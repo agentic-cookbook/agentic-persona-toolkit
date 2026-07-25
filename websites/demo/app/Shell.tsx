@@ -6,7 +6,7 @@ import {
   ColorModeProvider,
   ThemeStyle,
   type ThemeKey,
-} from '@agentic-developer-toolkit/themes'
+} from '@agenticdevelopertoolkit/themes'
 import { examples } from './examples'
 import { useDemoTheme } from './theme-store'
 import { ThemeMenu } from './ThemeMenu'

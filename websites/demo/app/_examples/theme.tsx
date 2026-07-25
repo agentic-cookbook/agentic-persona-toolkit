@@ -6,10 +6,10 @@ import {
   InlineChatView,
   MockBackend,
   useChatSession,
-} from '@agentic-developer-toolkit/chat'
-import '@agentic-developer-toolkit/chat/css/base.css'
-import '@agentic-developer-toolkit/chat/css/modes/inline.css'
-import { themes, type ThemeKey } from '@agentic-developer-toolkit/themes'
+} from '@agenticdevelopertoolkit/chat'
+import '@agenticdevelopertoolkit/chat/css/base.css'
+import '@agenticdevelopertoolkit/chat/css/modes/inline.css'
+import { themes, type ThemeKey } from '@agenticdevelopertoolkit/themes'
 import { useDemoTheme } from '../theme-store'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'

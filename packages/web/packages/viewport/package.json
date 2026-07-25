@@ -1,5 +1,5 @@
 {
-  "name": "@agentic-developer-toolkit/viewport",
+  "name": "@agenticdevelopertoolkit/viewport",
   "version": "0.1.0",
   "description": "Page-shell primitives for iOS-correct viewport + keyboard handling — ViewportShell, ViewportSpacer, ViewportComposer, useKeyboardInset.",
   "license": "UNLICENSED",

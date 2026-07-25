@@ -9,7 +9,7 @@ required — Next.js transpiles the package source on demand.
 Add the submodule wherever you want it to live:
 
 ```bash
-git submodule add git@github.com:agentic-cookbook/agentic-developer-toolkit.git vendor/adt
+git submodule add git@github.com:agentic-cookbook/agenticdevelopertoolkit.git vendor/adt
 ```
 
 In the consumer's `package.json` (e.g. `sites/main/package.json`), add a
@@ -18,9 +18,9 @@ In the consumer's `package.json` (e.g. `sites/main/package.json`), add a
 ```json
 {
   "dependencies": {
-    "@agentic-developer-toolkit/chat":     "file:./vendor/adt/packages/web/packages/chat",
-    "@agentic-developer-toolkit/themes":   "file:./vendor/adt/packages/web/packages/themes",
-    "@agentic-developer-toolkit/viewport": "file:./vendor/adt/packages/web/packages/viewport"
+    "@agenticdevelopertoolkit/chat":     "file:./vendor/adt/packages/web/packages/chat",
+    "@agenticdevelopertoolkit/themes":   "file:./vendor/adt/packages/web/packages/themes",
+    "@agenticdevelopertoolkit/viewport": "file:./vendor/adt/packages/web/packages/viewport"
   }
 }
 ```
@@ -31,9 +31,9 @@ In the consumer's `next.config.ts`, list the same package names under
 ```ts
 const nextConfig: NextConfig = {
   transpilePackages: [
-    "@agentic-developer-toolkit/chat",
-    "@agentic-developer-toolkit/themes",
-    "@agentic-developer-toolkit/viewport",
+    "@agenticdevelopertoolkit/chat",
+    "@agenticdevelopertoolkit/themes",
+    "@agenticdevelopertoolkit/viewport",
   ],
 };
 ```
@@ -78,7 +78,7 @@ The build container then runs the consumer's normal install + build (e.g.
 ## Future: npm-installed consumers
 
 External consumers (outside this org) won't use the submodule — they'll
-`npm install @agentic-developer-toolkit/chat` once the packages are published.
+`npm install @agenticdevelopertoolkit/chat` once the packages are published.
 Each package's `publishConfig` rewrites `main`/`types`/`exports` to point at
 `./dist/...` at publish time, so external consumers get a prebuilt tarball
 and don't need `transpilePackages`. Until publish, `publishConfig` sits
@@ -88,5 +88,5 @@ To publish, from inside the toolkit repo:
 
 ```bash
 cd packages/web && pnpm build         # populates dist/
-pnpm --filter @agentic-developer-toolkit/chat publish
+pnpm --filter @agenticdevelopertoolkit/chat publish
 ```

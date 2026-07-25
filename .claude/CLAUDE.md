@@ -1,4 +1,4 @@
-# agentic-developer-toolkit
+# agenticdevelopertoolkit
 
 Developer toolkit for wiring AI persona chats into apps using the official
 agentic registry (persona definitions + LLM provider integrations) and
@@ -107,9 +107,9 @@ tsup. `src/theme-data.ts` is gitignored — `install.sh` regenerates it.
 
 | Package | Source dir |
 |---|---|
-| `@agentic-developer-toolkit/chat` | `packages/web/packages/chat/src/` (modes/, components/, hooks/, backends/, css/) |
-| `@agentic-developer-toolkit/themes` | `packages/web/packages/themes/src/` (manifest, ThemeStyle, colorMode, styles/) |
-| `@agentic-developer-toolkit/viewport` | `packages/web/packages/viewport/src/` (ViewportShell, ViewportSpacer, ViewportComposer, useKeyboardInset) |
+| `@agenticdevelopertoolkit/chat` | `packages/web/packages/chat/src/` (modes/, components/, hooks/, backends/, css/) |
+| `@agenticdevelopertoolkit/themes` | `packages/web/packages/themes/src/` (manifest, ThemeStyle, colorMode, styles/) |
+| `@agenticdevelopertoolkit/viewport` | `packages/web/packages/viewport/src/` (ViewportShell, ViewportSpacer, ViewportComposer, useKeyboardInset) |
 
 Library packages may only depend on other `packages/web/packages/*`
 — never on ad-hoc paths outside the web workspace.

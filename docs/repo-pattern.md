@@ -1,6 +1,6 @@
 # Toolkit Repo Pattern
 
-How this repo (`agentic-developer-toolkit`) is laid out and consumed. Capture
+How this repo (`agenticdevelopertoolkit`) is laid out and consumed. Capture
 this pattern when starting a sibling toolkit repo — server packages, alternate
 domain SDKs, anything that ships reusable libraries to a mix of first-party
 and external consumers.

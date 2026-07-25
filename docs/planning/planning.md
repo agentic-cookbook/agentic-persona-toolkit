@@ -1,4 +1,4 @@
-# agentic-developer-toolkit — Planning
+# agenticdevelopertoolkit — Planning
 
 Captured from the M1 brainstorming session on 2026-05-09. The session locked
 scope, locked the high-level backend model, and paused before deciding the
@@ -6,7 +6,7 @@ final orchestration split. No design spec has been written yet.
 
 ## What this repo is
 
-`agentic-developer-toolkit` (adt) is the developer-facing toolkit that lets a
+`agenticdevelopertoolkit` (adt) is the developer-facing toolkit that lets a
 consuming app drop in a persona-driven chat UI backed by:
 
 - **`agenticregistry`** — official persona registry. Holds persona records

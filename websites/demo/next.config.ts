@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // No transpilePackages: the @agentic-developer-toolkit/* packages ship
+  // No transpilePackages: the @agenticdevelopertoolkit/* packages ship
   // prebuilt dist (compiled JS with "use client" preserved), so Next consumes
   // them like any normal library. The dist is built before next build (see
   // scripts/build.py).

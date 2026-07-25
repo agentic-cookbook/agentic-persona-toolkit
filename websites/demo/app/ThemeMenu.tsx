@@ -1,6 +1,6 @@
 'use client'
 
-import { themeIds, themes, type ThemeKey } from '@agentic-developer-toolkit/themes'
+import { themeIds, themes, type ThemeKey } from '@agenticdevelopertoolkit/themes'
 import { useDemoTheme } from './theme-store'
 import {
   Select,

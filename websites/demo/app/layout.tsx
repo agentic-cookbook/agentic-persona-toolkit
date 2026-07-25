@@ -5,7 +5,7 @@ import { Shell } from './Shell'
 
 const TITLE = 'Agentic Developer Toolkit — Demo'
 const DESCRIPTION =
-  'Local demo for the @agentic-developer-toolkit chat and theme packages.'
+  'Local demo for the @agenticdevelopertoolkit chat and theme packages.'
 
 export const metadata: Metadata = {
   title: TITLE,

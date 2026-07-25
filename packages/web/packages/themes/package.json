@@ -1,7 +1,7 @@
 {
-  "name": "@agentic-developer-toolkit/themes",
+  "name": "@agenticdevelopertoolkit/themes",
   "version": "0.1.0",
-  "description": "Theme manifest, ThemeStyle component, and ColorModeProvider for agentic-developer-toolkit.",
+  "description": "Theme manifest, ThemeStyle component, and ColorModeProvider for agenticdevelopertoolkit.",
   "license": "UNLICENSED",
   "type": "module",
   "main": "./dist/index.js",

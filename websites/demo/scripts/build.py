@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Build entry point for `websites/demo/`.
 
-The demo site consumes `@agentic-developer-toolkit/*` packages via their
+The demo site consumes `@agenticdevelopertoolkit/*` packages via their
 `file:` references. Those packages ship prebuilt `dist/` (compiled JS with
 `"use client"` preserved) — the same Model A contract as `agentictoolkit` —
 so the consumer needs no `transpilePackages`, but `dist/` is gitignored and

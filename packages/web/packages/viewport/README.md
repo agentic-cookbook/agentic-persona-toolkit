@@ -1,4 +1,4 @@
-# `@agentic-developer-toolkit/viewport`
+# `@agenticdevelopertoolkit/viewport`
 
 Page-shell primitives that make iOS keyboard + viewport handling a solved
 problem. Consumers compose three components and import one CSS file; the
@@ -26,8 +26,8 @@ import {
   ViewportShell,
   ViewportSpacer,
   ViewportComposer,
-} from '@agentic-developer-toolkit/viewport'
-import '@agentic-developer-toolkit/viewport/css/base.css'
+} from '@agenticdevelopertoolkit/viewport'
+import '@agenticdevelopertoolkit/viewport/css/base.css'
 
 export default function Page() {
   return (

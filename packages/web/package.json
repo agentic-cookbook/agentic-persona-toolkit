@@ -1,5 +1,5 @@
 {
-  "name": "agentic-developer-toolkit",
+  "name": "agenticdevelopertoolkit",
   "version": "0.1.0",
   "description": "Toolkit for wiring AI persona chats into apps using the official agentic registry and my-agentic-storage — pnpm monorepo.",
   "private": true,
@@ -8,11 +8,11 @@
   "packageManager": "pnpm@9.15.9",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/agentic-cookbook/agentic-developer-toolkit.git"
+    "url": "git+https://github.com/agentic-cookbook/agenticdevelopertoolkit.git"
   },
-  "homepage": "https://github.com/agentic-cookbook/agentic-developer-toolkit#readme",
+  "homepage": "https://github.com/agentic-cookbook/agenticdevelopertoolkit#readme",
   "bugs": {
-    "url": "https://github.com/agentic-cookbook/agentic-developer-toolkit/issues"
+    "url": "https://github.com/agentic-cookbook/agenticdevelopertoolkit/issues"
   },
   "scripts": {
     "build": "pnpm -r --workspace-concurrency=1 run build",

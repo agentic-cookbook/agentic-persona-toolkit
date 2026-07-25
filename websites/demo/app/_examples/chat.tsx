@@ -12,12 +12,12 @@ import {
   type InlineChatSizing,
   type ChatSizingBehavior,
   type SizingTransition,
-} from '@agentic-developer-toolkit/chat'
-import '@agentic-developer-toolkit/chat/css/base.css'
-import '@agentic-developer-toolkit/chat/css/modes/inline.css'
-import '@agentic-developer-toolkit/chat/css/modes/three-pane.css'
-import '@agentic-developer-toolkit/chat/css/modes/mobile.css'
-import '@agentic-developer-toolkit/chat/css/components/content-overlay.css'
+} from '@agenticdevelopertoolkit/chat'
+import '@agenticdevelopertoolkit/chat/css/base.css'
+import '@agenticdevelopertoolkit/chat/css/modes/inline.css'
+import '@agenticdevelopertoolkit/chat/css/modes/three-pane.css'
+import '@agenticdevelopertoolkit/chat/css/modes/mobile.css'
+import '@agenticdevelopertoolkit/chat/css/components/content-overlay.css'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
