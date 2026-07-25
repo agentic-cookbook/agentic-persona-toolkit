@@ -54,6 +54,12 @@ describe('useInputFocusReclaim', () => {
     expect(document.activeElement).not.toBe(input)
   })
 
+  // A settled click INSIDE the chat (dispatched on the wrapper) is the case
+  // reclaim is for; `bubbles: true` carries it to the document-level listener.
+  const clickInside = (ref: { current: HTMLDivElement | null }): void => {
+    ref.current?.dispatchEvent(new Event('pointerup', { bubbles: true }))
+  }
+
   it('does not reclaim focus synchronously at pointerup — only after the timer fires', () => {
     vi.useFakeTimers()
     const { ref, input } = mount()
@@ -61,7 +67,7 @@ describe('useInputFocusReclaim', () => {
     input.blur()
 
     act(() => {
-      document.dispatchEvent(new Event('pointerup'))
+      clickInside(ref)
     })
     // setTimeout(refocus, 0) defers past the pointerup tick — not reclaimed yet
     expect(document.activeElement).not.toBe(input)
@@ -72,6 +78,24 @@ describe('useInputFocusReclaim', () => {
     expect(document.activeElement).toBe(input)
   })
 
+  it('does not reclaim focus for a click OUTSIDE the wrapper', () => {
+    vi.useFakeTimers()
+    const { ref, input } = mount()
+    renderHook(() => useInputFocusReclaim(ref, true))
+    input.blur()
+
+    // A click on the page background (target outside the chat) is the user
+    // leaving the composer — a collapsing chat must be allowed to blur, so the
+    // reclaim bows out rather than pinning focus back.
+    act(() => {
+      document.dispatchEvent(new Event('pointerup'))
+    })
+    act(() => {
+      vi.advanceTimersByTime(0)
+    })
+    expect(document.activeElement).not.toBe(input)
+  })
+
   it('does not reclaim focus on pointerup while text is selected', () => {
     vi.useFakeTimers()
     const { ref, input } = mount()
@@ -80,7 +104,7 @@ describe('useInputFocusReclaim', () => {
     stubSelection('selected text')
 
     act(() => {
-      document.dispatchEvent(new Event('pointerup'))
+      clickInside(ref)
     })
     act(() => {
       vi.advanceTimersByTime(0)
@@ -96,7 +120,7 @@ describe('useInputFocusReclaim', () => {
     renderHook(() => useInputFocusReclaim(ref, true))
 
     act(() => {
-      document.dispatchEvent(new Event('pointerup'))
+      clickInside(ref)
     })
     act(() => {
       vi.advanceTimersByTime(0)
@@ -113,7 +137,7 @@ describe('useInputFocusReclaim', () => {
 
     // With the listener removed, a settled click no longer reclaims focus.
     act(() => {
-      document.dispatchEvent(new Event('pointerup'))
+      clickInside(ref)
     })
     act(() => {
       vi.advanceTimersByTime(0)

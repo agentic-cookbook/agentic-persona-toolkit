@@ -90,4 +90,47 @@ describe('useConnectRitual', () => {
     })
     expect(result.current.engaged).toBe(false)
   })
+
+  describe('engageOn an element', () => {
+    it('never engages on a window pointer move or the give-up timeout', async () => {
+      const el = document.createElement('div')
+      document.body.appendChild(el)
+      const { result } = renderHook(() => useConnectRitual({ ...cfg, engageOn: { current: el } }))
+      // Well past both the ready arm and the give-up fallback: neither applies here.
+      await act(async () => { await vi.advanceTimersByTimeAsync(60000) })
+      await act(async () => {
+        window.dispatchEvent(new Event('pointermove'))
+        await vi.advanceTimersByTimeAsync(0)
+      })
+      expect(result.current.engaged).toBe(false)
+      expect(result.current.inputDisabled).toBe(true)
+      el.remove()
+    })
+
+    it('engages on a deliberate pointerdown inside the element', async () => {
+      const el = document.createElement('div')
+      document.body.appendChild(el)
+      const { result } = renderHook(() => useConnectRitual({ ...cfg, engageOn: { current: el } }))
+      await act(async () => {
+        el.dispatchEvent(new Event('pointerdown', { bubbles: true }))
+        await vi.advanceTimersByTimeAsync(1000)
+      })
+      expect(result.current.engaged).toBe(true)
+      expect(result.current.connected).toBe(true)
+      expect(result.current.inputDisabled).toBe(false)
+      el.remove()
+    })
+
+    it('engages on focus landing inside the element', async () => {
+      const el = document.createElement('div')
+      document.body.appendChild(el)
+      const { result } = renderHook(() => useConnectRitual({ ...cfg, engageOn: { current: el } }))
+      await act(async () => {
+        el.dispatchEvent(new Event('focusin', { bubbles: true }))
+        await vi.advanceTimersByTimeAsync(0)
+      })
+      expect(result.current.engaged).toBe(true)
+      el.remove()
+    })
+  })
 })

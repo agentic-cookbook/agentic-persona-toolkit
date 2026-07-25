@@ -61,9 +61,40 @@
   visibility: hidden;
 }
 
+/*
+ * Fold the status/typing row too, so a collapsed minimal chat is genuinely
+ * "just the input bar" (the intent stated above). The package pins `.pc-typing`
+ * just above the composer, OUTSIDE the transcript scroll, so collapsing the
+ * transcript alone would leave the status line showing; collapse it in step.
+ * Scoped with `>` (a direct child of `.persona-chat`, like base.css) so it never
+ * catches a typing indicator rendered inside the transcript.
+ */
+.persona-chat.pc-collapsed > .pc-typing {
+  max-height: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  opacity: 0;
+  visibility: hidden;
+  overflow: hidden;
+}
+
 /* Idle, the chat is just the composer — tighten it so it reads as an entry bar. */
 .persona-chat.pc-collapsed .pc-input-area {
   padding: 8px 10px;
+}
+
+/*
+ * Dormant, the composer may be disabled — and a disabled <input>/<button>
+ * swallows the pointer, so a click meant to WAKE the chat (a connect ritual's
+ * `engageOn`, or the sizing's own expand) would land on a dead control and fire
+ * nothing. Drop their pointer-events WHILE collapsed so the click falls through
+ * to the bar (`.pc-input-area`, a div) and bubbles to the wrapper/document.
+ * Scoped to collapsed + disabled only: once live, the input catches its own
+ * clicks and focus.
+ */
+.persona-chat.pc-collapsed .pc-input:disabled,
+.persona-chat.pc-collapsed .pc-send-btn:disabled {
+  pointer-events: none;
 }
 
 /*
@@ -86,6 +117,26 @@
 
 .persona-chat.pc-anim:not(.pc-collapsed) .pc-transcript {
   max-height: 100vh;
+  transition:
+    max-height 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+    padding 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+    visibility 0s;
+}
+
+/* Fold the status row in step with the transcript (grow-down on collapse,
+ * grow-up on expand) instead of blinking out and jolting the box height. The
+ * open-state cap is one line's worth — the status is a single row. */
+.persona-chat.pc-anim > .pc-typing {
+  transition:
+    max-height 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+    padding 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+    visibility 0s linear 0.3s;
+}
+
+.persona-chat.pc-anim:not(.pc-collapsed) > .pc-typing {
+  max-height: 3rem;
   transition:
     max-height 0.3s cubic-bezier(0.16, 1, 0.3, 1),
     padding 0.3s cubic-bezier(0.16, 1, 0.3, 1),

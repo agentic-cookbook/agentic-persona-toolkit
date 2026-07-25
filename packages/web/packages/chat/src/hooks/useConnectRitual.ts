@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type RefObject } from 'react'
 
 export interface ConnectRitualConfig {
   /** Emits a persona line into the transcript. Typically `session.say`. */
@@ -15,9 +15,17 @@ export interface ConnectRitualConfig {
   connectingLine: string
   /** Status shown once the welcome has landed. */
   connectedLine: string
-  /** Ignore pointer movement for this long, so a passing cursor doesn't trigger. Default 2000ms. */
+  /**
+   * What triggers engagement. `'pointer'` (default) engages on the first real
+   * pointer move inside the focused window. Pass a ref to an element to instead
+   * engage only on a deliberate `pointerdown` or focus INSIDE that element — no
+   * passing-cursor trigger and no give-up fallback (`readyAfterMs` /
+   * `giveUpAfterMs` are ignored); the caller owns "the user reached for the chat."
+   */
+  engageOn?: 'pointer' | RefObject<HTMLElement | null>
+  /** (pointer mode) Ignore pointer movement for this long, so a passing cursor doesn't trigger. Default 2000ms. */
   readyAfterMs?: number
-  /** Connect anyway if the user never moves the pointer. Default 30000ms. */
+  /** (pointer mode) Connect anyway if the user never moves the pointer. Default 30000ms. */
   giveUpAfterMs?: number
   /** Beat between the welcome and the greeting. Default 800ms. */
   greetDelayMs?: number
@@ -40,9 +48,12 @@ export interface ConnectRitualState {
 
 /**
  * The connection ritual: hold the input closed while a status line cycles, wait
- * for the user to engage (a pointer move inside the focused window), then type
- * the welcome, beat, greet, and open the input. If the user never engages, the
- * status stalls in a loop until the give-up timeout connects anyway.
+ * for the user to engage, then type the welcome, beat, greet, and open the
+ * input. Engagement is a pointer move inside the focused window by default, or a
+ * deliberate pointerdown/focus inside `engageOn`'s element when a ref is passed.
+ * In pointer mode, if the user never engages the status stalls in a loop until
+ * the give-up timeout connects anyway; in element mode there is no fallback —
+ * he waits for the user to reach for the chat.
  */
 export function useConnectRitual(cfg: ConnectRitualConfig): ConnectRitualState {
   const {
@@ -53,6 +64,7 @@ export function useConnectRitual(cfg: ConnectRitualConfig): ConnectRitualState {
     stallLines,
     connectingLine,
     connectedLine,
+    engageOn = 'pointer',
     readyAfterMs = 2000,
     giveUpAfterMs = 30000,
     greetDelayMs = 800,
@@ -74,41 +86,58 @@ export function useConnectRitual(cfg: ConnectRitualConfig): ConnectRitualState {
     return () => clearTimeout(id)
   }, [waitIdx, engaged, waitLines.length, waitStepMs, stallStepMs])
 
-  // The ritual itself — runs once, whether triggered by a move or the timeout.
+  // The ritual itself — runs once, whichever trigger fires it. `begin` is
+  // trigger-agnostic: the `started` guard makes it idempotent, so every path
+  // (pointer move, give-up timeout, or an element pointerdown/focus) just calls it.
   const sayRef = useRef(say)
   sayRef.current = say
   const started = useRef(false)
   useEffect(() => {
-    let ready = false
-    let giveUpId: ReturnType<typeof setTimeout> | undefined
     const delay = (ms: number) => new Promise<void>((r) => setTimeout(r, ms))
     const begin = async (): Promise<void> => {
       if (started.current) return
       started.current = true
       setEngaged(true) // stop the stalling loop; the real ritual proceeds
-      window.removeEventListener('pointermove', onMove)
-      clearTimeout(giveUpId)
       await sayRef.current(welcome)
       setConnected(true)
       await delay(greetDelayMs)
       await sayRef.current(greeting)
       setInputDisabled(false)
     }
-    function onMove(): void {
+
+    // Element mode: engage only on a deliberate pointerdown or focus INSIDE the
+    // given element — no passing-cursor trigger, no give-up fallback. He waits.
+    if (engageOn !== 'pointer') {
+      const el = engageOn.current
+      if (!el) return
+      const onEngage = (): void => void begin()
+      el.addEventListener('pointerdown', onEngage)
+      el.addEventListener('focusin', onEngage)
+      return () => {
+        el.removeEventListener('pointerdown', onEngage)
+        el.removeEventListener('focusin', onEngage)
+      }
+    }
+
+    // Pointer mode (default): engage on the first real pointer move inside the
+    // focused window (after a short arming delay so a passing cursor doesn't
+    // trigger), or give up and connect anyway after the fallback timeout.
+    let ready = false
+    const onMove = (): void => {
       if (!ready || started.current || !document.hasFocus()) return
       void begin()
     }
     const readyId = setTimeout(() => {
       ready = true
     }, readyAfterMs)
-    giveUpId = setTimeout(() => void begin(), giveUpAfterMs)
+    const giveUpId = setTimeout(() => void begin(), giveUpAfterMs)
     window.addEventListener('pointermove', onMove)
     return () => {
       clearTimeout(readyId)
       clearTimeout(giveUpId)
       window.removeEventListener('pointermove', onMove)
     }
-    // Mount-only: the ritual runs exactly once per session.
+    // Mount-only: the ritual wires its trigger exactly once per session.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
