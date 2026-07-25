@@ -88,7 +88,7 @@
  * swallows the pointer, so a click meant to WAKE the chat (a connect ritual's
  * `engageOn`, or the sizing's own expand) would land on a dead control and fire
  * nothing. Drop their pointer-events WHILE collapsed so the click falls through
- * to the bar (`.pc-input-area`, a div) and bubbles to the wrapper/document.
+ * to the bar (`.pc-input-area`, the form) and bubbles to the wrapper/document.
  * Scoped to collapsed + disabled only: once live, the input catches its own
  * clicks and focus.
  */

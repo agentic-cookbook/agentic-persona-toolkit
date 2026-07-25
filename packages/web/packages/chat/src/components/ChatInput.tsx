@@ -34,25 +34,43 @@ export function ChatInput({
   }
 
   return (
-    <div className="pc-input-area" data-form-type="other">
+    /* A form, not a div, and that is what stops iOS offering "AutoFill Contact"
+       above the keyboard. An input with no form ancestor is scoped for autofill
+       against the whole DOCUMENT, so Safari classifies it from whatever else the
+       page happens to say — on a site with a contact section and an address to
+       write to, a lone text field reads as the place to put your details, and the
+       keyboard offers the reader's own contact card.
+
+       This was measured on iOS 26, not reasoned about: stripping EVERY attribute
+       off the input (name, aria-label, placeholder, autocomplete, the data-*
+       opt-outs — down to a bare `<input type="text">`) did not move it, and the
+       same markup on a page without contact copy never triggered it at all. What
+       fixed it was giving the field a form of its own to be scoped against; the
+       classifier then sees a one-field form that asks for nothing.
+
+       The element carries `pc-input-area` unchanged, so it is still the flex bar
+       every skin styles — the tag is the only thing that changed. Submitting is
+       now a real submit, which is also what `enterKeyHint="send"` has been
+       promising the on-screen keyboard all along. */
+    <form
+      className="pc-input-area"
+      data-form-type="other"
+      autoComplete="off"
+      onSubmit={(e) => {
+        e.preventDefault()
+        handleSend()
+      }}
+    >
       {/* A chat composer is never a credential field. Opt password managers out
           so they don't inject autofill attributes (data-dashlane-rid, etc.) that
           mutate the DOM before hydration and trip React's hydration mismatch:
           Dashlane reads data-form-type="other" (its SAWF "ignore" value, set on
           both this field and its container); 1Password/LastPass/Bitwarden read
           their own ignore attrs. autoComplete="off" alone is not enough. */}
-      {/* iOS offers "AutoFill Contact" above the keyboard for fields it can't
-          classify, and Safari classifies from the name, the label and the
-          placeholder — of which this field had none, none, and a rotating
-          persona joke. `autoComplete="off"` does not settle it: WebKit treats
-          `off` as a hint it may override for contact autofill, which is why the
-          `::-webkit-contacts-auto-fill-button` pseudo-element exists at all
-          (base.css hides it). The fix is to stop leaving Safari to guess and
-          name the field honestly — `name` and an accessible label that both say
-          "message", which is not a contact field in anyone's heuristic. The
-          label is worth having on its own: a placeholder is a weak accessible
-          name at the best of times, and a joke that re-rolls per send is no
-          name at all. */}
+      {/* `name` and `aria-label` are kept for their own sake, not as an autofill
+          hint — the measurement above showed they do nothing for that. A
+          placeholder is a weak accessible name at the best of times, and a
+          persona joke that re-rolls on every send is no name at all. */}
       <input
         ref={ref}
         className="pc-input"
@@ -77,14 +95,13 @@ export function ChatInput({
           }
         }}
       />
-      <button
-        className="pc-send-btn"
-        aria-label="Send"
-        disabled={disabled || !hasText}
-        onClick={handleSend}
-      >
+      {/* Submits the form rather than calling handleSend directly — one send
+          path, so the button and the keyboard's Send key cannot drift apart.
+          The Enter handler above still preventDefaults, so it never also
+          submits and nothing is sent twice. */}
+      <button className="pc-send-btn" type="submit" aria-label="Send" disabled={disabled || !hasText}>
         <SendIcon />
       </button>
-    </div>
+    </form>
   )
 }
