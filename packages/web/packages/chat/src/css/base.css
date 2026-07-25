@@ -146,6 +146,25 @@
   transition: border-color 0.2s;
 }
 
+/* Safari injects its own autofill affordance INTO the field — a contacts glyph,
+ * or a key for credentials — sized and coloured by WebKit, not by the theme. On
+ * a composer they are always wrong: this is a message box, never a signup form.
+ * ChatInput already names the field `message` so the heuristic has an honest
+ * answer, but `autocomplete="off"` is only advisory to WebKit, so this removes
+ * the button on the occasions it decides to offer one anyway. Both pseudo-
+ * elements are WebKit-only and unknown selectors elsewhere, so nothing else
+ * sees this rule. */
+.pc-input::-webkit-contacts-auto-fill-button,
+.pc-input::-webkit-credentials-auto-fill-button {
+  visibility: hidden;
+  pointer-events: none;
+  position: absolute;
+  right: 0;
+  width: 0;
+  height: 0;
+  margin: 0;
+}
+
 .pc-send-btn {
   cursor: pointer;
   display: flex;

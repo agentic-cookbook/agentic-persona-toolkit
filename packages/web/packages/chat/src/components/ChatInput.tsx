@@ -41,11 +41,25 @@ export function ChatInput({
           Dashlane reads data-form-type="other" (its SAWF "ignore" value, set on
           both this field and its container); 1Password/LastPass/Bitwarden read
           their own ignore attrs. autoComplete="off" alone is not enough. */}
+      {/* iOS offers "AutoFill Contact" above the keyboard for fields it can't
+          classify, and Safari classifies from the name, the label and the
+          placeholder — of which this field had none, none, and a rotating
+          persona joke. `autoComplete="off"` does not settle it: WebKit treats
+          `off` as a hint it may override for contact autofill, which is why the
+          `::-webkit-contacts-auto-fill-button` pseudo-element exists at all
+          (base.css hides it). The fix is to stop leaving Safari to guess and
+          name the field honestly — `name` and an accessible label that both say
+          "message", which is not a contact field in anyone's heuristic. The
+          label is worth having on its own: a placeholder is a weak accessible
+          name at the best of times, and a joke that re-rolls per send is no
+          name at all. */}
       <input
         ref={ref}
         className="pc-input"
         type="text"
         inputMode="text"
+        name="message"
+        aria-label="Message"
         placeholder={placeholder}
         autoComplete="off"
         data-form-type="other"
