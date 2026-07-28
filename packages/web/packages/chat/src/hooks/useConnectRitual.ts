@@ -7,10 +7,11 @@ export interface ConnectRitualConfig {
   welcome: string
   /** The persona's greeting; the input opens once it lands. */
   greeting: string
-  /** Status lines cycled briskly before the user engages. */
-  waitLines: readonly string[]
+  /** Status lines cycled briskly before the user engages. Omit under `'mount'`,
+   *  which never waits and so never shows one. */
+  waitLines?: readonly string[]
   /** Status lines looped indefinitely once the wait lines are exhausted. */
-  stallLines: readonly string[]
+  stallLines?: readonly string[]
   /** Status held once the user engages, until the welcome lands. */
   connectingLine: string
   /** Status shown once the welcome has landed. */
@@ -21,8 +22,14 @@ export interface ConnectRitualConfig {
    * engage only on a deliberate `pointerdown` or focus INSIDE that element — no
    * passing-cursor trigger and no give-up fallback (`readyAfterMs` /
    * `giveUpAfterMs` are ignored); the caller owns "the user reached for the chat."
+   *
+   * `'mount'` skips the waiting entirely: the persona arrives already connected,
+   * so the ritual runs straight through — welcome, beat, greeting, input open —
+   * from the moment he mounts. For a persona who is a FIXTURE in the corner of a
+   * page about something else, where making the reader wait would read as broken
+   * rather than as theater. `waitLines`/`stallLines` are never shown.
    */
-  engageOn?: 'pointer' | RefObject<HTMLElement | null>
+  engageOn?: 'pointer' | 'mount' | RefObject<HTMLElement | null>
   /** (pointer mode) Ignore pointer movement for this long, so a passing cursor doesn't trigger. Default 2000ms. */
   readyAfterMs?: number
   /** (pointer mode) Connect anyway if the user never moves the pointer. Default 30000ms. */
@@ -53,15 +60,16 @@ export interface ConnectRitualState {
  * deliberate pointerdown/focus inside `engageOn`'s element when a ref is passed.
  * In pointer mode, if the user never engages the status stalls in a loop until
  * the give-up timeout connects anyway; in element mode there is no fallback —
- * he waits for the user to reach for the chat.
+ * he waits for the user to reach for the chat. In `'mount'` mode there is no
+ * waiting at all: he arrives connected and runs the ritual through on mount.
  */
 export function useConnectRitual(cfg: ConnectRitualConfig): ConnectRitualState {
   const {
     say,
     welcome,
     greeting,
-    waitLines,
-    stallLines,
+    waitLines = [],
+    stallLines = [],
     connectingLine,
     connectedLine,
     engageOn = 'pointer',
@@ -78,13 +86,15 @@ export function useConnectRitual(cfg: ConnectRitualConfig): ConnectRitualState {
   const [waitIdx, setWaitIdx] = useState(0)
 
   // Step the waiting status: briskly through the wait lines, then slower through
-  // the looping stall lines — until the user engages.
+  // the looping stall lines — until the user engages. With no lines to show
+  // (a `'mount'` arrival) there is no status to step, so the timer never starts.
+  const hasWaitStatus = waitLines.length > 0 || stallLines.length > 0
   useEffect(() => {
-    if (engaged) return
+    if (engaged || !hasWaitStatus) return
     const ms = waitIdx < waitLines.length ? waitStepMs : stallStepMs
     const id = setTimeout(() => setWaitIdx((i) => i + 1), ms)
     return () => clearTimeout(id)
-  }, [waitIdx, engaged, waitLines.length, waitStepMs, stallStepMs])
+  }, [waitIdx, engaged, hasWaitStatus, waitLines.length, waitStepMs, stallStepMs])
 
   // The ritual itself — runs once, whichever trigger fires it. `begin` is
   // trigger-agnostic: the `started` guard makes it idempotent, so every path
@@ -103,6 +113,13 @@ export function useConnectRitual(cfg: ConnectRitualConfig): ConnectRitualState {
       await delay(greetDelayMs)
       await sayRef.current(greeting)
       setInputDisabled(false)
+    }
+
+    // Mount mode: he is already here. Nothing to wait for and nothing to listen
+    // to — the ritual runs straight through from this first effect.
+    if (engageOn === 'mount') {
+      void begin()
+      return
     }
 
     // Element mode: engage only on a deliberate pointerdown or focus INSIDE the
@@ -141,8 +158,9 @@ export function useConnectRitual(cfg: ConnectRitualConfig): ConnectRitualState {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const waitLine =
-    waitIdx < waitLines.length
+  const waitLine = !hasWaitStatus
+    ? null
+    : waitIdx < waitLines.length
       ? waitLines[waitIdx]
       : stallLines[(waitIdx - waitLines.length) % stallLines.length]
   const statusLine = connected ? connectedLine : engaged ? connectingLine : waitLine ?? null
