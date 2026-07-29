@@ -59,6 +59,83 @@ describe('useConnectRitual', () => {
     expect(result.current.inputDisabled).toBe(false)
   })
 
+  describe('wait lines with no stall loop', () => {
+    // The shape a fixture uses: a couple of lines while it settles, and then
+    // nothing to loop — no endless "still thinking" theater.
+    const noStall = { ...cfg, stallLines: [] }
+
+    it('holds the last wait line instead of blanking it', () => {
+      const { result } = renderHook(() => useConnectRitual(noStall))
+      act(() => { vi.advanceTimersByTime(900) })
+      expect(result.current.statusLine).toBe('accepted...')
+      // Past the last wait line there is nothing to step to. The index used to run
+      // on regardless and land on `% 0` — NaN — so the status silently vanished.
+      act(() => { vi.advanceTimersByTime(900) })
+      expect(result.current.statusLine).toBe('accepted...')
+      act(() => { vi.advanceTimersByTime(10000) })
+      expect(result.current.statusLine).toBe('accepted...')
+    })
+
+    it('stops stepping once nothing can advance', () => {
+      let renders = 0
+      renderHook(() => {
+        renders += 1
+        return useConnectRitual(noStall)
+      })
+      // One step at a time: each advance has to flush before the next timer is
+      // armed, so a single 1800ms jump would leave the last step still pending.
+      act(() => { vi.advanceTimersByTime(900) })
+      act(() => { vi.advanceTimersByTime(900) })
+      const settled = renders
+      expect(settled).toBeGreaterThan(1) // the steps really did happen
+      // Well past several stall cadences, and short of the 30s give-up. Nothing
+      // may re-render: the timer used to re-arm forever against an index no
+      // longer read, so this counted a render every 1600ms.
+      act(() => { vi.advanceTimersByTime(10000) })
+      expect(renders).toBe(settled)
+    })
+  })
+
+  describe('engagedByUser', () => {
+    it('stays false when the give-up timeout starts the ritual', async () => {
+      const { result } = renderHook(() => useConnectRitual(cfg))
+      await act(async () => { await vi.advanceTimersByTimeAsync(30000) })
+      // The ritual ran, but nobody reached for him — behavior that follows the
+      // reader's attention (his gaze) must not fire off a timer alone.
+      expect(result.current.engaged).toBe(true)
+      expect(result.current.engagedByUser).toBe(false)
+    })
+
+    it('stays false on a mount arrival', async () => {
+      const { result } = renderHook(() => useConnectRitual({ ...cfg, engageOn: 'mount' }))
+      await act(async () => { await vi.advanceTimersByTimeAsync(1000) })
+      expect(result.current.engaged).toBe(true)
+      expect(result.current.engagedByUser).toBe(false)
+    })
+
+    it('is true on a real pointer move', async () => {
+      const { result } = renderHook(() => useConnectRitual(cfg))
+      await act(async () => { await vi.advanceTimersByTimeAsync(2000) }) // readyAfterMs
+      await act(async () => {
+        window.dispatchEvent(new Event('pointermove'))
+        await vi.advanceTimersByTimeAsync(0)
+      })
+      expect(result.current.engagedByUser).toBe(true)
+    })
+
+    it('is true on a deliberate pointerdown in element mode', async () => {
+      const el = document.createElement('div')
+      document.body.appendChild(el)
+      const { result } = renderHook(() => useConnectRitual({ ...cfg, engageOn: { current: el } }))
+      await act(async () => {
+        el.dispatchEvent(new Event('pointerdown', { bubbles: true }))
+        await vi.advanceTimersByTimeAsync(0)
+      })
+      expect(result.current.engagedByUser).toBe(true)
+      el.remove()
+    })
+  })
+
   it('ignores a pointer move before the ready delay has elapsed', async () => {
     const { result } = renderHook(() => useConnectRitual(cfg))
     await act(async () => {
