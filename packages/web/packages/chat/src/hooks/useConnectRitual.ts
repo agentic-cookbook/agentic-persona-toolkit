@@ -49,6 +49,14 @@ export interface ConnectRitualState {
   connected: boolean
   /** True the moment the user engages (or the give-up timeout fires). */
   engaged: boolean
+  /**
+   * True only when a REAL user action started the ritual — a pointer move in
+   * pointer mode, a pointerdown/focus in element mode. The give-up timeout and
+   * `'mount'` do not set it: they start the ritual without the user having done
+   * anything. Behavior that should follow the user's attention (gaze, focus
+   * seizing) belongs on this, not on `engaged`.
+   */
+  engagedByUser: boolean
   /** The status line to show while `inputDisabled`, or null. */
   statusLine: string | null
 }
@@ -83,18 +91,23 @@ export function useConnectRitual(cfg: ConnectRitualConfig): ConnectRitualState {
   const [inputDisabled, setInputDisabled] = useState(true)
   const [connected, setConnected] = useState(false)
   const [engaged, setEngaged] = useState(false)
+  const [engagedByUser, setEngagedByUser] = useState(false)
   const [waitIdx, setWaitIdx] = useState(0)
 
   // Step the waiting status: briskly through the wait lines, then slower through
   // the looping stall lines — until the user engages. With no lines to show
   // (a `'mount'` arrival) there is no status to step, so the timer never starts.
   const hasWaitStatus = waitLines.length > 0 || stallLines.length > 0
+  // Past the wait lines only the stall loop can advance the index. A caller that
+  // supplies wait lines but no stall lines has nothing left to step to, so stop —
+  // otherwise the timer re-renders forever against an index nothing can read.
+  const canStep = waitIdx < waitLines.length || stallLines.length > 0
   useEffect(() => {
-    if (engaged || !hasWaitStatus) return
+    if (engaged || !hasWaitStatus || !canStep) return
     const ms = waitIdx < waitLines.length ? waitStepMs : stallStepMs
     const id = setTimeout(() => setWaitIdx((i) => i + 1), ms)
     return () => clearTimeout(id)
-  }, [waitIdx, engaged, hasWaitStatus, waitLines.length, waitStepMs, stallStepMs])
+  }, [waitIdx, engaged, hasWaitStatus, canStep, waitLines.length, waitStepMs, stallStepMs])
 
   // The ritual itself — runs once, whichever trigger fires it. `begin` is
   // trigger-agnostic: the `started` guard makes it idempotent, so every path
@@ -104,10 +117,13 @@ export function useConnectRitual(cfg: ConnectRitualConfig): ConnectRitualState {
   const started = useRef(false)
   useEffect(() => {
     const delay = (ms: number) => new Promise<void>((r) => setTimeout(r, ms))
-    const begin = async (): Promise<void> => {
+    // `byUser` separates "the ritual started" from "the user reached for him" —
+    // the give-up timeout and mount arrival do the former without the latter.
+    const begin = async (byUser: boolean): Promise<void> => {
       if (started.current) return
       started.current = true
       setEngaged(true) // stop the stalling loop; the real ritual proceeds
+      if (byUser) setEngagedByUser(true)
       await sayRef.current(welcome)
       setConnected(true)
       await delay(greetDelayMs)
@@ -118,7 +134,7 @@ export function useConnectRitual(cfg: ConnectRitualConfig): ConnectRitualState {
     // Mount mode: he is already here. Nothing to wait for and nothing to listen
     // to — the ritual runs straight through from this first effect.
     if (engageOn === 'mount') {
-      void begin()
+      void begin(false)
       return
     }
 
@@ -127,7 +143,7 @@ export function useConnectRitual(cfg: ConnectRitualConfig): ConnectRitualState {
     if (engageOn !== 'pointer') {
       const el = engageOn.current
       if (!el) return
-      const onEngage = (): void => void begin()
+      const onEngage = (): void => void begin(true)
       el.addEventListener('pointerdown', onEngage)
       el.addEventListener('focusin', onEngage)
       return () => {
@@ -142,12 +158,12 @@ export function useConnectRitual(cfg: ConnectRitualConfig): ConnectRitualState {
     let ready = false
     const onMove = (): void => {
       if (!ready || started.current || !document.hasFocus()) return
-      void begin()
+      void begin(true)
     }
     const readyId = setTimeout(() => {
       ready = true
     }, readyAfterMs)
-    const giveUpId = setTimeout(() => void begin(), giveUpAfterMs)
+    const giveUpId = setTimeout(() => void begin(false), giveUpAfterMs)
     window.addEventListener('pointermove', onMove)
     return () => {
       clearTimeout(readyId)
@@ -162,8 +178,12 @@ export function useConnectRitual(cfg: ConnectRitualConfig): ConnectRitualState {
     ? null
     : waitIdx < waitLines.length
       ? waitLines[waitIdx]
-      : stallLines[(waitIdx - waitLines.length) % stallLines.length]
+      : // With no stall loop, hold the last wait line. Indexing `% 0` here would
+        // be NaN → undefined → the status silently disappearing mid-wait.
+        stallLines.length > 0
+        ? stallLines[(waitIdx - waitLines.length) % stallLines.length]
+        : (waitLines[waitLines.length - 1] ?? null)
   const statusLine = connected ? connectedLine : engaged ? connectingLine : waitLine ?? null
 
-  return { inputDisabled, connected, engaged, statusLine }
+  return { inputDisabled, connected, engaged, engagedByUser, statusLine }
 }

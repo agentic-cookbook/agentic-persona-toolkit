@@ -3,6 +3,13 @@ import { themes, type ThemeKey } from './manifest'
 const GLOBAL_ID = 'agentic-toolkit-theme'
 const SCOPED_ID = 'agentic-toolkit-theme-scoped'
 
+/** One id per scope, not one id for all scoped blocks. A page can carry several
+ *  scoped themes at once (a chat theming itself, plus a host app theming the
+ *  wrapper it sits in), and a shared id makes those duplicates — invalid HTML, and
+ *  `getElementById` silently resolves to whichever happens to come first. */
+const scopedId = (scope: string): string =>
+  `${SCOPED_ID}-${scope.replace(/[^a-zA-Z0-9_-]+/g, '-').replace(/(^-+|-+$)/g, '').toLowerCase()}`
+
 const IMPORT_RE = /^@import\s+url\([^)]+\);\s*$/gm
 const ROOT_DARK_RE = /(^|,\s*):root\.dark\b/gm
 const ROOT_NOT_DARK_RE = /(^|,\s*):root:not\(\.dark\)/gm
@@ -56,7 +63,7 @@ export function ThemeStyle({ theme, scope, colorMode = 'system' }: ThemeStylePro
   const css = scope
     ? buildScopedCss(themes[theme].css, scope, colorMode)
     : themes[theme].css
-  const id = scope ? SCOPED_ID : GLOBAL_ID
+  const id = scope ? scopedId(scope) : GLOBAL_ID
   // Render the <style> inline (so it's in the SSR HTML and applied on the very
   // first paint — no flash of default-sized, unstyled chat before a client
   // effect runs). The content is the resolved theme CSS, so re-rendering on a
