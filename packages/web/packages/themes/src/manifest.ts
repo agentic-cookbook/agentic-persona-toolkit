@@ -2,6 +2,7 @@ import {
   adhCss,
   agenticcookbookwebCss,
   devTeamCss,
+  fishlampCss,
   greenMatrixCss,
   greenMatrixGlassCss,
   mikefullertonCss,
@@ -19,6 +20,7 @@ export type ThemeKey =
   | 'adh'
   | 'agenticcookbookweb'
   | 'dev-team'
+  | 'fishlamp'
   | 'green-matrix'
   | 'green-matrix-glass'
   | 'mikefullerton'
@@ -41,6 +43,7 @@ export const themes: Record<ThemeKey, ThemeEntry> = {
   adh: { id: 'adh', label: 'Agentic Developer Hub', css: adhCss },
   agenticcookbookweb: { id: 'agenticcookbookweb', label: 'Agentic Cookbook', css: agenticcookbookwebCss },
   'dev-team': { id: 'dev-team', label: 'Dev Team', css: devTeamCss },
+  fishlamp: { id: 'fishlamp', label: 'fishlamp (ember on ink)', css: fishlampCss },
   'green-matrix': { id: 'green-matrix', label: 'Green Matrix', css: greenMatrixCss },
   'green-matrix-glass': { id: 'green-matrix-glass', label: 'Green Matrix (Glass)', css: greenMatrixGlassCss },
   mikefullerton: { id: 'mikefullerton', label: 'Mike Fullerton', css: mikefullertonCss },

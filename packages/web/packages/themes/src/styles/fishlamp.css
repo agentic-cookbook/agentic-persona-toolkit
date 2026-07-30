@@ -1,0 +1,280 @@
+/* fishlamp — ember on ink. bitbag's shipping skin.
+ *
+ * This is the SHIPPED look of bitbag's chat everywhere he appears: the stage at
+ * bitbag.ai, and the dock in the shared adh footer. It is a port of fishlamp.com's
+ * own skin (websites/main/src/bitbag/styles/fishlamp-theme.css in the fishlamp
+ * repo), which is the source of truth for how bitbag looks — that site is where
+ * the design was drawn and measured, and the two had forked into two bitbags.
+ * Keep the rules below diffable against that file: same order, same comments,
+ * same token NAMES, so a change there can be carried across by reading a diff
+ * rather than re-deriving the design.
+ *
+ * Two deliberate differences from the fishlamp original, both structural:
+ *
+ * 1. TOKENS ARE INLINED. On fishlamp the palette (--color-ember, --font, …) is
+ *    page-global from app/globals.css, so the skin could just read it. A theme in
+ *    this package has no host to read from — it ships to any page — so the values
+ *    it needs are declared here. Only the ones the skin actually uses.
+ *
+ * 2. NO `.pc-theme-scope` PREFIX. fishlamp hand-writes that prefix on every rule
+ *    because it loads the file as a plain stylesheet. Here `ThemeStyle` wraps the
+ *    whole theme in `@scope (.pc-theme-scope) { … }`, so the prefix is already
+ *    applied — writing it again would demand a SECOND nested `.pc-theme-scope`
+ *    inside the first and match nothing at all.
+ *
+ * No `@import` of a webfont, unlike this package's other skins: bitbag rides in
+ * the footer of every adh site, and a theme is the wrong place to put a
+ * third-party font request on every page in the fleet. Iosevka comes from the
+ * host if the host has it (fishlamp self-hosts it as `--font-iosevka`, the adh
+ * suite loads the family as `Iosevka`), and degrades to the platform monospace
+ * if not — the design only needs A monospace, not a specific one.
+ *
+ * Single mode (always dark): the lamp only reads one way.
+ */
+
+/* === Tokens === */
+
+:root {
+  /* The lamp palette — fishlamp app/globals.css, inlined (see header note 1). */
+  --color-ink-soft: #17130f;
+  --color-ember: #e8a33d;
+  --color-ember-bright: #f5c877;
+  --color-ember-dim: rgba(232, 163, 61, 0.14);
+  --color-parchment: #f0e4d0;
+  --color-parchment-dim: #a8968a;
+  --color-hairline: rgba(232, 163, 61, 0.18);
+
+  /* The small token contract the package's base.css reads from the theme. */
+  --pc-font: var(--font-iosevka, 'Iosevka'), ui-monospace, 'SF Mono', Menlo, monospace;
+  --accent: var(--color-ember);
+  --pc-surface: var(--color-ink-soft);
+  --pc-radius: 11px;
+  --pc-thinking-done-color: var(--color-parchment-dim);
+}
+
+/* Deliberately NO `body` rule. The other skins here paint a page background,
+ * which `ThemeStyle` rewrites onto the theme scope root — and this chat is glass:
+ * an opaque fill on the wrapper would sit between the lamp light and the blur
+ * below and flatten the whole effect. */
+
+/* --- the box: one blurred, ember-hairline surface ------------------------- */
+.persona-chat {
+  font-family: var(--pc-font);
+  color: var(--color-parchment);
+  border: 1px solid var(--color-hairline);
+  /* Square where it meets the viewport edge — against a wide desktop window a
+   * rounded corner sitting on the edge reads as a card that slipped off the
+   * screen, not one docked to it. A phone is the other way round (below). */
+  border-radius: 18px 18px 0 0;
+  /* Mostly glass. The panel sits over the page's own glow and, once engaged,
+   * over the scrim the dock paints behind it (bitbag-dock.css) — so the ink can
+   * stay thin and let the lamp light through. The blur carries the legibility
+   * the alpha gives up: it's what keeps text off a moving background. */
+  background: rgba(17, 14, 11, 0.42);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  box-shadow: 0 12px 50px -12px rgba(0, 0, 0, 0.7);
+  /* Clearing the iPhone home indicator is the DOCK's job, not this box's — it
+   * lifts the whole rig instead (see `bottom` in bitbag-dock.css). It used to
+   * be padding here, which made the box itself taller the moment Safari's
+   * toolbar scrolled away and the indicator came out from under it: the entry
+   * line stayed put and a band of dead space grew below it. The box's height is
+   * now the composer's, and nothing about the browser's chrome changes it. */
+}
+
+/* On a phone the panel keeps all four corners. It still docks to the bottom edge
+ * — only the squaring goes. The panel is nearly as wide as the screen there, so
+ * squared bottom corners stop reading as "docked" and start reading as a bar
+ * welded across the frame, next to a phone's own rounded display. */
+@media (pointer: coarse) {
+  .persona-chat {
+    border-radius: 18px;
+  }
+}
+
+/* --- transcript ----------------------------------------------------------- */
+.pc-transcript {
+  padding: 0.7rem 0.8rem 0.55rem;
+  gap: 0.4rem;
+  /* Don't chain a flick that runs off the end of the transcript into the page —
+   * a docked chat sits over someone else's content, and taking their scroll
+   * with it is how a fixture in the corner turns into a trap. */
+  overscroll-behavior: contain;
+}
+
+/* --- message bubbles ------------------------------------------------------ */
+.pc-bubble {
+  padding: 0.4rem 0.7rem;
+  border-radius: 11px;
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+.pc-message.pc-persona .pc-bubble {
+  background: var(--color-ember-dim);
+  color: var(--color-parchment);
+}
+.pc-message.pc-user .pc-bubble {
+  background: rgba(240, 228, 208, 0.06);
+  color: var(--color-parchment);
+}
+.pc-time {
+  color: var(--color-parchment-dim);
+  font-size: 0.62rem;
+  letter-spacing: 0.04em;
+}
+
+/* --- status line: summoning / idle / thinking ----------------------------
+ * A point smaller than the chat text — it's a status, not a message. `bitbag`
+ * runs InlineChatView with `thinkingColorful`, so the LIT status word cycles
+ * vivid hues via an inline color that overrides this; the ember below is only
+ * the seed for the first frame before a hue lands. The settled (done / idle)
+ * line falls to the dim-parchment token via base.css. */
+.pc-thinking {
+  font-family: var(--pc-font);
+  font-size: 0.82rem;
+}
+.pc-thinking:not(.pc-thinking--done) {
+  color: var(--color-ember-bright);
+}
+
+/* The package builds the status row out of the same `pc-message pc-persona` +
+ * `pc-bubble` markup as a real message, so the bubble skin above would wrap it
+ * in an ember pill and it would read as something bitbag SAID. Strip it back to
+ * bare text — this is his out-of-band line, nearer a shell's stderr than a
+ * remark. Scoped with `>` to the row pinned above the composer, so a typing
+ * indicator rendered inside the transcript keeps its bubble. */
+.persona-chat > .pc-typing .pc-bubble {
+  background: none;
+  padding: 0;
+  border-radius: 0;
+}
+
+/* Set it left of the composer's prompt and tucked down against it, so it reads
+ * as a line the terminal printed just before the cursor rather than a caption
+ * floating over the box. */
+.persona-chat > .pc-typing {
+  padding: 0 0.55rem 0;
+  margin-bottom: -0.2rem;
+}
+
+/* Collapsed, the row folds to zero height (the package's `minimal` mode) — drop
+ * the negative margin with it, or it would keep pulling the composer up by
+ * 0.2rem while there's nothing left to tuck. */
+.persona-chat.pc-collapsed > .pc-typing {
+  margin-bottom: 0;
+}
+
+/* --- input row → pill bar, led by the mockup's ember flame ---------------- */
+.pc-input-area {
+  padding: 0.35rem 0.45rem 0.35rem 0.8rem;
+  /* Tight enough that the prompt below reads as `> text`, one unit, the way a
+   * shell sets it — not a glyph parked at the end of the bar. */
+  gap: 0.4rem;
+  /* Up-arrow-out-of-field glyph for the send button (masked below). */
+  --send-glyph: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 20.4V4.6M4.9 11.7 12 4.6l7.1 7.1' fill='none' stroke='%23fff' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+/* A terminal prompt, not an ornament: bitbag is set in one monospace face, so
+ * the chevron says "type here" in his own idiom and needs no explaining. It
+ * keeps the ember accent that used to belong to the ☉. Plain ASCII `>`, not
+ * `❯` — the heavy angle is not in every monospace face, and where it misses it
+ * falls to a substitute glyph a size off from everything beside it. */
+.pc-input-area::before {
+  content: ">";
+  flex: none;
+  color: var(--color-ember);
+  font-size: 0.86rem;
+  line-height: 1;
+}
+/* Composer type is chrome, not content: set a step below the transcript's 0.92rem
+ * so what bitbag says stays the largest thing in the box and the entry line reads
+ * as a small terminal field. */
+.pc-input {
+  background: none;
+  border: 0;
+  color: var(--color-parchment);
+  font: inherit;
+  font-size: 0.82rem;
+}
+
+/* On touch, base.css pins `.pc-input` to a flat `16px`, because iOS Safari zooms
+ * the whole page whenever a focused form control computes below that — and, on
+ * iOS, does not zoom back out when it blurs. That guard costs the composer its
+ * place in the hierarchy (16px is LARGER than the transcript's 0.92rem, so the
+ * entry line becomes the biggest type in the box, louder than anything bitbag
+ * says) and a flat px value ignores the reader's font-size setting. But it is
+ * the RIGHT default for a host that hasn't dealt with the zoom itself, and this
+ * theme ships to hosts it knows nothing about.
+ *
+ * So the size is the host's to declare, and the guard is what it falls back to.
+ * A host that has removed the auto-zoom at its source — `maximum-scale=1` in the
+ * viewport meta, iOS only (see RESTORE_ZOOM_OFF_IOS in fishlamp's app/layout.tsx
+ * for the whole treatment, including why it cannot be done from script after
+ * load) — sets `--pc-chat-touch-input-size: 0.82rem` and gets the design's own
+ * size back, in rem, still tracking the reader's text-size setting. A host that
+ * hasn't keeps the 16px floor and a composer 3px larger than fishlamp's. That is
+ * the one pixel bitbag is allowed to differ on, and it is a property of the PAGE,
+ * not of him. Measured on iOS 26 with the meta in place: composer at 0.82rem
+ * focuses at visualViewport.scale 1.000 (it was 1.301 without).
+ *
+ * Specificity has to clear base.css's `:root .persona-chat .pc-input` (three
+ * class-level components, chosen there precisely so an ordinary theme rule can't
+ * undercut the guard). `:root` becomes `:scope` when ThemeStyle scopes the theme,
+ * which is still one component, so `.pc-input` is doubled for a fourth — the rule
+ * then wins on specificity rather than on load order, scoped or global. */
+@media (pointer: coarse) {
+  :root .persona-chat .pc-input.pc-input {
+    font-size: var(--pc-chat-touch-input-size, 16px);
+  }
+}
+.pc-input::placeholder {
+  color: var(--color-parchment-dim);
+}
+
+/* Send: the glyph alone, no filled disc — one accent in the input row instead of
+ * a solid orange puck competing with the ☉ at the other end. It lifts on hover,
+ * in the direction it points, and greys out rather than fading when there's
+ * nothing to send, so "disabled" reads as a state and not as a half-drawn button. */
+.pc-send-btn {
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  color: var(--color-ember);
+  transition: color 0.2s, transform 0.2s, background 0.2s;
+}
+/* The glyph itself. The chat package hardcodes a paper plane (its <SendIcon>) and
+ * exposes no prop to change it, so the mark is swapped from CSS: the package SVG
+ * is hidden and the button paints its own arrow, drawn as a mask filled with
+ * `currentColor` so it inherits the rest/hover/disabled colours above with
+ * nothing to keep in sync. Delete both rules if the chat package grows a
+ * `sendIcon` prop. */
+.pc-send-btn > svg {
+  display: none;
+}
+.pc-send-btn::after {
+  content: "";
+  width: 20px;
+  height: 20px;
+  background: currentColor;
+  -webkit-mask: var(--send-glyph) center / contain no-repeat;
+  mask: var(--send-glyph) center / contain no-repeat;
+}
+.pc-send-btn:hover:not(:disabled) {
+  color: var(--color-ember-bright);
+  background: var(--color-ember-dim);
+  transform: translateY(-1px);
+}
+.pc-send-btn:active:not(:disabled) {
+  transform: translateY(-2px);
+}
+.pc-send-btn:disabled {
+  color: var(--color-parchment-dim);
+  opacity: 0.55;
+}
+
+/* The collapsed single-entry-line behavior — folding the transcript AND the
+ * status row, and dropping pointer-events on the dormant disabled composer so a
+ * click can wake him — lives in the chat package's `minimal` mode
+ * (css/modes/inline.css), shared by every mounting. Nothing to add here. */
