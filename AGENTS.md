@@ -24,7 +24,9 @@ system** — its conventional manifest file lives there.
 The web platform is a pnpm workspace; its libraries live under
 `packages/web/packages/`:
 
+- `@agenticdevelopertoolkit/avatar`
 - `@agenticdevelopertoolkit/chat`
+- `@agenticdevelopertoolkit/chrome`
 - `@agenticdevelopertoolkit/themes`
 - `@agenticdevelopertoolkit/viewport`
 

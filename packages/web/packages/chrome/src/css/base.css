@@ -1,0 +1,112 @@
+/*
+ * Chrome Base Styles — the menu button.
+ *
+ * Geometry and mechanics only. Nothing here paints a border, a background or a
+ * colour: the bars are `currentColor`, so a consumer themes the whole figure by
+ * setting `color` on the button, and sizes it with the custom properties below.
+ * Import once, before the stylesheet that skins it.
+ */
+
+.menu-button {
+  /* Whole pixels, and a whole-pixel PITCH, because the three bars have to be
+   * identical and a browser will not make them so on its own.
+   *
+   * A bar is a box with a fractional top: the button sits at whatever offset
+   * the header's padding and the root font size leave it at, and the stack is
+   * centred in whatever room is left over. The rasteriser rounds each edge of
+   * that box to a device pixel independently, so a bar's rendered thickness is
+   * `round(top + thickness) - round(top)` — which depends on where the bar
+   * starts unless the thickness is a whole number of pixels. At 2.5px and a
+   * 5.5px pitch, measured on a phone at three device pixels to the CSS pixel,
+   * the outer two bars came out 8 device pixels thick and the middle one 7,
+   * because the middle bar was half a pixel out of phase with its neighbours.
+   * Three identical elements, visibly not identical.
+   *
+   * Two rules fix that for good, at any device-pixel ratio and wherever the
+   * button lands:
+   *
+   *   thickness is a whole number of CSS pixels  -> `round(x + n) - round(x)`
+   *       is exactly `n` for whole `n`, so a bar keeps its weight no matter
+   *       what its top rounds to;
+   *   the PITCH (thickness + gap) is a whole number too  -> every bar has the
+   *       same fractional offset, so all three round the same way.
+   *
+   * The stack may still be half a pixel off a device pixel as a whole, and
+   * then all three are equally soft. That is a property of where the button is
+   * put, not of the icon, and it cannot be fixed from in here — what can be
+   * fixed is that the three bars agree, which is what the eye is reading. */
+  --menu-bar-thickness: 3px;
+  --menu-bar-gap: 3px;
+  /* Half the button wide: enough to read as a mark at this weight, and it
+   * leaves the same air either side as the gaps put between the bars. */
+  --menu-bar-width: 16px;
+  --menu-size: 32px;
+  /* The button is drawn small; it is not TAPPED small. */
+  --menu-hit: 44px;
+
+  position: relative;
+  /* `place-content` centres the STACK, which also stops the rows stretching to
+   * fill the button. That distinction matters: while they stretch, the bars are
+   * spread over the button's full height and the gap is inert — the icon is
+   * whatever height the button happens to be, and no spacing written here has
+   * any effect. Sized to content, the three bars become a figure with their own
+   * proportions, and `gap` is what sets them. */
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: var(--menu-bar-gap);
+  /* Stated rather than inherited: the centring above divides the room left
+   * INSIDE the box, so whether a consumer's border counts against the size has
+   * to be a fact of this file and not of whatever reset it happens to ship. */
+  box-sizing: border-box;
+  width: var(--menu-size);
+  height: var(--menu-size);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+/* Pushes the hit area back out to the size a thumb actually needs, without
+ * putting a single visible pixel back. Centred on the button rather than
+ * inset from it, so it stays 44px whatever `--menu-size` is set to. */
+.menu-button::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: var(--menu-hit);
+  height: var(--menu-hit);
+  transform: translate(-50%, -50%);
+}
+
+/* Solid strokes with fully rounded caps — at this weight a hairline would read
+ * as a seam rather than a mark, and square ends would fight the rounding a
+ * consumer is likely to put on the button itself. */
+.menu-button .mb-bar {
+  display: block;
+  width: var(--menu-bar-width);
+  height: var(--menu-bar-thickness);
+  border-radius: 999px;
+  background: currentColor;
+  transition: 0.25s;
+}
+
+/* The close glyph is the menu with a bar removed and the other two crossed.
+ * Crossing them needs the bars concentric, and the honest way to say that is to
+ * put them in the same grid cell — the centring above then puts both on the one
+ * point, and all that is left is the rotation. The alternative, translating each
+ * bar back onto the shared centre, only looks simpler: the offset it needs is a
+ * function of the thickness and the gap, so the figure silently degrades into a
+ * chevron the moment either is retuned. Overlaying derives nothing from the bar
+ * geometry and so survives every change to it. */
+.menu-button--close .mb-bar {
+  grid-area: 1 / 1;
+}
+.menu-button--close .mb-bar:first-child {
+  transform: rotate(45deg);
+}
+.menu-button--close .mb-bar:last-child {
+  transform: rotate(-45deg);
+}

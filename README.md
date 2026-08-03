@@ -28,8 +28,12 @@ platform.
 The web platform is a pnpm monorepo with libraries under
 `packages/web/packages/`:
 
+- `@agenticdevelopertoolkit/avatar` — headless avatar behaviour and the
+  `useAvatarEngine` hook.
 - `@agenticdevelopertoolkit/chat` — React chat components (`InlineChat`,
   `ThreePaneChat`, `MobileChat`, `PersonaChat`) with pluggable backends.
+- `@agenticdevelopertoolkit/chrome` — site chrome: the menu button and the
+  close glyph derived from it.
 - `@agenticdevelopertoolkit/themes` — Theme manifest, `ThemeStyle`, and
   `ColorModeProvider`.
 - `@agenticdevelopertoolkit/viewport` — iOS-correct viewport / keyboard
