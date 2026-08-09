@@ -188,4 +188,39 @@ describe('useChatSession', () => {
     unmount()
     expect(destroy).toHaveBeenCalled()
   })
+
+  // `say` types a line one character at a time, each character scheduling the next, and the
+  // whole chain outlives any caller that leaves mid-line — a route change, or a test file
+  // returning. Every remaining tick then calls `setMessages` on a component that is gone. In a
+  // jsdom run that lands after teardown, where React reads `window` to pick an update priority
+  // and finds it undefined: `ReferenceError: window is not defined`, attributed to whichever
+  // test file happened to be running, having passed.
+  //
+  // Asserted as "unmount leaves no scheduled work" rather than by watching for the update,
+  // because React 19 no longer warns about setState on an unmounted component — the write is
+  // silent, and the crash it causes surfaces somewhere else entirely.
+  it('cancels the typing chain on unmount', () => {
+    vi.useFakeTimers()
+    try {
+      const backend = createMockBackend()
+      const { result, unmount } = renderHook(() =>
+        useChatSession({ backend, persona: { name: 'Bot' } }),
+      )
+
+      act(() => {
+        void result.current.say('a line long enough to still be mid-word')
+      })
+      act(() => {
+        vi.advanceTimersByTime(100)
+      })
+      // Guard the guard: a line that had already finished typing would leave nothing
+      // scheduled and pass this test without exercising anything.
+      expect(vi.getTimerCount()).toBeGreaterThan(0)
+
+      unmount()
+      expect(vi.getTimerCount()).toBe(0)
+    } finally {
+      vi.useRealTimers()
+    }
+  })
 })

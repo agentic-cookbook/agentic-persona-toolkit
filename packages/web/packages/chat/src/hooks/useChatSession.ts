@@ -183,6 +183,10 @@ export function useChatSession(options: UseChatSessionOptions): ChatSession {
   const processingRef = useRef(false)
   const messagesRef = useRef(messages)
   messagesRef.current = messages
+  // Every timer `say` has in flight. A line types at one character per ~40ms and the promise
+  // resolves on the last one, so a caller that unmounts mid-line — a route change, a test
+  // returning — leaves the rest of the chain scheduled against a component that is gone.
+  const typingTimersRef = useRef<Set<ReturnType<typeof setTimeout>>>(new Set())
 
   const processQueue = useCallback(async () => {
     if (processingRef.current || queueRef.current.length === 0) return
@@ -250,6 +254,15 @@ export function useChatSession(options: UseChatSessionOptions): ChatSession {
       ])
       return new Promise<void>((resolve) => {
         let i = 0
+        // Scheduling goes through here so the pending timer is always in the set the unmount
+        // cleanup drains, including the one queued from inside `step` itself.
+        const schedule = (delay: number) => {
+          const timer = setTimeout(() => {
+            typingTimersRef.current.delete(timer)
+            step()
+          }, delay)
+          typingTimersRef.current.add(timer)
+        }
         const step = () => {
           i += 1
           const slice = text.slice(0, i)
@@ -261,9 +274,9 @@ export function useChatSession(options: UseChatSessionOptions): ChatSession {
             resolve()
             return
           }
-          window.setTimeout(step, 26 + Math.random() * 28)
+          schedule(26 + Math.random() * 28)
         }
-        window.setTimeout(step, 0)
+        schedule(0)
       })
     },
     [persona],
@@ -283,6 +296,18 @@ export function useChatSession(options: UseChatSessionOptions): ChatSession {
       backend.destroy?.()
     }
   }, [backend])
+
+  // Unmount only — an empty dependency list, unlike the effect above, because a new `backend`
+  // is no reason to cut a line off mid-word. The in-flight `say` promises are left unresolved
+  // on purpose: they mean "the line landed", and it did not. Nothing is awaiting them once the
+  // component is gone, and resolving would be a lie a scripted intro would act on.
+  useEffect(() => {
+    const timers = typingTimersRef.current
+    return () => {
+      for (const timer of timers) clearTimeout(timer)
+      timers.clear()
+    }
+  }, [])
 
   return useMemo(
     () => ({ messages, isTyping, sendMessage, say, selectedIndex, selectMessage }),
