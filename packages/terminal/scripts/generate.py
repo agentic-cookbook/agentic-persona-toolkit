@@ -22,9 +22,22 @@ OUT_PARENT = ROOT / "src" / "apt_terminal"
 OUT = OUT_PARENT / "generated"
 
 
+def interpreter() -> str:
+    """The python that has `openapi-python-client` installed.
+
+    pyproject pins the generator in the `dev` extra, so the interpreter that can run it is
+    normally this package's own `.venv` — not whatever python the consolidated orchestrator
+    happened to start with (it invokes us as a bare `python3`). Prefer the local venv when
+    it exists so `pnpm gen` works from a clean checkout after `pip install -e '.[dev]'`,
+    and fall back to the running interpreter for anyone who installed the extra globally.
+    """
+    venv = ROOT / ".venv" / "bin" / "python"
+    return str(venv) if venv.exists() else sys.executable
+
+
 def build_cmd(spec: Path) -> list[str]:
     return [
-        sys.executable, "-m", "openapi_python_client", "generate",
+        interpreter(), "-m", "openapi_python_client", "generate",
         "--path", str(spec),
         "--meta", "none",
         "--output-path", str(OUT),
