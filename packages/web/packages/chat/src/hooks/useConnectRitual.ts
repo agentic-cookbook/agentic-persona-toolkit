@@ -116,7 +116,28 @@ export function useConnectRitual(cfg: ConnectRitualConfig): ConnectRitualState {
   sayRef.current = say
   const started = useRef(false)
   useEffect(() => {
-    const delay = (ms: number) => new Promise<void>((r) => setTimeout(r, ms))
+    // The ritual is a chain of awaits, so left to itself it outlives the component
+    // that started it: the beat between the welcome and the greeting resolves
+    // whether or not anyone is still mounted, and a `say` after that renders its
+    // line through timers the session's own unmount cleanup has already drained —
+    // nothing is left to clear them, and they fire into a torn-down document. So
+    // the beat is a timer this effect owns, and the chain checks it is still alive
+    // after every await. A pending `say` needs no check: its promise resolves only
+    // when the line lands, which after unmount it never does.
+    let alive = true
+    let beat: ReturnType<typeof setTimeout> | undefined
+    const delay = (ms: number) =>
+      new Promise<void>((r) => {
+        beat = setTimeout(r, ms)
+      })
+    // Every branch below hangs its own unwiring off this, so abandonment happens on
+    // unmount whichever trigger the caller chose.
+    const stopOn = (unwire?: () => void) => (): void => {
+      alive = false
+      if (beat !== undefined) clearTimeout(beat)
+      unwire?.()
+    }
+
     // `byUser` separates "the ritual started" from "the user reached for him" —
     // the give-up timeout and mount arrival do the former without the latter.
     const begin = async (byUser: boolean): Promise<void> => {
@@ -125,9 +146,12 @@ export function useConnectRitual(cfg: ConnectRitualConfig): ConnectRitualState {
       setEngaged(true) // stop the stalling loop; the real ritual proceeds
       if (byUser) setEngagedByUser(true)
       await sayRef.current(welcome)
+      if (!alive) return
       setConnected(true)
       await delay(greetDelayMs)
+      if (!alive) return
       await sayRef.current(greeting)
+      if (!alive) return
       setInputDisabled(false)
     }
 
@@ -135,21 +159,21 @@ export function useConnectRitual(cfg: ConnectRitualConfig): ConnectRitualState {
     // to — the ritual runs straight through from this first effect.
     if (engageOn === 'mount') {
       void begin(false)
-      return
+      return stopOn()
     }
 
     // Element mode: engage only on a deliberate pointerdown or focus INSIDE the
     // given element — no passing-cursor trigger, no give-up fallback. He waits.
     if (engageOn !== 'pointer') {
       const el = engageOn.current
-      if (!el) return
+      if (!el) return stopOn()
       const onEngage = (): void => void begin(true)
       el.addEventListener('pointerdown', onEngage)
       el.addEventListener('focusin', onEngage)
-      return () => {
+      return stopOn(() => {
         el.removeEventListener('pointerdown', onEngage)
         el.removeEventListener('focusin', onEngage)
-      }
+      })
     }
 
     // Pointer mode (default): engage on the first real pointer move inside the
@@ -165,11 +189,11 @@ export function useConnectRitual(cfg: ConnectRitualConfig): ConnectRitualState {
     }, readyAfterMs)
     const giveUpId = setTimeout(() => void begin(false), giveUpAfterMs)
     window.addEventListener('pointermove', onMove)
-    return () => {
+    return stopOn(() => {
       clearTimeout(readyId)
       clearTimeout(giveUpId)
       window.removeEventListener('pointermove', onMove)
-    }
+    })
     // Mount-only: the ritual wires its trigger exactly once per session.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])

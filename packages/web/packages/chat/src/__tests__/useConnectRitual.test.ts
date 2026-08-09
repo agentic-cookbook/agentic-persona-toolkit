@@ -136,6 +136,35 @@ describe('useConnectRitual', () => {
     })
   })
 
+  describe('unmount', () => {
+    it('abandons the ritual mid-beat instead of speaking into a torn-down tree', async () => {
+      const said: string[] = []
+      const { unmount } = renderHook(() =>
+        useConnectRitual({
+          ...cfg,
+          engageOn: 'mount',
+          say: async (text: string) => {
+            said.push(text)
+          },
+        }),
+      )
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(0)
+      })
+      expect(said).toEqual(['connected.']) // the welcome landed; the beat is pending
+
+      unmount()
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(5000) // well past the 800ms beat
+      })
+      // The greeting must never be spoken after the component is gone. `say` renders
+      // it letter by letter through timers whose unmount cleanup has already run, so
+      // a line started now belongs to nobody: the timers fire into a torn-down
+      // document and React reaches for a `window` the environment no longer has.
+      expect(said).toEqual(['connected.'])
+    })
+  })
+
   it('ignores a pointer move before the ready delay has elapsed', async () => {
     const { result } = renderHook(() => useConnectRitual(cfg))
     await act(async () => {
