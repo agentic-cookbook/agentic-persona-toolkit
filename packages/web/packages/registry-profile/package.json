@@ -1,0 +1,48 @@
+{
+  "name": "@agenticdevelopertoolkit/registry-profile",
+  "version": "0.1.0",
+  "description": "The public registry-entry profile renderer. Takes a serialized entry and renders it — no fetching, no auth, no adh imports, so it drops into anyone's site.",
+  "license": "UNLICENSED",
+  "type": "module",
+  "sideEffects": ["**/*.css"],
+  "files": ["dist"],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "development": "./src/index.ts",
+      "import": "./dist/index.js"
+    },
+    "./css/profile.css": {
+      "development": "./src/css/profile.css",
+      "default": "./dist/css/profile.css"
+    }
+  },
+  "scripts": {
+    "build": "tsup && pnpm run build:types && pnpm run build:css",
+    "build:types": "tsc --emitDeclarationOnly -p tsconfig.build.json",
+    "build:css": "node ../../copy-css.mjs",
+    "dev": "tsup --watch",
+    "clean": "rm -rf dist",
+    "lint": "tsc --noEmit",
+    "test": "vitest run --passWithNoTests"
+  },
+  "//peerDependencies": "React and registry-types are peers, not dependencies: the consumer supplies the copy, so a bundle holds one instance rather than one per package that re-exports it.",
+  "peerDependencies": {
+    "@agenticdevelopertoolkit/registry-types": "*",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@agenticdevelopertoolkit/registry-types": "workspace:*",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.1.0",
+    "@types/react": "19.2.16",
+    "@types/react-dom": "19.2.3",
+    "jsdom": "^25.0.1",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "tsup": "^8.3.5",
+    "typescript": "^5.7.2",
+    "vitest": "^4.1.4"
+  }
+}
