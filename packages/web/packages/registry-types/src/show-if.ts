@@ -29,6 +29,12 @@ export type ShowIfOp = (typeof SHOW_IF_OPS)[number];
  * Not `===`: a multiselect value is an array, and two arrays carrying the same members are
  * different objects, so identity would report "changed" on every render and hide a field
  * that should be showing.
+ *
+ * Deliberately NOT deep for plain objects — the `===` fallback below means an `eq`/`ne`
+ * rule against an object-shaped value (e.g. `address`) can never match, even a freshly
+ * built object with identical fields. Out of scope here: a `show_if` controller is expected
+ * to be a scalar or array-valued field (select, multi_select, boolean, text, ...), not a
+ * compound one, so this is a documented limitation rather than a fix.
  */
 function sameValue(a: unknown, b: unknown): boolean {
   if (Array.isArray(a) && Array.isArray(b)) {
@@ -69,7 +75,12 @@ export function evaluateShowIf(
     case 'falsy':
       return !truthy(actual);
     case 'in':
-      return Array.isArray(rule.value) && rule.value.some((option) => sameValue(actual, option));
+      // A scalar `rule.value` here is a malformed rule, not a "no match" — the same case
+      // the unknown-op default below exists to handle. Failing open (show the field) keeps
+      // this consistent with that default instead of hiding the field permanently on an
+      // authoring mistake this build cannot interpret.
+      if (!Array.isArray(rule.value)) return true;
+      return rule.value.some((option) => sameValue(actual, option));
     case 'contains':
       return Array.isArray(actual) && actual.some((item) => sameValue(item, rule.value));
     default:

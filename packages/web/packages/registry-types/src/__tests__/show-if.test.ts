@@ -52,6 +52,12 @@ describe('evaluateShowIf', () => {
     expect(evaluateShowIf(rule({ op: 'matches-regex' }), { mode: 'anything' })).toBe(true);
   });
 
+  it('fails open on a malformed in rule the same way it does on an unknown op', () => {
+    // A scalar `value` on an `in` rule is a malformed rule, not a "no match" — the field
+    // must stay visible for the same reason an unrecognized op does (see the test above).
+    expect(evaluateShowIf(rule({ op: 'in', value: 'not-an-array' }), { mode: 'anything' })).toBe(true);
+  });
+
   it('names exactly the ops a builder may offer', () => {
     // The builder renders one option per entry. A seventh op added here without a case in
     // the switch would fail open on every entry that used it.

@@ -1,4 +1,18 @@
-import type { AddressValue, FieldDefLike } from './types';
+/**
+ * Call order is a contract, not a suggestion: **always `validateFieldValue` before
+ * `coerceFieldValue`.**
+ *
+ * Validation is a check on what the caller actually sent. Coercion normalizes input that
+ * has ALREADY been accepted — it is not a second validation pass, and will silently mangle
+ * a value validation should have rejected: an `image` value that is an object stringifies
+ * to `"[object Object]"` instead of failing; a `def.type` this catalog does not recognize
+ * has no safe coercion at all (see the `isFieldType` guards below). Every validator here
+ * accepts exactly the wire forms its matching coercer knows how to normalize, and nothing
+ * more, so a value that passes validation can never surprise the coercer that runs after
+ * it. Tasks 3-5: call them in this order, every time.
+ */
+import { isFieldType } from './types';
+import type { AddressValue, FieldDefLike, FieldType } from './types';
 // `publishBlockers` below needs the rule evaluator. In the source package this is an
 // ordinary import; in the backend's single-file vendored build the two files are
 // concatenated with show-if.ts LAST, and the call still resolves because
@@ -7,10 +21,55 @@ import { evaluateShowIf, type ShowIfRule } from './show-if';
 
 const URL_RE = /^https?:\/\/[^\s/$.?#].[^\s]*$/i;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-// Deliberately permissive: digits, spaces and the usual punctuation, 7-20 digits. Phone
-// formats vary enough by country that a strict pattern rejects valid numbers.
+// Deliberately permissive on shape: digits, spaces and the usual punctuation, 7-24
+// characters total. Phone formats vary enough by country that a strict pattern rejects
+// valid numbers. The digit count is checked separately below (see `countDigits`) — this
+// regex alone would accept a string of nothing but punctuation, which is not a phone number.
 const PHONE_RE = /^[+]?[\d\s().-]{7,24}$/;
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+// The value is an attachment id minted by the presigned upload flow, not an arbitrary
+// string — every id in this system is a varchar(36). Rejecting anything else here is what
+// stops a public profile from ever holding a `javascript:` payload or a third-party URL in
+// a field a later renderer might trust as "just an id" and interpolate unescaped.
+const IMAGE_ID_RE = /^[A-Za-z0-9_-]{1,36}$/;
+
+// Default length caps, applied only when the owner hasn't set `config.maxLength` (the
+// text-shaped types and multi_select's item count both support that override). These are
+// an abuse/DoS backstop, not a UX constraint — chosen so a genuine directory-entry answer
+// never comes close: a name or title (text), a short free-text answer (textarea), a
+// long-form "about" section (markdown), the longest URL most servers still accept in
+// practice (url, matching the de facto ~2KB ceiling many proxies enforce), and RFC 5321's
+// mailbox length limit (email).
+const DEFAULT_MAX_LENGTH: Partial<Record<FieldType, number>> = {
+  text: 200,
+  textarea: 2000,
+  markdown: 20000,
+  url: 2048,
+  email: 254,
+};
+// A generous tag/category list — comfortably more than any legitimate directory field asks
+// a registrant to pick — while still bounding the array a hostile submission could send.
+const MULTI_SELECT_MAX_ITEMS = 50;
+
+const BOOLEAN_TRUE = new Set(['true', '1', 'on']);
+const BOOLEAN_FALSE = new Set(['false', '0', 'off']);
+
+// The eight types whose value is fundamentally a string. A number, array, or object is
+// never a valid instance of one of these — without this guard `asString` below would
+// silently stringify it ("[object Object]", "1,2") and validation would wave a mangled
+// value through instead of rejecting it.
+const STRING_LIKE_TYPES: ReadonlySet<FieldType> = new Set([
+  'text',
+  'textarea',
+  'markdown',
+  'url',
+  'email',
+  'phone',
+  'date',
+  'select',
+]);
+
+const ADDRESS_KEYS = ['line1', 'line2', 'city', 'region', 'postalCode', 'country'] as const;
 
 function asString(value: unknown): string {
   return typeof value === 'string' ? value : value == null ? '' : String(value);
@@ -29,9 +88,26 @@ function isEmpty(def: FieldDefLike, value: unknown): boolean {
   return asString(value).trim() === '';
 }
 
+function countDigits(text: string): number {
+  return (text.match(/\d/g) ?? []).length;
+}
+
 /** Returns an error string, or null when the value is acceptable. */
 export function validateFieldValue(def: FieldDefLike, value: unknown): string | null {
+  if (!isFieldType(def.type)) {
+    // Reachable at runtime even though `FieldType` is a closed union at compile time:
+    // `registry.field_defs.type` is a bare varchar with no CHECK constraint (Task 1), so a
+    // def written by a newer frontend catalog can carry a type this backend was vendored
+    // before it knew about. TypeScript's exhaustive switch below only guarantees the
+    // *known* branches are complete — it says nothing about data that never matches one.
+    return 'Unrecognized field type';
+  }
+
   if (isEmpty(def, value)) return def.required ? 'Required' : null;
+
+  if (STRING_LIKE_TYPES.has(def.type) && typeof value !== 'string') {
+    return 'Must be text';
+  }
 
   const max = typeof def.config.maxLength === 'number' ? def.config.maxLength : null;
   const text = asString(value);
@@ -39,21 +115,32 @@ export function validateFieldValue(def: FieldDefLike, value: unknown): string | 
   switch (def.type) {
     case 'text':
     case 'textarea':
-    case 'markdown':
-      if (max != null && text.length > max) return `Must be ${max} characters or fewer`;
+    case 'markdown': {
+      const cap = max ?? DEFAULT_MAX_LENGTH[def.type];
+      if (cap != null && text.length > cap) return `Must be ${cap} characters or fewer`;
       return null;
+    }
 
-    case 'url':
+    case 'url': {
       if (!URL_RE.test(text)) return 'Must be a http(s) URL';
+      const cap = max ?? DEFAULT_MAX_LENGTH.url;
+      if (cap != null && text.length > cap) return `Must be ${cap} characters or fewer`;
       return null;
+    }
 
-    case 'email':
+    case 'email': {
       if (!EMAIL_RE.test(text)) return 'Must be an email address';
+      const cap = max ?? DEFAULT_MAX_LENGTH.email;
+      if (cap != null && text.length > cap) return `Must be ${cap} characters or fewer`;
       return null;
+    }
 
-    case 'phone':
+    case 'phone': {
       if (!PHONE_RE.test(text)) return 'Must be a phone number';
+      const digits = countDigits(text);
+      if (digits < 7 || digits > 20) return 'Must be a phone number';
       return null;
+    }
 
     case 'date':
       if (!DATE_RE.test(text)) return 'Must be a date (YYYY-MM-DD)';
@@ -61,8 +148,11 @@ export function validateFieldValue(def: FieldDefLike, value: unknown): string | 
       return null;
 
     case 'boolean':
-      if (typeof value !== 'boolean') return 'Must be true or false';
-      return null;
+      if (typeof value === 'boolean') return null;
+      if (typeof value === 'string' && (BOOLEAN_TRUE.has(value) || BOOLEAN_FALSE.has(value))) {
+        return null;
+      }
+      return 'Must be true or false';
 
     case 'select': {
       const allowed = options(def);
@@ -72,17 +162,22 @@ export function validateFieldValue(def: FieldDefLike, value: unknown): string | 
 
     case 'multi_select': {
       if (!Array.isArray(value)) return 'Must be a list';
+      if (value.length > MULTI_SELECT_MAX_ITEMS) {
+        return `Must be ${MULTI_SELECT_MAX_ITEMS} selections or fewer`;
+      }
+      const strs = value.map(asString);
+      if (new Set(strs).size !== strs.length) return 'Must not repeat a selection';
       const allowed = options(def);
-      if (allowed.length > 0 && !value.every((v) => allowed.includes(asString(v)))) {
+      if (allowed.length > 0 && !strs.every((v) => allowed.includes(v))) {
         return 'Not one of the allowed options';
       }
       return null;
     }
 
     case 'image':
-      // The value is an attachment id from the presigned upload flow; the upload route
-      // is what validates content type and size, so there is nothing left to check here.
-      if (typeof value !== 'string') return 'Must be an uploaded image';
+      // The value is an attachment id from the presigned upload flow, not an arbitrary
+      // string — the upload route validates content type and size, this validates shape.
+      if (typeof value !== 'string' || !IMAGE_ID_RE.test(value)) return 'Must be an uploaded image';
       return null;
 
     case 'address': {
@@ -96,8 +191,15 @@ export function validateFieldValue(def: FieldDefLike, value: unknown): string | 
   }
 }
 
-/** Normalizes a submitted value to the shape stored in `entries.values`. */
+/** Normalizes an ALREADY-VALID submitted value to the shape stored in `entries.values`. */
 export function coerceFieldValue(def: FieldDefLike, value: unknown): unknown {
+  if (!isFieldType(def.type)) {
+    // No safe value to coerce to — an unrecognized type carries no known storage shape.
+    // `validateFieldValue` rejects this def before any compliant caller reaches this line
+    // (see the module docblock), so this is a second line of defence, not the primary gate.
+    return undefined;
+  }
+
   switch (def.type) {
     case 'boolean':
       if (typeof value === 'boolean') return value;
@@ -105,8 +207,16 @@ export function coerceFieldValue(def: FieldDefLike, value: unknown): unknown {
     case 'multi_select':
       if (Array.isArray(value)) return value.map(asString);
       return isEmpty(def, value) ? [] : [asString(value)];
-    case 'address':
-      return typeof value === 'object' && value != null && !Array.isArray(value) ? value : {};
+    case 'address': {
+      if (typeof value !== 'object' || value == null || Array.isArray(value)) return {};
+      const src = value as Record<string, unknown>;
+      const out: AddressValue = {};
+      for (const key of ADDRESS_KEYS) {
+        const v = src[key];
+        if (typeof v === 'string') out[key] = v;
+      }
+      return out;
+    }
     case 'text':
     case 'textarea':
     case 'markdown':
@@ -125,8 +235,18 @@ export function coerceFieldValue(def: FieldDefLike, value: unknown): unknown {
  *
  * Types that are not language contribute nothing: an image is an attachment id, a
  * boolean is a flag, and indexing either only pollutes ranking.
+ *
+ * `visibility` is optional and additive — most callers never had a notion of it, and a
+ * plain `FieldDefLike` still satisfies this signature. When it IS present and not
+ * `'public'`, this returns `''` unconditionally. `entries.search_text` is schema-documented
+ * (Task 1) as derived from publicly-visible values only; Task 4's indexer is the primary
+ * filter for that, and this is defence in depth — a private value should never reach the
+ * search index even if a future caller forgets to filter it out first.
  */
-export function searchableText(def: FieldDefLike, value: unknown): string {
+export function searchableText(def: FieldDefLike & { visibility?: string }, value: unknown): string {
+  if (!isFieldType(def.type)) return '';
+  if (def.visibility != null && def.visibility !== 'public') return '';
+
   switch (def.type) {
     case 'text':
     case 'textarea':
@@ -157,8 +277,11 @@ export interface PublishBlocker {
 }
 
 /**
- * Every required field the entry has left blank — what stands between it and
- * `published`.
+ * Every required field the entry is blocked on — what stands between it and `published`.
+ * That is either a blank answer, OR a present-but-invalid one (the same rule
+ * `validateFieldValue` enforces): a registrant who typed an unparsable URL into a required
+ * field has not usefully answered it, and letting that publish would put a broken value on
+ * the public page for a field the checklist told them was satisfied.
  *
  * **`required` gates PUBLISH, not save.** The owner-defined form can run to dozens of
  * fields across several sections, and spec §13 saves those sections INDEPENDENTLY — so a
@@ -184,12 +307,13 @@ export function publishBlockers(
   values: Record<string, unknown>,
 ): PublishBlocker[] {
   return defs
-    .filter(
-      (def) =>
-        !def.deletedAt &&
-        def.required &&
-        evaluateShowIf(def, values) &&
-        isEmpty(def, values[def.key]),
-    )
+    .filter((def) => {
+      if (def.deletedAt) return false;
+      if (!def.required) return false;
+      if (!evaluateShowIf(def, values)) return false;
+      const value = values[def.key];
+      if (isEmpty(def, value)) return true;
+      return validateFieldValue(def, value) != null;
+    })
     .map((def) => ({ key: def.key, label: def.label ?? def.key }));
 }
