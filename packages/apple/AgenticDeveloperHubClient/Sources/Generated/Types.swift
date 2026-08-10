@@ -1259,7 +1259,7 @@ public protocol APIProtocol: Sendable {
     func postContentMarkdownCategories(_ input: Operations.PostContentMarkdownCategories.Input) async throws -> Operations.PostContentMarkdownCategories.Output
     /// List the caller's existing tag labels (autocomplete source)
     ///
-    /// The account's full set of tag labels (content.keywords), scoped to the caller and ecosystem, distinct and alphabetical — the autocomplete/browse source for the research tag field.
+    /// The account's full set of tag labels (content.keywords), scoped to the caller and ecosystem, distinct and alphabetical — the autocomplete/browse source for the research tag field. `nodes` is the same set with each label's row id, which is what addresses a tag for a rename or delete.
     ///
     /// - Remark: HTTP `GET /content/markdown/tags`.
     /// - Remark: Generated from `#/paths//content/markdown/tags/get`.
@@ -7699,7 +7699,7 @@ extension APIProtocol {
     }
     /// List the caller's existing tag labels (autocomplete source)
     ///
-    /// The account's full set of tag labels (content.keywords), scoped to the caller and ecosystem, distinct and alphabetical — the autocomplete/browse source for the research tag field.
+    /// The account's full set of tag labels (content.keywords), scoped to the caller and ecosystem, distinct and alphabetical — the autocomplete/browse source for the research tag field. `nodes` is the same set with each label's row id, which is what addresses a tag for a rename or delete.
     ///
     /// - Remark: HTTP `GET /content/markdown/tags`.
     /// - Remark: Generated from `#/paths//content/markdown/tags/get`.
@@ -22094,7 +22094,7 @@ public enum Components {
                 case more
             }
         }
-        /// A wrapper object `{ items: string[] }` (NOT a bare array). Returned by the tag/category facet and autocomplete endpoints.
+        /// A wrapper object `{ items: string[] }` (NOT a bare array). Returned by the public tag/category facet endpoints and the project label list.
         ///
         /// - Remark: Generated from `#/components/schemas/StringList`.
         public struct StringList: Codable, Hashable, Sendable {
@@ -22170,6 +22170,60 @@ public enum Components {
             public init(
                 items: [Swift.String],
                 nodes: [Components.Schemas.MarkdownCategoryNode]
+            ) {
+                self.items = items
+                self.nodes = nodes
+            }
+            public enum CodingKeys: String, CodingKey {
+                case items
+                case nodes
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/MarkdownKeywordNode`.
+        public struct MarkdownKeywordNode: Codable, Hashable, Sendable {
+            /// The row id — what ADDRESSES this tag for a rename or delete (`/content/keywords/{id}`). A label cannot: links point at the id, so renaming the row renames the tag everywhere it is used.
+            ///
+            /// - Remark: Generated from `#/components/schemas/MarkdownKeywordNode/id`.
+            public var id: Swift.String
+            /// The tag text. Unique per owner + ecosystem.
+            ///
+            /// - Remark: Generated from `#/components/schemas/MarkdownKeywordNode/label`.
+            public var label: Swift.String
+            /// Creates a new `MarkdownKeywordNode`.
+            ///
+            /// - Parameters:
+            ///   - id: The row id — what ADDRESSES this tag for a rename or delete (`/content/keywords/{id}`). A label cannot: links point at the id, so renaming the row renames the tag everywhere it is used.
+            ///   - label: The tag text. Unique per owner + ecosystem.
+            public init(
+                id: Swift.String,
+                label: Swift.String
+            ) {
+                self.id = id
+                self.label = label
+            }
+            public enum CodingKeys: String, CodingKey {
+                case id
+                case label
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/MarkdownTagSet`.
+        public struct MarkdownTagSet: Codable, Hashable, Sendable {
+            /// Tag labels, alphabetical.
+            ///
+            /// - Remark: Generated from `#/components/schemas/MarkdownTagSet/items`.
+            public var items: [Swift.String]
+            /// The same labels with their row ids, in the same order.
+            ///
+            /// - Remark: Generated from `#/components/schemas/MarkdownTagSet/nodes`.
+            public var nodes: [Components.Schemas.MarkdownKeywordNode]
+            /// Creates a new `MarkdownTagSet`.
+            ///
+            /// - Parameters:
+            ///   - items: Tag labels, alphabetical.
+            ///   - nodes: The same labels with their row ids, in the same order.
+            public init(
+                items: [Swift.String],
+                nodes: [Components.Schemas.MarkdownKeywordNode]
             ) {
                 self.items = items
                 self.nodes = nodes
@@ -22404,6 +22458,10 @@ public enum Components {
             ///
             /// - Remark: Generated from `#/components/schemas/MarkdownDocumentSummary/title`.
             public var title: Swift.String
+            /// Server-derived, read-only preview: up to 4 body lines FOLLOWING the title line, newline-separated, each capped at 160 characters and stripped of leading markdown syntax. Empty when the body holds nothing past its title. Exists because this projection carries no `content` — it is what lets a list render a preview without fetching every document whole.
+            ///
+            /// - Remark: Generated from `#/components/schemas/MarkdownDocumentSummary/excerpt`.
+            public var excerpt: Swift.String
             /// - Remark: Generated from `#/components/schemas/MarkdownDocumentSummary/frontmatter`.
             public struct FrontmatterPayload: Codable, Hashable, Sendable {
                 /// A container of undocumented properties.
@@ -22468,6 +22526,7 @@ public enum Components {
             /// - Parameters:
             ///   - id:
             ///   - title: Server-derived, read-only: the frontmatter `title` then `name`, else the first non-empty line of the body (frontmatter and code fences ignored, leading markdown syntax stripped), else 'Untitled'. Capped at 500 characters.
+            ///   - excerpt: Server-derived, read-only preview: up to 4 body lines FOLLOWING the title line, newline-separated, each capped at 160 characters and stripped of leading markdown syntax. Empty when the body holds nothing past its title. Exists because this projection carries no `content` — it is what lets a list render a preview without fetching every document whole.
             ///   - frontmatter:
             ///   - category:
             ///   - tags:
@@ -22484,6 +22543,7 @@ public enum Components {
             public init(
                 id: Swift.String,
                 title: Swift.String,
+                excerpt: Swift.String,
                 frontmatter: Components.Schemas.MarkdownDocumentSummary.FrontmatterPayload? = nil,
                 category: Swift.String? = nil,
                 tags: [Swift.String],
@@ -22500,6 +22560,7 @@ public enum Components {
             ) {
                 self.id = id
                 self.title = title
+                self.excerpt = excerpt
                 self.frontmatter = frontmatter
                 self.category = category
                 self.tags = tags
@@ -22517,6 +22578,7 @@ public enum Components {
             public enum CodingKeys: String, CodingKey {
                 case id
                 case title
+                case excerpt
                 case frontmatter
                 case category
                 case tags
@@ -99993,7 +100055,7 @@ public enum Operations {
     }
     /// List the caller's existing tag labels (autocomplete source)
     ///
-    /// The account's full set of tag labels (content.keywords), scoped to the caller and ecosystem, distinct and alphabetical — the autocomplete/browse source for the research tag field.
+    /// The account's full set of tag labels (content.keywords), scoped to the caller and ecosystem, distinct and alphabetical — the autocomplete/browse source for the research tag field. `nodes` is the same set with each label's row id, which is what addresses a tag for a rename or delete.
     ///
     /// - Remark: HTTP `GET /content/markdown/tags`.
     /// - Remark: Generated from `#/paths//content/markdown/tags/get`.
@@ -100025,12 +100087,12 @@ public enum Operations {
                 /// - Remark: Generated from `#/paths/content/markdown/tags/GET/responses/200/content`.
                 @frozen public enum Body: Sendable, Hashable {
                     /// - Remark: Generated from `#/paths/content/markdown/tags/GET/responses/200/content/application\/json`.
-                    case json(Components.Schemas.StringList)
+                    case json(Components.Schemas.MarkdownTagSet)
                     /// The associated value of the enum case if `self` is `.json`.
                     ///
                     /// - Throws: An error if `self` is not `.json`.
                     /// - SeeAlso: `.json`.
-                    public var json: Components.Schemas.StringList {
+                    public var json: Components.Schemas.MarkdownTagSet {
                         get throws {
                             switch self {
                             case let .json(body):
@@ -100049,7 +100111,7 @@ public enum Operations {
                     self.body = body
                 }
             }
-            /// Distinct tag labels, sorted alphabetically
+            /// Tag labels (alphabetical) and the keyword nodes
             ///
             /// - Remark: Generated from `#/paths//content/markdown/tags/get/responses/200`.
             ///

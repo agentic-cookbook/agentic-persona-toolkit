@@ -29258,7 +29258,7 @@ public struct Client: APIProtocol {
     }
     /// List the caller's existing tag labels (autocomplete source)
     ///
-    /// The account's full set of tag labels (content.keywords), scoped to the caller and ecosystem, distinct and alphabetical — the autocomplete/browse source for the research tag field.
+    /// The account's full set of tag labels (content.keywords), scoped to the caller and ecosystem, distinct and alphabetical — the autocomplete/browse source for the research tag field. `nodes` is the same set with each label's row id, which is what addresses a tag for a rename or delete.
     ///
     /// - Remark: HTTP `GET /content/markdown/tags`.
     /// - Remark: Generated from `#/paths//content/markdown/tags/get`.
@@ -29296,7 +29296,7 @@ public struct Client: APIProtocol {
                     switch chosenContentType {
                     case "application/json":
                         body = try await converter.getResponseBodyAsJSON(
-                            Components.Schemas.StringList.self,
+                            Components.Schemas.MarkdownTagSet.self,
                             from: responseBody,
                             transforming: { value in
                                 .json(value)
