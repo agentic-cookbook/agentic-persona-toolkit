@@ -25,6 +25,13 @@ const entry: PublicEntry = {
     { key: 'site', label: 'Portfolio', type: 'url', value: 'https://work.example' },
     { key: 'remote', label: 'Remote', type: 'boolean', value: true },
     { key: 'stacks', label: 'Stacks', type: 'multi_select', value: ['Swift', 'Obj-C'] },
+    // The server never serializes email/phone fields (see FieldValue's comment), but an
+    // embedder can still build a PublicEntry by hand, so the component must still cope —
+    // by rendering the value as plain text, never as a mailto:/tel: link. These two entries
+    // are what let "renders no email or telephone affordance" actually exercise that arm of
+    // FieldValue, instead of vacuously passing because the fixture never reaches it.
+    { key: 'email', label: 'Email', type: 'email', value: 'hello@fishlamp.example' },
+    { key: 'phone', label: 'Phone', type: 'phone', value: '+1 206 555 0100' },
   ],
   services: [],
   imageUrls: {},
