@@ -279,25 +279,47 @@ export function coerceFieldValue(def: FieldDefLike, value: unknown): unknown {
  * (Task 1) as derived from publicly-visible values only; Task 4's indexer is the primary
  * filter for that, and this is defence in depth — a private value should never reach the
  * search index even if a future caller forgets to filter it out first.
+ *
+ * Extracts from the COERCED value, not the raw one — deliberately, after this function
+ * used to re-derive "what shape does this type's value have" a second time in its own
+ * switch, and fell out of sync with `coerceFieldValue` the moment that switch was taught a
+ * new wire form (a bare string on `multi_select`) that this one was not: the validator
+ * accepted it, the coercer normalized it, and this function silently contributed no text
+ * for it. That was the *same defect as the validate/coerce mismatch above*, one function
+ * over — the fix is the same shape: stop asking twice. `coerceFieldValue` is now the one
+ * place in this package that knows what shapes a type accepts; this only reads the answer.
+ * It is safe to call here whether `value` is raw wire input or an already-stored value
+ * being re-indexed, because `coerceFieldValue` is idempotent on its own output (re-coercing
+ * an already-coerced value returns the same value).
  */
 export function searchableText(def: FieldDefLike & { visibility?: string }, value: unknown): string {
   // Same reasoning as the `isFieldType` guards in `validateFieldValue`/`coerceFieldValue`
   // above: an unrecognized type has no known text shape to extract, so it contributes
-  // nothing rather than guessing.
+  // nothing rather than guessing. Must run BEFORE coercion — `coerceFieldValue` returns
+  // `undefined` for an unrecognized type, which is not a shape any branch below expects.
   if (!isFieldType(def.type)) return '';
+  // Must also run before coercion: a private value should never reach text extraction at
+  // all, coerced or not (see the docblock above).
   if (def.visibility != null && def.visibility !== 'public') return '';
+
+  const normalized = coerceFieldValue(def, value);
 
   switch (def.type) {
     case 'text':
     case 'textarea':
     case 'markdown':
     case 'select':
-      return asString(value).trim();
+      // coerceFieldValue's shared string branch already trims; nothing left to do here.
+      return normalized as string;
     case 'multi_select':
-      return Array.isArray(value) ? value.map(asString).join(' ').trim() : '';
+      // Always an array post-coercion, regardless of whether `value` arrived as an array
+      // or the single-choice bare-string form — that is exactly the case this function
+      // used to miss.
+      return (normalized as string[]).join(' ').trim();
     case 'address': {
-      if (typeof value !== 'object' || value == null || Array.isArray(value)) return '';
-      const a = value as AddressValue;
+      // Always a plain object post-coercion (possibly `{}`), with only the declared
+      // address keys present — no shape check needed here, unlike the old per-branch one.
+      const a = normalized as AddressValue;
       return [a.city, a.region, a.country].filter(Boolean).join(' ').trim();
     }
     case 'url':

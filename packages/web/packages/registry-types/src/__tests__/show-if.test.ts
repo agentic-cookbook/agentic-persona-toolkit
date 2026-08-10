@@ -63,4 +63,30 @@ describe('evaluateShowIf', () => {
     // the switch would fail open on every entry that used it.
     expect([...SHOW_IF_OPS]).toEqual(['eq', 'ne', 'truthy', 'falsy', 'in', 'contains']);
   });
+
+  it('compares eq and ne against an object-shaped controller value (e.g. address) by structure, not reference', () => {
+    // Round 3, I3: two field-for-field identical address values fetched independently are
+    // different object references. Before this fix, `eq` fell back to `===` and could
+    // never match one against the other — hiding the dependent field permanently and
+    // silently, exactly what evaluateShowIf's own fail-open policy (see the 'in' case and
+    // the module docblock) exists to prevent for a rule this build cannot interpret. An
+    // object comparison should not BE uninterpretable, so this makes it not be.
+    const home = { line1: '1 Main St', city: 'Seattle', country: 'US' };
+    const sameHomeAgain = { line1: '1 Main St', city: 'Seattle', country: 'US' };
+    const otherHome = { line1: '1 Main St', city: 'Portland', country: 'US' };
+
+    expect(evaluateShowIf(rule({ op: 'eq', value: home }), { mode: sameHomeAgain })).toBe(true);
+    expect(evaluateShowIf(rule({ op: 'eq', value: home }), { mode: otherHome })).toBe(false);
+    expect(evaluateShowIf(rule({ op: 'ne', value: home }), { mode: sameHomeAgain })).toBe(false);
+    expect(evaluateShowIf(rule({ op: 'ne', value: home }), { mode: otherHome })).toBe(true);
+  });
+
+  it('compares nested objects by structure at every level, not just the top one', () => {
+    const nested = { a: { b: { c: [1, 2, { d: 'deep' }] } } };
+    const sameShapeAgain = { a: { b: { c: [1, 2, { d: 'deep' }] } } };
+    const differsOnlyDeepInside = { a: { b: { c: [1, 2, { d: 'different' }] } } };
+
+    expect(evaluateShowIf(rule({ op: 'eq', value: nested }), { mode: sameShapeAgain })).toBe(true);
+    expect(evaluateShowIf(rule({ op: 'eq', value: nested }), { mode: differsOnlyDeepInside })).toBe(false);
+  });
 });

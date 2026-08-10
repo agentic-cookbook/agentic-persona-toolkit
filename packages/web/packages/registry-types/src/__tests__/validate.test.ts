@@ -177,10 +177,15 @@ describe('the field-type catalog', () => {
     interface TypeCase {
       extra?: Partial<FieldDefLike>;
       // Every wire form validateFieldValue must accept, paired with the EXACT value
-      // coerceFieldValue must produce for it — a spot check of "is it defined" would stay
-      // green for a coercer that returned the same placeholder for everything, which is
-      // exactly how the round-1 boolean/multi_select mismatches slipped through here.
-      accepted: { value: unknown; stored: unknown }[];
+      // coerceFieldValue must produce for it, AND the EXACT text searchableText must
+      // contribute for it — a spot check of "is it defined" would stay green for a
+      // coercer (or extractor) that returned the same placeholder for everything, which
+      // is exactly how the round-1 boolean/multi_select mismatches slipped through here,
+      // and how round 2's multi_select fix left searchableText's bare-string case
+      // uncovered (round 3, I2). Declaring all three answers together is what makes a
+      // new wire form, or a 13th type, impossible to add without also saying what all
+      // three functions think it means.
+      accepted: { value: unknown; stored: unknown; text: string }[];
       // At least one wire form validateFieldValue must reject, so attemptSave's "a
       // rejected value never reaches the coercer" guarantee is exercised for real.
       rejected: unknown[];
@@ -192,73 +197,79 @@ describe('the field-type catalog', () => {
     const table: Record<FieldType, TypeCase> = {
       text: {
         accepted: [
-          { value: 'hello', stored: 'hello' },
-          { value: '  padded  ', stored: 'padded' },
+          { value: 'hello', stored: 'hello', text: 'hello' },
+          { value: '  padded  ', stored: 'padded', text: 'padded' },
         ],
         rejected: [{ a: 1 }, 'a'.repeat(256)],
       },
       textarea: {
-        accepted: [{ value: 'hi there', stored: 'hi there' }],
+        accepted: [{ value: 'hi there', stored: 'hi there', text: 'hi there' }],
         rejected: [[1, 2]],
       },
       markdown: {
-        accepted: [{ value: '# hi', stored: '# hi' }],
+        accepted: [{ value: '# hi', stored: '# hi', text: '# hi' }],
         rejected: [42],
       },
       select: {
         extra: selectCfg,
-        accepted: [{ value: 'a', stored: 'a' }],
+        accepted: [{ value: 'a', stored: 'a', text: 'a' }],
         rejected: ['z'],
       },
       multi_select: {
         extra: selectCfg,
         accepted: [
-          { value: ['a'], stored: ['a'] },
-          { value: ['a', 'b'], stored: ['a', 'b'] },
+          { value: ['a'], stored: ['a'], text: 'a' },
+          { value: ['a', 'b'], stored: ['a', 'b'], text: 'a b' },
           // Standard form encoding, not sloppiness: a single-choice multi-select posts a
           // bare string, not a one-element array. `[value]` is its lossless
-          // normalization, so validation must accept it (see the module docblock).
-          { value: 'a', stored: ['a'] },
+          // normalization, so validation must accept it (see the module docblock) — and
+          // searchableText must extract the same 'a' a real one-element array would
+          // (round 3, I2: this used to silently contribute '').
+          { value: 'a', stored: ['a'], text: 'a' },
         ],
         rejected: [['a', 'z'], ['a', 'a']],
       },
+      // Not text-bearing (see searchableText's docblock): every accepted url/email/phone/
+      // boolean/date/image value contributes '', regardless of what it says.
       url: {
-        accepted: [{ value: 'https://example.com', stored: 'https://example.com' }],
+        accepted: [{ value: 'https://example.com', stored: 'https://example.com', text: '' }],
         rejected: ['example.com'],
       },
       email: {
-        accepted: [{ value: 'a@b.co', stored: 'a@b.co' }],
+        accepted: [{ value: 'a@b.co', stored: 'a@b.co', text: '' }],
         rejected: ['nope'],
       },
       phone: {
-        accepted: [{ value: '+1 555 123 4567', stored: '+1 555 123 4567' }],
+        accepted: [{ value: '+1 555 123 4567', stored: '+1 555 123 4567', text: '' }],
         rejected: ['-------'],
       },
       boolean: {
         accepted: [
-          { value: true, stored: true },
-          { value: false, stored: false },
-          { value: 'true', stored: true },
-          { value: 'false', stored: false },
-          { value: '1', stored: true },
-          { value: '0', stored: false },
-          { value: 'on', stored: true },
-          { value: 'off', stored: false },
+          { value: true, stored: true, text: '' },
+          { value: false, stored: false, text: '' },
+          { value: 'true', stored: true, text: '' },
+          { value: 'false', stored: false, text: '' },
+          { value: '1', stored: true, text: '' },
+          { value: '0', stored: false, text: '' },
+          { value: 'on', stored: true, text: '' },
+          { value: 'off', stored: false, text: '' },
         ],
         rejected: [5, 'yes'],
       },
       date: {
-        accepted: [{ value: '2026-03-04', stored: '2026-03-04' }],
+        accepted: [{ value: '2026-03-04', stored: '2026-03-04', text: '' }],
         rejected: ['03/04/2026'],
       },
       image: {
-        accepted: [{ value: 'att_123', stored: 'att_123' }],
+        accepted: [{ value: 'att_123', stored: 'att_123', text: '' }],
         rejected: [{ a: 1 }, 'https://evil.example/x.gif'],
       },
       address: {
         accepted: [
-          { value: { country: 'US' }, stored: { country: 'US' } },
-          { value: { line1: '1 Main St', junk: 'drop me' }, stored: { line1: '1 Main St' } },
+          { value: { country: 'US' }, stored: { country: 'US' }, text: 'US' },
+          // No city/region/country survives this one's coercion, so it contributes no
+          // search text even though it is a perfectly acceptable (if sparse) address.
+          { value: { line1: '1 Main St', junk: 'drop me' }, stored: { line1: '1 Main St' }, text: '' },
         ],
         rejected: [{ country: 'usa' }],
       },
@@ -269,14 +280,21 @@ describe('the field-type catalog', () => {
     });
 
     it.each(FIELD_TYPES.map((type) => [type, table[type]] as const))(
-      '%s: accepts every listed wire form and coerces it EXACTLY; rejects the rest before the coercer runs',
+      '%s: accepts every listed wire form, coerces it EXACTLY, and searchableTexts it EXACTLY; rejects the rest before the coercer runs',
       (type, { extra, accepted, rejected }) => {
         const d = def(type, extra);
 
-        for (const { value, stored } of accepted) {
+        for (const { value, stored, text } of accepted) {
           const result = attemptSave(d, value);
           expect(result.ok, `expected ${type} to accept ${JSON.stringify(value)}`).toBe(true);
           if (result.ok) expect(result.stored).toEqual(stored);
+          // The three-function agreement invariant (round 3, I2): for every wire form
+          // validateFieldValue accepts, coerceFieldValue and searchableText must agree
+          // about what that value IS. Run against the raw `value`, not `result.stored` —
+          // searchableText must do its own normalization, not lean on having been handed
+          // an already-coerced input.
+          expect(searchableText(d, value), `expected ${type} search text for ${JSON.stringify(value)}`)
+            .toBe(text);
         }
 
         for (const value of rejected) {

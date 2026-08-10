@@ -23,22 +23,51 @@ export const SHOW_IF_OPS = ['eq', 'ne', 'truthy', 'falsy', 'in', 'contains'] as 
 
 export type ShowIfOp = (typeof SHOW_IF_OPS)[number];
 
+// JSON values from a jsonb column cannot contain a real reference cycle — `JSON.parse`
+// never aliases, so a value can never contain itself. What IS reachable is a
+// pathologically deep or malformed blob, and unbounded recursion on that is a real hang,
+// not a theoretical one. A depth cap is the simple, sufficient guard for that shape of
+// input; no legitimate field value (an address is six flat string keys) comes close to it.
+const MAX_COMPARE_DEPTH = 32;
+
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
 /**
- * Value equality for the scalars a field can hold, plus arrays of them.
+ * Value equality for the scalars a field can hold, arrays of them, and plain objects
+ * (`address`'s stored shape, and any future compound type's).
  *
- * Not `===`: a multiselect value is an array, and two arrays carrying the same members are
- * different objects, so identity would report "changed" on every render and hide a field
- * that should be showing.
+ * Not `===`: a multiselect value is an array, and an address value is an object — two
+ * structurally identical instances of either are different references, so identity would
+ * report "changed" on every render and hide a field that should be showing.
  *
- * Deliberately NOT deep for plain objects — the `===` fallback below means an `eq`/`ne`
- * rule against an object-shaped value (e.g. `address`) can never match, even a freshly
- * built object with identical fields. Out of scope here: a `show_if` controller is expected
- * to be a scalar or array-valued field (select, multi_select, boolean, text, ...), not a
- * compound one, so this is a documented limitation rather than a fix.
+ * Objects are deep-compared, not left to the `===` fallback, because an `eq`/`ne` rule
+ * against an object-shaped value used to be exactly the "rule this build cannot read" case
+ * `evaluateShowIf` documents itself as failing OPEN on (see its docblock, and the `in` op
+ * below) — except reference equality made it fail CLOSED instead: two freshly-fetched,
+ * field-for-field identical `address` values compared unequal, so the rule silently hid
+ * the field forever, exactly the outcome those fail-open branches exist to prevent. Deep
+ * comparison removes the uninterpretable case rather than adding a third fail-open branch
+ * for it — after this, `eq`/`ne` against an object means what it says.
+ *
+ * `key in b` is deliberately not used for the membership check inside the object branch:
+ * these values can originate from an untrusted jsonb blob, and `in` walks the prototype
+ * chain, so a hostile payload using a key like `"constructor"` would read as "present" on
+ * an object that has no OWN property by that name. `Object.hasOwn` does not have that gap.
  */
-function sameValue(a: unknown, b: unknown): boolean {
+function sameValue(a: unknown, b: unknown, depth = 0): boolean {
+  if (depth > MAX_COMPARE_DEPTH) return a === b;
   if (Array.isArray(a) && Array.isArray(b)) {
-    return a.length === b.length && a.every((item, i) => sameValue(item, b[i]));
+    return a.length === b.length && a.every((item, i) => sameValue(item, b[i], depth + 1));
+  }
+  if (isPlainObject(a) && isPlainObject(b)) {
+    const aKeys = Object.keys(a);
+    const bKeys = Object.keys(b);
+    return (
+      aKeys.length === bKeys.length
+      && aKeys.every((key) => Object.hasOwn(b, key) && sameValue(a[key], b[key], depth + 1))
+    );
   }
   return a === b;
 }
