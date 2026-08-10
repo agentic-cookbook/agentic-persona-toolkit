@@ -104,8 +104,11 @@ describe('the field-type catalog', () => {
   });
 
   it('enforces a default length cap when the owner has not configured one', () => {
-    expect(validateFieldValue(def('text'), 'a'.repeat(201))).toBe('Must be 200 characters or fewer');
-    expect(validateFieldValue(def('text'), 'a'.repeat(200))).toBeNull();
+    // 255, not a round number: it matches the varchar(255) every single-line column in
+    // this schema uses (registries.name, entries.displayName, field_defs.label, ...),
+    // since this value is stored beside those columns.
+    expect(validateFieldValue(def('text'), 'a'.repeat(256))).toBe('Must be 255 characters or fewer');
+    expect(validateFieldValue(def('text'), 'a'.repeat(255))).toBeNull();
     expect(validateFieldValue(def('textarea'), 'a'.repeat(2001))).toBe('Must be 2000 characters or fewer');
     expect(validateFieldValue(def('markdown'), 'a'.repeat(20001))).toBe('Must be 20000 characters or fewer');
     expect(validateFieldValue(def('url'), `https://example.com/${'a'.repeat(3000)}`))
@@ -124,6 +127,20 @@ describe('the field-type catalog', () => {
     const d = def('multi_select', { config: { options: ['a', 'b'] } });
     expect(validateFieldValue(d, ['a', 'a'])).toBe('Must not repeat a selection');
     expect(validateFieldValue(d, ['a', 'b'])).toBeNull();
+  });
+
+  it('overrides the multi_select item cap via config.maxItems, the maxLength analogue', () => {
+    const capped = def('multi_select', { config: { maxItems: 2, options: ['a', 'b', 'c'] } });
+    expect(validateFieldValue(capped, ['a', 'b', 'c'])).toBe('Must be 2 selections or fewer');
+    expect(validateFieldValue(capped, ['a', 'b'])).toBeNull();
+  });
+
+  it('accepts a bare string on multi_select as the single-choice form-encoding it is', () => {
+    const d = def('multi_select', { config: { options: ['a', 'b'] } });
+    expect(validateFieldValue(d, 'a')).toBeNull();
+    expect(coerceFieldValue(d, 'a')).toEqual(['a']);
+    // Still runs the same options/dedupe/cap checks a real array would.
+    expect(validateFieldValue(d, 'z')).toBe('Not one of the allowed options');
   });
 
   it('requires actual digits in a phone number, not just punctuation of the right length', () => {
@@ -157,32 +174,145 @@ describe('the field-type catalog', () => {
 
     const selectCfg = { config: { options: ['a', 'b'] } };
 
-    const cases: { type: FieldType; extra?: Partial<FieldDefLike>; valid: unknown; invalid: unknown }[] = [
-      { type: 'text', valid: 'hello', invalid: { a: 1 } },
-      { type: 'textarea', valid: 'hi there', invalid: [1, 2] },
-      { type: 'markdown', valid: '# hi', invalid: 42 },
-      { type: 'select', extra: selectCfg, valid: 'a', invalid: 'z' },
-      { type: 'multi_select', extra: selectCfg, valid: ['a'], invalid: ['z'] },
-      { type: 'url', valid: 'https://example.com', invalid: 'example.com' },
-      { type: 'email', valid: 'a@b.co', invalid: 'nope' },
-      { type: 'phone', valid: '+1 555 123 4567', invalid: '-------' },
-      { type: 'boolean', valid: 'true', invalid: 5 },
-      { type: 'date', valid: '2026-03-04', invalid: '03/04/2026' },
-      { type: 'image', valid: 'att_123', invalid: { a: 1 } },
-      { type: 'address', valid: { country: 'US' }, invalid: { country: 'usa' } },
-    ];
+    interface TypeCase {
+      extra?: Partial<FieldDefLike>;
+      // Every wire form validateFieldValue must accept, paired with the EXACT value
+      // coerceFieldValue must produce for it — a spot check of "is it defined" would stay
+      // green for a coercer that returned the same placeholder for everything, which is
+      // exactly how the round-1 boolean/multi_select mismatches slipped through here.
+      accepted: { value: unknown; stored: unknown }[];
+      // At least one wire form validateFieldValue must reject, so attemptSave's "a
+      // rejected value never reaches the coercer" guarantee is exercised for real.
+      rejected: unknown[];
+    }
 
-    it.each(cases)(
-      '$type: an accepted value coerces cleanly; a rejected one never reaches the coercer',
-      ({ type, extra, valid, invalid }) => {
+    // `Record<FieldType, TypeCase>` makes a missing row for a 13th FIELD_TYPES entry a
+    // compile error; the explicit key-set assertion below makes it a RUNTIME test failure
+    // too, so `pnpm test` catches it even where a type error alone might not.
+    const table: Record<FieldType, TypeCase> = {
+      text: {
+        accepted: [
+          { value: 'hello', stored: 'hello' },
+          { value: '  padded  ', stored: 'padded' },
+        ],
+        rejected: [{ a: 1 }, 'a'.repeat(256)],
+      },
+      textarea: {
+        accepted: [{ value: 'hi there', stored: 'hi there' }],
+        rejected: [[1, 2]],
+      },
+      markdown: {
+        accepted: [{ value: '# hi', stored: '# hi' }],
+        rejected: [42],
+      },
+      select: {
+        extra: selectCfg,
+        accepted: [{ value: 'a', stored: 'a' }],
+        rejected: ['z'],
+      },
+      multi_select: {
+        extra: selectCfg,
+        accepted: [
+          { value: ['a'], stored: ['a'] },
+          { value: ['a', 'b'], stored: ['a', 'b'] },
+          // Standard form encoding, not sloppiness: a single-choice multi-select posts a
+          // bare string, not a one-element array. `[value]` is its lossless
+          // normalization, so validation must accept it (see the module docblock).
+          { value: 'a', stored: ['a'] },
+        ],
+        rejected: [['a', 'z'], ['a', 'a']],
+      },
+      url: {
+        accepted: [{ value: 'https://example.com', stored: 'https://example.com' }],
+        rejected: ['example.com'],
+      },
+      email: {
+        accepted: [{ value: 'a@b.co', stored: 'a@b.co' }],
+        rejected: ['nope'],
+      },
+      phone: {
+        accepted: [{ value: '+1 555 123 4567', stored: '+1 555 123 4567' }],
+        rejected: ['-------'],
+      },
+      boolean: {
+        accepted: [
+          { value: true, stored: true },
+          { value: false, stored: false },
+          { value: 'true', stored: true },
+          { value: 'false', stored: false },
+          { value: '1', stored: true },
+          { value: '0', stored: false },
+          { value: 'on', stored: true },
+          { value: 'off', stored: false },
+        ],
+        rejected: [5, 'yes'],
+      },
+      date: {
+        accepted: [{ value: '2026-03-04', stored: '2026-03-04' }],
+        rejected: ['03/04/2026'],
+      },
+      image: {
+        accepted: [{ value: 'att_123', stored: 'att_123' }],
+        rejected: [{ a: 1 }, 'https://evil.example/x.gif'],
+      },
+      address: {
+        accepted: [
+          { value: { country: 'US' }, stored: { country: 'US' } },
+          { value: { line1: '1 Main St', junk: 'drop me' }, stored: { line1: '1 Main St' } },
+        ],
+        rejected: [{ country: 'usa' }],
+      },
+    };
+
+    it('the wire-form table covers exactly the current field-type catalog', () => {
+      expect(Object.keys(table).sort()).toEqual([...FIELD_TYPES].sort());
+    });
+
+    it.each(FIELD_TYPES.map((type) => [type, table[type]] as const))(
+      '%s: accepts every listed wire form and coerces it EXACTLY; rejects the rest before the coercer runs',
+      (type, { extra, accepted, rejected }) => {
         const d = def(type, extra);
 
-        const okResult = attemptSave(d, valid);
-        expect(okResult.ok).toBe(true);
-        if (okResult.ok) expect(okResult.stored).not.toBeUndefined();
+        for (const { value, stored } of accepted) {
+          const result = attemptSave(d, value);
+          expect(result.ok, `expected ${type} to accept ${JSON.stringify(value)}`).toBe(true);
+          if (result.ok) expect(result.stored).toEqual(stored);
+        }
 
-        const badResult = attemptSave(d, invalid);
-        expect(badResult.ok).toBe(false);
+        for (const value of rejected) {
+          const result = attemptSave(d, value);
+          expect(result.ok, `expected ${type} to reject ${JSON.stringify(value)}`).toBe(false);
+        }
+      },
+    );
+
+    // Emptiness is decided by `required`, uniformly, before any type-shape check — applied
+    // consistently across all twelve types here so a future type-specific special case
+    // (like round 1's boolean carve-out, which broke this) fails this loop immediately.
+    const EMPTY_STORED: Record<FieldType, unknown> = {
+      text: '',
+      textarea: '',
+      markdown: '',
+      url: '',
+      email: '',
+      phone: '',
+      date: '',
+      select: '',
+      image: '',
+      boolean: false,
+      multi_select: [],
+      address: {},
+    };
+
+    it.each(FIELD_TYPES)(
+      '%s: an empty value is valid and coerces to the empty form when optional, and "Required" when required',
+      (type) => {
+        const optional = def(type, { required: false });
+        expect(validateFieldValue(optional, '')).toBeNull();
+        expect(coerceFieldValue(optional, '')).toEqual(EMPTY_STORED[type]);
+
+        const required = def(type, { required: true });
+        expect(validateFieldValue(required, '')).toBe('Required');
       },
     );
   });

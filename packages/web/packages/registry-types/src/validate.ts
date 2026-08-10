@@ -6,10 +6,23 @@
  * has ALREADY been accepted — it is not a second validation pass, and will silently mangle
  * a value validation should have rejected: an `image` value that is an object stringifies
  * to `"[object Object]"` instead of failing; a `def.type` this catalog does not recognize
- * has no safe coercion at all (see the `isFieldType` guards below). Every validator here
- * accepts exactly the wire forms its matching coercer knows how to normalize, and nothing
- * more, so a value that passes validation can never surprise the coercer that runs after
- * it. Tasks 3-5: call them in this order, every time.
+ * has no safe coercion at all (see the `isFieldType` guards below).
+ *
+ * The precise rule each validator follows: accept exactly those wire forms for which the
+ * matching coercer produces a MEANINGFUL, NON-LOSSY normalization, and reject every other
+ * value. "The coercer has a branch for it" is NOT that test — every coercer here is total,
+ * so every input has some branch; the test is whether that branch's output is a faithful
+ * reading of what was sent, not an invention. Two concrete consequences, both load-bearing:
+ * `''` on a `boolean` field means "no answer" — coercing it to `false` is faithful only
+ * because emptiness is checked against `required` (the SAME rule every other type follows)
+ * before the type-shape switch below ever runs, so a required boolean left blank still
+ * reads "Required", never "Must be true or false". And a bare string on `multi_select` is
+ * exactly what a single-choice form field posts (standard form encoding, not a malformed
+ * request) — `[value]` is its lossless normalization, so the validator accepts it and
+ * applies the same options/dedupe/cap checks it applies to an array. Where the coercer
+ * would have to invent or discard information instead — an `image` value that is an
+ * object, a `multi_select` string outside its configured options — the validator rejects.
+ * Tasks 3-5: call them in this order, every time.
  */
 import { isFieldType } from './types';
 import type { AddressValue, FieldDefLike, FieldType } from './types';
@@ -33,15 +46,17 @@ const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 // a field a later renderer might trust as "just an id" and interpolate unescaped.
 const IMAGE_ID_RE = /^[A-Za-z0-9_-]{1,36}$/;
 
-// Default length caps, applied only when the owner hasn't set `config.maxLength` (the
-// text-shaped types and multi_select's item count both support that override). These are
-// an abuse/DoS backstop, not a UX constraint — chosen so a genuine directory-entry answer
-// never comes close: a name or title (text), a short free-text answer (textarea), a
-// long-form "about" section (markdown), the longest URL most servers still accept in
-// practice (url, matching the de facto ~2KB ceiling many proxies enforce), and RFC 5321's
-// mailbox length limit (email).
+// Default length caps, applied only when the owner hasn't set `config.maxLength`. These
+// are an abuse/DoS backstop, not a UX constraint — chosen so a genuine directory-entry
+// answer never comes close: a name or title (text, matching the `varchar(255)` every
+// single-line column in this schema uses — `registries.name`, `entries.displayName`,
+// `entries.locationText`, `field_defs.label` — since a headline or one-line specialties
+// list can plausibly run 150-250 characters and this value is stored beside those
+// columns), a short free-text answer (textarea), a long-form "about" section (markdown),
+// the longest URL most servers still accept in practice (url, matching the de facto ~2KB
+// ceiling many proxies enforce), and RFC 5321's mailbox length limit (email).
 const DEFAULT_MAX_LENGTH: Partial<Record<FieldType, number>> = {
-  text: 200,
+  text: 255,
   textarea: 2000,
   markdown: 20000,
   url: 2048,
@@ -49,6 +64,8 @@ const DEFAULT_MAX_LENGTH: Partial<Record<FieldType, number>> = {
 };
 // A generous tag/category list — comfortably more than any legitimate directory field asks
 // a registrant to pick — while still bounding the array a hostile submission could send.
+// Applied only when the owner hasn't set `config.maxItems` (the multi_select analogue of
+// `config.maxLength` above; same ad-hoc `config` bag, same override pattern).
 const MULTI_SELECT_MAX_ITEMS = 50;
 
 const BOOLEAN_TRUE = new Set(['true', '1', 'on']);
@@ -80,9 +97,19 @@ function options(def: FieldDefLike): string[] {
   return Array.isArray(raw) ? raw.filter((o): o is string => typeof o === 'string') : [];
 }
 
-function isEmpty(def: FieldDefLike, value: unknown): boolean {
+/**
+ * Emptiness is a wire-level judgment, decided the SAME way for every type, before any
+ * type-shape check runs: `null`/`undefined`, an empty or whitespace-only string, an empty
+ * array, and an empty plain object all mean "nothing was submitted." `required` is the only
+ * thing that then decides whether that is acceptable — never the type. A real value that
+ * merely LOOKS falsy, `false` or `0`, is not empty: `asString` renders it as the non-blank
+ * string `'false'`/`'0'`, so it falls through to the final line as a value, not an absence.
+ * (An earlier version of this function special-cased `boolean` to never be empty, which
+ * also — accidentally — made `''` on a boolean field skip the `required` gate entirely and
+ * fall into the type-shape switch, where nothing recognized it: see the module docblock.)
+ */
+function isEmpty(value: unknown): boolean {
   if (value == null) return true;
-  if (def.type === 'boolean') return false; // `false` is a value, not an absence
   if (Array.isArray(value)) return value.length === 0;
   if (typeof value === 'object') return Object.keys(value as object).length === 0;
   return asString(value).trim() === '';
@@ -103,7 +130,7 @@ export function validateFieldValue(def: FieldDefLike, value: unknown): string | 
     return 'Unrecognized field type';
   }
 
-  if (isEmpty(def, value)) return def.required ? 'Required' : null;
+  if (isEmpty(value)) return def.required ? 'Required' : null;
 
   if (STRING_LIKE_TYPES.has(def.type) && typeof value !== 'string') {
     return 'Must be text';
@@ -161,11 +188,21 @@ export function validateFieldValue(def: FieldDefLike, value: unknown): string | 
     }
 
     case 'multi_select': {
-      if (!Array.isArray(value)) return 'Must be a list';
-      if (value.length > MULTI_SELECT_MAX_ITEMS) {
-        return `Must be ${MULTI_SELECT_MAX_ITEMS} selections or fewer`;
-      }
-      const strs = value.map(asString);
+      // A bare string is a real wire form, not a malformed one: a form-encoded
+      // multi-select with exactly one option checked posts that option as a scalar, the
+      // same way a single <select> or checkbox does — the array form only appears once
+      // two or more boxes are checked. `[value]` is that scalar's lossless
+      // normalization, so it is accepted here and run through the same
+      // options/dedupe/cap checks as an array, rather than rejected as "Must be a list".
+      const list: unknown[] | null = Array.isArray(value)
+        ? value
+        : typeof value === 'string'
+          ? [value]
+          : null;
+      if (list === null) return 'Must be a list';
+      const maxItems = typeof def.config.maxItems === 'number' ? def.config.maxItems : MULTI_SELECT_MAX_ITEMS;
+      if (list.length > maxItems) return `Must be ${maxItems} selections or fewer`;
+      const strs = list.map(asString);
       if (new Set(strs).size !== strs.length) return 'Must not repeat a selection';
       const allowed = options(def);
       if (allowed.length > 0 && !strs.every((v) => allowed.includes(v))) {
@@ -206,7 +243,7 @@ export function coerceFieldValue(def: FieldDefLike, value: unknown): unknown {
       return value === 'true' || value === '1' || value === 'on';
     case 'multi_select':
       if (Array.isArray(value)) return value.map(asString);
-      return isEmpty(def, value) ? [] : [asString(value)];
+      return isEmpty(value) ? [] : [asString(value)];
     case 'address': {
       if (typeof value !== 'object' || value == null || Array.isArray(value)) return {};
       const src = value as Record<string, unknown>;
@@ -244,6 +281,9 @@ export function coerceFieldValue(def: FieldDefLike, value: unknown): unknown {
  * search index even if a future caller forgets to filter it out first.
  */
 export function searchableText(def: FieldDefLike & { visibility?: string }, value: unknown): string {
+  // Same reasoning as the `isFieldType` guards in `validateFieldValue`/`coerceFieldValue`
+  // above: an unrecognized type has no known text shape to extract, so it contributes
+  // nothing rather than guessing.
   if (!isFieldType(def.type)) return '';
   if (def.visibility != null && def.visibility !== 'public') return '';
 
@@ -270,7 +310,11 @@ export function searchableText(def: FieldDefLike & { visibility?: string }, valu
   }
 }
 
-/** A required field this entry has not answered yet. */
+/**
+ * A required field that stands between this entry and `published` — either left blank, or
+ * answered with a value `validateFieldValue` rejects. The shape carries no flag telling the
+ * two apart; see `publishBlockers` below for why.
+ */
 export interface PublishBlocker {
   key: string;
   label: string;
@@ -312,7 +356,7 @@ export function publishBlockers(
       if (!def.required) return false;
       if (!evaluateShowIf(def, values)) return false;
       const value = values[def.key];
-      if (isEmpty(def, value)) return true;
+      if (isEmpty(value)) return true;
       return validateFieldValue(def, value) != null;
     })
     .map((def) => ({ key: def.key, label: def.label ?? def.key }));
