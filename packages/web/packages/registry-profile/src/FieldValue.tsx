@@ -35,9 +35,11 @@ export function FieldValue({ field, resolveImageUrl }: FieldValueProps) {
 
     case 'email':
     case 'phone':
-      // The server never serializes these, so reaching here means an embedder built the
-      // data itself. Render the text, never a mailto:/tel: link — an address that is a
-      // link is an address that is harvested.
+      // Render the text, never a `mailto:`/`tel:` link. Whether the value reaches this page
+      // at all is the visibility question — decided server-side, and these types START
+      // `private` so publishing one is a choice. This is the separate question of what a
+      // published one becomes in the markup, and the answer is plain text: a linkified
+      // address is the one a scraper finds by selector rather than by parsing prose.
       return <span className="rp-field__text">{String(value ?? '')}</span>;
 
     case 'boolean':

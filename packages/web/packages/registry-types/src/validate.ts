@@ -277,8 +277,14 @@ export function coerceFieldValue(def: FieldDefLike, value: unknown): unknown {
  * plain `FieldDefLike` still satisfies this signature. When it IS present and not
  * `'public'`, this returns `''` unconditionally. `entries.search_text` is schema-documented
  * (Task 1) as derived from publicly-visible values only; Task 4's indexer is the primary
- * filter for that, and this is defence in depth — a private value should never reach the
+ * filter for that, and this is defence in depth — a non-public value should never reach the
  * search index even if a future caller forgets to filter it out first.
+ *
+ * The visibility passed must be the EFFECTIVE one — the tighter of the field def's ceiling
+ * and the entry's own override (`tightestVisibility`, visibility.ts). Handing in the def's
+ * raw setting would index a value the registrant had scoped away from the public plane.
+ * `authenticated` is excluded by the same `!== 'public'` test, and must be: `search_text`
+ * is matched by the ANONYMOUS search route, which cannot ask who is asking.
  *
  * Extracts from the COERCED value, not the raw one — deliberately, after this function
  * used to re-derive "what shape does this type's value have" a second time in its own
@@ -322,9 +328,18 @@ export function searchableText(def: FieldDefLike & { visibility?: string }, valu
       const a = normalized as AddressValue;
       return [a.city, a.region, a.country].filter(Boolean).join(' ').trim();
     }
-    case 'url':
     case 'email':
     case 'phone':
+      // Deliberately unindexed even when the value IS public. This used to be redundant
+      // with a platform floor that kept email and phone off the public plane outright;
+      // that floor is gone — an owner may now publish a business phone number — so these
+      // two branches are the whole of what keeps a published address or number out of the
+      // anonymous full-text index. A directory is searched by who someone is and what they
+      // do, never by their phone number, so indexing one buys nothing and turns the search
+      // box into a harvesting oracle: `?q=<number>` answers "is this number registered?"
+      // for a caller who cannot see the profile field itself.
+      return '';
+    case 'url':
     case 'boolean':
     case 'date':
     case 'image':

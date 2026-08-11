@@ -21,17 +21,19 @@ const entry: PublicEntry = {
   contactMode: 'dm',
   languages: ['en'],
   fields: [
-    { key: 'bio', label: 'Bio', type: 'text', value: 'twenty years of Cocoa' },
-    { key: 'site', label: 'Portfolio', type: 'url', value: 'https://work.example' },
-    { key: 'remote', label: 'Remote', type: 'boolean', value: true },
-    { key: 'stacks', label: 'Stacks', type: 'multi_select', value: ['Swift', 'Obj-C'] },
-    // The server never serializes email/phone fields (see FieldValue's comment), but an
-    // embedder can still build a PublicEntry by hand, so the component must still cope —
-    // by rendering the value as plain text, never as a mailto:/tel: link. These two entries
-    // are what let "renders no email or telephone affordance" actually exercise that arm of
-    // FieldValue, instead of vacuously passing because the fixture never reaches it.
-    { key: 'email', label: 'Email', type: 'email', value: 'hello@fishlamp.example' },
-    { key: 'phone', label: 'Phone', type: 'phone', value: '+1 206 555 0100' },
+    { key: 'bio', label: 'Bio', type: 'text', value: 'twenty years of Cocoa', visibility: 'public' },
+    { key: 'site', label: 'Portfolio', type: 'url', value: 'https://work.example', visibility: 'public' },
+    { key: 'remote', label: 'Remote', type: 'boolean', value: true, visibility: 'public' },
+    { key: 'stacks', label: 'Stacks', type: 'multi_select', value: ['Swift', 'Obj-C'], visibility: 'public' },
+    // A registry owner may publish an email or a phone — `defaultVisibilityForType` starts
+    // those types `private`, so doing it is a decision rather than an inheritance, and once
+    // made the server serializes them like any other field. What this component must never
+    // do is turn one into a `mailto:`/`tel:` affordance (see FieldValue's comment): it
+    // renders the value as plain text. These two entries are what let "renders no email or
+    // telephone affordance" actually exercise that arm of FieldValue, instead of vacuously
+    // passing because the fixture never reaches it.
+    { key: 'email', label: 'Email', type: 'email', value: 'hello@fishlamp.example', visibility: 'public' },
+    { key: 'phone', label: 'Phone', type: 'phone', value: '+1 206 555 0100', visibility: 'public' },
   ],
   services: [],
   imageUrls: {},
@@ -57,6 +59,25 @@ describe('RegistryProfile', () => {
       expect(el.getAttribute('hidden')).toBeNull();
       expect(el.className).not.toMatch(/hidden|sr-only|visually-hidden/);
     }
+  });
+
+  it('marks a field narrowed to signed-in members, and marks nothing else', () => {
+    // The marking is the ONLY evidence on the page that this reader is seeing more than a
+    // stranger would. Without it a registrant reviewing their own live profile while signed
+    // in reads the wider page as the public one — and publishes on that belief.
+    const { container } = render(
+      <RegistryProfile
+        entry={{
+          ...entry,
+          fields: [
+            ...entry.fields,
+            { key: 'direct', label: 'Direct line', type: 'phone', value: '+1 206 555 0199', visibility: 'authenticated' },
+          ],
+        }}
+      />,
+    );
+    expect(screen.getByText('Signed-in members only')).toBeInTheDocument();
+    expect(container.querySelectorAll('.rp__field-audience')).toHaveLength(1);
   });
 
   it('renders a url field as a link and a boolean as a word, not raw JSON', () => {
@@ -98,7 +119,10 @@ describe('RegistryProfile', () => {
         entry={{
           ...entry,
           photoAttachmentId: 'att_photo',
-          fields: [...entry.fields, { key: 'shot', label: 'Screenshot', type: 'image', value: 'att_shot' }],
+          fields: [
+            ...entry.fields,
+            { key: 'shot', label: 'Screenshot', type: 'image', value: 'att_shot', visibility: 'public' },
+          ],
           imageUrls: { att_photo: 'https://cdn.example/p.png', att_shot: 'https://cdn.example/s.png' },
         }}
       />,

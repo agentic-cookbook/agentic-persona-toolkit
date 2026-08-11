@@ -1,10 +1,25 @@
-import type { FieldType } from '@agenticdevelopertoolkit/registry-types';
+import type { FieldType, FieldVisibility } from '@agenticdevelopertoolkit/registry-types';
 
 export interface PublicField {
   key: string;
   label: string;
   type: FieldType;
   value: unknown;
+  /**
+   * The audience this value actually reaches — the tighter of the registry owner's ceiling
+   * for the field and the registrant's own setting on this entry.
+   *
+   * Present so the profile can SAY so, which matters because the difference is invisible
+   * from the page itself: an anonymous visitor is served a strictly smaller entry than a
+   * signed-in one and has no way to tell, and a registrant checking their own live profile
+   * while signed in would otherwise read the wider page as the public one.
+   *
+   * Never a licence to render and hide. The server strips — a field this viewer is not
+   * admitted to has no entry in `fields` at all — so `'private'` cannot appear here, and
+   * `'authenticated'` only ever arrives in a response that was itself served to a signed-in
+   * reader. Hiding in CSS would leave the value in the markup where View Source finds it.
+   */
+  visibility: FieldVisibility;
 }
 
 export interface PublicService {

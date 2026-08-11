@@ -1,7 +1,31 @@
+import type { FieldVisibility } from '@agenticdevelopertoolkit/registry-types';
 import type { ReactNode } from 'react';
 import { FieldValue } from './FieldValue';
 import { ServiceList } from './ServiceList';
 import type { PublicEntry } from './types';
+
+/**
+ * How a narrowed audience is NAMED beside the field it applies to, or `null` for the one
+ * audience that needs no marking.
+ *
+ * The marker exists because the narrowing is otherwise invisible: this page renders the
+ * same for a registrant reviewing their own live profile as for a stranger, and without a
+ * word beside the field they cannot tell that a stranger sees fewer of them.
+ *
+ * Exhaustive `Record` on purpose — an audience added to `FIELD_VISIBILITIES` and not named
+ * here is a compile error rather than a field that silently renders unmarked, which is the
+ * failure that matters: an unmarked field reads as public.
+ *
+ * `private` is here for that exhaustiveness and should never render: the server strips a
+ * field the viewer is not admitted to, so a `private` one has no entry in `fields` at all.
+ * Naming it honestly, rather than throwing, means a serializer bug shows up as an
+ * over-cautious marking instead of a blank profile.
+ */
+const AUDIENCE_NOTE: Record<FieldVisibility, string | null> = {
+  public: null,
+  authenticated: 'Signed-in members only',
+  private: 'Private',
+};
 
 export interface RegistryProfileProps {
   entry: PublicEntry;
@@ -68,14 +92,29 @@ export function RegistryProfile({ entry, resolveImageUrl, contact }: RegistryPro
       */}
       {entry.fields.length > 0 ? (
         <dl className="rp__fields">
-          {entry.fields.map((field) => (
-            <div className="rp__field" data-field-key={field.key} key={field.key}>
-              <dt className="rp__field-label">{field.label}</dt>
-              <dd className="rp__field-value">
-                <FieldValue field={field} resolveImageUrl={urlFor} />
-              </dd>
-            </div>
-          ))}
+          {entry.fields.map((field) => {
+            const audience = AUDIENCE_NOTE[field.visibility] ?? null;
+            return (
+              <div className="rp__field" data-field-key={field.key} key={field.key}>
+                <dt className="rp__field-label">
+                  {field.label}
+                  {/*
+                    Inside the <dt>, not floated beside the value: the marking is about the
+                    field, and a reader who meets it after the value has already read a
+                    number they believed was public.
+                  */}
+                  {audience ? (
+                    <span className="rp__field-audience" data-audience={field.visibility}>
+                      {audience}
+                    </span>
+                  ) : null}
+                </dt>
+                <dd className="rp__field-value">
+                  <FieldValue field={field} resolveImageUrl={urlFor} />
+                </dd>
+              </div>
+            );
+          })}
         </dl>
       ) : null}
 

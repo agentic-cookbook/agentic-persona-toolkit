@@ -40,6 +40,17 @@
 .rp__field-label {
   color: var(--rp-muted); font-size: 0.8125rem;
   letter-spacing: 0.02em; text-transform: uppercase;
+  display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: baseline;
+}
+/* Borrows the keyword pill's shape but not its casing: the label around it is uppercased,
+   and an audience marking is a sentence about the field rather than another tag. */
+.rp__field-audience {
+  border: 1px solid var(--rp-border);
+  border-radius: 999px;
+  font-size: 0.6875rem;
+  letter-spacing: normal;
+  padding: 0.05rem 0.5rem;
+  text-transform: none;
 }
 .rp__field-value { margin: 0; }
 .rp-field__prose { margin: 0; white-space: pre-wrap; }
