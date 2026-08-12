@@ -23930,6 +23930,7 @@ public enum Components {
                 case onTrack = "on_track"
                 case atRisk = "at_risk"
                 case offTrack = "off_track"
+                case _empty_ = ""
             }
             /// DERIVED, never stored: the health on the NEWEST live status update (GET /project/projects/{id}/status-updates returns it first). null means no update has been posted — which is not "on track", and the distinction is the reason this is not a column with a default. Retracting the newest update moves it back to the previous one, or to null.
             ///
@@ -31412,6 +31413,7 @@ public enum Components {
                 case member = "member"
                 case token = "token"
                 case persona = "persona"
+                case application = "application"
                 case ecosystem = "ecosystem"
             }
             /// - Remark: Generated from `#/components/schemas/UsageSummaryRow/kind`.
@@ -31421,6 +31423,7 @@ public enum Components {
                 case user = "user"
                 case persona = "persona"
                 case token = "token"
+                case application = "application"
                 case visitor = "visitor"
                 case ecosystem = "ecosystem"
                 case visitorGlobal = "visitor_global"

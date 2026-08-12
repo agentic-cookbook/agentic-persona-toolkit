@@ -5284,7 +5284,8 @@
             "enum": [
               "on_track",
               "at_risk",
-              "off_track"
+              "off_track",
+              null
             ],
             "nullable": true,
             "description": "DERIVED, never stored: the health on the NEWEST live status update (GET /project/projects/{id}/status-updates returns it first). null means no update has been posted — which is not \"on track\", and the distinction is the reason this is not a column with a default. Retracting the newest update moves it back to the previous one, or to null."
@@ -9943,6 +9944,7 @@
               "member",
               "token",
               "persona",
+              "application",
               "ecosystem"
             ]
           },
@@ -9952,6 +9954,7 @@
               "user",
               "persona",
               "token",
+              "application",
               "visitor",
               "ecosystem",
               "visitor_global"
