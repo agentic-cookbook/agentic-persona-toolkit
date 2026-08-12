@@ -223,4 +223,39 @@ describe('useChatSession', () => {
       vi.useRealTimers()
     }
   })
+
+  // The other half of that cleanup, and the half that was missing. Cancelling the timers
+  // stops the writes; it does nothing for the caller AWAITING the line, who is left at an
+  // await on a promise no code path can ever settle. `useConnectRitual` awaits every line it
+  // speaks, so under React's Strict Mode — which runs each effect mount → cleanup → mount in
+  // development — the intro chain stopped dead at the first await on every dev page load: an
+  // empty bubble streaming forever behind a composer that never opened.
+  it('settles an in-flight line when the session tears down', async () => {
+    vi.useFakeTimers()
+    try {
+      const backend = createMockBackend()
+      const { result, unmount } = renderHook(() =>
+        useChatSession({ backend, persona: { name: 'Bot' } }),
+      )
+
+      let settled = false
+      act(() => {
+        void result.current.say('a line long enough to still be mid-word').then(() => {
+          settled = true
+        })
+      })
+      act(() => {
+        vi.advanceTimersByTime(100)
+      })
+      expect(settled).toBe(false) // still typing — the promise is genuinely in flight
+
+      unmount()
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(0) // let the resolution microtask run
+      })
+      expect(settled).toBe(true)
+    } finally {
+      vi.useRealTimers()
+    }
+  })
 })

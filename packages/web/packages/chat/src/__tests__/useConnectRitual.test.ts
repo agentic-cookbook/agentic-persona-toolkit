@@ -2,6 +2,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { act, renderHook } from '@testing-library/react'
 import { useConnectRitual } from '../hooks/useConnectRitual'
+import { useChatSession } from '../hooks/useChatSession'
+import type { ChatBackend } from '../backends/types'
 
 const cfg = {
   say: async () => {},
@@ -162,6 +164,57 @@ describe('useConnectRitual', () => {
       // a line started now belongs to nobody: the timers fire into a torn-down
       // document and React reaches for a `window` the environment no longer has.
       expect(said).toEqual(['connected.'])
+    })
+  })
+
+  describe('React Strict Mode', () => {
+    // In development React runs every effect mount → cleanup → mount. The ritual is a chain
+    // of awaits started from an effect and guarded by `started`, a ref, so it must survive
+    // that cleanup: the chain belongs to the SESSION, not to one run of the effect. When the
+    // liveness flag was a plain `let`, the cleanup between the two runs killed run 1's chain
+    // and `started` made run 2 a no-op — so in dev the ritual died at its first await and the
+    // composer stayed shut forever. Driven through a real `useChatSession` because that is
+    // where the awaited promises come from, and its own teardown lands them.
+    const persona = { name: 'Bot' }
+    const backend: ChatBackend = { sendMessage: async () => 'ok' }
+
+    // `reactStrictMode: true`, not `wrapper: StrictMode` — with a wrapper, RTL mounts the
+    // hook's component outside the boundary and the effects run exactly once, so the test
+    // passes against the broken hook and proves nothing.
+    const renderRitual = (strict: boolean) =>
+      renderHook(
+        () => {
+          const session = useChatSession({ backend, persona })
+          const ritual = useConnectRitual({ ...cfg, engageOn: 'mount', say: session.say })
+          return { session, ritual }
+        },
+        { reactStrictMode: strict },
+      )
+
+    it('completes the ritual through the dev double-mount', async () => {
+      const { result } = renderRitual(true)
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(5000) // well past the beat and both typed lines
+      })
+      expect(result.current.ritual.connected).toBe(true)
+      expect(result.current.ritual.inputDisabled).toBe(false)
+      // Spoken once each, whole, and in order — the second mount must not re-run the ritual.
+      expect(result.current.session.messages.map((m) => m.text)).toEqual([
+        'connected.',
+        'hello.',
+      ])
+    })
+
+    it('reaches the same end state without Strict Mode', async () => {
+      const { result } = renderRitual(false)
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(5000)
+      })
+      expect(result.current.ritual.inputDisabled).toBe(false)
+      expect(result.current.session.messages.map((m) => m.text)).toEqual([
+        'connected.',
+        'hello.',
+      ])
     })
   })
 

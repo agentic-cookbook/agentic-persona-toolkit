@@ -115,6 +115,10 @@ export function useConnectRitual(cfg: ConnectRitualConfig): ConnectRitualState {
   const sayRef = useRef(say)
   sayRef.current = say
   const started = useRef(false)
+  // Whether the chain may still touch state. A ref rather than a local, for the reason
+  // spelled out at the top of the effect: it has to outlive a single run of the effect,
+  // because `started` does.
+  const alive = useRef(false)
   useEffect(() => {
     // The ritual is a chain of awaits, so left to itself it outlives the component
     // that started it: the beat between the welcome and the greeting resolves
@@ -122,19 +126,42 @@ export function useConnectRitual(cfg: ConnectRitualConfig): ConnectRitualState {
     // line through timers the session's own unmount cleanup has already drained —
     // nothing is left to clear them, and they fire into a torn-down document. So
     // the beat is a timer this effect owns, and the chain checks it is still alive
-    // after every await. A pending `say` needs no check: its promise resolves only
-    // when the line lands, which after unmount it never does.
-    let alive = true
+    // after every await.
+    //
+    // `alive` is a REF, and set back to true at the top of every run of this effect,
+    // because React's Strict Mode runs each effect mount → cleanup → mount in
+    // development. A plain `let` belongs to one run: the first run starts the chain,
+    // the cleanup between the two runs kills it, and the second run cannot start
+    // another because `started` is already true — so in dev the ritual died at the
+    // first await and the composer never came back. A ref outlives the runs the way
+    // the chain does, which makes the pair agree: one ritual per session, alive for
+    // as long as SOME run of this effect is.
+    alive.current = true
     let beat: ReturnType<typeof setTimeout> | undefined
+    // Held so teardown can settle a beat that is still pending. Cleared when the
+    // beat fires on its own, so `stopOn` never resolves a promise twice.
+    let wake: (() => void) | undefined
     const delay = (ms: number) =>
       new Promise<void>((r) => {
-        beat = setTimeout(r, ms)
+        wake = r
+        beat = setTimeout(() => {
+          wake = undefined
+          r()
+        }, ms)
       })
     // Every branch below hangs its own unwiring off this, so abandonment happens on
     // unmount whichever trigger the caller chose.
+    //
+    // The pending beat is woken rather than dropped. Clearing its timer alone leaves
+    // the chain parked at `await delay(...)` on a promise nothing can settle, which
+    // is a stall rather than an abandonment: on a real unmount the very next line is
+    // the liveness check that ends the chain, and on Strict Mode's remount the run
+    // that follows has already set `alive` back to true, so it carries on.
     const stopOn = (unwire?: () => void) => (): void => {
-      alive = false
+      alive.current = false
       if (beat !== undefined) clearTimeout(beat)
+      wake?.()
+      wake = undefined
       unwire?.()
     }
 
@@ -146,12 +173,12 @@ export function useConnectRitual(cfg: ConnectRitualConfig): ConnectRitualState {
       setEngaged(true) // stop the stalling loop; the real ritual proceeds
       if (byUser) setEngagedByUser(true)
       await sayRef.current(welcome)
-      if (!alive) return
+      if (!alive.current) return
       setConnected(true)
       await delay(greetDelayMs)
-      if (!alive) return
+      if (!alive.current) return
       await sayRef.current(greeting)
-      if (!alive) return
+      if (!alive.current) return
       setInputDisabled(false)
     }
 

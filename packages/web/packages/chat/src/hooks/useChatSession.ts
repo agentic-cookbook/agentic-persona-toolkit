@@ -183,10 +183,13 @@ export function useChatSession(options: UseChatSessionOptions): ChatSession {
   const processingRef = useRef(false)
   const messagesRef = useRef(messages)
   messagesRef.current = messages
-  // Every timer `say` has in flight. A line types at one character per ~40ms and the promise
-  // resolves on the last one, so a caller that unmounts mid-line — a route change, a test
-  // returning — leaves the rest of the chain scheduled against a component that is gone.
-  const typingTimersRef = useRef<Set<ReturnType<typeof setTimeout>>>(new Set())
+  // Every line `say` has in flight, held as the function that LANDS it: stop the typing timer,
+  // put the whole line in the message, resolve. A line types at one character per ~40ms and the
+  // promise resolves on the last one, so a caller that leaves mid-line — a route change, a test
+  // returning — otherwise leaves the rest of the chain scheduled against a component that is
+  // gone. Landing rather than merely cancelling is what makes teardown survivable for a caller
+  // that AWAITS the line; see the cleanup at the bottom of this hook.
+  const pendingLinesRef = useRef<Set<() => void>>(new Set())
 
   const processQueue = useCallback(async () => {
     if (processingRef.current || queueRef.current.length === 0) return
@@ -252,31 +255,34 @@ export function useChatSession(options: UseChatSessionOptions): ChatSession {
           isStreaming: true,
         },
       ])
+      const pending = pendingLinesRef.current
       return new Promise<void>((resolve) => {
         let i = 0
-        // Scheduling goes through here so the pending timer is always in the set the unmount
-        // cleanup drains, including the one queued from inside `step` itself.
-        const schedule = (delay: number) => {
-          const timer = setTimeout(() => {
-            typingTimersRef.current.delete(timer)
-            step()
-          }, delay)
-          typingTimersRef.current.add(timer)
+        let timer: ReturnType<typeof setTimeout> | undefined
+        // The end of the line, however it is reached: typed to the last character, or cut short
+        // by teardown with no time left to type. Both want the same three things, and writing
+        // the full `text` rather than the slice reached so far is what keeps a cut-short line a
+        // whole sentence instead of a fragment frozen mid-word.
+        const land = (): void => {
+          if (timer !== undefined) clearTimeout(timer)
+          pending.delete(land)
+          setMessages((prev) =>
+            prev.map((m) => (m.id === id ? { ...m, text, isStreaming: false } : m)),
+          )
+          resolve()
         }
-        const step = () => {
+        const step = (): void => {
           i += 1
-          const slice = text.slice(0, i)
-          setMessages((prev) => prev.map((m) => (m.id === id ? { ...m, text: slice } : m)))
           if (i >= text.length) {
-            setMessages((prev) =>
-              prev.map((m) => (m.id === id ? { ...m, isStreaming: false } : m)),
-            )
-            resolve()
+            land()
             return
           }
-          schedule(26 + Math.random() * 28)
+          const slice = text.slice(0, i)
+          setMessages((prev) => prev.map((m) => (m.id === id ? { ...m, text: slice } : m)))
+          timer = setTimeout(step, 26 + Math.random() * 28)
         }
-        schedule(0)
+        pending.add(land)
+        timer = setTimeout(step, 0)
       })
     },
     [persona],
@@ -298,14 +304,28 @@ export function useChatSession(options: UseChatSessionOptions): ChatSession {
   }, [backend])
 
   // Unmount only — an empty dependency list, unlike the effect above, because a new `backend`
-  // is no reason to cut a line off mid-word. The in-flight `say` promises are left unresolved
-  // on purpose: they mean "the line landed", and it did not. Nothing is awaiting them once the
-  // component is gone, and resolving would be a lie a scripted intro would act on.
+  // is no reason to cut a line off mid-word.
+  //
+  // Each in-flight line is LANDED rather than abandoned: its timer is cleared, its text is
+  // written whole, and its promise resolves. The promises were left hanging here once, on the
+  // argument that resolving means "the line landed" and it had not — which is true of the
+  // animation and false of everything a caller does with it. React's Strict Mode runs every
+  // effect mount → cleanup → mount in development, so that argument cost the intro ritual its
+  // whole chain on the first render of every dev session: `await say(welcome)` never settled,
+  // and bitbag sat behind a disabled composer with one empty bubble streaming forever. A
+  // promise nothing can ever settle is not a truthful "it did not happen" — it is a caller
+  // stuck at an await with no way to find out.
+  //
+  // Landing is the honest version of the same intent. Nothing is scheduled past teardown (the
+  // timers are still cleared, which is what the test below pins), a real unmount's setMessages
+  // is a no-op React ignores, and a caller that is still there — Strict Mode's second mount —
+  // finds its line whole and carries on.
   useEffect(() => {
-    const timers = typingTimersRef.current
+    const pending = pendingLinesRef.current
     return () => {
-      for (const timer of timers) clearTimeout(timer)
-      timers.clear()
+      // A copy: `land` deletes itself from this set as it runs.
+      for (const land of [...pending]) land()
+      pending.clear()
     }
   }, [])
 
