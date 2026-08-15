@@ -4,6 +4,11 @@ import { preserveDirectivesPlugin } from 'esbuild-plugin-preserve-directives'
 export default defineConfig({
   entry: {
     index: 'src/index.ts',
+    // React-free halves, reachable without pulling the modes into the graph.
+    // `contract` is type-only and erases to an empty module; it is built anyway
+    // so `./contract` resolves under every bundler, not just type-aware ones.
+    'contract/index': 'src/contract/index.ts',
+    'runtime/index': 'src/runtime/index.ts',
     'modes/InlineChat': 'src/modes/InlineChat.tsx',
     'modes/ThreePaneChat': 'src/modes/ThreePaneChat.tsx',
     'modes/MobileChat': 'src/modes/MobileChat.tsx',

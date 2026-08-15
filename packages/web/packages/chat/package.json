@@ -17,6 +17,14 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     },
+    "./contract": {
+      "types": "./dist/contract/index.d.ts",
+      "import": "./dist/contract/index.js"
+    },
+    "./runtime": {
+      "types": "./dist/runtime/index.d.ts",
+      "import": "./dist/runtime/index.js"
+    },
     "./css/base.css": "./dist/css/base.css",
     "./css/modes/*.css": "./dist/css/modes/*.css",
     "./css/components/*.css": "./dist/css/components/*.css"
