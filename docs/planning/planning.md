@@ -106,3 +106,12 @@ storage.
    reviewed.
 3. Implementation plan via `superpowers:writing-plans`.
 4. Implementation.
+
+## See also
+
+[`../llm-backend-direction.md`](../llm-backend-direction.md) — what we intend to
+take from Apple's Foundation Models provider architecture into the `Backend`
+contract (usage reporting, classified failures, reasoning as its own channel,
+capabilities, a conformance catalogue). Written ahead of its milestone because
+`Backend` has no conformers yet and the changes are free until it does. It does
+not resolve A1/A2 — the event vocabulary is the same under either.
