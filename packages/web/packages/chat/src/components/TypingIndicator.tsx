@@ -180,7 +180,12 @@ function ThinkingStatus({
   // itself never left `true`). Only a false→true edge should seed `startRef` — otherwise a
   // mid-turn kind change restarts the elapsed-time clock and understates the turn's real
   // length (a 40s turn that changed kind at t=37 would settle to "for 3s").
-  const wasActiveRef = useRef(active)
+  // Always starts `false` — never `active` — so a component that mounts with the turn
+  // already in flight (a chat surface remounted into an active turn) still reads as a
+  // false→true edge on the effect's first run and seeds `startRef`. Seeding it from
+  // `active` would leave `startRef` at its `0` default in that case, so the settled line
+  // would report elapsed time since the Unix epoch instead of since the turn began.
+  const wasActiveRef = useRef(false)
 
   // In-bounds by construction: a kind change can swap in a shorter glyph set than the frame
   // the spinner is currently on (the effect below re-subscribes to the new `frames.length`

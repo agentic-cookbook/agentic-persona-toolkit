@@ -67,7 +67,10 @@ describe('TypingIndicator', () => {
   // that must not restart the elapsed-time clock the settled "for Ns" line reports.
   it('keeps the elapsed-time clock running through a mid-turn label-list change', () => {
     vi.useFakeTimers()
-    vi.setSystemTime(0)
+    // Deliberately non-zero: `startRef`'s own unseeded default is 0, so seeding the clock
+    // at system time 0 would make a missing seed indistinguishable from a correct one —
+    // both give the same elapsed time. A non-zero start makes a missing seed obviously wrong.
+    vi.setSystemTime(1_700_000_000_000)
     const thinkWords: StatusWordPair[] = [{ present: 'thinking', past: 'thought' }]
     const retryWords: StatusWordPair[] = [{ present: 'trying again', past: 'tried again' }]
     const { container, rerender } = render(<TypingIndicator isTyping labels={thinkWords} />)
@@ -80,6 +83,23 @@ describe('TypingIndicator', () => {
     rerender(<TypingIndicator isTyping={false} labels={retryWords} />)
 
     expect(container.querySelector('.pc-thinking-for')?.textContent).toBe(' for 40s')
+  })
+
+  // Regression guard: a chat surface can remount into a turn that is already in flight, so
+  // `active` is `true` on the very first render — there is no prior false render to have
+  // seeded the clock. `wasActiveRef` must start `false` so this still reads as a false→true
+  // edge and seeds `startRef`, rather than leaving it at its unseeded `0` default (which
+  // would make the settled line report elapsed time since the Unix epoch).
+  it('seeds the elapsed-time clock when it mounts already active', () => {
+    vi.useFakeTimers()
+    vi.setSystemTime(1_700_000_000_000)
+    const thinkWords: StatusWordPair[] = [{ present: 'thinking', past: 'thought' }]
+    const { container, rerender } = render(<TypingIndicator isTyping labels={thinkWords} />)
+
+    act(() => { vi.advanceTimersByTime(10_000) })
+    rerender(<TypingIndicator isTyping={false} labels={thinkWords} />)
+
+    expect(container.querySelector('.pc-thinking-for')?.textContent).toBe(' for 10s')
   })
 
   // Finding 3 regression guard: a kind change can swap in a shorter glyph set than the
