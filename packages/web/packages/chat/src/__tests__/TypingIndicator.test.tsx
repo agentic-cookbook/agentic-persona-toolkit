@@ -101,4 +101,37 @@ describe('TypingIndicator tint', () => {
     )
     expect(tintedNodes).toHaveLength(0)
   })
+
+  it('tints the utterance branch too', () => {
+    // `utterance` overrides every phase, rendering its own glyph/label pair distinct
+    // from the thinking branch's — confirm it reads `tint` (via the same spans) and
+    // shows the utterance text, so this is provably the utterance branch, not the
+    // thinking branch under a different label.
+    const { container } = render(
+      <TypingIndicator
+        isTyping
+        labels={only}
+        utterance="hey!"
+        tint={{ color: 'rgb(1, 2, 3)', applies: 'both' }}
+      />,
+    )
+    const glyph = container.querySelector<HTMLElement>('.pc-thinking-glyph')!
+    const label = container.querySelector<HTMLElement>('.pc-thinking-label')!
+    expect(label.textContent).toBe('hey!')
+    expect(glyph.style.color).toBe('rgb(1, 2, 3)')
+    expect(label.style.color).toBe('rgb(1, 2, 3)')
+  })
+
+  it('leaves the thinking phase untinted when no tint prop is given', () => {
+    const { container } = render(<TypingIndicator isTyping labels={only} />)
+    // Confirm this actually rendered the thinking phase with real glyph/label nodes —
+    // otherwise "no coloured elements" would hold vacuously on an empty render.
+    const glyph = container.querySelector<HTMLElement>('.pc-thinking-glyph')
+    const label = container.querySelector<HTMLElement>('.pc-thinking-label')
+    expect(glyph).not.toBeNull()
+    expect(label).not.toBeNull()
+    expect(label!.textContent).toBe('thinking')
+    expect(glyph!.style.color).toBe('')
+    expect(label!.style.color).toBe('')
+  })
 })
