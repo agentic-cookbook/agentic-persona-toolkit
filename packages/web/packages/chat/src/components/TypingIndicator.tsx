@@ -19,13 +19,24 @@ export interface StatusWordPair {
   past: string
 }
 
+/**
+ * One colour and what it colours. The settled "thought for 8s" line is deliberately NOT
+ * tinted: it is the persona's finished work, and the grey is what makes the running line
+ * read as active.
+ */
+export interface StatusTintSpec {
+  color: string
+  applies: 'words' | 'icons' | 'both'
+}
+
 export interface TypingIndicatorProps {
   /** Whether a reply is currently in flight. */
   isTyping: boolean
   /**
-   * "Thinking" words to cycle through while in flight (e.g. ["zeeping",
-   * "zorping"]). When omitted, falls back to the classic three-dot indicator
-   * and nothing persists — so existing consumers are unaffected.
+   * "Thinking" word pairs to cycle through while in flight (e.g.
+   * [{ present: 'zeeping', past: 'zeeped' }, …]). When omitted, falls back to
+   * the classic three-dot indicator and nothing persists — so existing
+   * consumers are unaffected.
    */
   labels?: readonly StatusWordPair[]
   /** Frames for the rotating glyph. Defaults to a braille spinner. */
@@ -34,6 +45,8 @@ export interface TypingIndicatorProps {
   doneGlyph?: string
   /** Flash random non-green colors while thinking (settles to grey when done). */
   colorful?: boolean
+  /** Tint the glyph, the words, or both while thinking. Absent means untinted. */
+  tint?: StatusTintSpec
   /** Spinner frame interval (ms). */
   frameMs?: number
   /** How often to switch to a new random word (ms). */
@@ -58,6 +71,7 @@ export function TypingIndicator({
   frames,
   doneGlyph,
   colorful,
+  tint,
   frameMs,
   labelMs,
   idlePhrase,
@@ -86,6 +100,7 @@ export function TypingIndicator({
       frames={frames ?? DEFAULT_FRAMES}
       doneGlyph={doneGlyph ?? DEFAULT_DONE_GLYPH}
       colorful={colorful ?? false}
+      tint={tint}
       frameMs={frameMs ?? 260}
       labelMs={labelMs ?? 1800}
     />
@@ -110,6 +125,7 @@ interface ThinkingStatusProps {
   frames: readonly string[]
   doneGlyph: string
   colorful: boolean
+  tint?: StatusTintSpec
   frameMs: number
   labelMs: number
 }
@@ -130,6 +146,7 @@ function ThinkingStatus({
   frames,
   doneGlyph,
   colorful,
+  tint,
   frameMs,
   labelMs,
 }: ThinkingStatusProps) {
@@ -147,12 +164,21 @@ function ThinkingStatus({
   const [color, setColor] = useState<string | undefined>(undefined)
   const [done, setDone] = useState<{ word: string; secs: number } | null>(null)
 
+  // Always-current ref to the drawn pair, so the active→idle transition below can read
+  // the latest word without re-subscribing the phase effect on every draw.
   const pairRef = useRef(pair)
   pairRef.current = pair
 
   // Always-current ref so the active→idle transition reads the latest start time
   // without re-subscribing the effect on every tick.
   const startRef = useRef(0)
+
+  // Applied to the SPANS rather than the wrapper so `applies` can name one of them; an
+  // inherited colour on the wrapper would tint both or neither.
+  const glyphStyle =
+    tint && (tint.applies === 'icons' || tint.applies === 'both') ? { color: tint.color } : undefined
+  const labelStyle =
+    tint && (tint.applies === 'words' || tint.applies === 'both') ? { color: tint.color } : undefined
 
   // Phase transitions driven by `active` (the chat's isTyping).
   useEffect(() => {
@@ -203,8 +229,8 @@ function ThinkingStatus({
             style={colorful && color ? { color } : undefined}
             aria-live="polite"
           >
-            <span className="pc-thinking-glyph" aria-hidden="true">{frames[frame]}</span>
-            <span className="pc-thinking-label">{utterance}</span>
+            <span className="pc-thinking-glyph" aria-hidden="true" style={glyphStyle}>{frames[frame]}</span>
+            <span className="pc-thinking-label" style={labelStyle}>{utterance}</span>
           </span>
         </div>
       </div>
@@ -250,8 +276,8 @@ function ThinkingStatus({
           style={colorful && color ? { color } : undefined}
           aria-live="polite"
         >
-          <span className="pc-thinking-glyph" aria-hidden="true">{frames[frame]}</span>
-          <span className="pc-thinking-label">{pair.present}</span>
+          <span className="pc-thinking-glyph" aria-hidden="true" style={glyphStyle}>{frames[frame]}</span>
+          <span className="pc-thinking-label" style={labelStyle}>{pair.present}</span>
           <span className="pc-thinking-ellipsis" aria-hidden="true">…</span>
         </span>
       </div>

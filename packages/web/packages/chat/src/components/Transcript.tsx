@@ -1,7 +1,7 @@
 import { useRef, type ReactNode } from 'react'
 import type { ChatMessage } from '../types'
 import { MessageBubble } from './MessageBubble'
-import { TypingIndicator, type StatusWordPair } from './TypingIndicator'
+import { TypingIndicator, type StatusWordPair, type StatusTintSpec } from './TypingIndicator'
 import { useScrollToBottom } from '../hooks/useScrollToBottom'
 
 interface TranscriptProps {
@@ -21,6 +21,8 @@ interface TranscriptProps {
   thinkingDoneGlyph?: string
   /** Flash random non-green colors while thinking. */
   thinkingColorful?: boolean
+  /** Tint the glyph, the words, or both while thinking. */
+  thinkingTint?: StatusTintSpec
   /** Don't render the in-transcript indicator (a host renders it elsewhere). */
   suppressTypingIndicator?: boolean
   /** Fade older messages toward the top via a viewport-anchored gradient mask:
@@ -43,6 +45,7 @@ export function Transcript({
   thinkingFrames,
   thinkingDoneGlyph,
   thinkingColorful,
+  thinkingTint,
   suppressTypingIndicator,
   fadeOlder = false,
 }: TranscriptProps) {
@@ -81,6 +84,7 @@ export function Transcript({
           frames={thinkingFrames}
           doneGlyph={thinkingDoneGlyph}
           colorful={thinkingColorful}
+          tint={thinkingTint}
         />
       )}
     </div>

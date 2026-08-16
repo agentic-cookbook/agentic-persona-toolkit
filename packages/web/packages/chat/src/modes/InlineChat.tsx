@@ -6,7 +6,7 @@ import { useChatSizing } from '../hooks/useChatSizing'
 import { Transcript } from '../components/Transcript'
 import { ChatInput } from '../components/ChatInput'
 import { InlinePopover } from '../components/InlinePopover'
-import { TypingIndicator, type StatusWordPair } from '../components/TypingIndicator'
+import { TypingIndicator, type StatusWordPair, type StatusTintSpec } from '../components/TypingIndicator'
 
 /**
  * How the inline chat box determines its height while engaged ("active").
@@ -75,6 +75,8 @@ export interface InlineChatViewProps {
   thinkingDoneGlyph?: string
   /** Flash random non-green colors while thinking. */
   thinkingColorful?: boolean
+  /** Tint the glyph, the words, or both while thinking. */
+  thinkingTint?: StatusTintSpec
   /**
    * Keep the status indicator animating while a reply is streaming in (the words
    * "coming out"), not only while awaiting the first token.
@@ -99,6 +101,7 @@ export function InlineChatView({
   thinkingFrames,
   thinkingDoneGlyph,
   thinkingColorful,
+  thinkingTint,
   statusWhileStreaming,
   idlePhrase,
   statusUtterance,
@@ -130,6 +133,7 @@ export function InlineChatView({
         frames={thinkingFrames}
         doneGlyph={thinkingDoneGlyph}
         colorful={thinkingColorful}
+        tint={thinkingTint}
       />
       <ChatInput onSend={sendMessage} placeholder={placeholder} disabled={inputDisabled} />
     </div>
@@ -148,6 +152,7 @@ export interface InlineChatProps {
   thinkingFrames?: readonly string[]
   thinkingDoneGlyph?: string
   thinkingColorful?: boolean
+  thinkingTint?: StatusTintSpec
   statusWhileStreaming?: boolean
   idlePhrase?: string
   statusUtterance?: string | null
@@ -167,6 +172,7 @@ export function InlineChat(props: InlineChatProps) {
       thinkingFrames={props.thinkingFrames}
       thinkingDoneGlyph={props.thinkingDoneGlyph}
       thinkingColorful={props.thinkingColorful}
+      thinkingTint={props.thinkingTint}
       statusWhileStreaming={props.statusWhileStreaming}
       idlePhrase={props.idlePhrase}
       statusUtterance={props.statusUtterance}

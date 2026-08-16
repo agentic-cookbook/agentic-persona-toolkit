@@ -62,3 +62,43 @@ describe('TypingIndicator', () => {
     expect(glyph()).toBe('y')
   })
 })
+
+describe('TypingIndicator tint', () => {
+  const only: StatusWordPair[] = [{ present: 'thinking', past: 'thought' }]
+
+  it('tints only the glyph when applies is "icons"', () => {
+    const { container } = render(
+      <TypingIndicator isTyping labels={only} tint={{ color: 'rgb(1, 2, 3)', applies: 'icons' }} />,
+    )
+    expect(container.querySelector<HTMLElement>('.pc-thinking-glyph')!.style.color).toBe('rgb(1, 2, 3)')
+    expect(container.querySelector<HTMLElement>('.pc-thinking-label')!.style.color).toBe('')
+  })
+
+  it('tints only the words when applies is "words"', () => {
+    const { container } = render(
+      <TypingIndicator isTyping labels={only} tint={{ color: 'rgb(1, 2, 3)', applies: 'words' }} />,
+    )
+    expect(container.querySelector<HTMLElement>('.pc-thinking-glyph')!.style.color).toBe('')
+    expect(container.querySelector<HTMLElement>('.pc-thinking-label')!.style.color).toBe('rgb(1, 2, 3)')
+  })
+
+  it('tints both when applies is "both"', () => {
+    const { container } = render(
+      <TypingIndicator isTyping labels={only} tint={{ color: 'rgb(1, 2, 3)', applies: 'both' }} />,
+    )
+    expect(container.querySelector<HTMLElement>('.pc-thinking-glyph')!.style.color).toBe('rgb(1, 2, 3)')
+    expect(container.querySelector<HTMLElement>('.pc-thinking-label')!.style.color).toBe('rgb(1, 2, 3)')
+  })
+
+  it('leaves the settled line untinted', () => {
+    // Assert the property ("no colour anywhere in the settled line"), not a specific
+    // element/class — that holds regardless of which element the done branch uses.
+    const tint = { color: 'rgb(1, 2, 3)', applies: 'both' } as const
+    const { container, rerender } = render(<TypingIndicator isTyping labels={only} tint={tint} />)
+    rerender(<TypingIndicator isTyping={false} labels={only} tint={tint} />)
+    const tintedNodes = Array.from(container.querySelectorAll<HTMLElement>('*')).filter(
+      (el) => el.style.color !== '',
+    )
+    expect(tintedNodes).toHaveLength(0)
+  })
+})
