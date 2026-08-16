@@ -61,6 +61,47 @@ describe('TypingIndicator', () => {
     act(() => { vi.advanceTimersByTime(50) })
     expect(glyph()).toBe('y')
   })
+
+  // Finding 2 regression guard: a mid-turn status change (e.g. `retry`) re-resolves the
+  // caller's `labels` array to a NEW identity while `isTyping` stays `true` the whole time —
+  // that must not restart the elapsed-time clock the settled "for Ns" line reports.
+  it('keeps the elapsed-time clock running through a mid-turn label-list change', () => {
+    vi.useFakeTimers()
+    vi.setSystemTime(0)
+    const thinkWords: StatusWordPair[] = [{ present: 'thinking', past: 'thought' }]
+    const retryWords: StatusWordPair[] = [{ present: 'trying again', past: 'tried again' }]
+    const { container, rerender } = render(<TypingIndicator isTyping labels={thinkWords} />)
+
+    act(() => { vi.advanceTimersByTime(37_000) })
+    // The turn is still going (`isTyping` stays true) but the resolved word list changed —
+    // this is what a mid-turn `onStatus(kind)` looks like from the indicator's perspective.
+    rerender(<TypingIndicator isTyping labels={retryWords} />)
+    act(() => { vi.advanceTimersByTime(3_000) })
+    rerender(<TypingIndicator isTyping={false} labels={retryWords} />)
+
+    expect(container.querySelector('.pc-thinking-for')?.textContent).toBe(' for 40s')
+  })
+
+  // Finding 3 regression guard: a kind change can swap in a shorter glyph set than the
+  // frame the spinner is currently on. The rendered glyph must stay one of the CURRENT
+  // frame set's characters rather than going blank for a tick.
+  it('keeps the glyph in bounds when a kind change shrinks the frame set', () => {
+    vi.useFakeTimers()
+    const only: StatusWordPair[] = [{ present: 'thinking', past: 'thought' }]
+    const long = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
+    const short = ['x', 'y']
+    const { container, rerender } = render(
+      <TypingIndicator isTyping labels={only} frames={long} frameMs={10} />,
+    )
+
+    // Advance the spinner past `short.length` so the retained frame index would be
+    // out of bounds for `short` if it were used verbatim.
+    act(() => { vi.advanceTimersByTime(10 * 7) })
+    rerender(<TypingIndicator isTyping labels={only} frames={short} frameMs={10} />)
+
+    const glyph = container.querySelector('.pc-thinking-glyph')?.textContent
+    expect(short).toContain(glyph)
+  })
 })
 
 describe('TypingIndicator tint', () => {

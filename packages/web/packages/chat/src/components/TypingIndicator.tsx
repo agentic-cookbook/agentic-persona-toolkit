@@ -173,6 +173,20 @@ function ThinkingStatus({
   // without re-subscribing the effect on every tick.
   const startRef = useRef(0)
 
+  // Tracks whether `active` was already true on the PREVIOUS run of the phase effect below,
+  // so that effect can tell "the turn just began" from "the turn is still going and only the
+  // word list changed" (a mid-turn status change re-resolves `labels`, which mints a new
+  // `bag` identity and re-runs the effect via its `bag` dependency, even though `active`
+  // itself never left `true`). Only a false→true edge should seed `startRef` — otherwise a
+  // mid-turn kind change restarts the elapsed-time clock and understates the turn's real
+  // length (a 40s turn that changed kind at t=37 would settle to "for 3s").
+  const wasActiveRef = useRef(active)
+
+  // In-bounds by construction: a kind change can swap in a shorter glyph set than the frame
+  // the spinner is currently on (the effect below re-subscribes to the new `frames.length`
+  // asynchronously), so the render below must not trust `frame` to already be in range.
+  const frameIndex = frames.length > 0 ? frame % frames.length : 0
+
   // Applied to the SPANS rather than the wrapper so `applies` can name one of them; an
   // inherited colour on the wrapper would tint both or neither.
   const glyphStyle =
@@ -185,7 +199,9 @@ function ThinkingStatus({
     if (active) {
       setPair(bag.next())
       if (colorful) setColor(randomNonGreen())
-      startRef.current = Date.now()
+      // Seed the clock only on the false→true edge — a mid-turn re-run of this effect
+      // (triggered by `bag` changing while `active` stays `true`) must not touch it.
+      if (!wasActiveRef.current) startRef.current = Date.now()
       setPhase('thinking')
     } else {
       setPhase((p) => {
@@ -195,6 +211,7 @@ function ThinkingStatus({
         return 'done'
       })
     }
+    wasActiveRef.current = active
   }, [active, bag, colorful])
 
   // Spinner cycles while thinking AND while an utterance is showing (so his
@@ -229,7 +246,7 @@ function ThinkingStatus({
             style={colorful && color ? { color } : undefined}
             aria-live="polite"
           >
-            <span className="pc-thinking-glyph" aria-hidden="true" style={glyphStyle}>{frames[frame]}</span>
+            <span className="pc-thinking-glyph" aria-hidden="true" style={glyphStyle}>{frames[frameIndex]}</span>
             <span className="pc-thinking-label" style={labelStyle}>{utterance}</span>
           </span>
         </div>
@@ -276,7 +293,7 @@ function ThinkingStatus({
           style={colorful && color ? { color } : undefined}
           aria-live="polite"
         >
-          <span className="pc-thinking-glyph" aria-hidden="true" style={glyphStyle}>{frames[frame]}</span>
+          <span className="pc-thinking-glyph" aria-hidden="true" style={glyphStyle}>{frames[frameIndex]}</span>
           <span className="pc-thinking-label" style={labelStyle}>{pair.present}</span>
           <span className="pc-thinking-ellipsis" aria-hidden="true">…</span>
         </span>
