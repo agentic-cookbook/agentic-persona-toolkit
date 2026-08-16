@@ -91,6 +91,23 @@
   padding: 4px 0;
 }
 
+/* Standard clip-rect "visually hidden" technique: hides from sight without pulling the
+ * element out of the accessibility tree the way display:none/visibility:hidden would. No
+ * existing utility for this was found anywhere in this package or the sibling web packages
+ * (chrome/popover/textlens/themes/viewport/avatar), so it's added here locally. Used by the
+ * typing-indicator status live region — see TypingIndicator.tsx. */
+.pc-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 /* In-flight "thinking" indicator: [rotating glyph] [word]… — inherits the
  * persona text color, so it matches whatever theme is active. */
 .pc-thinking {

@@ -1,3 +1,4 @@
+import { StrictMode } from 'react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { act, cleanup, render, screen } from '@testing-library/react'
 import { TypingIndicator, type StatusWordPair } from '../components/TypingIndicator'
@@ -5,6 +6,9 @@ import { TypingIndicator, type StatusWordPair } from '../components/TypingIndica
 afterEach(() => {
   cleanup()
   vi.useRealTimers()
+  // Restores the `Math.random` spy the Fix 1 test below installs — every other test relies
+  // on the real shuffle being genuinely random.
+  vi.restoreAllMocks()
 })
 
 const PAIRS: StatusWordPair[] = [
@@ -16,12 +20,18 @@ describe('TypingIndicator', () => {
   it('shows the authored past word when the turn settles, not a derived one', () => {
     // "thought" is unreachable by any -ing → -ed rule. A test using only regular
     // words would pass whether or not the derivation is still there.
+    //
+    // Scoped to the visible `.pc-thinking-label` (not `screen.getByText`, which would throw
+    // "multiple elements" here): Fix 3's live region also carries the text "thinking" the
+    // instant the turn starts (it announces the phase-entry word), so two distinct nodes
+    // legitimately hold that exact string at once — that duplication is the whole point of
+    // the live region, not a bug.
     const only: StatusWordPair[] = [{ present: 'thinking', past: 'thought' }]
-    const { rerender } = render(<TypingIndicator isTyping labels={only} />)
-    expect(screen.getByText('thinking')).toBeInTheDocument()
+    const { container, rerender } = render(<TypingIndicator isTyping labels={only} />)
+    expect(container.querySelector('.pc-thinking-label')?.textContent).toBe('thinking')
 
     rerender(<TypingIndicator isTyping={false} labels={only} />)
-    expect(screen.getByText('thought')).toBeInTheDocument()
+    expect(container.querySelector('.pc-thinking-label')?.textContent).toBe('thought')
     expect(screen.queryByText('thinked')).not.toBeInTheDocument()
   })
 
@@ -122,6 +132,135 @@ describe('TypingIndicator', () => {
     const glyph = container.querySelector('.pc-thinking-glyph')?.textContent
     expect(short).toContain(glyph)
   })
+
+  // Fix 1 regression guard: `resolveChatStatus` (the sibling `agentictoolkit` repo) hands
+  // back a freshly `.filter()`ed array on every call, so a think->respond transition — or a
+  // keystroke in the persona editor — mints a NEW array holding the exact same words. Keying
+  // the bag's `useMemo` on that array's IDENTITY (pre-fix `TypingIndicator.tsx:159`) threw the
+  // in-progress bag away on every such change, so a word could repeat immediately.
+  //
+  // Pins `Math.random` so the Fisher-Yates shuffle in `ShuffleBag.ts` is fully deterministic:
+  // with `Math.random()` always 0, tracing the shuffle loop shows a fresh
+  // `ShuffleBag(['a-ing','b-ing','c-ing','d-ing'])` always draws in the exact order
+  // a, d, c, b. That makes the assertions below exact-value checks, not a "no repeat in N
+  // samples" check — the latter would only be PROBABLY violated by the bug (a false reset
+  // reshuffles randomly, so it doesn't reliably produce an observable repeat in a short
+  // window), which would make the test flaky in both directions.
+  it('does not reset the shuffle bag when `labels` gets a new identity with the same content', () => {
+    vi.spyOn(Math, 'random').mockReturnValue(0)
+    vi.useFakeTimers()
+    const four: StatusWordPair[] = [
+      { present: 'a-ing', past: 'a-ed' },
+      { present: 'b-ing', past: 'b-ed' },
+      { present: 'c-ing', past: 'c-ed' },
+      { present: 'd-ing', past: 'd-ed' },
+    ]
+    const { container, rerender } = render(
+      <TypingIndicator isTyping labels={four} labelMs={100} />,
+    )
+    const read = () => container.querySelector('.pc-thinking-label')?.textContent ?? ''
+
+    expect(read()).toBe('a-ing')
+    act(() => { vi.advanceTimersByTime(100) })
+    expect(read()).toBe('d-ing')
+
+    // A fresh array, byte-identical content and order — exactly what `resolveChatStatus`
+    // hands back on every call. Keyed on content (Fix 1), the bag survives this untouched, so
+    // the displayed word must NOT move just from this rerender.
+    rerender(<TypingIndicator isTyping labels={four.map((p) => ({ ...p }))} labelMs={100} />)
+    expect(read()).toBe('d-ing')
+
+    // The interrupted permutation continues correctly: c, then b — never an early repeat of
+    // a-ing or d-ing.
+    act(() => { vi.advanceTimersByTime(100) })
+    expect(read()).toBe('c-ing')
+    act(() => { vi.advanceTimersByTime(100) })
+    expect(read()).toBe('b-ing')
+  })
+
+  // Fix 2 regression guard. The bug: `pair` (pre-fix `TypingIndicator.tsx:162`) is seeded ONLY
+  // at mount; the redraw that would fix it up lives in an effect gated on `active`
+  // (`:203`-`:220`), and effects run AFTER paint. RTL's `act()` flushes effects synchronously
+  // on every `rerender()`, so a plain "change `labels` while `active` stays `true`" case can't
+  // observe the resulting one-frame flash of stale text — by the time `rerender()` returns,
+  // the phase effect's own redraw (via `bag.next()`, re-triggered because `bag`'s identity
+  // also changed) has already overwritten it, bug or no bug.
+  //
+  // This case routes around that: flipping `isTyping` to `false` in the SAME rerender as the
+  // vocabulary change sends the update through the SETTLE branch instead, which does not call
+  // `bag.next()` — it reads `pairRef.current.past` (pre-fix `:215`). Pre-fix, `pair` (and so
+  // `pairRef`, which mirrors it every render at `:170`) was never reset for this commit, so it
+  // still holds the OLD vocabulary's word, and the settled line reports a past-tense word that
+  // does not exist in the vocabulary the turn actually finished under. That is fully
+  // deterministic and needs no timers or mocked randomness — a real, not just a
+  // single-frame-transient, divergence.
+  it('reflects the new vocabulary immediately when it changes in the same commit the turn settles', () => {
+    const oldWords: StatusWordPair[] = [{ present: 'zeeping', past: 'zeeped' }]
+    const newWords: StatusWordPair[] = [{ present: 'fleeping', past: 'fleeped' }]
+    const { container, rerender } = render(<TypingIndicator isTyping labels={oldWords} />)
+
+    rerender(<TypingIndicator isTyping={false} labels={newWords} />)
+
+    const settled = container.querySelector('.pc-thinking-label')?.textContent
+    expect(settled).toBe('fleeped')
+    // Never a word absent from the vocabulary the turn settled under.
+    expect(settled).not.toBe('zeeped')
+  })
+
+  // Fix 3 regression guard. Pre-fix, the running line's `aria-live="polite"` sat on the
+  // per-tick text itself (`:300`), so it re-announced on every 1.8s word rotation with no
+  // opt-out. There was also no `.pc-status-announce` element at all pre-fix — this assertion
+  // is red from the very first line, for that reason alone.
+  it('announces the running phase once, and does not re-announce when the word rotates', () => {
+    vi.useFakeTimers()
+    const two: StatusWordPair[] = [
+      { present: 'pondering', past: 'pondered' },
+      { present: 'musing', past: 'mused' },
+    ]
+    const { container } = render(<TypingIndicator isTyping labels={two} labelMs={100} />)
+    const announce = () => container.querySelector('.pc-status-announce')?.textContent
+
+    const first = announce()
+    expect(first).toMatch(/^(pondering|musing)$/)
+
+    // The visible word rotates on this tick (the interval effect's own `setPair`), but the
+    // live region must not follow it.
+    act(() => { vi.advanceTimersByTime(100) })
+    expect(announce()).toBe(first)
+  })
+
+  // Fix 3 regression guard, other direction. Pre-fix, the settled line (`:283`) was a
+  // DIFFERENT subtree with no live region at all — the one announcement carrying real
+  // information ("thought for 12s") was never spoken. `.pc-status-announce` doesn't exist
+  // pre-fix, so this is red immediately.
+  it('announces "<past word> for Ns" when the phase settles', () => {
+    vi.useFakeTimers()
+    vi.setSystemTime(1_700_000_000_000)
+    const only: StatusWordPair[] = [{ present: 'thinking', past: 'thought' }]
+    const { container, rerender } = render(<TypingIndicator isTyping labels={only} />)
+
+    act(() => { vi.advanceTimersByTime(5_000) })
+    rerender(<TypingIndicator isTyping={false} labels={only} />)
+
+    expect(container.querySelector('.pc-status-announce')?.textContent).toBe('thought for 5s')
+  })
+
+  // Fix 4 coverage note (no dedicated test below): the two defects here — `:212`'s
+  // `setDone(...)` called from INSIDE the `setPhase` updater, and `:170`'s `pairRef.current =
+  // pair` written directly in the render body — are both React purity violations whose only
+  // documented detector is `StrictMode`'s dev-mode double-invocation of updater functions and
+  // render bodies. That mechanism doesn't itself emit a `console.error`/`warn` for this
+  // specific shape (a leaked `setState` inside another `setState`'s updater, or a mutated
+  // ref) — it just silently invokes twice, and with `vi.useFakeTimers()` freezing `Date.now()`
+  // the duplicated `setDone` call pre-fix computes an identical value both times, so there is
+  // no numeric drift to observe either. A test asserting "no console output" would not
+  // reliably have been red pre-fix, so — rather than ship an unverified claim — this fix is
+  // covered by construction (the rewrite below matches the fix spec exactly: two ordinary
+  // top-level `setDone`/`setPhase` calls, `pairRef`/`phaseRef` synced via an effect declared
+  // BEFORE the phase effect) and by the "reflects the new vocabulary immediately…" test above,
+  // which already depends on that declaration order: it reads `pairRef.current.past` in the
+  // very same settle branch FIX 4 rewrote, and would read a STALE ref if the sync effect ran
+  // after the phase effect instead of before it.
 })
 
 describe('TypingIndicator tint', () => {

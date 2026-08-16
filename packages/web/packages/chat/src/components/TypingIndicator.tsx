@@ -13,6 +13,13 @@ const DEFAULT_DONE_GLYPH = '✱'
  * "thought" once it settles. BOTH are authored — nothing here derives one from the other,
  * because no rule can turn "thinking" into "thought" and a rule that turns it into
  * "thinked" is worse than no rule.
+ *
+ * There is a SECOND, DIFFERENT `StatusWordPair` — the sibling `agentictoolkit` repo's
+ * `data/src/personas/chat-status.ts` exports one that adds `tags` (so a persona's status
+ * words can be scoped to a status `kind`). Both are reachable one import apart from the
+ * persona editor. This one is the RENDERER's view: it deliberately does not know about
+ * tags — `resolveChatStatus` over there strips them before handing words to this component.
+ * Do not rename either; this one is a published prop type.
  */
 export interface StatusWordPair {
   present: string
@@ -151,23 +158,58 @@ function ThinkingStatus({
   labelMs,
 }: ThinkingStatusProps) {
   const [phase, setPhase] = useState<Phase>(active ? 'thinking' : 'idle')
-  // One bag per label array: draw-without-replacement, so a four-word persona shows
-  // all four before any repeats. `labels` identity is the cache key — callers memoize it.
-  // `ThinkingStatus` is only reached when `labels.length > 0` (the guard in
-  // `TypingIndicator` returns the dots indicator otherwise), which is what keeps
-  // `new ShuffleBag([])` — a throw — unreachable.
-  const bag = useMemo(() => new ShuffleBag(labels), [labels])
+
+  // Keyed on the CONTENT of `labels`, not its identity: the producer returns freshly filtered
+  // arrays on every call, so a think->respond transition (or a keystroke in the editor) mints a
+  // new array even when the words are byte-identical. Keying on identity threw away the
+  // draw-without-replacement bag on every such change — the word could repeat immediately, and
+  // the glyph interval was cleared and restarted before it could tick.
+  const labelsKey = labels.map((p) => `${p.present} ${p.past}`).join('')
+  // One bag per DISTINCT label vocabulary (see `labelsKey` above): draw-without-replacement,
+  // so a four-word persona shows all four before any repeats. `ThinkingStatus` is only reached
+  // when `labels.length > 0` (the guard in `TypingIndicator` returns the dots indicator
+  // otherwise), which is what keeps `new ShuffleBag([])` — a throw — unreachable.
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- keyed on `labelsKey` (content), not `labels` (identity); see the comment above `labelsKey`
+  const bag = useMemo(() => new ShuffleBag(labels), [labelsKey])
   // Seeded from the first label rather than a bag draw: the mount effect below draws the
   // real first word, and drawing here too would burn a second item before anything renders.
   const [pair, setPair] = useState<StatusWordPair>(() => labels[0]!)
+
+  // Adjusting state during render (React's documented pattern for "reset state when a prop
+  // changes"), guarded by `labelsKey` so it fires only on a genuine vocabulary change, not on
+  // every render. Without this, `pair` still points into the PREVIOUS, now-discarded word set
+  // for one committed frame: the phase effect below that redraws the real word only runs AFTER
+  // paint (effects always do), so the stale word would flash on screen first. Resetting to
+  // `labels[0]` rather than a bag draw is deliberate — drawing here would mutate `bag` during
+  // render, which StrictMode double-invokes, drawing (and discarding) an extra item per render.
+  const seenKeyRef = useRef(labelsKey)
+  if (seenKeyRef.current !== labelsKey) {
+    seenKeyRef.current = labelsKey
+    setPair(labels[0]!)
+  }
+
   const [frame, setFrame] = useState(0)
   const [color, setColor] = useState<string | undefined>(undefined)
   const [done, setDone] = useState<{ word: string; secs: number } | null>(null)
+  // Screen-reader announcement, held separately from the visible spans below and updated ONLY
+  // where a phase actually changes (entering `thinking`, settling, or a fresh utterance) — see
+  // the live-region markup near the bottom of this component for why it exists at all: the
+  // running line's own `aria-live` used to be on the per-tick text, so it re-announced every
+  // word rotation (no opt-out) and then, because the settled line is a DIFFERENT subtree with
+  // no live region of its own, the one announcement that actually carries information —
+  // "thought for 12s" — was never spoken.
+  const [announcement, setAnnouncement] = useState('')
 
-  // Always-current ref to the drawn pair, so the active→idle transition below can read
-  // the latest word without re-subscribing the phase effect on every draw.
+  // Always-current refs, kept in sync via effect rather than written during render (a ref
+  // write during render is a side effect React can't see, and unsafe to rely on for
+  // correctness). Declared BEFORE the phase effect below so both are already current by the
+  // time that effect — which reads them — runs on the same commit.
   const pairRef = useRef(pair)
-  pairRef.current = pair
+  const phaseRef = useRef(phase)
+  useEffect(() => {
+    pairRef.current = pair
+    phaseRef.current = phase
+  })
 
   // Always-current ref so the active→idle transition reads the latest start time
   // without re-subscribing the effect on every tick.
@@ -202,22 +244,36 @@ function ThinkingStatus({
   // Phase transitions driven by `active` (the chat's isTyping).
   useEffect(() => {
     if (active) {
-      setPair(bag.next())
+      const next = bag.next()
+      setPair(next)
+      // Announce the drawn word ONCE, on the transition into `thinking` — not on every 1.8s
+      // rotation (that redraw lives in the interval effect below and deliberately never
+      // touches `announcement`).
+      setAnnouncement(next.present)
       if (colorful) setColor(randomNonGreen())
       // Seed the clock only on the false→true edge — a mid-turn re-run of this effect
       // (triggered by `bag` changing while `active` stays `true`) must not touch it.
       if (!wasActiveRef.current) startRef.current = Date.now()
       setPhase('thinking')
-    } else {
-      setPhase((p) => {
-        if (p !== 'thinking') return p
-        const secs = Math.max(1, Math.round((Date.now() - startRef.current) / 1000))
-        setDone({ word: pairRef.current.past, secs })
-        return 'done'
-      })
+    } else if (phaseRef.current === 'thinking') {
+      // Two ordinary top-level calls, not a `setPhase` updater with `setDone` called from
+      // inside it (updaters must be pure — the old version wasn't). `phaseRef.current` stands
+      // in for the `p` the updater used to receive; it's current because the ref-sync effect
+      // above is declared first and so runs first on this same commit.
+      const secs = Math.max(1, Math.round((Date.now() - startRef.current) / 1000))
+      setDone({ word: pairRef.current.past, secs })
+      setAnnouncement(`${pairRef.current.past} for ${secs}s`)
+      setPhase('done')
     }
     wasActiveRef.current = active
   }, [active, bag, colorful])
+
+  // A fresh utterance is announced once — this effect fires only when `utterance` itself
+  // changes value (the caller clears it after a beat, which naturally produces a new value on
+  // the next one), not on every render while the same utterance is still showing.
+  useEffect(() => {
+    if (utterance) setAnnouncement(utterance)
+  }, [utterance])
 
   // Spinner cycles while thinking AND while an utterance is showing (so his
   // "speech" glyph animates too); the word cycles only during an actual think.
@@ -240,6 +296,19 @@ function ThinkingStatus({
     }
   }, [phase, frames.length, frameMs, bag, labelMs, colorful, utterance])
 
+  // ONE persistent live region, present in the same tree position across every phase below
+  // (so React never tears it down mid-turn) and carrying PHASE-LEVEL announcements only — see
+  // `announcement`'s doc comment above for the screen-reader bug this replaces. Visually
+  // hidden, not display:none — an AT-only region has to stay in the accessibility tree, which
+  // `display:none`/`visibility:hidden` remove it from. No existing "hide from sight, not from
+  // AT" utility was found anywhere in this package or its sibling web packages, so the
+  // standard clip-rect technique is added locally as `.pc-visually-hidden` in `base.css`.
+  const liveRegion = (
+    <span className="pc-visually-hidden pc-status-announce" aria-live="polite">
+      {announcement}
+    </span>
+  )
+
   // An utterance he just blurted overrides every phase (idle/thinking/done) for
   // its brief lifetime — shown lit, like he's speaking.
   if (utterance) {
@@ -249,11 +318,12 @@ function ThinkingStatus({
           <span
             className="pc-thinking"
             style={colorful && color ? { color } : undefined}
-            aria-live="polite"
+            aria-hidden="true"
           >
             <span className="pc-thinking-glyph" aria-hidden="true" style={glyphStyle}>{frames[frameIndex]}</span>
             <span className="pc-thinking-label" style={labelStyle}>{utterance}</span>
           </span>
+          {liveRegion}
         </div>
       </div>
     )
@@ -266,11 +336,12 @@ function ThinkingStatus({
     return (
       <div className="pc-message pc-persona pc-typing">
         <div className="pc-bubble">
-          <span className="pc-thinking pc-thinking--done">
+          <span className="pc-thinking pc-thinking--done" aria-hidden="true">
             <span className="pc-thinking-glyph" aria-hidden="true">{doneGlyph}</span>
             <span className="pc-thinking-label">{idlePhrase}</span>
             <span className="pc-thinking-ellipsis" aria-hidden="true">…</span>
           </span>
+          {liveRegion}
         </div>
       </div>
     )
@@ -280,11 +351,12 @@ function ThinkingStatus({
     return (
       <div className="pc-message pc-persona pc-typing">
         <div className="pc-bubble">
-          <span className="pc-thinking pc-thinking--done">
+          <span className="pc-thinking pc-thinking--done" aria-hidden="true">
             <span className="pc-thinking-glyph" aria-hidden="true">{doneGlyph}</span>
             <span className="pc-thinking-label">{done.word}</span>
             <span className="pc-thinking-for">{` for ${done.secs}s`}</span>
           </span>
+          {liveRegion}
         </div>
       </div>
     )
@@ -296,12 +368,13 @@ function ThinkingStatus({
         <span
           className="pc-thinking"
           style={colorful && color ? { color } : undefined}
-          aria-live="polite"
+          aria-hidden="true"
         >
           <span className="pc-thinking-glyph" aria-hidden="true" style={glyphStyle}>{frames[frameIndex]}</span>
           <span className="pc-thinking-label" style={labelStyle}>{pair.present}</span>
           <span className="pc-thinking-ellipsis" aria-hidden="true">…</span>
         </span>
+        {liveRegion}
       </div>
     </div>
   )
