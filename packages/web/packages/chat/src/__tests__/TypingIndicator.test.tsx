@@ -322,6 +322,32 @@ describe('TypingIndicator tint', () => {
     expect(label.style.color).toBe('rgb(1, 2, 3)')
   })
 
+  it('rebuilds the vocabulary when two different word lists would share a naive key', () => {
+    // The content key is built by joining the authored words, so the separator has to be a
+    // character the author cannot type. With a space, these two lists both key to "a b c":
+    // the memo would not rebuild, the render-time reset would not fire, and the status line
+    // would keep showing a word the persona no longer has. A NUL separator is what parts them.
+    const spaced: StatusWordPair[] = [{ present: 'a b', past: 'c' }]
+    const shifted: StatusWordPair[] = [{ present: 'a', past: 'b c' }]
+    const { container, rerender } = render(<TypingIndicator isTyping labels={spaced} />)
+    expect(container.querySelector('.pc-thinking-label')?.textContent).toBe('a b')
+
+    rerender(<TypingIndicator isTyping labels={shifted} />)
+    expect(container.querySelector('.pc-thinking-label')?.textContent).toBe('a')
+  })
+
+  it('puts the idle phrase where assistive tech can reach it', () => {
+    // Every visible span is `aria-hidden` so the live region is the single AT-facing copy of
+    // the status line — which means an idle line whose region is empty is not "quiet", it is
+    // absent. Seeding the region at mount also keeps it silent: live regions announce later
+    // changes, not the content they mount with.
+    const { container } = render(
+      <TypingIndicator isTyping={false} labels={only} idlePhrase="waiting to zeeble" />,
+    )
+    expect(container.querySelector('.pc-thinking')?.getAttribute('aria-hidden')).toBe('true')
+    expect(container.querySelector('.pc-status-announce')?.textContent).toBe('waiting to zeeble')
+  })
+
   it('leaves the thinking phase untinted when no tint prop is given', () => {
     const { container } = render(<TypingIndicator isTyping labels={only} />)
     // Confirm this actually rendered the thinking phase with real glyph/label nodes —

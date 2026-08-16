@@ -164,7 +164,12 @@ function ThinkingStatus({
   // new array even when the words are byte-identical. Keying on identity threw away the
   // draw-without-replacement bag on every such change — the word could repeat immediately, and
   // the glyph interval was cleared and restarted before it could tick.
-  const labelsKey = labels.map((p) => `${p.present} ${p.past}`).join('')
+  // The separator is a NUL (`\u0000`) rather than a space or a comma because the words are AUTHORED:
+  // an owner may type anything, including whatever we picked as a separator. With a space,
+  // `[{present: 'a b', past: 'c'}]` and `[{present: 'a', past: 'b c'}]` produce the same key,
+  // and a key collision means the bag is NOT rebuilt — so the status line keeps drawing from
+  // the vocabulary the persona no longer has. A NUL cannot appear in the input.
+  const labelsKey = labels.map((p) => `${p.present}\u0000${p.past}`).join('\u0000')
   // One bag per DISTINCT label vocabulary (see `labelsKey` above): draw-without-replacement,
   // so a four-word persona shows all four before any repeats. `ThinkingStatus` is only reached
   // when `labels.length > 0` (the guard in `TypingIndicator` returns the dots indicator
@@ -198,7 +203,12 @@ function ThinkingStatus({
   // word rotation (no opt-out) and then, because the settled line is a DIFFERENT subtree with
   // no live region of its own, the one announcement that actually carries information —
   // "thought for 12s" — was never spoken.
-  const [announcement, setAnnouncement] = useState('')
+  // Seeded with the idle phrase rather than empty, because the visible spans below are all
+  // `aria-hidden` — this region is the ONLY copy of the status line that assistive tech can
+  // reach, so an empty seed leaves a rendered "waiting to zeeble" with nothing behind it. A
+  // live region that MOUNTS with content is not announced (only later changes are), which is
+  // exactly what the idle line wants: readable when navigated to, silent on page load.
+  const [announcement, setAnnouncement] = useState(() => (active ? '' : (idlePhrase ?? '')))
 
   // Always-current refs, kept in sync via effect rather than written during render (a ref
   // write during render is a side effect React can't see, and unsafe to rely on for
