@@ -1,11 +1,23 @@
 "use client"
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { ShuffleBag } from '../backends/ShuffleBag'
 
 // A classic terminal spinner — rotates smoothly in a monospace font.
 const DEFAULT_FRAMES = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏']
 // Settled glyph for the completed (grey) state, à la Claude's "✱ Churned for…".
 const DEFAULT_DONE_GLYPH = '✱'
+
+/**
+ * One action word in both the forms the status line needs: "thinking" while it runs,
+ * "thought" once it settles. BOTH are authored — nothing here derives one from the other,
+ * because no rule can turn "thinking" into "thought" and a rule that turns it into
+ * "thinked" is worse than no rule.
+ */
+export interface StatusWordPair {
+  present: string
+  past: string
+}
 
 export interface TypingIndicatorProps {
   /** Whether a reply is currently in flight. */
@@ -15,7 +27,7 @@ export interface TypingIndicatorProps {
    * "zorping"]). When omitted, falls back to the classic three-dot indicator
    * and nothing persists — so existing consumers are unaffected.
    */
-  labels?: readonly string[]
+  labels?: readonly StatusWordPair[]
   /** Frames for the rotating glyph. Defaults to a braille spinner. */
   frames?: readonly string[]
   /** Settled glyph for the grey done line. Defaults to "✱". */
@@ -80,15 +92,6 @@ export function TypingIndicator({
   )
 }
 
-function randomLabel(labels: readonly string[]): string {
-  return labels[Math.floor(Math.random() * labels.length)] ?? labels[0] ?? ''
-}
-
-/** zorping → zorped, zeeping → zeeped (present participle → past tense). */
-function pastTense(word: string): string {
-  return word.endsWith('ing') ? `${word.slice(0, -3)}ed` : `${word}ed`
-}
-
 /**
  * A vivid color that is never green — skips the ~75°–165° hue band — and stays
  * bright enough to read on a dark surface.
@@ -103,7 +106,7 @@ interface ThinkingStatusProps {
   active: boolean
   idlePhrase?: string
   utterance?: string | null
-  labels: readonly string[]
+  labels: readonly StatusWordPair[]
   frames: readonly string[]
   doneGlyph: string
   colorful: boolean
@@ -131,21 +134,30 @@ function ThinkingStatus({
   labelMs,
 }: ThinkingStatusProps) {
   const [phase, setPhase] = useState<Phase>(active ? 'thinking' : 'idle')
+  // One bag per label array: draw-without-replacement, so a four-word persona shows
+  // all four before any repeats. `labels` identity is the cache key — callers memoize it.
+  // `ThinkingStatus` is only reached when `labels.length > 0` (the guard in
+  // `TypingIndicator` returns the dots indicator otherwise), which is what keeps
+  // `new ShuffleBag([])` — a throw — unreachable.
+  const bag = useMemo(() => new ShuffleBag(labels), [labels])
+  // Seeded from the first label rather than a bag draw: the mount effect below draws the
+  // real first word, and drawing here too would burn a second item before anything renders.
+  const [pair, setPair] = useState<StatusWordPair>(() => labels[0]!)
   const [frame, setFrame] = useState(0)
-  const [word, setWord] = useState(() => randomLabel(labels))
   const [color, setColor] = useState<string | undefined>(undefined)
   const [done, setDone] = useState<{ word: string; secs: number } | null>(null)
 
-  // Always-current refs so the active→idle transition reads the latest values
+  const pairRef = useRef(pair)
+  pairRef.current = pair
+
+  // Always-current ref so the active→idle transition reads the latest start time
   // without re-subscribing the effect on every tick.
-  const wordRef = useRef(word)
-  wordRef.current = word
   const startRef = useRef(0)
 
   // Phase transitions driven by `active` (the chat's isTyping).
   useEffect(() => {
     if (active) {
-      setWord(randomLabel(labels))
+      setPair(bag.next())
       if (colorful) setColor(randomNonGreen())
       startRef.current = Date.now()
       setPhase('thinking')
@@ -153,11 +165,11 @@ function ThinkingStatus({
       setPhase((p) => {
         if (p !== 'thinking') return p
         const secs = Math.max(1, Math.round((Date.now() - startRef.current) / 1000))
-        setDone({ word: pastTense(wordRef.current), secs })
+        setDone({ word: pairRef.current.past, secs })
         return 'done'
       })
     }
-  }, [active, labels, colorful])
+  }, [active, bag, colorful])
 
   // Spinner cycles while thinking AND while an utterance is showing (so his
   // "speech" glyph animates too); the word cycles only during an actual think.
@@ -167,8 +179,7 @@ function ThinkingStatus({
     const spinning = phase === 'thinking' || !!utterance
     if (!spinning) return
     const f = setInterval(() => setFrame((i) => (i + 1) % frames.length), frameMs)
-    const l =
-      phase === 'thinking' ? setInterval(() => setWord(randomLabel(labels)), labelMs) : undefined
+    const l = phase === 'thinking' ? setInterval(() => setPair(bag.next()), labelMs) : undefined
     let c: ReturnType<typeof setInterval> | undefined
     if (colorful) {
       setColor(randomNonGreen())
@@ -179,7 +190,7 @@ function ThinkingStatus({
       if (l) clearInterval(l)
       if (c) clearInterval(c)
     }
-  }, [phase, frames.length, frameMs, labels, labelMs, colorful, utterance])
+  }, [phase, frames.length, frameMs, bag, labelMs, colorful, utterance])
 
   // An utterance he just blurted overrides every phase (idle/thinking/done) for
   // its brief lifetime — shown lit, like he's speaking.
@@ -240,7 +251,7 @@ function ThinkingStatus({
           aria-live="polite"
         >
           <span className="pc-thinking-glyph" aria-hidden="true">{frames[frame]}</span>
-          <span className="pc-thinking-label">{word}</span>
+          <span className="pc-thinking-label">{pair.present}</span>
           <span className="pc-thinking-ellipsis" aria-hidden="true">…</span>
         </span>
       </div>

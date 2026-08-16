@@ -6,7 +6,7 @@ import { useChatSizing } from '../hooks/useChatSizing'
 import { Transcript } from '../components/Transcript'
 import { ChatInput } from '../components/ChatInput'
 import { InlinePopover } from '../components/InlinePopover'
-import { TypingIndicator } from '../components/TypingIndicator'
+import { TypingIndicator, type StatusWordPair } from '../components/TypingIndicator'
 
 /**
  * How the inline chat box determines its height while engaged ("active").
@@ -68,7 +68,7 @@ export interface InlineChatViewProps {
   sizing?: InlineChatSizing
   placeholder?: string
   /** "Thinking" words for the in-flight indicator (falls back to dots). */
-  thinkingLabels?: readonly string[]
+  thinkingLabels?: readonly StatusWordPair[]
   /** Frames for the in-flight rotating glyph. */
   thinkingFrames?: readonly string[]
   /** Settled glyph for the grey done line. */
@@ -144,7 +144,7 @@ export interface InlineChatProps {
   className?: string
   sizing?: InlineChatSizing
   placeholder?: string
-  thinkingLabels?: readonly string[]
+  thinkingLabels?: readonly StatusWordPair[]
   thinkingFrames?: readonly string[]
   thinkingDoneGlyph?: string
   thinkingColorful?: boolean

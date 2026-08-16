@@ -1,7 +1,7 @@
 import { useRef, type ReactNode } from 'react'
 import type { ChatMessage } from '../types'
 import { MessageBubble } from './MessageBubble'
-import { TypingIndicator } from './TypingIndicator'
+import { TypingIndicator, type StatusWordPair } from './TypingIndicator'
 import { useScrollToBottom } from '../hooks/useScrollToBottom'
 
 interface TranscriptProps {
@@ -14,7 +14,7 @@ interface TranscriptProps {
   onDetailArrowClick?: (index: number) => void
   className?: string
   /** "Thinking" words for the in-flight indicator (falls back to dots). */
-  thinkingLabels?: readonly string[]
+  thinkingLabels?: readonly StatusWordPair[]
   /** Frames for the in-flight rotating glyph. */
   thinkingFrames?: readonly string[]
   /** Settled glyph for the grey done line. */
