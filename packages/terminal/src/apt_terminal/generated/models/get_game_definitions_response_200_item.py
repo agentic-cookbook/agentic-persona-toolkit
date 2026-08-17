@@ -74,14 +74,14 @@ class GetGameDefinitionsResponse200Item:
 
         name = self.name
 
-        description: None | str
+        description: str | None
         description = self.description
 
         status = self.status
 
         sort_order = self.sort_order
 
-        data: None | bool | dict[str, Any] | float | list[Any] | str
+        data: bool | dict[str, Any] | float | list[Any] | str | None
         if isinstance(self.data, GetGameDefinitionsResponse200ItemDataType0Type1):
             data = self.data.to_dict()
         elif isinstance(self.data, list):
@@ -94,12 +94,12 @@ class GetGameDefinitionsResponse200Item:
 
         updated_at = self.updated_at
 
-        deleted_at: None | str
+        deleted_at: str | None
         deleted_at = self.deleted_at
 
         sync_version = self.sync_version
 
-        sync_stamped_at: None | str
+        sync_stamped_at: str | None
         sync_stamped_at = self.sync_stamped_at
 
         sync_txid = self.sync_txid

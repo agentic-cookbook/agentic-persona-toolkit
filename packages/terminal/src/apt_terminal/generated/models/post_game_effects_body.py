@@ -54,7 +54,7 @@ class PostGameEffectsBody:
 
         ecosystem_id = self.ecosystem_id
 
-        duration: None | Unset | int
+        duration: Unset | int | None
         if isinstance(self.duration, Unset):
             duration = UNSET
         else:

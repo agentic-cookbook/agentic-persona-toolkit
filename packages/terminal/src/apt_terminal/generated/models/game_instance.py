@@ -53,13 +53,13 @@ class GameInstance:
 
         depth = self.depth
 
-        slot: None | Unset | str
+        slot: Unset | str | None
         if isinstance(self.slot, Unset):
             slot = UNSET
         else:
             slot = self.slot
 
-        data: None | Unset | dict[str, Any]
+        data: Unset | dict[str, Any] | None
         if isinstance(self.data, Unset):
             data = UNSET
         elif isinstance(self.data, GameInstanceDataType0):
@@ -72,9 +72,9 @@ class GameInstance:
         field_dict.update(
             {
                 "id": id,
-                "definition_id": definition_id,
-                "location_type": location_type,
-                "location_id": location_id,
+                "definitionId": definition_id,
+                "locationType": location_type,
+                "locationId": location_id,
                 "quantity": quantity,
                 "depth": depth,
             }
@@ -93,11 +93,11 @@ class GameInstance:
         d = dict(src_dict)
         id = d.pop("id")
 
-        definition_id = d.pop("definition_id")
+        definition_id = d.pop("definitionId")
 
-        location_type = GameInstanceLocationType(d.pop("location_type"))
+        location_type = GameInstanceLocationType(d.pop("locationType"))
 
-        location_id = d.pop("location_id")
+        location_id = d.pop("locationId")
 
         quantity = d.pop("quantity")
 

@@ -58,13 +58,13 @@ class GameFeedItem:
 
         role = self.role
 
-        slot: None | Unset | str
+        slot: Unset | str | None
         if isinstance(self.slot, Unset):
             slot = UNSET
         else:
             slot = self.slot
 
-        data: None | Unset | dict[str, Any]
+        data: Unset | dict[str, Any] | None
         if isinstance(self.data, Unset):
             data = UNSET
         elif isinstance(self.data, GameFeedItemDataType0):
@@ -72,19 +72,19 @@ class GameFeedItem:
         else:
             data = self.data
 
-        text: None | Unset | str
+        text: Unset | str | None
         if isinstance(self.text, Unset):
             text = UNSET
         else:
             text = self.text
 
-        content_format: None | Unset | str
+        content_format: Unset | str | None
         if isinstance(self.content_format, Unset):
             content_format = UNSET
         else:
             content_format = self.content_format
 
-        summary: None | Unset | dict[str, Any]
+        summary: Unset | dict[str, Any] | None
         if isinstance(self.summary, Unset):
             summary = UNSET
         elif isinstance(self.summary, GameFeedItemSummaryType0):
@@ -96,7 +96,7 @@ class GameFeedItem:
 
         exposure_count = self.exposure_count
 
-        published_at: None | Unset | str
+        published_at: Unset | str | None
         if isinstance(self.published_at, Unset):
             published_at = UNSET
         else:

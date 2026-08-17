@@ -1093,6 +1093,13 @@ public protocol APIProtocol: Sendable {
     /// - Remark: HTTP `DELETE /game/artifacts/{id}`.
     /// - Remark: Generated from `#/paths//game/artifacts/{id}/delete`.
     func deleteGameArtifactsId(_ input: Operations.DeleteGameArtifactsId.Input) async throws -> Operations.DeleteGameArtifactsId.Output
+    /// Publish the caller’s own artifact to the public feed (screened)
+    ///
+    /// The write side §6.6 named and §6.3 owed: `visibility` and `published_at` are server-managed on `game.artifacts`, so this is the only way an artifact reaches `GET /game/feed`. Screening (§6.5) runs BEFORE the row flips, on every string the artifact carries — `text` plus every string leaf of `summary` and `data` — because adh cannot tell which jsonb slots hold player prose without doing the engine’s job. Long artifacts are screened in CHUNKS rather than truncated to the classifier’s character budget, which would publish the tail unjudged; past eight chunks the request is 422 rather than silently partly-screened. Idempotent: an already-published artifact returns 200 with the current row and calls no classifier, so a retry is free. 404 covers both "no such artifact" and "not yours" — the ownership term is in the UPDATE itself, so there is no check-then-write window. Publishing is one-way; withdrawing is `DELETE /game/artifacts/{id}`.
+    ///
+    /// - Remark: HTTP `POST /game/artifacts/{id}/publish`.
+    /// - Remark: Generated from `#/paths//game/artifacts/{id}/publish/post`.
+    func postGameArtifactsIdPublish(_ input: Operations.PostGameArtifactsIdPublish.Input) async throws -> Operations.PostGameArtifactsIdPublish.Output
     /// One game’s public artifact feed (anonymous, read replica)
     ///
     /// The hot path, and it carries no `security`: it serves published artifacts to signed-out visitors and runs on the read replica so it does not contend with authenticated traffic. Three predicates are the entire boundary — `visibility = 'public'`, `deleted_at is null`, and `ecosystem_id`. The ecosystem is taken from the resolved game row, never from the query string. A retired game is 404.
@@ -1144,7 +1151,7 @@ public protocol APIProtocol: Sendable {
     func getGameProfilesSlug(_ input: Operations.GetGameProfilesSlug.Input) async throws -> Operations.GetGameProfilesSlug.Output
     /// The caller’s own instances, including what is inside what they hold
     ///
-    /// A recursive containment walk: everything located on the player, plus everything located inside those, and so on — the chest in the inventory and the key in the chest. Two INDEPENDENT bounds, and neither substitutes for the other: a depth cap (default and maximum 32) cuts a containment cycle, and a hard row limit (2000) cuts breadth, because a cycle at depth 2 fanning out ten ways per level is still 10^32 rows inside the depth cap. `location_id` carries no FK, so nothing is read from the request: the player id comes from the caller’s own resolved profile. A caller who has never played gets an empty list, not a 404.
+    /// A recursive containment walk: everything located on the player, plus everything located inside those, and so on — the chest in the inventory and the key in the chest. Two INDEPENDENT bounds, and neither substitutes for the other: a depth cap (default and maximum 32) cuts a containment cycle, and a hard row limit (2000) cuts breadth, because a cycle at depth 2 fanning out ten ways per level is still 10^32 rows inside the depth cap. The row limit is applied BEFORE the sort, so a truncated walk returns the rows the walk reached first (shallowest first) rather than the smallest 2000 by sort key; on a well-formed world nothing is truncated and the two are the same. `location_id` carries no FK, so nothing is read from the request: the player id comes from the caller’s own resolved profile. A caller who has never played gets an empty list, not a 404.
     ///
     /// - Remark: HTTP `GET /game/instances`.
     /// - Remark: Generated from `#/paths//game/instances/get`.
@@ -7680,6 +7687,21 @@ extension APIProtocol {
             headers: headers
         ))
     }
+    /// Publish the caller’s own artifact to the public feed (screened)
+    ///
+    /// The write side §6.6 named and §6.3 owed: `visibility` and `published_at` are server-managed on `game.artifacts`, so this is the only way an artifact reaches `GET /game/feed`. Screening (§6.5) runs BEFORE the row flips, on every string the artifact carries — `text` plus every string leaf of `summary` and `data` — because adh cannot tell which jsonb slots hold player prose without doing the engine’s job. Long artifacts are screened in CHUNKS rather than truncated to the classifier’s character budget, which would publish the tail unjudged; past eight chunks the request is 422 rather than silently partly-screened. Idempotent: an already-published artifact returns 200 with the current row and calls no classifier, so a retry is free. 404 covers both "no such artifact" and "not yours" — the ownership term is in the UPDATE itself, so there is no check-then-write window. Publishing is one-way; withdrawing is `DELETE /game/artifacts/{id}`.
+    ///
+    /// - Remark: HTTP `POST /game/artifacts/{id}/publish`.
+    /// - Remark: Generated from `#/paths//game/artifacts/{id}/publish/post`.
+    public func postGameArtifactsIdPublish(
+        path: Operations.PostGameArtifactsIdPublish.Input.Path,
+        headers: Operations.PostGameArtifactsIdPublish.Input.Headers = .init()
+    ) async throws -> Operations.PostGameArtifactsIdPublish.Output {
+        try await postGameArtifactsIdPublish(Operations.PostGameArtifactsIdPublish.Input(
+            path: path,
+            headers: headers
+        ))
+    }
     /// One game’s public artifact feed (anonymous, read replica)
     ///
     /// The hot path, and it carries no `security`: it serves published artifacts to signed-out visitors and runs on the read replica so it does not contend with authenticated traffic. Three predicates are the entire boundary — `visibility = 'public'`, `deleted_at is null`, and `ecosystem_id`. The ecosystem is taken from the resolved game row, never from the query string. A retired game is 404.
@@ -7789,7 +7811,7 @@ extension APIProtocol {
     }
     /// The caller’s own instances, including what is inside what they hold
     ///
-    /// A recursive containment walk: everything located on the player, plus everything located inside those, and so on — the chest in the inventory and the key in the chest. Two INDEPENDENT bounds, and neither substitutes for the other: a depth cap (default and maximum 32) cuts a containment cycle, and a hard row limit (2000) cuts breadth, because a cycle at depth 2 fanning out ten ways per level is still 10^32 rows inside the depth cap. `location_id` carries no FK, so nothing is read from the request: the player id comes from the caller’s own resolved profile. A caller who has never played gets an empty list, not a 404.
+    /// A recursive containment walk: everything located on the player, plus everything located inside those, and so on — the chest in the inventory and the key in the chest. Two INDEPENDENT bounds, and neither substitutes for the other: a depth cap (default and maximum 32) cuts a containment cycle, and a hard row limit (2000) cuts breadth, because a cycle at depth 2 fanning out ten ways per level is still 10^32 rows inside the depth cap. The row limit is applied BEFORE the sort, so a truncated walk returns the rows the walk reached first (shallowest first) rather than the smallest 2000 by sort key; on a well-formed world nothing is truncated and the two are the same. `location_id` carries no FK, so nothing is read from the request: the player id comes from the caller’s own resolved profile. A caller who has never played gets an empty list, not a 404.
     ///
     /// - Remark: HTTP `GET /game/instances`.
     /// - Remark: Generated from `#/paths//game/instances/get`.
@@ -24128,18 +24150,18 @@ public enum Components {
         public struct GameInstance: Codable, Hashable, Sendable {
             /// - Remark: Generated from `#/components/schemas/GameInstance/id`.
             public var id: Swift.String
-            /// - Remark: Generated from `#/components/schemas/GameInstance/definition_id`.
+            /// - Remark: Generated from `#/components/schemas/GameInstance/definitionId`.
             public var definitionId: Swift.String
-            /// - Remark: Generated from `#/components/schemas/GameInstance/location_type`.
+            /// - Remark: Generated from `#/components/schemas/GameInstance/locationType`.
             @frozen public enum LocationTypePayload: String, Codable, Hashable, Sendable, CaseIterable {
                 case player = "player"
                 case session = "session"
                 case instance = "instance"
                 case game = "game"
             }
-            /// - Remark: Generated from `#/components/schemas/GameInstance/location_type`.
+            /// - Remark: Generated from `#/components/schemas/GameInstance/locationType`.
             public var locationType: Components.Schemas.GameInstance.LocationTypePayload
-            /// - Remark: Generated from `#/components/schemas/GameInstance/location_id`.
+            /// - Remark: Generated from `#/components/schemas/GameInstance/locationId`.
             public var locationId: Swift.String
             /// - Remark: Generated from `#/components/schemas/GameInstance/slot`.
             public var slot: Swift.String?
@@ -24199,9 +24221,9 @@ public enum Components {
             }
             public enum CodingKeys: String, CodingKey {
                 case id
-                case definitionId = "definition_id"
-                case locationType = "location_type"
-                case locationId = "location_id"
+                case definitionId
+                case locationType
+                case locationId
                 case slot
                 case quantity
                 case data
@@ -95554,6 +95576,391 @@ public enum Operations {
             }
         }
     }
+    /// Publish the caller’s own artifact to the public feed (screened)
+    ///
+    /// The write side §6.6 named and §6.3 owed: `visibility` and `published_at` are server-managed on `game.artifacts`, so this is the only way an artifact reaches `GET /game/feed`. Screening (§6.5) runs BEFORE the row flips, on every string the artifact carries — `text` plus every string leaf of `summary` and `data` — because adh cannot tell which jsonb slots hold player prose without doing the engine’s job. Long artifacts are screened in CHUNKS rather than truncated to the classifier’s character budget, which would publish the tail unjudged; past eight chunks the request is 422 rather than silently partly-screened. Idempotent: an already-published artifact returns 200 with the current row and calls no classifier, so a retry is free. 404 covers both "no such artifact" and "not yours" — the ownership term is in the UPDATE itself, so there is no check-then-write window. Publishing is one-way; withdrawing is `DELETE /game/artifacts/{id}`.
+    ///
+    /// - Remark: HTTP `POST /game/artifacts/{id}/publish`.
+    /// - Remark: Generated from `#/paths//game/artifacts/{id}/publish/post`.
+    public enum PostGameArtifactsIdPublish {
+        public static let id: Swift.String = "post/game/artifacts/{id}/publish"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/game/artifacts/{id}/publish/POST/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/game/artifacts/{id}/publish/POST/path/id`.
+                public var id: Swift.String
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - id:
+                public init(id: Swift.String) {
+                    self.id = id
+                }
+            }
+            public var path: Operations.PostGameArtifactsIdPublish.Input.Path
+            /// - Remark: Generated from `#/paths/game/artifacts/{id}/publish/POST/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.PostGameArtifactsIdPublish.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.PostGameArtifactsIdPublish.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.PostGameArtifactsIdPublish.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            public init(
+                path: Operations.PostGameArtifactsIdPublish.Input.Path,
+                headers: Operations.PostGameArtifactsIdPublish.Input.Headers = .init()
+            ) {
+                self.path = path
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/game/artifacts/{id}/publish/POST/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/game/artifacts/{id}/publish/POST/responses/200/content/application\/json`.
+                    case json(Components.Schemas.GameArtifact)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas.GameArtifact {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.PostGameArtifactsIdPublish.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.PostGameArtifactsIdPublish.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// The published artifact
+            ///
+            /// - Remark: Generated from `#/paths//game/artifacts/{id}/publish/post/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.PostGameArtifactsIdPublish.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.PostGameArtifactsIdPublish.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            public struct Unauthorized: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/game/artifacts/{id}/publish/POST/responses/401/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/game/artifacts/{id}/publish/POST/responses/401/content/application\/json`.
+                    case json(Components.Schemas._Error)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas._Error {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.PostGameArtifactsIdPublish.Output.Unauthorized.Body
+                /// Creates a new `Unauthorized`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.PostGameArtifactsIdPublish.Output.Unauthorized.Body) {
+                    self.body = body
+                }
+            }
+            /// Error
+            ///
+            /// - Remark: Generated from `#/paths//game/artifacts/{id}/publish/post/responses/401`.
+            ///
+            /// HTTP response code: `401 unauthorized`.
+            case unauthorized(Operations.PostGameArtifactsIdPublish.Output.Unauthorized)
+            /// The associated value of the enum case if `self` is `.unauthorized`.
+            ///
+            /// - Throws: An error if `self` is not `.unauthorized`.
+            /// - SeeAlso: `.unauthorized`.
+            public var unauthorized: Operations.PostGameArtifactsIdPublish.Output.Unauthorized {
+                get throws {
+                    switch self {
+                    case let .unauthorized(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "unauthorized",
+                            response: self
+                        )
+                    }
+                }
+            }
+            public struct Forbidden: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/game/artifacts/{id}/publish/POST/responses/403/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/game/artifacts/{id}/publish/POST/responses/403/content/application\/json`.
+                    case json(Components.Schemas._Error)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas._Error {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.PostGameArtifactsIdPublish.Output.Forbidden.Body
+                /// Creates a new `Forbidden`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.PostGameArtifactsIdPublish.Output.Forbidden.Body) {
+                    self.body = body
+                }
+            }
+            /// Error
+            ///
+            /// - Remark: Generated from `#/paths//game/artifacts/{id}/publish/post/responses/403`.
+            ///
+            /// HTTP response code: `403 forbidden`.
+            case forbidden(Operations.PostGameArtifactsIdPublish.Output.Forbidden)
+            /// The associated value of the enum case if `self` is `.forbidden`.
+            ///
+            /// - Throws: An error if `self` is not `.forbidden`.
+            /// - SeeAlso: `.forbidden`.
+            public var forbidden: Operations.PostGameArtifactsIdPublish.Output.Forbidden {
+                get throws {
+                    switch self {
+                    case let .forbidden(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "forbidden",
+                            response: self
+                        )
+                    }
+                }
+            }
+            public struct NotFound: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/game/artifacts/{id}/publish/POST/responses/404/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/game/artifacts/{id}/publish/POST/responses/404/content/application\/json`.
+                    case json(Components.Schemas._Error)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas._Error {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.PostGameArtifactsIdPublish.Output.NotFound.Body
+                /// Creates a new `NotFound`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.PostGameArtifactsIdPublish.Output.NotFound.Body) {
+                    self.body = body
+                }
+            }
+            /// Error
+            ///
+            /// - Remark: Generated from `#/paths//game/artifacts/{id}/publish/post/responses/404`.
+            ///
+            /// HTTP response code: `404 notFound`.
+            case notFound(Operations.PostGameArtifactsIdPublish.Output.NotFound)
+            /// The associated value of the enum case if `self` is `.notFound`.
+            ///
+            /// - Throws: An error if `self` is not `.notFound`.
+            /// - SeeAlso: `.notFound`.
+            public var notFound: Operations.PostGameArtifactsIdPublish.Output.NotFound {
+                get throws {
+                    switch self {
+                    case let .notFound(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "notFound",
+                            response: self
+                        )
+                    }
+                }
+            }
+            public struct UnprocessableContent: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/game/artifacts/{id}/publish/POST/responses/422/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/game/artifacts/{id}/publish/POST/responses/422/content/application\/json`.
+                    case json(Components.Schemas._Error)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas._Error {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.PostGameArtifactsIdPublish.Output.UnprocessableContent.Body
+                /// Creates a new `UnprocessableContent`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.PostGameArtifactsIdPublish.Output.UnprocessableContent.Body) {
+                    self.body = body
+                }
+            }
+            /// Error
+            ///
+            /// - Remark: Generated from `#/paths//game/artifacts/{id}/publish/post/responses/422`.
+            ///
+            /// HTTP response code: `422 unprocessableContent`.
+            case unprocessableContent(Operations.PostGameArtifactsIdPublish.Output.UnprocessableContent)
+            /// The associated value of the enum case if `self` is `.unprocessableContent`.
+            ///
+            /// - Throws: An error if `self` is not `.unprocessableContent`.
+            /// - SeeAlso: `.unprocessableContent`.
+            public var unprocessableContent: Operations.PostGameArtifactsIdPublish.Output.UnprocessableContent {
+                get throws {
+                    switch self {
+                    case let .unprocessableContent(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "unprocessableContent",
+                            response: self
+                        )
+                    }
+                }
+            }
+            public struct TooManyRequests: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/game/artifacts/{id}/publish/POST/responses/429/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/game/artifacts/{id}/publish/POST/responses/429/content/application\/json`.
+                    case json(Components.Schemas._Error)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas._Error {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.PostGameArtifactsIdPublish.Output.TooManyRequests.Body
+                /// Creates a new `TooManyRequests`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.PostGameArtifactsIdPublish.Output.TooManyRequests.Body) {
+                    self.body = body
+                }
+            }
+            /// Error
+            ///
+            /// - Remark: Generated from `#/paths//game/artifacts/{id}/publish/post/responses/429`.
+            ///
+            /// HTTP response code: `429 tooManyRequests`.
+            case tooManyRequests(Operations.PostGameArtifactsIdPublish.Output.TooManyRequests)
+            /// The associated value of the enum case if `self` is `.tooManyRequests`.
+            ///
+            /// - Throws: An error if `self` is not `.tooManyRequests`.
+            /// - SeeAlso: `.tooManyRequests`.
+            public var tooManyRequests: Operations.PostGameArtifactsIdPublish.Output.TooManyRequests {
+                get throws {
+                    switch self {
+                    case let .tooManyRequests(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "tooManyRequests",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Undocumented response.
+            ///
+            /// A response with a code that is not documented in the OpenAPI document.
+            case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json
+                ]
+            }
+        }
+    }
     /// One game’s public artifact feed (anonymous, read replica)
     ///
     /// The hot path, and it carries no `security`: it serves published artifacts to signed-out visitors and runs on the read replica so it does not contend with authenticated traffic. Three predicates are the entire boundary — `visibility = 'public'`, `deleted_at is null`, and `ecosystem_id`. The ecosystem is taken from the resolved game row, never from the query string. A retired game is 404.
@@ -97865,7 +98272,7 @@ public enum Operations {
     }
     /// The caller’s own instances, including what is inside what they hold
     ///
-    /// A recursive containment walk: everything located on the player, plus everything located inside those, and so on — the chest in the inventory and the key in the chest. Two INDEPENDENT bounds, and neither substitutes for the other: a depth cap (default and maximum 32) cuts a containment cycle, and a hard row limit (2000) cuts breadth, because a cycle at depth 2 fanning out ten ways per level is still 10^32 rows inside the depth cap. `location_id` carries no FK, so nothing is read from the request: the player id comes from the caller’s own resolved profile. A caller who has never played gets an empty list, not a 404.
+    /// A recursive containment walk: everything located on the player, plus everything located inside those, and so on — the chest in the inventory and the key in the chest. Two INDEPENDENT bounds, and neither substitutes for the other: a depth cap (default and maximum 32) cuts a containment cycle, and a hard row limit (2000) cuts breadth, because a cycle at depth 2 fanning out ten ways per level is still 10^32 rows inside the depth cap. The row limit is applied BEFORE the sort, so a truncated walk returns the rows the walk reached first (shallowest first) rather than the smallest 2000 by sort key; on a well-formed world nothing is truncated and the two are the same. `location_id` carries no FK, so nothing is read from the request: the player id comes from the caller’s own resolved profile. A caller who has never played gets an empty list, not a 404.
     ///
     /// - Remark: HTTP `GET /game/instances`.
     /// - Remark: Generated from `#/paths//game/instances/get`.
@@ -277787,8 +278194,6 @@ public enum Operations {
                 public struct JsonPayload: Codable, Hashable, Sendable {
                     /// - Remark: Generated from `#/paths/game/definitions/POST/requestBody/json/ecosystemId`.
                     public var ecosystemId: Swift.String?
-                    /// - Remark: Generated from `#/paths/game/definitions/POST/requestBody/json/authorCustomerId`.
-                    public var authorCustomerId: Swift.String?
                     /// - Remark: Generated from `#/paths/game/definitions/POST/requestBody/json/gameId`.
                     public var gameId: Swift.String
                     /// - Remark: Generated from `#/paths/game/definitions/POST/requestBody/json/kind`.
@@ -277807,7 +278212,6 @@ public enum Operations {
                     ///
                     /// - Parameters:
                     ///   - ecosystemId:
-                    ///   - authorCustomerId:
                     ///   - gameId:
                     ///   - kind:
                     ///   - key:
@@ -277817,7 +278221,6 @@ public enum Operations {
                     ///   - syncTxid:
                     public init(
                         ecosystemId: Swift.String? = nil,
-                        authorCustomerId: Swift.String? = nil,
                         gameId: Swift.String,
                         kind: Swift.String,
                         key: Swift.String,
@@ -277827,7 +278230,6 @@ public enum Operations {
                         syncTxid: Swift.Int? = nil
                     ) {
                         self.ecosystemId = ecosystemId
-                        self.authorCustomerId = authorCustomerId
                         self.gameId = gameId
                         self.kind = kind
                         self.key = key
@@ -277838,7 +278240,6 @@ public enum Operations {
                     }
                     public enum CodingKeys: String, CodingKey {
                         case ecosystemId
-                        case authorCustomerId
                         case gameId
                         case kind
                         case key
@@ -277852,10 +278253,6 @@ public enum Operations {
                         self.ecosystemId = try container.decodeIfPresent(
                             Swift.String.self,
                             forKey: .ecosystemId
-                        )
-                        self.authorCustomerId = try container.decodeIfPresent(
-                            Swift.String.self,
-                            forKey: .authorCustomerId
                         )
                         self.gameId = try container.decode(
                             Swift.String.self,
@@ -277887,7 +278284,6 @@ public enum Operations {
                         )
                         try decoder.ensureNoAdditionalProperties(knownKeys: [
                             "ecosystemId",
-                            "authorCustomerId",
                             "gameId",
                             "kind",
                             "key",
@@ -278686,8 +279082,6 @@ public enum Operations {
                 public struct JsonPayload: Codable, Hashable, Sendable {
                     /// - Remark: Generated from `#/paths/game/definitions/{id}/PUT/requestBody/json/ecosystemId`.
                     public var ecosystemId: Swift.String?
-                    /// - Remark: Generated from `#/paths/game/definitions/{id}/PUT/requestBody/json/authorCustomerId`.
-                    public var authorCustomerId: Swift.String?
                     /// - Remark: Generated from `#/paths/game/definitions/{id}/PUT/requestBody/json/gameId`.
                     public var gameId: Swift.String?
                     /// - Remark: Generated from `#/paths/game/definitions/{id}/PUT/requestBody/json/kind`.
@@ -278706,7 +279100,6 @@ public enum Operations {
                     ///
                     /// - Parameters:
                     ///   - ecosystemId:
-                    ///   - authorCustomerId:
                     ///   - gameId:
                     ///   - kind:
                     ///   - key:
@@ -278716,7 +279109,6 @@ public enum Operations {
                     ///   - syncTxid:
                     public init(
                         ecosystemId: Swift.String? = nil,
-                        authorCustomerId: Swift.String? = nil,
                         gameId: Swift.String? = nil,
                         kind: Swift.String? = nil,
                         key: Swift.String? = nil,
@@ -278726,7 +279118,6 @@ public enum Operations {
                         syncTxid: Swift.Int? = nil
                     ) {
                         self.ecosystemId = ecosystemId
-                        self.authorCustomerId = authorCustomerId
                         self.gameId = gameId
                         self.kind = kind
                         self.key = key
@@ -278737,7 +279128,6 @@ public enum Operations {
                     }
                     public enum CodingKeys: String, CodingKey {
                         case ecosystemId
-                        case authorCustomerId
                         case gameId
                         case kind
                         case key
@@ -278751,10 +279141,6 @@ public enum Operations {
                         self.ecosystemId = try container.decodeIfPresent(
                             Swift.String.self,
                             forKey: .ecosystemId
-                        )
-                        self.authorCustomerId = try container.decodeIfPresent(
-                            Swift.String.self,
-                            forKey: .authorCustomerId
                         )
                         self.gameId = try container.decodeIfPresent(
                             Swift.String.self,
@@ -278786,7 +279172,6 @@ public enum Operations {
                         )
                         try decoder.ensureNoAdditionalProperties(knownKeys: [
                             "ecosystemId",
-                            "authorCustomerId",
                             "gameId",
                             "kind",
                             "key",

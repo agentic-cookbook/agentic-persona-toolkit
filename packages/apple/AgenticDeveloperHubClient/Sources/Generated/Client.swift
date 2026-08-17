@@ -25057,6 +25057,180 @@ public struct Client: APIProtocol {
             }
         )
     }
+    /// Publish the caller’s own artifact to the public feed (screened)
+    ///
+    /// The write side §6.6 named and §6.3 owed: `visibility` and `published_at` are server-managed on `game.artifacts`, so this is the only way an artifact reaches `GET /game/feed`. Screening (§6.5) runs BEFORE the row flips, on every string the artifact carries — `text` plus every string leaf of `summary` and `data` — because adh cannot tell which jsonb slots hold player prose without doing the engine’s job. Long artifacts are screened in CHUNKS rather than truncated to the classifier’s character budget, which would publish the tail unjudged; past eight chunks the request is 422 rather than silently partly-screened. Idempotent: an already-published artifact returns 200 with the current row and calls no classifier, so a retry is free. 404 covers both "no such artifact" and "not yours" — the ownership term is in the UPDATE itself, so there is no check-then-write window. Publishing is one-way; withdrawing is `DELETE /game/artifacts/{id}`.
+    ///
+    /// - Remark: HTTP `POST /game/artifacts/{id}/publish`.
+    /// - Remark: Generated from `#/paths//game/artifacts/{id}/publish/post`.
+    public func postGameArtifactsIdPublish(_ input: Operations.PostGameArtifactsIdPublish.Input) async throws -> Operations.PostGameArtifactsIdPublish.Output {
+        try await client.send(
+            input: input,
+            forOperation: Operations.PostGameArtifactsIdPublish.id,
+            serializer: { input in
+                let path = try converter.renderedPath(
+                    template: "/game/artifacts/{}/publish",
+                    parameters: [
+                        input.path.id
+                    ]
+                )
+                var request: HTTPTypes.HTTPRequest = .init(
+                    soar_path: path,
+                    method: .post
+                )
+                suppressMutabilityWarning(&request)
+                converter.setAcceptHeader(
+                    in: &request.headerFields,
+                    contentTypes: input.headers.accept
+                )
+                return (request, nil)
+            },
+            deserializer: { response, responseBody in
+                switch response.status.code {
+                case 200:
+                    let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
+                    let body: Operations.PostGameArtifactsIdPublish.Output.Ok.Body
+                    let chosenContentType = try converter.bestContentType(
+                        received: contentType,
+                        options: [
+                            "application/json"
+                        ]
+                    )
+                    switch chosenContentType {
+                    case "application/json":
+                        body = try await converter.getResponseBodyAsJSON(
+                            Components.Schemas.GameArtifact.self,
+                            from: responseBody,
+                            transforming: { value in
+                                .json(value)
+                            }
+                        )
+                    default:
+                        preconditionFailure("bestContentType chose an invalid content type.")
+                    }
+                    return .ok(.init(body: body))
+                case 401:
+                    let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
+                    let body: Operations.PostGameArtifactsIdPublish.Output.Unauthorized.Body
+                    let chosenContentType = try converter.bestContentType(
+                        received: contentType,
+                        options: [
+                            "application/json"
+                        ]
+                    )
+                    switch chosenContentType {
+                    case "application/json":
+                        body = try await converter.getResponseBodyAsJSON(
+                            Components.Schemas._Error.self,
+                            from: responseBody,
+                            transforming: { value in
+                                .json(value)
+                            }
+                        )
+                    default:
+                        preconditionFailure("bestContentType chose an invalid content type.")
+                    }
+                    return .unauthorized(.init(body: body))
+                case 403:
+                    let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
+                    let body: Operations.PostGameArtifactsIdPublish.Output.Forbidden.Body
+                    let chosenContentType = try converter.bestContentType(
+                        received: contentType,
+                        options: [
+                            "application/json"
+                        ]
+                    )
+                    switch chosenContentType {
+                    case "application/json":
+                        body = try await converter.getResponseBodyAsJSON(
+                            Components.Schemas._Error.self,
+                            from: responseBody,
+                            transforming: { value in
+                                .json(value)
+                            }
+                        )
+                    default:
+                        preconditionFailure("bestContentType chose an invalid content type.")
+                    }
+                    return .forbidden(.init(body: body))
+                case 404:
+                    let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
+                    let body: Operations.PostGameArtifactsIdPublish.Output.NotFound.Body
+                    let chosenContentType = try converter.bestContentType(
+                        received: contentType,
+                        options: [
+                            "application/json"
+                        ]
+                    )
+                    switch chosenContentType {
+                    case "application/json":
+                        body = try await converter.getResponseBodyAsJSON(
+                            Components.Schemas._Error.self,
+                            from: responseBody,
+                            transforming: { value in
+                                .json(value)
+                            }
+                        )
+                    default:
+                        preconditionFailure("bestContentType chose an invalid content type.")
+                    }
+                    return .notFound(.init(body: body))
+                case 422:
+                    let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
+                    let body: Operations.PostGameArtifactsIdPublish.Output.UnprocessableContent.Body
+                    let chosenContentType = try converter.bestContentType(
+                        received: contentType,
+                        options: [
+                            "application/json"
+                        ]
+                    )
+                    switch chosenContentType {
+                    case "application/json":
+                        body = try await converter.getResponseBodyAsJSON(
+                            Components.Schemas._Error.self,
+                            from: responseBody,
+                            transforming: { value in
+                                .json(value)
+                            }
+                        )
+                    default:
+                        preconditionFailure("bestContentType chose an invalid content type.")
+                    }
+                    return .unprocessableContent(.init(body: body))
+                case 429:
+                    let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
+                    let body: Operations.PostGameArtifactsIdPublish.Output.TooManyRequests.Body
+                    let chosenContentType = try converter.bestContentType(
+                        received: contentType,
+                        options: [
+                            "application/json"
+                        ]
+                    )
+                    switch chosenContentType {
+                    case "application/json":
+                        body = try await converter.getResponseBodyAsJSON(
+                            Components.Schemas._Error.self,
+                            from: responseBody,
+                            transforming: { value in
+                                .json(value)
+                            }
+                        )
+                    default:
+                        preconditionFailure("bestContentType chose an invalid content type.")
+                    }
+                    return .tooManyRequests(.init(body: body))
+                default:
+                    return .undocumented(
+                        statusCode: response.status.code,
+                        .init(
+                            headerFields: response.headerFields,
+                            body: responseBody
+                        )
+                    )
+                }
+            }
+        )
+    }
     /// One game’s public artifact feed (anonymous, read replica)
     ///
     /// The hot path, and it carries no `security`: it serves published artifacts to signed-out visitors and runs on the read replica so it does not contend with authenticated traffic. Three predicates are the entire boundary — `visibility = 'public'`, `deleted_at is null`, and `ecosystem_id`. The ecosystem is taken from the resolved game row, never from the query string. A retired game is 404.
@@ -26152,7 +26326,7 @@ public struct Client: APIProtocol {
     }
     /// The caller’s own instances, including what is inside what they hold
     ///
-    /// A recursive containment walk: everything located on the player, plus everything located inside those, and so on — the chest in the inventory and the key in the chest. Two INDEPENDENT bounds, and neither substitutes for the other: a depth cap (default and maximum 32) cuts a containment cycle, and a hard row limit (2000) cuts breadth, because a cycle at depth 2 fanning out ten ways per level is still 10^32 rows inside the depth cap. `location_id` carries no FK, so nothing is read from the request: the player id comes from the caller’s own resolved profile. A caller who has never played gets an empty list, not a 404.
+    /// A recursive containment walk: everything located on the player, plus everything located inside those, and so on — the chest in the inventory and the key in the chest. Two INDEPENDENT bounds, and neither substitutes for the other: a depth cap (default and maximum 32) cuts a containment cycle, and a hard row limit (2000) cuts breadth, because a cycle at depth 2 fanning out ten ways per level is still 10^32 rows inside the depth cap. The row limit is applied BEFORE the sort, so a truncated walk returns the rows the walk reached first (shallowest first) rather than the smallest 2000 by sort key; on a well-formed world nothing is truncated and the two are the same. `location_id` carries no FK, so nothing is read from the request: the player id comes from the caller’s own resolved profile. A caller who has never played gets an empty list, not a 404.
     ///
     /// - Remark: HTTP `GET /game/instances`.
     /// - Remark: Generated from `#/paths//game/instances/get`.

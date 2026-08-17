@@ -16,7 +16,6 @@ class PostGamePlayersBody:
         first_played_at (str):
         last_played_at (str):
         ecosystem_id (Union[Unset, str]):
-        character_name (Union[None, Unset, str]):
         character_avatar_url (Union[None, Unset, str]):
         visibility (Union[Unset, str]):
         sync_txid (Union[Unset, int]):
@@ -26,7 +25,6 @@ class PostGamePlayersBody:
     first_played_at: str
     last_played_at: str
     ecosystem_id: Unset | str = UNSET
-    character_name: None | Unset | str = UNSET
     character_avatar_url: None | Unset | str = UNSET
     visibility: Unset | str = UNSET
     sync_txid: Unset | int = UNSET
@@ -40,13 +38,7 @@ class PostGamePlayersBody:
 
         ecosystem_id = self.ecosystem_id
 
-        character_name: None | Unset | str
-        if isinstance(self.character_name, Unset):
-            character_name = UNSET
-        else:
-            character_name = self.character_name
-
-        character_avatar_url: None | Unset | str
+        character_avatar_url: Unset | str | None
         if isinstance(self.character_avatar_url, Unset):
             character_avatar_url = UNSET
         else:
@@ -67,8 +59,6 @@ class PostGamePlayersBody:
         )
         if ecosystem_id is not UNSET:
             field_dict["ecosystemId"] = ecosystem_id
-        if character_name is not UNSET:
-            field_dict["characterName"] = character_name
         if character_avatar_url is not UNSET:
             field_dict["characterAvatarUrl"] = character_avatar_url
         if visibility is not UNSET:
@@ -89,15 +79,6 @@ class PostGamePlayersBody:
 
         ecosystem_id = d.pop("ecosystemId", UNSET)
 
-        def _parse_character_name(data: object) -> None | Unset | str:
-            if data is None:
-                return data
-            if isinstance(data, Unset):
-                return data
-            return cast(None | Unset | str, data)
-
-        character_name = _parse_character_name(d.pop("characterName", UNSET))
-
         def _parse_character_avatar_url(data: object) -> None | Unset | str:
             if data is None:
                 return data
@@ -116,7 +97,6 @@ class PostGamePlayersBody:
             first_played_at=first_played_at,
             last_played_at=last_played_at,
             ecosystem_id=ecosystem_id,
-            character_name=character_name,
             character_avatar_url=character_avatar_url,
             visibility=visibility,
             sync_txid=sync_txid,

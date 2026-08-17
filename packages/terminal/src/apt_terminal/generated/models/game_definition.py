@@ -63,19 +63,19 @@ class GameDefinition:
 
         updated_at = self.updated_at
 
-        description: None | Unset | str
+        description: Unset | str | None
         if isinstance(self.description, Unset):
             description = UNSET
         else:
             description = self.description
 
-        author_customer_id: None | Unset | str
+        author_customer_id: Unset | str | None
         if isinstance(self.author_customer_id, Unset):
             author_customer_id = UNSET
         else:
             author_customer_id = self.author_customer_id
 
-        data: None | Unset | dict[str, Any]
+        data: Unset | dict[str, Any] | None
         if isinstance(self.data, Unset):
             data = UNSET
         elif isinstance(self.data, GameDefinitionDataType0):

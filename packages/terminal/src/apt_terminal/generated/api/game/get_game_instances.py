@@ -93,9 +93,11 @@ def sync_detailed(
     those, and so on — the chest in the inventory and the key in the chest. Two INDEPENDENT bounds, and
     neither substitutes for the other: a depth cap (default and maximum 32) cuts a containment cycle,
     and a hard row limit (2000) cuts breadth, because a cycle at depth 2 fanning out ten ways per level
-    is still 10^32 rows inside the depth cap. `location_id` carries no FK, so nothing is read from the
-    request: the player id comes from the caller’s own resolved profile. A caller who has never played
-    gets an empty list, not a 404.
+    is still 10^32 rows inside the depth cap. The row limit is applied BEFORE the sort, so a truncated
+    walk returns the rows the walk reached first (shallowest first) rather than the smallest 2000 by
+    sort key; on a well-formed world nothing is truncated and the two are the same. `location_id`
+    carries no FK, so nothing is read from the request: the player id comes from the caller’s own
+    resolved profile. A caller who has never played gets an empty list, not a 404.
 
     Args:
         game_id (Union[Unset, str]):
@@ -136,9 +138,11 @@ def sync(
     those, and so on — the chest in the inventory and the key in the chest. Two INDEPENDENT bounds, and
     neither substitutes for the other: a depth cap (default and maximum 32) cuts a containment cycle,
     and a hard row limit (2000) cuts breadth, because a cycle at depth 2 fanning out ten ways per level
-    is still 10^32 rows inside the depth cap. `location_id` carries no FK, so nothing is read from the
-    request: the player id comes from the caller’s own resolved profile. A caller who has never played
-    gets an empty list, not a 404.
+    is still 10^32 rows inside the depth cap. The row limit is applied BEFORE the sort, so a truncated
+    walk returns the rows the walk reached first (shallowest first) rather than the smallest 2000 by
+    sort key; on a well-formed world nothing is truncated and the two are the same. `location_id`
+    carries no FK, so nothing is read from the request: the player id comes from the caller’s own
+    resolved profile. A caller who has never played gets an empty list, not a 404.
 
     Args:
         game_id (Union[Unset, str]):
@@ -174,9 +178,11 @@ async def asyncio_detailed(
     those, and so on — the chest in the inventory and the key in the chest. Two INDEPENDENT bounds, and
     neither substitutes for the other: a depth cap (default and maximum 32) cuts a containment cycle,
     and a hard row limit (2000) cuts breadth, because a cycle at depth 2 fanning out ten ways per level
-    is still 10^32 rows inside the depth cap. `location_id` carries no FK, so nothing is read from the
-    request: the player id comes from the caller’s own resolved profile. A caller who has never played
-    gets an empty list, not a 404.
+    is still 10^32 rows inside the depth cap. The row limit is applied BEFORE the sort, so a truncated
+    walk returns the rows the walk reached first (shallowest first) rather than the smallest 2000 by
+    sort key; on a well-formed world nothing is truncated and the two are the same. `location_id`
+    carries no FK, so nothing is read from the request: the player id comes from the caller’s own
+    resolved profile. A caller who has never played gets an empty list, not a 404.
 
     Args:
         game_id (Union[Unset, str]):
@@ -215,9 +221,11 @@ async def asyncio(
     those, and so on — the chest in the inventory and the key in the chest. Two INDEPENDENT bounds, and
     neither substitutes for the other: a depth cap (default and maximum 32) cuts a containment cycle,
     and a hard row limit (2000) cuts breadth, because a cycle at depth 2 fanning out ten ways per level
-    is still 10^32 rows inside the depth cap. `location_id` carries no FK, so nothing is read from the
-    request: the player id comes from the caller’s own resolved profile. A caller who has never played
-    gets an empty list, not a 404.
+    is still 10^32 rows inside the depth cap. The row limit is applied BEFORE the sort, so a truncated
+    walk returns the rows the walk reached first (shallowest first) rather than the smallest 2000 by
+    sort key; on a well-formed world nothing is truncated and the two are the same. `location_id`
+    carries no FK, so nothing is read from the request: the player id comes from the caller’s own
+    resolved profile. A caller who has never played gets an empty list, not a 404.
 
     Args:
         game_id (Union[Unset, str]):

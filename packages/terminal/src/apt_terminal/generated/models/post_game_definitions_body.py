@@ -23,7 +23,6 @@ class PostGameDefinitionsBody:
         key (str):
         name (str):
         ecosystem_id (Union[Unset, str]):
-        author_customer_id (Union[Unset, str]):
         description (Union[None, Unset, str]):
         status (Union[Unset, str]):
         sort_order (Union[Unset, int]):
@@ -36,7 +35,6 @@ class PostGameDefinitionsBody:
     key: str
     name: str
     ecosystem_id: Unset | str = UNSET
-    author_customer_id: Unset | str = UNSET
     description: None | Unset | str = UNSET
     status: Unset | str = UNSET
     sort_order: Unset | int = UNSET
@@ -60,9 +58,7 @@ class PostGameDefinitionsBody:
 
         ecosystem_id = self.ecosystem_id
 
-        author_customer_id = self.author_customer_id
-
-        description: None | Unset | str
+        description: Unset | str | None
         if isinstance(self.description, Unset):
             description = UNSET
         else:
@@ -72,7 +68,7 @@ class PostGameDefinitionsBody:
 
         sort_order = self.sort_order
 
-        data: None | Unset | bool | dict[str, Any] | float | list[Any] | str
+        data: Unset | bool | dict[str, Any] | float | list[Any] | str | None
         if isinstance(self.data, Unset):
             data = UNSET
         elif isinstance(self.data, PostGameDefinitionsBodyDataType0Type1):
@@ -97,8 +93,6 @@ class PostGameDefinitionsBody:
         )
         if ecosystem_id is not UNSET:
             field_dict["ecosystemId"] = ecosystem_id
-        if author_customer_id is not UNSET:
-            field_dict["authorCustomerId"] = author_customer_id
         if description is not UNSET:
             field_dict["description"] = description
         if status is not UNSET:
@@ -128,8 +122,6 @@ class PostGameDefinitionsBody:
         name = d.pop("name")
 
         ecosystem_id = d.pop("ecosystemId", UNSET)
-
-        author_customer_id = d.pop("authorCustomerId", UNSET)
 
         def _parse_description(data: object) -> None | Unset | str:
             if data is None:
@@ -192,7 +184,6 @@ class PostGameDefinitionsBody:
             key=key,
             name=name,
             ecosystem_id=ecosystem_id,
-            author_customer_id=author_customer_id,
             description=description,
             status=status,
             sort_order=sort_order,

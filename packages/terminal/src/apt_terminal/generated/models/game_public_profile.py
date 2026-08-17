@@ -53,19 +53,19 @@ class GamePublicProfile:
             stats_item = stats_item_data.to_dict()
             stats.append(stats_item)
 
-        name: None | Unset | str
+        name: Unset | str | None
         if isinstance(self.name, Unset):
             name = UNSET
         else:
             name = self.name
 
-        character_name: None | Unset | str
+        character_name: Unset | str | None
         if isinstance(self.character_name, Unset):
             character_name = UNSET
         else:
             character_name = self.character_name
 
-        character_avatar_url: None | Unset | str
+        character_avatar_url: Unset | str | None
         if isinstance(self.character_avatar_url, Unset):
             character_avatar_url = UNSET
         else:
@@ -73,7 +73,7 @@ class GamePublicProfile:
 
         first_played_at = self.first_played_at
 
-        last_played_at: None | Unset | str
+        last_played_at: Unset | str | None
         if isinstance(self.last_played_at, Unset):
             last_played_at = UNSET
         else:

@@ -60,7 +60,7 @@ class GameEvent:
 
         occurred_at = self.occurred_at
 
-        input_: None | Unset | dict[str, Any]
+        input_: Unset | dict[str, Any] | None
         if isinstance(self.input_, Unset):
             input_ = UNSET
         elif isinstance(self.input_, GameEventInputType0):
@@ -68,7 +68,7 @@ class GameEvent:
         else:
             input_ = self.input_
 
-        output: None | Unset | dict[str, Any]
+        output: Unset | dict[str, Any] | None
         if isinstance(self.output, Unset):
             output = UNSET
         elif isinstance(self.output, GameEventOutputType0):
@@ -76,7 +76,7 @@ class GameEvent:
         else:
             output = self.output
 
-        cost: None | Unset | dict[str, Any]
+        cost: Unset | dict[str, Any] | None
         if isinstance(self.cost, Unset):
             cost = UNSET
         elif isinstance(self.cost, GameEventCostType0):
@@ -84,7 +84,7 @@ class GameEvent:
         else:
             cost = self.cost
 
-        artifact_id: None | Unset | str
+        artifact_id: Unset | str | None
         if isinstance(self.artifact_id, Unset):
             artifact_id = UNSET
         else:

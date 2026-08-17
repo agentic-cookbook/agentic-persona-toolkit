@@ -66,7 +66,7 @@ class PutGameEffectsIdResponse200:
 
         value = self.value
 
-        duration: None | int
+        duration: int | None
         duration = self.duration
 
         sort_order = self.sort_order
@@ -75,12 +75,12 @@ class PutGameEffectsIdResponse200:
 
         updated_at = self.updated_at
 
-        deleted_at: None | str
+        deleted_at: str | None
         deleted_at = self.deleted_at
 
         sync_version = self.sync_version
 
-        sync_stamped_at: None | str
+        sync_stamped_at: str | None
         sync_stamped_at = self.sync_stamped_at
 
         sync_txid = self.sync_txid

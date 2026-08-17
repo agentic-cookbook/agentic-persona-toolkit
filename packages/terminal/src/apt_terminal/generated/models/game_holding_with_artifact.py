@@ -64,7 +64,7 @@ class GameHoldingWithArtifact:
 
         acquired_at = self.acquired_at
 
-        data: None | Unset | dict[str, Any]
+        data: Unset | dict[str, Any] | None
         if isinstance(self.data, Unset):
             data = UNSET
         elif isinstance(self.data, GameHoldingWithArtifactDataType0):
@@ -74,13 +74,13 @@ class GameHoldingWithArtifact:
 
         artifact_kind = self.artifact_kind
 
-        artifact_slot: None | Unset | str
+        artifact_slot: Unset | str | None
         if isinstance(self.artifact_slot, Unset):
             artifact_slot = UNSET
         else:
             artifact_slot = self.artifact_slot
 
-        artifact_summary: None | Unset | dict[str, Any]
+        artifact_summary: Unset | dict[str, Any] | None
         if isinstance(self.artifact_summary, Unset):
             artifact_summary = UNSET
         elif isinstance(self.artifact_summary, GameHoldingWithArtifactArtifactSummaryType0):

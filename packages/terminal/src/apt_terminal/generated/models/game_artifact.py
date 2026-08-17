@@ -83,13 +83,13 @@ class GameArtifact:
 
         updated_at = self.updated_at
 
-        slot: None | Unset | str
+        slot: Unset | str | None
         if isinstance(self.slot, Unset):
             slot = UNSET
         else:
             slot = self.slot
 
-        data: None | Unset | dict[str, Any]
+        data: Unset | dict[str, Any] | None
         if isinstance(self.data, Unset):
             data = UNSET
         elif isinstance(self.data, GameArtifactDataType0):
@@ -97,25 +97,25 @@ class GameArtifact:
         else:
             data = self.data
 
-        text: None | Unset | str
+        text: Unset | str | None
         if isinstance(self.text, Unset):
             text = UNSET
         else:
             text = self.text
 
-        content_format: None | Unset | str
+        content_format: Unset | str | None
         if isinstance(self.content_format, Unset):
             content_format = UNSET
         else:
             content_format = self.content_format
 
-        engine_version: None | Unset | str
+        engine_version: Unset | str | None
         if isinstance(self.engine_version, Unset):
             engine_version = UNSET
         else:
             engine_version = self.engine_version
 
-        summary: None | Unset | dict[str, Any]
+        summary: Unset | dict[str, Any] | None
         if isinstance(self.summary, Unset):
             summary = UNSET
         elif isinstance(self.summary, GameArtifactSummaryType0):
@@ -127,13 +127,13 @@ class GameArtifact:
 
         score = self.score
 
-        published_at: None | Unset | str
+        published_at: Unset | str | None
         if isinstance(self.published_at, Unset):
             published_at = UNSET
         else:
             published_at = self.published_at
 
-        last_active_at: None | Unset | str
+        last_active_at: Unset | str | None
         if isinstance(self.last_active_at, Unset):
             last_active_at = UNSET
         else:

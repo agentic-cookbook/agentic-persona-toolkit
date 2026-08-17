@@ -54,7 +54,7 @@ class PutGameEffectsIdBody:
 
         value = self.value
 
-        duration: None | Unset | int
+        duration: Unset | int | None
         if isinstance(self.duration, Unset):
             duration = UNSET
         else:

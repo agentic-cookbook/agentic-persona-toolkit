@@ -56,7 +56,7 @@ class PutGameGamesIdBody:
 
         name = self.name
 
-        description: None | Unset | str
+        description: Unset | str | None
         if isinstance(self.description, Unset):
             description = UNSET
         else:
@@ -64,7 +64,7 @@ class PutGameGamesIdBody:
 
         engine = self.engine
 
-        engine_config: None | Unset | bool | dict[str, Any] | float | list[Any] | str
+        engine_config: Unset | bool | dict[str, Any] | float | list[Any] | str | None
         if isinstance(self.engine_config, Unset):
             engine_config = UNSET
         elif isinstance(self.engine_config, PutGameGamesIdBodyEngineConfigType1):

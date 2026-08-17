@@ -32,7 +32,7 @@ class GamePlayerStat:
 
         value = self.value
 
-        label: None | Unset | str
+        label: Unset | str | None
         if isinstance(self.label, Unset):
             label = UNSET
         else:

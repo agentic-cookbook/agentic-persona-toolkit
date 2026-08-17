@@ -68,12 +68,12 @@ class GetGameGamesIdResponse200:
 
         name = self.name
 
-        description: None | str
+        description: str | None
         description = self.description
 
         engine = self.engine
 
-        engine_config: None | bool | dict[str, Any] | float | list[Any] | str
+        engine_config: bool | dict[str, Any] | float | list[Any] | str | None
         if isinstance(self.engine_config, GetGameGamesIdResponse200EngineConfigType1):
             engine_config = self.engine_config.to_dict()
         elif isinstance(self.engine_config, list):
@@ -94,12 +94,12 @@ class GetGameGamesIdResponse200:
 
         updated_at = self.updated_at
 
-        deleted_at: None | str
+        deleted_at: str | None
         deleted_at = self.deleted_at
 
         sync_version = self.sync_version
 
-        sync_stamped_at: None | str
+        sync_stamped_at: str | None
         sync_stamped_at = self.sync_stamped_at
 
         sync_txid = self.sync_txid

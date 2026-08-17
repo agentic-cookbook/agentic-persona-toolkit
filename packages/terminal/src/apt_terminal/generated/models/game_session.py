@@ -58,19 +58,19 @@ class GameSession:
 
         started_at = self.started_at
 
-        chat_id: None | Unset | str
+        chat_id: Unset | str | None
         if isinstance(self.chat_id, Unset):
             chat_id = UNSET
         else:
             chat_id = self.chat_id
 
-        subject_artifact_id: None | Unset | str
+        subject_artifact_id: Unset | str | None
         if isinstance(self.subject_artifact_id, Unset):
             subject_artifact_id = UNSET
         else:
             subject_artifact_id = self.subject_artifact_id
 
-        payload: None | Unset | dict[str, Any]
+        payload: Unset | dict[str, Any] | None
         if isinstance(self.payload, Unset):
             payload = UNSET
         elif isinstance(self.payload, GameSessionPayloadType0):
@@ -78,7 +78,7 @@ class GameSession:
         else:
             payload = self.payload
 
-        ended_at: None | Unset | str
+        ended_at: Unset | str | None
         if isinstance(self.ended_at, Unset):
             ended_at = UNSET
         else:

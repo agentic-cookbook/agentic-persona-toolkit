@@ -19,7 +19,6 @@ class PutGameDefinitionsIdBody:
     """
     Attributes:
         ecosystem_id (Union[Unset, str]):
-        author_customer_id (Union[Unset, str]):
         game_id (Union[Unset, str]):
         kind (Union[Unset, str]):
         key (Union[Unset, str]):
@@ -32,7 +31,6 @@ class PutGameDefinitionsIdBody:
     """
 
     ecosystem_id: Unset | str = UNSET
-    author_customer_id: Unset | str = UNSET
     game_id: Unset | str = UNSET
     kind: Unset | str = UNSET
     key: Unset | str = UNSET
@@ -52,8 +50,6 @@ class PutGameDefinitionsIdBody:
 
         ecosystem_id = self.ecosystem_id
 
-        author_customer_id = self.author_customer_id
-
         game_id = self.game_id
 
         kind = self.kind
@@ -62,7 +58,7 @@ class PutGameDefinitionsIdBody:
 
         name = self.name
 
-        description: None | Unset | str
+        description: Unset | str | None
         if isinstance(self.description, Unset):
             description = UNSET
         else:
@@ -72,7 +68,7 @@ class PutGameDefinitionsIdBody:
 
         sort_order = self.sort_order
 
-        data: None | Unset | bool | dict[str, Any] | float | list[Any] | str
+        data: Unset | bool | dict[str, Any] | float | list[Any] | str | None
         if isinstance(self.data, Unset):
             data = UNSET
         elif isinstance(self.data, PutGameDefinitionsIdBodyDataType0Type1):
@@ -90,8 +86,6 @@ class PutGameDefinitionsIdBody:
         field_dict.update({})
         if ecosystem_id is not UNSET:
             field_dict["ecosystemId"] = ecosystem_id
-        if author_customer_id is not UNSET:
-            field_dict["authorCustomerId"] = author_customer_id
         if game_id is not UNSET:
             field_dict["gameId"] = game_id
         if kind is not UNSET:
@@ -121,8 +115,6 @@ class PutGameDefinitionsIdBody:
 
         d = dict(src_dict)
         ecosystem_id = d.pop("ecosystemId", UNSET)
-
-        author_customer_id = d.pop("authorCustomerId", UNSET)
 
         game_id = d.pop("gameId", UNSET)
 
@@ -189,7 +181,6 @@ class PutGameDefinitionsIdBody:
 
         put_game_definitions_id_body = cls(
             ecosystem_id=ecosystem_id,
-            author_customer_id=author_customer_id,
             game_id=game_id,
             kind=kind,
             key=key,
