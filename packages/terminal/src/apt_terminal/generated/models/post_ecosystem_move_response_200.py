@@ -1,54 +1,41 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import TYPE_CHECKING, Any, TypeVar, Union
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 from ..types import UNSET, Unset
 
-from ..types import UNSET, Unset
-from typing import cast
-from typing import Union
-
 if TYPE_CHECKING:
-  from ..models.post_ecosystem_move_response_200_moved import PostEcosystemMoveResponse200Moved
-
-
-
+    from ..models.post_ecosystem_move_response_200_moved import PostEcosystemMoveResponse200Moved
 
 
 T = TypeVar("T", bound="PostEcosystemMoveResponse200")
 
 
-
 @_attrs_define
 class PostEcosystemMoveResponse200:
-    """ 
-        Attributes:
-            schema (Union[Unset, str]):
-            table (Union[Unset, str]):
-            id (Union[Unset, str]):
-            from_ (Union[Unset, str]):
-            to (Union[Unset, str]):
-            dry_run (Union[Unset, bool]):
-            moved (Union[Unset, PostEcosystemMoveResponse200Moved]):
-     """
+    """
+    Attributes:
+        schema (Union[Unset, str]):
+        table (Union[Unset, str]):
+        id (Union[Unset, str]):
+        from_ (Union[Unset, str]):
+        to (Union[Unset, str]):
+        dry_run (Union[Unset, bool]):
+        moved (Union[Unset, PostEcosystemMoveResponse200Moved]):
+    """
 
-    schema: Union[Unset, str] = UNSET
-    table: Union[Unset, str] = UNSET
-    id: Union[Unset, str] = UNSET
-    from_: Union[Unset, str] = UNSET
-    to: Union[Unset, str] = UNSET
-    dry_run: Union[Unset, bool] = UNSET
-    moved: Union[Unset, 'PostEcosystemMoveResponse200Moved'] = UNSET
+    schema: Unset | str = UNSET
+    table: Unset | str = UNSET
+    id: Unset | str = UNSET
+    from_: Unset | str = UNSET
+    to: Unset | str = UNSET
+    dry_run: Unset | bool = UNSET
+    moved: Union[Unset, "PostEcosystemMoveResponse200Moved"] = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
-
-
-
-
     def to_dict(self) -> dict[str, Any]:
-        from ..models.post_ecosystem_move_response_200_moved import PostEcosystemMoveResponse200Moved
         schema = self.schema
 
         table = self.table
@@ -61,15 +48,13 @@ class PostEcosystemMoveResponse200:
 
         dry_run = self.dry_run
 
-        moved: Union[Unset, dict[str, Any]] = UNSET
+        moved: Unset | dict[str, Any] = UNSET
         if not isinstance(self.moved, Unset):
             moved = self.moved.to_dict()
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-        })
+        field_dict.update({})
         if schema is not UNSET:
             field_dict["schema"] = schema
         if table is not UNSET:
@@ -87,11 +72,12 @@ class PostEcosystemMoveResponse200:
 
         return field_dict
 
-
-
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.post_ecosystem_move_response_200_moved import PostEcosystemMoveResponse200Moved
+        from ..models.post_ecosystem_move_response_200_moved import (
+            PostEcosystemMoveResponse200Moved,
+        )
+
         d = dict(src_dict)
         schema = d.pop("schema", UNSET)
 
@@ -106,14 +92,11 @@ class PostEcosystemMoveResponse200:
         dry_run = d.pop("dryRun", UNSET)
 
         _moved = d.pop("moved", UNSET)
-        moved: Union[Unset, PostEcosystemMoveResponse200Moved]
-        if isinstance(_moved,  Unset):
+        moved: Unset | PostEcosystemMoveResponse200Moved
+        if isinstance(_moved, Unset):
             moved = UNSET
         else:
             moved = PostEcosystemMoveResponse200Moved.from_dict(_moved)
-
-
-
 
         post_ecosystem_move_response_200 = cls(
             schema=schema,
@@ -124,7 +107,6 @@ class PostEcosystemMoveResponse200:
             dry_run=dry_run,
             moved=moved,
         )
-
 
         post_ecosystem_move_response_200.additional_properties = d
         return post_ecosystem_move_response_200

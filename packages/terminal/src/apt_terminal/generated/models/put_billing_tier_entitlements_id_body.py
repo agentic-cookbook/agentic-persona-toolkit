@@ -1,41 +1,27 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
-from attrs import field as _attrs_field
 
 from ..types import UNSET, Unset
-
-from ..types import UNSET, Unset
-from typing import Union
-
-
-
-
-
 
 T = TypeVar("T", bound="PutBillingTierEntitlementsIdBody")
 
 
-
 @_attrs_define
 class PutBillingTierEntitlementsIdBody:
-    """ 
-        Attributes:
-            tier_id (Union[Unset, str]):
-            entitlement_key (Union[Unset, str]):
-            value_type (Union[Unset, str]):
-            value (Union[Unset, str]):
-     """
+    """
+    Attributes:
+        tier_id (Union[Unset, str]):
+        entitlement_key (Union[Unset, str]):
+        value_type (Union[Unset, str]):
+        value (Union[Unset, str]):
+    """
 
-    tier_id: Union[Unset, str] = UNSET
-    entitlement_key: Union[Unset, str] = UNSET
-    value_type: Union[Unset, str] = UNSET
-    value: Union[Unset, str] = UNSET
-
-
-
-
+    tier_id: Unset | str = UNSET
+    entitlement_key: Unset | str = UNSET
+    value_type: Unset | str = UNSET
+    value: Unset | str = UNSET
 
     def to_dict(self) -> dict[str, Any]:
         tier_id = self.tier_id
@@ -46,11 +32,9 @@ class PutBillingTierEntitlementsIdBody:
 
         value = self.value
 
-
         field_dict: dict[str, Any] = {}
 
-        field_dict.update({
-        })
+        field_dict.update({})
         if tier_id is not UNSET:
             field_dict["tierId"] = tier_id
         if entitlement_key is not UNSET:
@@ -61,8 +45,6 @@ class PutBillingTierEntitlementsIdBody:
             field_dict["value"] = value
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -83,4 +65,3 @@ class PutBillingTierEntitlementsIdBody:
         )
 
         return put_billing_tier_entitlements_id_body
-

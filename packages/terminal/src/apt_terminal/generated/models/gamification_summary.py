@@ -1,53 +1,39 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import TYPE_CHECKING, Any, TypeVar, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 from ..types import UNSET, Unset
 
-from ..types import UNSET, Unset
-from typing import cast
-from typing import cast, Union
-from typing import Union
-
 if TYPE_CHECKING:
-  from ..models.gamification_subject_badge import GamificationSubjectBadge
-
-
-
+    from ..models.gamification_subject_badge import GamificationSubjectBadge
 
 
 T = TypeVar("T", bound="GamificationSummary")
 
 
-
 @_attrs_define
 class GamificationSummary:
-    """ 
-        Attributes:
-            subject_type (str):
-            subject_id (str):
-            total_points (int):
-            opted_out (bool):
-            badges (list['GamificationSubjectBadge']):
-            level (Union[None, Unset, str]):
-     """
+    """
+    Attributes:
+        subject_type (str):
+        subject_id (str):
+        total_points (int):
+        opted_out (bool):
+        badges (list['GamificationSubjectBadge']):
+        level (Union[None, Unset, str]):
+    """
 
     subject_type: str
     subject_id: str
     total_points: int
     opted_out: bool
-    badges: list['GamificationSubjectBadge']
-    level: Union[None, Unset, str] = UNSET
+    badges: list["GamificationSubjectBadge"]
+    level: None | Unset | str = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
-
-
-
-
     def to_dict(self) -> dict[str, Any]:
-        from ..models.gamification_subject_badge import GamificationSubjectBadge
         subject_type = self.subject_type
 
         subject_id = self.subject_id
@@ -61,34 +47,32 @@ class GamificationSummary:
             badges_item = badges_item_data.to_dict()
             badges.append(badges_item)
 
-
-
-        level: Union[None, Unset, str]
+        level: None | Unset | str
         if isinstance(self.level, Unset):
             level = UNSET
         else:
             level = self.level
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "subjectType": subject_type,
-            "subjectId": subject_id,
-            "totalPoints": total_points,
-            "optedOut": opted_out,
-            "badges": badges,
-        })
+        field_dict.update(
+            {
+                "subjectType": subject_type,
+                "subjectId": subject_id,
+                "totalPoints": total_points,
+                "optedOut": opted_out,
+                "badges": badges,
+            }
+        )
         if level is not UNSET:
             field_dict["level"] = level
 
         return field_dict
 
-
-
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.gamification_subject_badge import GamificationSubjectBadge
+
         d = dict(src_dict)
         subject_type = d.pop("subjectType")
 
@@ -100,23 +84,19 @@ class GamificationSummary:
 
         badges = []
         _badges = d.pop("badges")
-        for badges_item_data in (_badges):
+        for badges_item_data in _badges:
             badges_item = GamificationSubjectBadge.from_dict(badges_item_data)
-
-
 
             badges.append(badges_item)
 
-
-        def _parse_level(data: object) -> Union[None, Unset, str]:
+        def _parse_level(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         level = _parse_level(d.pop("level", UNSET))
-
 
         gamification_summary = cls(
             subject_type=subject_type,
@@ -126,7 +106,6 @@ class GamificationSummary:
             badges=badges,
             level=level,
         )
-
 
         gamification_summary.additional_properties = d
         return gamification_summary

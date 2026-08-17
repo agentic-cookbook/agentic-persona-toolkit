@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class PostPersonaMemoryGlobalBodySource(str, Enum):
     INFERRED = "inferred"
     TOOL = "tool"

@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class ContactMethodType(str, Enum):
     EMAIL = "email"
     PHONE = "phone"

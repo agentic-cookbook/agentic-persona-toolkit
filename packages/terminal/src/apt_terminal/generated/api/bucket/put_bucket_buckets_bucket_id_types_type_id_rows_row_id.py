@@ -1,16 +1,13 @@
 from http import HTTPStatus
-from typing import Any, Optional, Union, cast
+from typing import Any
 
 import httpx
 
-from ...client import AuthenticatedClient, Client
-from ...types import Response, UNSET
 from ... import errors
-
+from ...client import AuthenticatedClient, Client
 from ...models.bucket_row import BucketRow
 from ...models.error import Error
-from typing import cast
-
+from ...types import UNSET, Response
 
 
 def _get_kwargs(
@@ -21,12 +18,8 @@ def _get_kwargs(
     body: BucketRow,
     as_type: str,
     as_id: str,
-
 ) -> dict[str, Any]:
     headers: dict[str, Any] = {}
-
-
-    
 
     params: dict[str, Any] = {}
 
@@ -34,18 +27,15 @@ def _get_kwargs(
 
     params["asId"] = as_id
 
-
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
-
 
     _kwargs: dict[str, Any] = {
         "method": "put",
-        "url": "/bucket/buckets/{bucket_id}/types/{type_id}/rows/{row_id}".format(bucket_id=bucket_id,type_id=type_id,row_id=row_id,),
+        "url": f"/bucket/buckets/{bucket_id}/types/{type_id}/rows/{row_id}",
         "params": params,
     }
 
     _kwargs["json"] = body.to_dict()
-
 
     headers["Content-Type"] = "application/json"
 
@@ -53,40 +43,31 @@ def _get_kwargs(
     return _kwargs
 
 
-
-def _parse_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Optional[Union[BucketRow, Error]]:
+def _parse_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> BucketRow | Error | None:
     if response.status_code == 200:
         response_200 = BucketRow.from_dict(response.json())
-
-
 
         return response_200
 
     if response.status_code == 400:
         response_400 = Error.from_dict(response.json())
 
-
-
         return response_400
 
     if response.status_code == 401:
         response_401 = Error.from_dict(response.json())
-
-
 
         return response_401
 
     if response.status_code == 403:
         response_403 = Error.from_dict(response.json())
 
-
-
         return response_403
 
     if response.status_code == 404:
         response_404 = Error.from_dict(response.json())
-
-
 
         return response_404
 
@@ -96,7 +77,9 @@ def _parse_response(*, client: Union[AuthenticatedClient, Client], response: htt
         return None
 
 
-def _build_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Response[Union[BucketRow, Error]]:
+def _build_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Response[BucketRow | Error]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -114,9 +97,8 @@ def sync_detailed(
     body: BucketRow,
     as_type: str,
     as_id: str,
-
-) -> Response[Union[BucketRow, Error]]:
-    """ Update a bucket-type row (acting as an app/persona)
+) -> Response[BucketRow | Error]:
+    """Update a bucket-type row (acting as an app/persona)
 
     Args:
         bucket_id (str):
@@ -134,17 +116,15 @@ def sync_detailed(
 
     Returns:
         Response[Union[BucketRow, Error]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         bucket_id=bucket_id,
-type_id=type_id,
-row_id=row_id,
-body=body,
-as_type=as_type,
-as_id=as_id,
-
+        type_id=type_id,
+        row_id=row_id,
+        body=body,
+        as_type=as_type,
+        as_id=as_id,
     )
 
     response = client.get_httpx_client().request(
@@ -152,6 +132,7 @@ as_id=as_id,
     )
 
     return _build_response(client=client, response=response)
+
 
 def sync(
     bucket_id: str,
@@ -162,9 +143,8 @@ def sync(
     body: BucketRow,
     as_type: str,
     as_id: str,
-
-) -> Optional[Union[BucketRow, Error]]:
-    """ Update a bucket-type row (acting as an app/persona)
+) -> BucketRow | Error | None:
+    """Update a bucket-type row (acting as an app/persona)
 
     Args:
         bucket_id (str):
@@ -182,19 +162,18 @@ def sync(
 
     Returns:
         Union[BucketRow, Error]
-     """
-
+    """
 
     return sync_detailed(
         bucket_id=bucket_id,
-type_id=type_id,
-row_id=row_id,
-client=client,
-body=body,
-as_type=as_type,
-as_id=as_id,
-
+        type_id=type_id,
+        row_id=row_id,
+        client=client,
+        body=body,
+        as_type=as_type,
+        as_id=as_id,
     ).parsed
+
 
 async def asyncio_detailed(
     bucket_id: str,
@@ -205,9 +184,8 @@ async def asyncio_detailed(
     body: BucketRow,
     as_type: str,
     as_id: str,
-
-) -> Response[Union[BucketRow, Error]]:
-    """ Update a bucket-type row (acting as an app/persona)
+) -> Response[BucketRow | Error]:
+    """Update a bucket-type row (acting as an app/persona)
 
     Args:
         bucket_id (str):
@@ -225,24 +203,21 @@ async def asyncio_detailed(
 
     Returns:
         Response[Union[BucketRow, Error]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         bucket_id=bucket_id,
-type_id=type_id,
-row_id=row_id,
-body=body,
-as_type=as_type,
-as_id=as_id,
-
+        type_id=type_id,
+        row_id=row_id,
+        body=body,
+        as_type=as_type,
+        as_id=as_id,
     )
 
-    response = await client.get_async_httpx_client().request(
-        **kwargs
-    )
+    response = await client.get_async_httpx_client().request(**kwargs)
 
     return _build_response(client=client, response=response)
+
 
 async def asyncio(
     bucket_id: str,
@@ -253,9 +228,8 @@ async def asyncio(
     body: BucketRow,
     as_type: str,
     as_id: str,
-
-) -> Optional[Union[BucketRow, Error]]:
-    """ Update a bucket-type row (acting as an app/persona)
+) -> BucketRow | Error | None:
+    """Update a bucket-type row (acting as an app/persona)
 
     Args:
         bucket_id (str):
@@ -273,16 +247,16 @@ async def asyncio(
 
     Returns:
         Union[BucketRow, Error]
-     """
+    """
 
-
-    return (await asyncio_detailed(
-        bucket_id=bucket_id,
-type_id=type_id,
-row_id=row_id,
-client=client,
-body=body,
-as_type=as_type,
-as_id=as_id,
-
-    )).parsed
+    return (
+        await asyncio_detailed(
+            bucket_id=bucket_id,
+            type_id=type_id,
+            row_id=row_id,
+            client=client,
+            body=body,
+            as_type=as_type,
+            as_id=as_id,
+        )
+    ).parsed

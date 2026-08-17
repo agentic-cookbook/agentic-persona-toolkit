@@ -1,66 +1,50 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
-
-from typing import cast, Union
-
-
-
-
-
-
 T = TypeVar("T", bound="GetCommunitiesIdMembersMeResponse200")
-
 
 
 @_attrs_define
 class GetCommunitiesIdMembersMeResponse200:
-    """ 
-        Attributes:
-            role (Union[None, str]): owner | admin | moderator | member, or null (not a member).
-     """
+    """
+    Attributes:
+        role (Union[None, str]): owner | admin | moderator | member, or null (not a member).
+    """
 
-    role: Union[None, str]
+    role: None | str
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
-
-
-
-
     def to_dict(self) -> dict[str, Any]:
-        role: Union[None, str]
+        role: None | str
         role = self.role
-
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "role": role,
-        })
+        field_dict.update(
+            {
+                "role": role,
+            }
+        )
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
-        def _parse_role(data: object) -> Union[None, str]:
+
+        def _parse_role(data: object) -> None | str:
             if data is None:
                 return data
-            return cast(Union[None, str], data)
+            return cast(None | str, data)
 
         role = _parse_role(d.pop("role"))
-
 
         get_communities_id_members_me_response_200 = cls(
             role=role,
         )
-
 
         get_communities_id_members_me_response_200.additional_properties = d
         return get_communities_id_members_me_response_200

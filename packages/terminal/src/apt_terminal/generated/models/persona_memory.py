@@ -1,58 +1,47 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
-
-from ..types import UNSET, Unset
 
 from ..models.persona_memory_memory_type import PersonaMemoryMemoryType
 from ..models.persona_memory_scope import PersonaMemoryScope
 from ..models.persona_memory_source import PersonaMemorySource
 from ..models.persona_memory_status import PersonaMemoryStatus
 from ..types import UNSET, Unset
-from typing import cast
-from typing import cast, Union
-from typing import Union
-
-
-
-
-
 
 T = TypeVar("T", bound="PersonaMemory")
 
 
-
 @_attrs_define
 class PersonaMemory:
-    """ 
-        Attributes:
-            id (str):
-            ecosystem_id (str): Ecosystem (tenant) id
-            customer_id (str): Owning user; empty for a global memory
-            persona_id (str):
-            scope (PersonaMemoryScope):
-            slug (str):
-            memory_type (PersonaMemoryMemoryType):
-            description (str):
-            body (str):
-            status (PersonaMemoryStatus):
-            source (PersonaMemorySource):
-            confidence (int):
-            tags (list[str]):
-            recall_count (int):
-            created_at (str):
-            updated_at (str):
-            deleted_at (Union[None, Unset, str]):
-            subject_table (Union[None, Unset, str]):
-            subject_id (Union[None, Unset, str]):
-            supersedes_id (Union[None, Unset, str]):
-            valid_from (Union[None, Unset, str]):
-            valid_to (Union[None, Unset, str]):
-            last_recalled_at (Union[None, Unset, str]):
-            embedding_model (Union[None, Unset, str]):
-     """
+    """
+    Attributes:
+        id (str):
+        ecosystem_id (str): Ecosystem (tenant) id
+        customer_id (str): Owning user; empty for a global memory
+        persona_id (str):
+        scope (PersonaMemoryScope):
+        slug (str):
+        memory_type (PersonaMemoryMemoryType):
+        description (str):
+        body (str):
+        status (PersonaMemoryStatus):
+        source (PersonaMemorySource):
+        confidence (int):
+        tags (list[str]):
+        recall_count (int):
+        created_at (str):
+        updated_at (str):
+        deleted_at (Union[None, Unset, str]):
+        subject_table (Union[None, Unset, str]):
+        subject_id (Union[None, Unset, str]):
+        supersedes_id (Union[None, Unset, str]):
+        valid_from (Union[None, Unset, str]):
+        valid_to (Union[None, Unset, str]):
+        last_recalled_at (Union[None, Unset, str]):
+        embedding_model (Union[None, Unset, str]):
+    """
 
     id: str
     ecosystem_id: str
@@ -70,19 +59,15 @@ class PersonaMemory:
     recall_count: int
     created_at: str
     updated_at: str
-    deleted_at: Union[None, Unset, str] = UNSET
-    subject_table: Union[None, Unset, str] = UNSET
-    subject_id: Union[None, Unset, str] = UNSET
-    supersedes_id: Union[None, Unset, str] = UNSET
-    valid_from: Union[None, Unset, str] = UNSET
-    valid_to: Union[None, Unset, str] = UNSET
-    last_recalled_at: Union[None, Unset, str] = UNSET
-    embedding_model: Union[None, Unset, str] = UNSET
+    deleted_at: None | Unset | str = UNSET
+    subject_table: None | Unset | str = UNSET
+    subject_id: None | Unset | str = UNSET
+    supersedes_id: None | Unset | str = UNSET
+    valid_from: None | Unset | str = UNSET
+    valid_to: None | Unset | str = UNSET
+    last_recalled_at: None | Unset | str = UNSET
+    embedding_model: None | Unset | str = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         id = self.id
@@ -111,83 +96,82 @@ class PersonaMemory:
 
         tags = self.tags
 
-
-
         recall_count = self.recall_count
 
         created_at = self.created_at
 
         updated_at = self.updated_at
 
-        deleted_at: Union[None, Unset, str]
+        deleted_at: None | Unset | str
         if isinstance(self.deleted_at, Unset):
             deleted_at = UNSET
         else:
             deleted_at = self.deleted_at
 
-        subject_table: Union[None, Unset, str]
+        subject_table: None | Unset | str
         if isinstance(self.subject_table, Unset):
             subject_table = UNSET
         else:
             subject_table = self.subject_table
 
-        subject_id: Union[None, Unset, str]
+        subject_id: None | Unset | str
         if isinstance(self.subject_id, Unset):
             subject_id = UNSET
         else:
             subject_id = self.subject_id
 
-        supersedes_id: Union[None, Unset, str]
+        supersedes_id: None | Unset | str
         if isinstance(self.supersedes_id, Unset):
             supersedes_id = UNSET
         else:
             supersedes_id = self.supersedes_id
 
-        valid_from: Union[None, Unset, str]
+        valid_from: None | Unset | str
         if isinstance(self.valid_from, Unset):
             valid_from = UNSET
         else:
             valid_from = self.valid_from
 
-        valid_to: Union[None, Unset, str]
+        valid_to: None | Unset | str
         if isinstance(self.valid_to, Unset):
             valid_to = UNSET
         else:
             valid_to = self.valid_to
 
-        last_recalled_at: Union[None, Unset, str]
+        last_recalled_at: None | Unset | str
         if isinstance(self.last_recalled_at, Unset):
             last_recalled_at = UNSET
         else:
             last_recalled_at = self.last_recalled_at
 
-        embedding_model: Union[None, Unset, str]
+        embedding_model: None | Unset | str
         if isinstance(self.embedding_model, Unset):
             embedding_model = UNSET
         else:
             embedding_model = self.embedding_model
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "id": id,
-            "ecosystemId": ecosystem_id,
-            "customerId": customer_id,
-            "personaId": persona_id,
-            "scope": scope,
-            "slug": slug,
-            "memoryType": memory_type,
-            "description": description,
-            "body": body,
-            "status": status,
-            "source": source,
-            "confidence": confidence,
-            "tags": tags,
-            "recallCount": recall_count,
-            "createdAt": created_at,
-            "updatedAt": updated_at,
-        })
+        field_dict.update(
+            {
+                "id": id,
+                "ecosystemId": ecosystem_id,
+                "customerId": customer_id,
+                "personaId": persona_id,
+                "scope": scope,
+                "slug": slug,
+                "memoryType": memory_type,
+                "description": description,
+                "body": body,
+                "status": status,
+                "source": source,
+                "confidence": confidence,
+                "tags": tags,
+                "recallCount": recall_count,
+                "createdAt": created_at,
+                "updatedAt": updated_at,
+            }
+        )
         if deleted_at is not UNSET:
             field_dict["deletedAt"] = deleted_at
         if subject_table is not UNSET:
@@ -207,8 +191,6 @@ class PersonaMemory:
 
         return field_dict
 
-
-
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
@@ -222,15 +204,9 @@ class PersonaMemory:
 
         scope = PersonaMemoryScope(d.pop("scope"))
 
-
-
-
         slug = d.pop("slug")
 
         memory_type = PersonaMemoryMemoryType(d.pop("memoryType"))
-
-
-
 
         description = d.pop("description")
 
@@ -238,18 +214,11 @@ class PersonaMemory:
 
         status = PersonaMemoryStatus(d.pop("status"))
 
-
-
-
         source = PersonaMemorySource(d.pop("source"))
-
-
-
 
         confidence = d.pop("confidence")
 
         tags = cast(list[str], d.pop("tags"))
-
 
         recall_count = d.pop("recallCount")
 
@@ -257,85 +226,77 @@ class PersonaMemory:
 
         updated_at = d.pop("updatedAt")
 
-        def _parse_deleted_at(data: object) -> Union[None, Unset, str]:
+        def _parse_deleted_at(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         deleted_at = _parse_deleted_at(d.pop("deletedAt", UNSET))
 
-
-        def _parse_subject_table(data: object) -> Union[None, Unset, str]:
+        def _parse_subject_table(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         subject_table = _parse_subject_table(d.pop("subjectTable", UNSET))
 
-
-        def _parse_subject_id(data: object) -> Union[None, Unset, str]:
+        def _parse_subject_id(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         subject_id = _parse_subject_id(d.pop("subjectId", UNSET))
 
-
-        def _parse_supersedes_id(data: object) -> Union[None, Unset, str]:
+        def _parse_supersedes_id(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         supersedes_id = _parse_supersedes_id(d.pop("supersedesId", UNSET))
 
-
-        def _parse_valid_from(data: object) -> Union[None, Unset, str]:
+        def _parse_valid_from(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         valid_from = _parse_valid_from(d.pop("validFrom", UNSET))
 
-
-        def _parse_valid_to(data: object) -> Union[None, Unset, str]:
+        def _parse_valid_to(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         valid_to = _parse_valid_to(d.pop("validTo", UNSET))
 
-
-        def _parse_last_recalled_at(data: object) -> Union[None, Unset, str]:
+        def _parse_last_recalled_at(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         last_recalled_at = _parse_last_recalled_at(d.pop("lastRecalledAt", UNSET))
 
-
-        def _parse_embedding_model(data: object) -> Union[None, Unset, str]:
+        def _parse_embedding_model(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         embedding_model = _parse_embedding_model(d.pop("embeddingModel", UNSET))
-
 
         persona_memory = cls(
             id=id,
@@ -363,7 +324,6 @@ class PersonaMemory:
             last_recalled_at=last_recalled_at,
             embedding_model=embedding_model,
         )
-
 
         persona_memory.additional_properties = d
         return persona_memory

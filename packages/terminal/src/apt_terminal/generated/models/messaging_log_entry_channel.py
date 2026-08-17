@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class MessagingLogEntryChannel(str, Enum):
     EMAIL = "email"
     SMS = "sms"

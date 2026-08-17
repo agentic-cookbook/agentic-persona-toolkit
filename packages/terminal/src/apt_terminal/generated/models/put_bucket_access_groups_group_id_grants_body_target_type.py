@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class PutBucketAccessGroupsGroupIdGrantsBodyTargetType(str, Enum):
     BUCKET = "bucket"
     BUCKET_TYPE = "bucket_type"

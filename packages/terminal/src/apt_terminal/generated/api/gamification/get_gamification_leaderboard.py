@@ -1,38 +1,28 @@
 from http import HTTPStatus
-from typing import Any, Optional, Union, cast
+from typing import Any
 
 import httpx
 
-from ...client import AuthenticatedClient, Client
-from ...types import Response, UNSET
 from ... import errors
-
+from ...client import AuthenticatedClient, Client
 from ...models.error import Error
 from ...models.gamification_leaderboard import GamificationLeaderboard
 from ...models.get_gamification_leaderboard_period import GetGamificationLeaderboardPeriod
-from ...types import UNSET, Unset
-from typing import cast
-from typing import Union
-
+from ...types import UNSET, Response, Unset
 
 
 def _get_kwargs(
     *,
-    subject_type: Union[Unset, str] = 'user',
-    period: Union[Unset, GetGamificationLeaderboardPeriod] = GetGamificationLeaderboardPeriod.ALL,
-    page: Union[Unset, str] = UNSET,
-    page_size: Union[Unset, str] = UNSET,
-
+    subject_type: Unset | str = "user",
+    period: Unset | GetGamificationLeaderboardPeriod = GetGamificationLeaderboardPeriod.ALL,
+    page: Unset | str = UNSET,
+    page_size: Unset | str = UNSET,
 ) -> dict[str, Any]:
-    
-
-    
-
     params: dict[str, Any] = {}
 
     params["subjectType"] = subject_type
 
-    json_period: Union[Unset, str] = UNSET
+    json_period: Unset | str = UNSET
     if not isinstance(period, Unset):
         json_period = period.value
 
@@ -42,9 +32,7 @@ def _get_kwargs(
 
     params["pageSize"] = page_size
 
-
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
-
 
     _kwargs: dict[str, Any] = {
         "method": "get",
@@ -52,23 +40,19 @@ def _get_kwargs(
         "params": params,
     }
 
-
     return _kwargs
 
 
-
-def _parse_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Optional[Union[Error, GamificationLeaderboard]]:
+def _parse_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Error | GamificationLeaderboard | None:
     if response.status_code == 200:
         response_200 = GamificationLeaderboard.from_dict(response.json())
-
-
 
         return response_200
 
     if response.status_code == 401:
         response_401 = Error.from_dict(response.json())
-
-
 
         return response_401
 
@@ -78,7 +62,9 @@ def _parse_response(*, client: Union[AuthenticatedClient, Client], response: htt
         return None
 
 
-def _build_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Response[Union[Error, GamificationLeaderboard]]:
+def _build_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Response[Error | GamificationLeaderboard]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -90,13 +76,12 @@ def _build_response(*, client: Union[AuthenticatedClient, Client], response: htt
 def sync_detailed(
     *,
     client: AuthenticatedClient,
-    subject_type: Union[Unset, str] = 'user',
-    period: Union[Unset, GetGamificationLeaderboardPeriod] = GetGamificationLeaderboardPeriod.ALL,
-    page: Union[Unset, str] = UNSET,
-    page_size: Union[Unset, str] = UNSET,
-
-) -> Response[Union[Error, GamificationLeaderboard]]:
-    """ Ranked leaderboard by summed points for a subject kind
+    subject_type: Unset | str = "user",
+    period: Unset | GetGamificationLeaderboardPeriod = GetGamificationLeaderboardPeriod.ALL,
+    page: Unset | str = UNSET,
+    page_size: Unset | str = UNSET,
+) -> Response[Error | GamificationLeaderboard]:
+    """Ranked leaderboard by summed points for a subject kind
 
     Args:
         subject_type (Union[Unset, str]):  Default: 'user'.
@@ -111,15 +96,13 @@ def sync_detailed(
 
     Returns:
         Response[Union[Error, GamificationLeaderboard]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         subject_type=subject_type,
-period=period,
-page=page,
-page_size=page_size,
-
+        period=period,
+        page=page,
+        page_size=page_size,
     )
 
     response = client.get_httpx_client().request(
@@ -128,16 +111,16 @@ page_size=page_size,
 
     return _build_response(client=client, response=response)
 
+
 def sync(
     *,
     client: AuthenticatedClient,
-    subject_type: Union[Unset, str] = 'user',
-    period: Union[Unset, GetGamificationLeaderboardPeriod] = GetGamificationLeaderboardPeriod.ALL,
-    page: Union[Unset, str] = UNSET,
-    page_size: Union[Unset, str] = UNSET,
-
-) -> Optional[Union[Error, GamificationLeaderboard]]:
-    """ Ranked leaderboard by summed points for a subject kind
+    subject_type: Unset | str = "user",
+    period: Unset | GetGamificationLeaderboardPeriod = GetGamificationLeaderboardPeriod.ALL,
+    page: Unset | str = UNSET,
+    page_size: Unset | str = UNSET,
+) -> Error | GamificationLeaderboard | None:
+    """Ranked leaderboard by summed points for a subject kind
 
     Args:
         subject_type (Union[Unset, str]):  Default: 'user'.
@@ -152,28 +135,26 @@ def sync(
 
     Returns:
         Union[Error, GamificationLeaderboard]
-     """
-
+    """
 
     return sync_detailed(
         client=client,
-subject_type=subject_type,
-period=period,
-page=page,
-page_size=page_size,
-
+        subject_type=subject_type,
+        period=period,
+        page=page,
+        page_size=page_size,
     ).parsed
+
 
 async def asyncio_detailed(
     *,
     client: AuthenticatedClient,
-    subject_type: Union[Unset, str] = 'user',
-    period: Union[Unset, GetGamificationLeaderboardPeriod] = GetGamificationLeaderboardPeriod.ALL,
-    page: Union[Unset, str] = UNSET,
-    page_size: Union[Unset, str] = UNSET,
-
-) -> Response[Union[Error, GamificationLeaderboard]]:
-    """ Ranked leaderboard by summed points for a subject kind
+    subject_type: Unset | str = "user",
+    period: Unset | GetGamificationLeaderboardPeriod = GetGamificationLeaderboardPeriod.ALL,
+    page: Unset | str = UNSET,
+    page_size: Unset | str = UNSET,
+) -> Response[Error | GamificationLeaderboard]:
+    """Ranked leaderboard by summed points for a subject kind
 
     Args:
         subject_type (Union[Unset, str]):  Default: 'user'.
@@ -188,33 +169,29 @@ async def asyncio_detailed(
 
     Returns:
         Response[Union[Error, GamificationLeaderboard]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         subject_type=subject_type,
-period=period,
-page=page,
-page_size=page_size,
-
+        period=period,
+        page=page,
+        page_size=page_size,
     )
 
-    response = await client.get_async_httpx_client().request(
-        **kwargs
-    )
+    response = await client.get_async_httpx_client().request(**kwargs)
 
     return _build_response(client=client, response=response)
+
 
 async def asyncio(
     *,
     client: AuthenticatedClient,
-    subject_type: Union[Unset, str] = 'user',
-    period: Union[Unset, GetGamificationLeaderboardPeriod] = GetGamificationLeaderboardPeriod.ALL,
-    page: Union[Unset, str] = UNSET,
-    page_size: Union[Unset, str] = UNSET,
-
-) -> Optional[Union[Error, GamificationLeaderboard]]:
-    """ Ranked leaderboard by summed points for a subject kind
+    subject_type: Unset | str = "user",
+    period: Unset | GetGamificationLeaderboardPeriod = GetGamificationLeaderboardPeriod.ALL,
+    page: Unset | str = UNSET,
+    page_size: Unset | str = UNSET,
+) -> Error | GamificationLeaderboard | None:
+    """Ranked leaderboard by summed points for a subject kind
 
     Args:
         subject_type (Union[Unset, str]):  Default: 'user'.
@@ -229,14 +206,14 @@ async def asyncio(
 
     Returns:
         Union[Error, GamificationLeaderboard]
-     """
+    """
 
-
-    return (await asyncio_detailed(
-        client=client,
-subject_type=subject_type,
-period=period,
-page=page,
-page_size=page_size,
-
-    )).parsed
+    return (
+        await asyncio_detailed(
+            client=client,
+            subject_type=subject_type,
+            period=period,
+            page=page,
+            page_size=page_size,
+        )
+    ).parsed

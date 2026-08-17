@@ -1,0 +1,220 @@
+from collections.abc import Mapping
+from typing import TYPE_CHECKING, Any, TypeVar, Union, cast
+
+from attrs import define as _attrs_define
+from attrs import field as _attrs_field
+
+from ..types import UNSET, Unset
+
+if TYPE_CHECKING:
+    from ..models.game_holding_with_artifact_artifact_summary_type_0 import (
+        GameHoldingWithArtifactArtifactSummaryType0,
+    )
+    from ..models.game_holding_with_artifact_data_type_0 import GameHoldingWithArtifactDataType0
+
+
+T = TypeVar("T", bound="GameHoldingWithArtifact")
+
+
+@_attrs_define
+class GameHoldingWithArtifact:
+    """
+    Attributes:
+        id (str):
+        game_id (str):
+        artifact_id (str):
+        kind (str):
+        quantity (int):
+        acquired_at (str):
+        data (Union['GameHoldingWithArtifactDataType0', None, Unset]):
+        artifact_kind (Union[Unset, str]):
+        artifact_slot (Union[None, Unset, str]):
+        artifact_summary (Union['GameHoldingWithArtifactArtifactSummaryType0', None, Unset]):
+        artifact_visibility (Union[Unset, str]):
+    """
+
+    id: str
+    game_id: str
+    artifact_id: str
+    kind: str
+    quantity: int
+    acquired_at: str
+    data: Union["GameHoldingWithArtifactDataType0", None, Unset] = UNSET
+    artifact_kind: Unset | str = UNSET
+    artifact_slot: None | Unset | str = UNSET
+    artifact_summary: Union["GameHoldingWithArtifactArtifactSummaryType0", None, Unset] = UNSET
+    artifact_visibility: Unset | str = UNSET
+    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
+
+    def to_dict(self) -> dict[str, Any]:
+        from ..models.game_holding_with_artifact_artifact_summary_type_0 import (
+            GameHoldingWithArtifactArtifactSummaryType0,
+        )
+        from ..models.game_holding_with_artifact_data_type_0 import GameHoldingWithArtifactDataType0
+
+        id = self.id
+
+        game_id = self.game_id
+
+        artifact_id = self.artifact_id
+
+        kind = self.kind
+
+        quantity = self.quantity
+
+        acquired_at = self.acquired_at
+
+        data: None | Unset | dict[str, Any]
+        if isinstance(self.data, Unset):
+            data = UNSET
+        elif isinstance(self.data, GameHoldingWithArtifactDataType0):
+            data = self.data.to_dict()
+        else:
+            data = self.data
+
+        artifact_kind = self.artifact_kind
+
+        artifact_slot: None | Unset | str
+        if isinstance(self.artifact_slot, Unset):
+            artifact_slot = UNSET
+        else:
+            artifact_slot = self.artifact_slot
+
+        artifact_summary: None | Unset | dict[str, Any]
+        if isinstance(self.artifact_summary, Unset):
+            artifact_summary = UNSET
+        elif isinstance(self.artifact_summary, GameHoldingWithArtifactArtifactSummaryType0):
+            artifact_summary = self.artifact_summary.to_dict()
+        else:
+            artifact_summary = self.artifact_summary
+
+        artifact_visibility = self.artifact_visibility
+
+        field_dict: dict[str, Any] = {}
+        field_dict.update(self.additional_properties)
+        field_dict.update(
+            {
+                "id": id,
+                "gameId": game_id,
+                "artifactId": artifact_id,
+                "kind": kind,
+                "quantity": quantity,
+                "acquiredAt": acquired_at,
+            }
+        )
+        if data is not UNSET:
+            field_dict["data"] = data
+        if artifact_kind is not UNSET:
+            field_dict["artifactKind"] = artifact_kind
+        if artifact_slot is not UNSET:
+            field_dict["artifactSlot"] = artifact_slot
+        if artifact_summary is not UNSET:
+            field_dict["artifactSummary"] = artifact_summary
+        if artifact_visibility is not UNSET:
+            field_dict["artifactVisibility"] = artifact_visibility
+
+        return field_dict
+
+    @classmethod
+    def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
+        from ..models.game_holding_with_artifact_artifact_summary_type_0 import (
+            GameHoldingWithArtifactArtifactSummaryType0,
+        )
+        from ..models.game_holding_with_artifact_data_type_0 import GameHoldingWithArtifactDataType0
+
+        d = dict(src_dict)
+        id = d.pop("id")
+
+        game_id = d.pop("gameId")
+
+        artifact_id = d.pop("artifactId")
+
+        kind = d.pop("kind")
+
+        quantity = d.pop("quantity")
+
+        acquired_at = d.pop("acquiredAt")
+
+        def _parse_data(data: object) -> Union["GameHoldingWithArtifactDataType0", None, Unset]:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            try:
+                if not isinstance(data, dict):
+                    raise TypeError()
+                data_type_0 = GameHoldingWithArtifactDataType0.from_dict(data)
+
+                return data_type_0
+            except:  # noqa: E722
+                pass
+            return cast(Union["GameHoldingWithArtifactDataType0", None, Unset], data)
+
+        data = _parse_data(d.pop("data", UNSET))
+
+        artifact_kind = d.pop("artifactKind", UNSET)
+
+        def _parse_artifact_slot(data: object) -> None | Unset | str:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(None | Unset | str, data)
+
+        artifact_slot = _parse_artifact_slot(d.pop("artifactSlot", UNSET))
+
+        def _parse_artifact_summary(
+            data: object,
+        ) -> Union["GameHoldingWithArtifactArtifactSummaryType0", None, Unset]:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            try:
+                if not isinstance(data, dict):
+                    raise TypeError()
+                artifact_summary_type_0 = GameHoldingWithArtifactArtifactSummaryType0.from_dict(
+                    data
+                )
+
+                return artifact_summary_type_0
+            except:  # noqa: E722
+                pass
+            return cast(Union["GameHoldingWithArtifactArtifactSummaryType0", None, Unset], data)
+
+        artifact_summary = _parse_artifact_summary(d.pop("artifactSummary", UNSET))
+
+        artifact_visibility = d.pop("artifactVisibility", UNSET)
+
+        game_holding_with_artifact = cls(
+            id=id,
+            game_id=game_id,
+            artifact_id=artifact_id,
+            kind=kind,
+            quantity=quantity,
+            acquired_at=acquired_at,
+            data=data,
+            artifact_kind=artifact_kind,
+            artifact_slot=artifact_slot,
+            artifact_summary=artifact_summary,
+            artifact_visibility=artifact_visibility,
+        )
+
+        game_holding_with_artifact.additional_properties = d
+        return game_holding_with_artifact
+
+    @property
+    def additional_keys(self) -> list[str]:
+        return list(self.additional_properties.keys())
+
+    def __getitem__(self, key: str) -> Any:
+        return self.additional_properties[key]
+
+    def __setitem__(self, key: str, value: Any) -> None:
+        self.additional_properties[key] = value
+
+    def __delitem__(self, key: str) -> None:
+        del self.additional_properties[key]
+
+    def __contains__(self, key: str) -> bool:
+        return key in self.additional_properties

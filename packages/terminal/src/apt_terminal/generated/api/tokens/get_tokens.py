@@ -1,39 +1,27 @@
 from http import HTTPStatus
-from typing import Any, Optional, Union, cast
+from typing import Any
 
 import httpx
 
-from ...client import AuthenticatedClient, Client
-from ...types import Response, UNSET
 from ... import errors
-
+from ...client import AuthenticatedClient, Client
 from ...models.error import Error
 from ...models.token_principal import TokenPrincipal
-from ...types import UNSET, Unset
-from typing import cast
-from typing import Union
-
+from ...types import UNSET, Response, Unset
 
 
 def _get_kwargs(
     *,
-    ecosystem_id: Union[Unset, str] = UNSET,
-    workspace: Union[Unset, str] = UNSET,
-
+    ecosystem_id: Unset | str = UNSET,
+    workspace: Unset | str = UNSET,
 ) -> dict[str, Any]:
-    
-
-    
-
     params: dict[str, Any] = {}
 
     params["ecosystemId"] = ecosystem_id
 
     params["workspace"] = workspace
 
-
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
-
 
     _kwargs: dict[str, Any] = {
         "method": "get",
@@ -41,19 +29,17 @@ def _get_kwargs(
         "params": params,
     }
 
-
     return _kwargs
 
 
-
-def _parse_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Optional[Union[Error, list['TokenPrincipal']]]:
+def _parse_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Error | list["TokenPrincipal"] | None:
     if response.status_code == 200:
         response_200 = []
         _response_200 = response.json()
-        for response_200_item_data in (_response_200):
+        for response_200_item_data in _response_200:
             response_200_item = TokenPrincipal.from_dict(response_200_item_data)
-
-
 
             response_200.append(response_200_item)
 
@@ -62,21 +48,15 @@ def _parse_response(*, client: Union[AuthenticatedClient, Client], response: htt
     if response.status_code == 401:
         response_401 = Error.from_dict(response.json())
 
-
-
         return response_401
 
     if response.status_code == 403:
         response_403 = Error.from_dict(response.json())
 
-
-
         return response_403
 
     if response.status_code == 404:
         response_404 = Error.from_dict(response.json())
-
-
 
         return response_404
 
@@ -86,7 +66,9 @@ def _parse_response(*, client: Union[AuthenticatedClient, Client], response: htt
         return None
 
 
-def _build_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Response[Union[Error, list['TokenPrincipal']]]:
+def _build_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Response[Error | list["TokenPrincipal"]]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -98,11 +80,10 @@ def _build_response(*, client: Union[AuthenticatedClient, Client], response: htt
 def sync_detailed(
     *,
     client: AuthenticatedClient,
-    ecosystem_id: Union[Unset, str] = UNSET,
-    workspace: Union[Unset, str] = UNSET,
-
-) -> Response[Union[Error, list['TokenPrincipal']]]:
-    """ List the caller’s token principals (metadata only; secret never returned)
+    ecosystem_id: Unset | str = UNSET,
+    workspace: Unset | str = UNSET,
+) -> Response[Error | list["TokenPrincipal"]]:
+    """List the caller’s token principals (metadata only; secret never returned)
 
     Args:
         ecosystem_id (Union[Unset, str]):
@@ -114,13 +95,11 @@ def sync_detailed(
 
     Returns:
         Response[Union[Error, list['TokenPrincipal']]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         ecosystem_id=ecosystem_id,
-workspace=workspace,
-
+        workspace=workspace,
     )
 
     response = client.get_httpx_client().request(
@@ -129,14 +108,14 @@ workspace=workspace,
 
     return _build_response(client=client, response=response)
 
+
 def sync(
     *,
     client: AuthenticatedClient,
-    ecosystem_id: Union[Unset, str] = UNSET,
-    workspace: Union[Unset, str] = UNSET,
-
-) -> Optional[Union[Error, list['TokenPrincipal']]]:
-    """ List the caller’s token principals (metadata only; secret never returned)
+    ecosystem_id: Unset | str = UNSET,
+    workspace: Unset | str = UNSET,
+) -> Error | list["TokenPrincipal"] | None:
+    """List the caller’s token principals (metadata only; secret never returned)
 
     Args:
         ecosystem_id (Union[Unset, str]):
@@ -148,24 +127,22 @@ def sync(
 
     Returns:
         Union[Error, list['TokenPrincipal']]
-     """
-
+    """
 
     return sync_detailed(
         client=client,
-ecosystem_id=ecosystem_id,
-workspace=workspace,
-
+        ecosystem_id=ecosystem_id,
+        workspace=workspace,
     ).parsed
+
 
 async def asyncio_detailed(
     *,
     client: AuthenticatedClient,
-    ecosystem_id: Union[Unset, str] = UNSET,
-    workspace: Union[Unset, str] = UNSET,
-
-) -> Response[Union[Error, list['TokenPrincipal']]]:
-    """ List the caller’s token principals (metadata only; secret never returned)
+    ecosystem_id: Unset | str = UNSET,
+    workspace: Unset | str = UNSET,
+) -> Response[Error | list["TokenPrincipal"]]:
+    """List the caller’s token principals (metadata only; secret never returned)
 
     Args:
         ecosystem_id (Union[Unset, str]):
@@ -177,29 +154,25 @@ async def asyncio_detailed(
 
     Returns:
         Response[Union[Error, list['TokenPrincipal']]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         ecosystem_id=ecosystem_id,
-workspace=workspace,
-
+        workspace=workspace,
     )
 
-    response = await client.get_async_httpx_client().request(
-        **kwargs
-    )
+    response = await client.get_async_httpx_client().request(**kwargs)
 
     return _build_response(client=client, response=response)
+
 
 async def asyncio(
     *,
     client: AuthenticatedClient,
-    ecosystem_id: Union[Unset, str] = UNSET,
-    workspace: Union[Unset, str] = UNSET,
-
-) -> Optional[Union[Error, list['TokenPrincipal']]]:
-    """ List the caller’s token principals (metadata only; secret never returned)
+    ecosystem_id: Unset | str = UNSET,
+    workspace: Unset | str = UNSET,
+) -> Error | list["TokenPrincipal"] | None:
+    """List the caller’s token principals (metadata only; secret never returned)
 
     Args:
         ecosystem_id (Union[Unset, str]):
@@ -211,12 +184,12 @@ async def asyncio(
 
     Returns:
         Union[Error, list['TokenPrincipal']]
-     """
+    """
 
-
-    return (await asyncio_detailed(
-        client=client,
-ecosystem_id=ecosystem_id,
-workspace=workspace,
-
-    )).parsed
+    return (
+        await asyncio_detailed(
+            client=client,
+            ecosystem_id=ecosystem_id,
+            workspace=workspace,
+        )
+    ).parsed

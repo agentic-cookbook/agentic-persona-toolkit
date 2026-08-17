@@ -1,49 +1,35 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
-
-from typing import cast, Union
-
-
-
-
-
-
 T = TypeVar("T", bound="RegistryPersonaTokenCreated")
-
 
 
 @_attrs_define
 class RegistryPersonaTokenCreated:
-    """ 
-        Attributes:
-            id (str):
-            name (str):
-            prefix (str): Non-secret leading chars, for display
-            created_at (str):
-            expires_at (Union[None, str]):
-            last_used_at (Union[None, str]): null until the token first authenticates
-            persona_id (Union[None, str]): The persona this token authenticates AS
-            token (str): The raw token value — shown exactly once, on mint
-     """
+    """
+    Attributes:
+        id (str):
+        name (str):
+        prefix (str): Non-secret leading chars, for display
+        created_at (str):
+        expires_at (Union[None, str]):
+        last_used_at (Union[None, str]): null until the token first authenticates
+        persona_id (Union[None, str]): The persona this token authenticates AS
+        token (str): The raw token value — shown exactly once, on mint
+    """
 
     id: str
     name: str
     prefix: str
     created_at: str
-    expires_at: Union[None, str]
-    last_used_at: Union[None, str]
-    persona_id: Union[None, str]
+    expires_at: None | str
+    last_used_at: None | str
+    persona_id: None | str
     token: str
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         id = self.id
@@ -54,34 +40,33 @@ class RegistryPersonaTokenCreated:
 
         created_at = self.created_at
 
-        expires_at: Union[None, str]
+        expires_at: None | str
         expires_at = self.expires_at
 
-        last_used_at: Union[None, str]
+        last_used_at: None | str
         last_used_at = self.last_used_at
 
-        persona_id: Union[None, str]
+        persona_id: None | str
         persona_id = self.persona_id
 
         token = self.token
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "id": id,
-            "name": name,
-            "prefix": prefix,
-            "createdAt": created_at,
-            "expiresAt": expires_at,
-            "lastUsedAt": last_used_at,
-            "personaId": persona_id,
-            "token": token,
-        })
+        field_dict.update(
+            {
+                "id": id,
+                "name": name,
+                "prefix": prefix,
+                "createdAt": created_at,
+                "expiresAt": expires_at,
+                "lastUsedAt": last_used_at,
+                "personaId": persona_id,
+                "token": token,
+            }
+        )
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -94,29 +79,26 @@ class RegistryPersonaTokenCreated:
 
         created_at = d.pop("createdAt")
 
-        def _parse_expires_at(data: object) -> Union[None, str]:
+        def _parse_expires_at(data: object) -> None | str:
             if data is None:
                 return data
-            return cast(Union[None, str], data)
+            return cast(None | str, data)
 
         expires_at = _parse_expires_at(d.pop("expiresAt"))
 
-
-        def _parse_last_used_at(data: object) -> Union[None, str]:
+        def _parse_last_used_at(data: object) -> None | str:
             if data is None:
                 return data
-            return cast(Union[None, str], data)
+            return cast(None | str, data)
 
         last_used_at = _parse_last_used_at(d.pop("lastUsedAt"))
 
-
-        def _parse_persona_id(data: object) -> Union[None, str]:
+        def _parse_persona_id(data: object) -> None | str:
             if data is None:
                 return data
-            return cast(Union[None, str], data)
+            return cast(None | str, data)
 
         persona_id = _parse_persona_id(d.pop("personaId"))
-
 
         token = d.pop("token")
 
@@ -130,7 +112,6 @@ class RegistryPersonaTokenCreated:
             persona_id=persona_id,
             token=token,
         )
-
 
         registry_persona_token_created.additional_properties = d
         return registry_persona_token_created

@@ -1,52 +1,37 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import TYPE_CHECKING, Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
-
-from typing import cast
-
 if TYPE_CHECKING:
-  from ..models.integration_global_config import IntegrationGlobalConfig
-
-
-
+    from ..models.integration_global_config import IntegrationGlobalConfig
 
 
 T = TypeVar("T", bound="GetIntegrationsAdminConfigsResponse200")
 
 
-
 @_attrs_define
 class GetIntegrationsAdminConfigsResponse200:
-    """ 
-        Attributes:
-            items (list['IntegrationGlobalConfig']):
-            total (int): Unfiltered count of provider configs
-            limit (int):
-            offset (int):
-     """
+    """
+    Attributes:
+        items (list['IntegrationGlobalConfig']):
+        total (int): Unfiltered count of provider configs
+        limit (int):
+        offset (int):
+    """
 
-    items: list['IntegrationGlobalConfig']
+    items: list["IntegrationGlobalConfig"]
     total: int
     limit: int
     offset: int
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
-
-
-
-
     def to_dict(self) -> dict[str, Any]:
-        from ..models.integration_global_config import IntegrationGlobalConfig
         items = []
         for items_item_data in self.items:
             items_item = items_item_data.to_dict()
             items.append(items_item)
-
-
 
         total = self.total
 
@@ -54,33 +39,30 @@ class GetIntegrationsAdminConfigsResponse200:
 
         offset = self.offset
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "items": items,
-            "total": total,
-            "limit": limit,
-            "offset": offset,
-        })
+        field_dict.update(
+            {
+                "items": items,
+                "total": total,
+                "limit": limit,
+                "offset": offset,
+            }
+        )
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.integration_global_config import IntegrationGlobalConfig
+
         d = dict(src_dict)
         items = []
         _items = d.pop("items")
-        for items_item_data in (_items):
+        for items_item_data in _items:
             items_item = IntegrationGlobalConfig.from_dict(items_item_data)
 
-
-
             items.append(items_item)
-
 
         total = d.pop("total")
 
@@ -94,7 +76,6 @@ class GetIntegrationsAdminConfigsResponse200:
             limit=limit,
             offset=offset,
         )
-
 
         get_integrations_admin_configs_response_200.additional_properties = d
         return get_integrations_admin_configs_response_200

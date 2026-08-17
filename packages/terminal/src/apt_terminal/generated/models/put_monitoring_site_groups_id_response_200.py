@@ -1,38 +1,27 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar, cast
 
 from attrs import define as _attrs_define
-from attrs import field as _attrs_field
-
-from ..types import UNSET, Unset
-
-from typing import cast, Union
-
-
-
-
-
 
 T = TypeVar("T", bound="PutMonitoringSiteGroupsIdResponse200")
 
 
-
 @_attrs_define
 class PutMonitoringSiteGroupsIdResponse200:
-    """ 
-        Attributes:
-            id (str):
-            user_id (str):
-            owner_kind (str):
-            owner_id (str):
-            name (str):
-            slug (str):
-            description (Union[None, str]):
-            retention_days (int):
-            display_order (int):
-            created_at (str):
-            updated_at (str):
-     """
+    """
+    Attributes:
+        id (str):
+        user_id (str):
+        owner_kind (str):
+        owner_id (str):
+        name (str):
+        slug (str):
+        description (Union[None, str]):
+        retention_days (int):
+        display_order (int):
+        created_at (str):
+        updated_at (str):
+    """
 
     id: str
     user_id: str
@@ -40,15 +29,11 @@ class PutMonitoringSiteGroupsIdResponse200:
     owner_id: str
     name: str
     slug: str
-    description: Union[None, str]
+    description: None | str
     retention_days: int
     display_order: int
     created_at: str
     updated_at: str
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         id = self.id
@@ -63,7 +48,7 @@ class PutMonitoringSiteGroupsIdResponse200:
 
         slug = self.slug
 
-        description: Union[None, str]
+        description: None | str
         description = self.description
 
         retention_days = self.retention_days
@@ -74,26 +59,25 @@ class PutMonitoringSiteGroupsIdResponse200:
 
         updated_at = self.updated_at
 
-
         field_dict: dict[str, Any] = {}
 
-        field_dict.update({
-            "id": id,
-            "userId": user_id,
-            "ownerKind": owner_kind,
-            "ownerId": owner_id,
-            "name": name,
-            "slug": slug,
-            "description": description,
-            "retentionDays": retention_days,
-            "displayOrder": display_order,
-            "createdAt": created_at,
-            "updatedAt": updated_at,
-        })
+        field_dict.update(
+            {
+                "id": id,
+                "userId": user_id,
+                "ownerKind": owner_kind,
+                "ownerId": owner_id,
+                "name": name,
+                "slug": slug,
+                "description": description,
+                "retentionDays": retention_days,
+                "displayOrder": display_order,
+                "createdAt": created_at,
+                "updatedAt": updated_at,
+            }
+        )
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -110,13 +94,12 @@ class PutMonitoringSiteGroupsIdResponse200:
 
         slug = d.pop("slug")
 
-        def _parse_description(data: object) -> Union[None, str]:
+        def _parse_description(data: object) -> None | str:
             if data is None:
                 return data
-            return cast(Union[None, str], data)
+            return cast(None | str, data)
 
         description = _parse_description(d.pop("description"))
-
 
         retention_days = d.pop("retentionDays")
 
@@ -141,4 +124,3 @@ class PutMonitoringSiteGroupsIdResponse200:
         )
 
         return put_monitoring_site_groups_id_response_200
-

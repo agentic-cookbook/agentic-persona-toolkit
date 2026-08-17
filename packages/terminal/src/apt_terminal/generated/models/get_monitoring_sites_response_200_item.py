@@ -1,38 +1,27 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar, cast
 
 from attrs import define as _attrs_define
-from attrs import field as _attrs_field
-
-from ..types import UNSET, Unset
-
-from typing import cast, Union
-
-
-
-
-
 
 T = TypeVar("T", bound="GetMonitoringSitesResponse200Item")
 
 
-
 @_attrs_define
 class GetMonitoringSitesResponse200Item:
-    """ 
-        Attributes:
-            id (str):
-            site_group_id (str):
-            user_id (str):
-            owner_kind (str):
-            owner_id (str):
-            name (str):
-            slug (str):
-            description (Union[None, str]):
-            display_order (int):
-            created_at (str):
-            updated_at (str):
-     """
+    """
+    Attributes:
+        id (str):
+        site_group_id (str):
+        user_id (str):
+        owner_kind (str):
+        owner_id (str):
+        name (str):
+        slug (str):
+        description (Union[None, str]):
+        display_order (int):
+        created_at (str):
+        updated_at (str):
+    """
 
     id: str
     site_group_id: str
@@ -41,14 +30,10 @@ class GetMonitoringSitesResponse200Item:
     owner_id: str
     name: str
     slug: str
-    description: Union[None, str]
+    description: None | str
     display_order: int
     created_at: str
     updated_at: str
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         id = self.id
@@ -65,7 +50,7 @@ class GetMonitoringSitesResponse200Item:
 
         slug = self.slug
 
-        description: Union[None, str]
+        description: None | str
         description = self.description
 
         display_order = self.display_order
@@ -74,26 +59,25 @@ class GetMonitoringSitesResponse200Item:
 
         updated_at = self.updated_at
 
-
         field_dict: dict[str, Any] = {}
 
-        field_dict.update({
-            "id": id,
-            "siteGroupId": site_group_id,
-            "userId": user_id,
-            "ownerKind": owner_kind,
-            "ownerId": owner_id,
-            "name": name,
-            "slug": slug,
-            "description": description,
-            "displayOrder": display_order,
-            "createdAt": created_at,
-            "updatedAt": updated_at,
-        })
+        field_dict.update(
+            {
+                "id": id,
+                "siteGroupId": site_group_id,
+                "userId": user_id,
+                "ownerKind": owner_kind,
+                "ownerId": owner_id,
+                "name": name,
+                "slug": slug,
+                "description": description,
+                "displayOrder": display_order,
+                "createdAt": created_at,
+                "updatedAt": updated_at,
+            }
+        )
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -112,13 +96,12 @@ class GetMonitoringSitesResponse200Item:
 
         slug = d.pop("slug")
 
-        def _parse_description(data: object) -> Union[None, str]:
+        def _parse_description(data: object) -> None | str:
             if data is None:
                 return data
-            return cast(Union[None, str], data)
+            return cast(None | str, data)
 
         description = _parse_description(d.pop("description"))
-
 
         display_order = d.pop("displayOrder")
 
@@ -141,4 +124,3 @@ class GetMonitoringSitesResponse200Item:
         )
 
         return get_monitoring_sites_response_200_item
-

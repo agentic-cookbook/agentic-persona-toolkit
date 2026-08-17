@@ -1,31 +1,22 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
-
-
-
-
-
-
-
 T = TypeVar("T", bound="Note")
-
 
 
 @_attrs_define
 class Note:
-    """ 
-        Attributes:
-            id (str):
-            content (str):
-            title (str): Derived from the doc’s first line.
-            created_at (str):
-            updated_at (str):
-     """
+    """
+    Attributes:
+        id (str):
+        content (str):
+        title (str): Derived from the doc’s first line.
+        created_at (str):
+        updated_at (str):
+    """
 
     id: str
     content: str
@@ -33,10 +24,6 @@ class Note:
     created_at: str
     updated_at: str
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         id = self.id
@@ -49,20 +36,19 @@ class Note:
 
         updated_at = self.updated_at
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "id": id,
-            "content": content,
-            "title": title,
-            "createdAt": created_at,
-            "updatedAt": updated_at,
-        })
+        field_dict.update(
+            {
+                "id": id,
+                "content": content,
+                "title": title,
+                "createdAt": created_at,
+                "updatedAt": updated_at,
+            }
+        )
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -84,7 +70,6 @@ class Note:
             created_at=created_at,
             updated_at=updated_at,
         )
-
 
         note.additional_properties = d
         return note

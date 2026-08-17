@@ -1,39 +1,31 @@
 from http import HTTPStatus
-from typing import Any, Optional, Union, cast
+from typing import Any
 
 import httpx
 
-from ...client import AuthenticatedClient, Client
-from ...types import Response, UNSET
 from ... import errors
-
+from ...client import AuthenticatedClient, Client
 from ...models.bucket_access_group import BucketAccessGroup
 from ...models.error import Error
-from ...models.post_bucket_buckets_bucket_id_access_groups_body import PostBucketBucketsBucketIdAccessGroupsBody
-from typing import cast
-
+from ...models.post_bucket_buckets_bucket_id_access_groups_body import (
+    PostBucketBucketsBucketIdAccessGroupsBody,
+)
+from ...types import Response
 
 
 def _get_kwargs(
     bucket_id: str,
     *,
     body: PostBucketBucketsBucketIdAccessGroupsBody,
-
 ) -> dict[str, Any]:
     headers: dict[str, Any] = {}
 
-
-    
-
-    
-
     _kwargs: dict[str, Any] = {
         "method": "post",
-        "url": "/bucket/buckets/{bucket_id}/access-groups".format(bucket_id=bucket_id,),
+        "url": f"/bucket/buckets/{bucket_id}/access-groups",
     }
 
     _kwargs["json"] = body.to_dict()
-
 
     headers["Content-Type"] = "application/json"
 
@@ -41,40 +33,31 @@ def _get_kwargs(
     return _kwargs
 
 
-
-def _parse_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Optional[Union[BucketAccessGroup, Error]]:
+def _parse_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> BucketAccessGroup | Error | None:
     if response.status_code == 201:
         response_201 = BucketAccessGroup.from_dict(response.json())
-
-
 
         return response_201
 
     if response.status_code == 400:
         response_400 = Error.from_dict(response.json())
 
-
-
         return response_400
 
     if response.status_code == 401:
         response_401 = Error.from_dict(response.json())
-
-
 
         return response_401
 
     if response.status_code == 404:
         response_404 = Error.from_dict(response.json())
 
-
-
         return response_404
 
     if response.status_code == 409:
         response_409 = Error.from_dict(response.json())
-
-
 
         return response_409
 
@@ -84,7 +67,9 @@ def _parse_response(*, client: Union[AuthenticatedClient, Client], response: htt
         return None
 
 
-def _build_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Response[Union[BucketAccessGroup, Error]]:
+def _build_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Response[BucketAccessGroup | Error]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -98,9 +83,8 @@ def sync_detailed(
     *,
     client: AuthenticatedClient,
     body: PostBucketBucketsBucketIdAccessGroupsBody,
-
-) -> Response[Union[BucketAccessGroup, Error]]:
-    """ Create an access group in a bucket
+) -> Response[BucketAccessGroup | Error]:
+    """Create an access group in a bucket
 
     Args:
         bucket_id (str):
@@ -112,13 +96,11 @@ def sync_detailed(
 
     Returns:
         Response[Union[BucketAccessGroup, Error]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         bucket_id=bucket_id,
-body=body,
-
+        body=body,
     )
 
     response = client.get_httpx_client().request(
@@ -127,14 +109,14 @@ body=body,
 
     return _build_response(client=client, response=response)
 
+
 def sync(
     bucket_id: str,
     *,
     client: AuthenticatedClient,
     body: PostBucketBucketsBucketIdAccessGroupsBody,
-
-) -> Optional[Union[BucketAccessGroup, Error]]:
-    """ Create an access group in a bucket
+) -> BucketAccessGroup | Error | None:
+    """Create an access group in a bucket
 
     Args:
         bucket_id (str):
@@ -146,24 +128,22 @@ def sync(
 
     Returns:
         Union[BucketAccessGroup, Error]
-     """
-
+    """
 
     return sync_detailed(
         bucket_id=bucket_id,
-client=client,
-body=body,
-
+        client=client,
+        body=body,
     ).parsed
+
 
 async def asyncio_detailed(
     bucket_id: str,
     *,
     client: AuthenticatedClient,
     body: PostBucketBucketsBucketIdAccessGroupsBody,
-
-) -> Response[Union[BucketAccessGroup, Error]]:
-    """ Create an access group in a bucket
+) -> Response[BucketAccessGroup | Error]:
+    """Create an access group in a bucket
 
     Args:
         bucket_id (str):
@@ -175,29 +155,25 @@ async def asyncio_detailed(
 
     Returns:
         Response[Union[BucketAccessGroup, Error]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         bucket_id=bucket_id,
-body=body,
-
+        body=body,
     )
 
-    response = await client.get_async_httpx_client().request(
-        **kwargs
-    )
+    response = await client.get_async_httpx_client().request(**kwargs)
 
     return _build_response(client=client, response=response)
+
 
 async def asyncio(
     bucket_id: str,
     *,
     client: AuthenticatedClient,
     body: PostBucketBucketsBucketIdAccessGroupsBody,
-
-) -> Optional[Union[BucketAccessGroup, Error]]:
-    """ Create an access group in a bucket
+) -> BucketAccessGroup | Error | None:
+    """Create an access group in a bucket
 
     Args:
         bucket_id (str):
@@ -209,12 +185,12 @@ async def asyncio(
 
     Returns:
         Union[BucketAccessGroup, Error]
-     """
+    """
 
-
-    return (await asyncio_detailed(
-        bucket_id=bucket_id,
-client=client,
-body=body,
-
-    )).parsed
+    return (
+        await asyncio_detailed(
+            bucket_id=bucket_id,
+            client=client,
+            body=body,
+        )
+    ).parsed

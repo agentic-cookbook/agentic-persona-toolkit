@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class RegistryNamespaceOwnerKind(str, Enum):
     CUSTOMER = "customer"
     ECOSYSTEM = "ecosystem"

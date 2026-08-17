@@ -1,39 +1,33 @@
 from http import HTTPStatus
-from typing import Any, Optional, Union, cast
+from typing import Any
 
 import httpx
 
-from ...client import AuthenticatedClient, Client
-from ...types import Response, UNSET
 from ... import errors
-
-from ...models.post_integrations_providers_provider_id_link_token_body import PostIntegrationsProvidersProviderIdLinkTokenBody
-from ...models.post_integrations_providers_provider_id_link_token_response_200 import PostIntegrationsProvidersProviderIdLinkTokenResponse200
+from ...client import AuthenticatedClient, Client
+from ...models.post_integrations_providers_provider_id_link_token_body import (
+    PostIntegrationsProvidersProviderIdLinkTokenBody,
+)
+from ...models.post_integrations_providers_provider_id_link_token_response_200 import (
+    PostIntegrationsProvidersProviderIdLinkTokenResponse200,
+)
 from ...models.problem_details import ProblemDetails
-from typing import cast
-
+from ...types import Response
 
 
 def _get_kwargs(
     provider_id: str,
     *,
     body: PostIntegrationsProvidersProviderIdLinkTokenBody,
-
 ) -> dict[str, Any]:
     headers: dict[str, Any] = {}
 
-
-    
-
-    
-
     _kwargs: dict[str, Any] = {
         "method": "post",
-        "url": "/integrations/providers/{provider_id}/link-token".format(provider_id=provider_id,),
+        "url": f"/integrations/providers/{provider_id}/link-token",
     }
 
     _kwargs["json"] = body.to_dict()
-
 
     headers["Content-Type"] = "application/json"
 
@@ -41,40 +35,33 @@ def _get_kwargs(
     return _kwargs
 
 
-
-def _parse_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Optional[Union[PostIntegrationsProvidersProviderIdLinkTokenResponse200, ProblemDetails]]:
+def _parse_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> PostIntegrationsProvidersProviderIdLinkTokenResponse200 | ProblemDetails | None:
     if response.status_code == 200:
-        response_200 = PostIntegrationsProvidersProviderIdLinkTokenResponse200.from_dict(response.json())
-
-
+        response_200 = PostIntegrationsProvidersProviderIdLinkTokenResponse200.from_dict(
+            response.json()
+        )
 
         return response_200
 
     if response.status_code == 400:
         response_400 = ProblemDetails.from_dict(response.json())
 
-
-
         return response_400
 
     if response.status_code == 401:
         response_401 = ProblemDetails.from_dict(response.json())
-
-
 
         return response_401
 
     if response.status_code == 403:
         response_403 = ProblemDetails.from_dict(response.json())
 
-
-
         return response_403
 
     if response.status_code == 404:
         response_404 = ProblemDetails.from_dict(response.json())
-
-
 
         return response_404
 
@@ -84,7 +71,9 @@ def _parse_response(*, client: Union[AuthenticatedClient, Client], response: htt
         return None
 
 
-def _build_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Response[Union[PostIntegrationsProvidersProviderIdLinkTokenResponse200, ProblemDetails]]:
+def _build_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Response[PostIntegrationsProvidersProviderIdLinkTokenResponse200 | ProblemDetails]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -98,9 +87,8 @@ def sync_detailed(
     *,
     client: AuthenticatedClient,
     body: PostIntegrationsProvidersProviderIdLinkTokenBody,
-
-) -> Response[Union[PostIntegrationsProvidersProviderIdLinkTokenResponse200, ProblemDetails]]:
-    """ Mint a Plaid Link token
+) -> Response[PostIntegrationsProvidersProviderIdLinkTokenResponse200 | ProblemDetails]:
+    """Mint a Plaid Link token
 
      Only valid for plaid_link providers (400 otherwise). 404 for an unknown provider. The link token is
     minted for the target ecosystem `ecosystemId`; the caller must manage it (404/403 when unknown / not
@@ -116,13 +104,11 @@ def sync_detailed(
 
     Returns:
         Response[Union[PostIntegrationsProvidersProviderIdLinkTokenResponse200, ProblemDetails]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         provider_id=provider_id,
-body=body,
-
+        body=body,
     )
 
     response = client.get_httpx_client().request(
@@ -131,14 +117,14 @@ body=body,
 
     return _build_response(client=client, response=response)
 
+
 def sync(
     provider_id: str,
     *,
     client: AuthenticatedClient,
     body: PostIntegrationsProvidersProviderIdLinkTokenBody,
-
-) -> Optional[Union[PostIntegrationsProvidersProviderIdLinkTokenResponse200, ProblemDetails]]:
-    """ Mint a Plaid Link token
+) -> PostIntegrationsProvidersProviderIdLinkTokenResponse200 | ProblemDetails | None:
+    """Mint a Plaid Link token
 
      Only valid for plaid_link providers (400 otherwise). 404 for an unknown provider. The link token is
     minted for the target ecosystem `ecosystemId`; the caller must manage it (404/403 when unknown / not
@@ -154,24 +140,22 @@ def sync(
 
     Returns:
         Union[PostIntegrationsProvidersProviderIdLinkTokenResponse200, ProblemDetails]
-     """
-
+    """
 
     return sync_detailed(
         provider_id=provider_id,
-client=client,
-body=body,
-
+        client=client,
+        body=body,
     ).parsed
+
 
 async def asyncio_detailed(
     provider_id: str,
     *,
     client: AuthenticatedClient,
     body: PostIntegrationsProvidersProviderIdLinkTokenBody,
-
-) -> Response[Union[PostIntegrationsProvidersProviderIdLinkTokenResponse200, ProblemDetails]]:
-    """ Mint a Plaid Link token
+) -> Response[PostIntegrationsProvidersProviderIdLinkTokenResponse200 | ProblemDetails]:
+    """Mint a Plaid Link token
 
      Only valid for plaid_link providers (400 otherwise). 404 for an unknown provider. The link token is
     minted for the target ecosystem `ecosystemId`; the caller must manage it (404/403 when unknown / not
@@ -187,29 +171,25 @@ async def asyncio_detailed(
 
     Returns:
         Response[Union[PostIntegrationsProvidersProviderIdLinkTokenResponse200, ProblemDetails]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         provider_id=provider_id,
-body=body,
-
+        body=body,
     )
 
-    response = await client.get_async_httpx_client().request(
-        **kwargs
-    )
+    response = await client.get_async_httpx_client().request(**kwargs)
 
     return _build_response(client=client, response=response)
+
 
 async def asyncio(
     provider_id: str,
     *,
     client: AuthenticatedClient,
     body: PostIntegrationsProvidersProviderIdLinkTokenBody,
-
-) -> Optional[Union[PostIntegrationsProvidersProviderIdLinkTokenResponse200, ProblemDetails]]:
-    """ Mint a Plaid Link token
+) -> PostIntegrationsProvidersProviderIdLinkTokenResponse200 | ProblemDetails | None:
+    """Mint a Plaid Link token
 
      Only valid for plaid_link providers (400 otherwise). 404 for an unknown provider. The link token is
     minted for the target ecosystem `ecosystemId`; the caller must manage it (404/403 when unknown / not
@@ -225,12 +205,12 @@ async def asyncio(
 
     Returns:
         Union[PostIntegrationsProvidersProviderIdLinkTokenResponse200, ProblemDetails]
-     """
+    """
 
-
-    return (await asyncio_detailed(
-        provider_id=provider_id,
-client=client,
-body=body,
-
-    )).parsed
+    return (
+        await asyncio_detailed(
+            provider_id=provider_id,
+            client=client,
+            body=body,
+        )
+    ).parsed

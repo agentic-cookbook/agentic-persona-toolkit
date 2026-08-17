@@ -1,53 +1,41 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import TYPE_CHECKING, Any, TypeVar, Union, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 from ..types import UNSET, Unset
 
-from ..types import UNSET, Unset
-from typing import cast
-from typing import cast, Union
-from typing import Union
-
 if TYPE_CHECKING:
-  from ..models.community_settings_type_0 import CommunitySettingsType0
-
-
-
+    from ..models.community_settings_type_0 import CommunitySettingsType0
 
 
 T = TypeVar("T", bound="Community")
 
 
-
 @_attrs_define
 class Community:
-    """ 
-        Attributes:
-            id (str):
-            slug (str):
-            name (str):
-            is_public (bool):
-            description (Union[None, Unset, str]):
-            settings (Union['CommunitySettingsType0', None, Unset]): Opaque per-instance config bag.
-     """
+    """
+    Attributes:
+        id (str):
+        slug (str):
+        name (str):
+        is_public (bool):
+        description (Union[None, Unset, str]):
+        settings (Union['CommunitySettingsType0', None, Unset]): Opaque per-instance config bag.
+    """
 
     id: str
     slug: str
     name: str
     is_public: bool
-    description: Union[None, Unset, str] = UNSET
-    settings: Union['CommunitySettingsType0', None, Unset] = UNSET
+    description: None | Unset | str = UNSET
+    settings: Union["CommunitySettingsType0", None, Unset] = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         from ..models.community_settings_type_0 import CommunitySettingsType0
+
         id = self.id
 
         slug = self.slug
@@ -56,13 +44,13 @@ class Community:
 
         is_public = self.is_public
 
-        description: Union[None, Unset, str]
+        description: None | Unset | str
         if isinstance(self.description, Unset):
             description = UNSET
         else:
             description = self.description
 
-        settings: Union[None, Unset, dict[str, Any]]
+        settings: None | Unset | dict[str, Any]
         if isinstance(self.settings, Unset):
             settings = UNSET
         elif isinstance(self.settings, CommunitySettingsType0):
@@ -70,15 +58,16 @@ class Community:
         else:
             settings = self.settings
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "id": id,
-            "slug": slug,
-            "name": name,
-            "isPublic": is_public,
-        })
+        field_dict.update(
+            {
+                "id": id,
+                "slug": slug,
+                "name": name,
+                "isPublic": is_public,
+            }
+        )
         if description is not UNSET:
             field_dict["description"] = description
         if settings is not UNSET:
@@ -86,11 +75,10 @@ class Community:
 
         return field_dict
 
-
-
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.community_settings_type_0 import CommunitySettingsType0
+
         d = dict(src_dict)
         id = d.pop("id")
 
@@ -100,17 +88,16 @@ class Community:
 
         is_public = d.pop("isPublic")
 
-        def _parse_description(data: object) -> Union[None, Unset, str]:
+        def _parse_description(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         description = _parse_description(d.pop("description", UNSET))
 
-
-        def _parse_settings(data: object) -> Union['CommunitySettingsType0', None, Unset]:
+        def _parse_settings(data: object) -> Union["CommunitySettingsType0", None, Unset]:
             if data is None:
                 return data
             if isinstance(data, Unset):
@@ -120,15 +107,12 @@ class Community:
                     raise TypeError()
                 settings_type_0 = CommunitySettingsType0.from_dict(data)
 
-
-
                 return settings_type_0
-            except: # noqa: E722
+            except:  # noqa: E722
                 pass
-            return cast(Union['CommunitySettingsType0', None, Unset], data)
+            return cast(Union["CommunitySettingsType0", None, Unset], data)
 
         settings = _parse_settings(d.pop("settings", UNSET))
-
 
         community = cls(
             id=id,
@@ -138,7 +122,6 @@ class Community:
             description=description,
             settings=settings,
         )
-
 
         community.additional_properties = d
         return community

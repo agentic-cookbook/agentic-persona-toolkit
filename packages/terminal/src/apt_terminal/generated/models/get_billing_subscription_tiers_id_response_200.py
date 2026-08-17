@@ -1,48 +1,33 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar, cast
 
 from attrs import define as _attrs_define
-from attrs import field as _attrs_field
-
-from ..types import UNSET, Unset
-
-from typing import cast, Union
-
-
-
-
-
 
 T = TypeVar("T", bound="GetBillingSubscriptionTiersIdResponse200")
 
 
-
 @_attrs_define
 class GetBillingSubscriptionTiersIdResponse200:
-    """ 
-        Attributes:
-            id (str):
-            key (str):
-            name (str):
-            description (Union[None, str]):
-            display_order (int):
-            is_active (bool):
-            created_at (str):
-            updated_at (str):
-     """
+    """
+    Attributes:
+        id (str):
+        key (str):
+        name (str):
+        description (Union[None, str]):
+        display_order (int):
+        is_active (bool):
+        created_at (str):
+        updated_at (str):
+    """
 
     id: str
     key: str
     name: str
-    description: Union[None, str]
+    description: None | str
     display_order: int
     is_active: bool
     created_at: str
     updated_at: str
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         id = self.id
@@ -51,7 +36,7 @@ class GetBillingSubscriptionTiersIdResponse200:
 
         name = self.name
 
-        description: Union[None, str]
+        description: None | str
         description = self.description
 
         display_order = self.display_order
@@ -62,23 +47,22 @@ class GetBillingSubscriptionTiersIdResponse200:
 
         updated_at = self.updated_at
 
-
         field_dict: dict[str, Any] = {}
 
-        field_dict.update({
-            "id": id,
-            "key": key,
-            "name": name,
-            "description": description,
-            "displayOrder": display_order,
-            "isActive": is_active,
-            "createdAt": created_at,
-            "updatedAt": updated_at,
-        })
+        field_dict.update(
+            {
+                "id": id,
+                "key": key,
+                "name": name,
+                "description": description,
+                "displayOrder": display_order,
+                "isActive": is_active,
+                "createdAt": created_at,
+                "updatedAt": updated_at,
+            }
+        )
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -89,13 +73,12 @@ class GetBillingSubscriptionTiersIdResponse200:
 
         name = d.pop("name")
 
-        def _parse_description(data: object) -> Union[None, str]:
+        def _parse_description(data: object) -> None | str:
             if data is None:
                 return data
-            return cast(Union[None, str], data)
+            return cast(None | str, data)
 
         description = _parse_description(d.pop("description"))
-
 
         display_order = d.pop("displayOrder")
 
@@ -117,4 +100,3 @@ class GetBillingSubscriptionTiersIdResponse200:
         )
 
         return get_billing_subscription_tiers_id_response_200
-

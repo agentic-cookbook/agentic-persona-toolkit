@@ -1,37 +1,30 @@
 from http import HTTPStatus
-from typing import Any, Optional, Union, cast
+from typing import Any
 
 import httpx
 
-from ...client import AuthenticatedClient, Client
-from ...types import Response, UNSET
 from ... import errors
-
+from ...client import AuthenticatedClient, Client
 from ...models.error import Error
 from ...models.get_content_reactions_response_200 import GetContentReactionsResponse200
-from typing import cast
-
+from ...types import UNSET, Response, Unset
 
 
 def _get_kwargs(
     *,
     target_kind: str,
-    target_id: str,
-
+    target_id: Unset | str = UNSET,
+    target_ids: Unset | str = UNSET,
 ) -> dict[str, Any]:
-    
-
-    
-
     params: dict[str, Any] = {}
 
     params["targetKind"] = target_kind
 
     params["targetId"] = target_id
 
+    params["targetIds"] = target_ids
 
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
-
 
     _kwargs: dict[str, Any] = {
         "method": "get",
@@ -39,30 +32,24 @@ def _get_kwargs(
         "params": params,
     }
 
-
     return _kwargs
 
 
-
-def _parse_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Optional[Union[Error, GetContentReactionsResponse200]]:
+def _parse_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Error | GetContentReactionsResponse200 | None:
     if response.status_code == 200:
         response_200 = GetContentReactionsResponse200.from_dict(response.json())
-
-
 
         return response_200
 
     if response.status_code == 400:
         response_400 = Error.from_dict(response.json())
 
-
-
         return response_400
 
     if response.status_code == 401:
         response_401 = Error.from_dict(response.json())
-
-
 
         return response_401
 
@@ -72,7 +59,9 @@ def _parse_response(*, client: Union[AuthenticatedClient, Client], response: htt
         return None
 
 
-def _build_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Response[Union[Error, GetContentReactionsResponse200]]:
+def _build_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Response[Error | GetContentReactionsResponse200]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -85,14 +74,15 @@ def sync_detailed(
     *,
     client: AuthenticatedClient,
     target_kind: str,
-    target_id: str,
-
-) -> Response[Union[Error, GetContentReactionsResponse200]]:
-    """ List all reactions on a target (public within the ecosystem)
+    target_id: Unset | str = UNSET,
+    target_ids: Unset | str = UNSET,
+) -> Response[Error | GetContentReactionsResponse200]:
+    """List all reactions on one target, or a batch of them (public within the ecosystem)
 
     Args:
         target_kind (str):
-        target_id (str):
+        target_id (Union[Unset, str]):
+        target_ids (Union[Unset, str]):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -100,13 +90,12 @@ def sync_detailed(
 
     Returns:
         Response[Union[Error, GetContentReactionsResponse200]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         target_kind=target_kind,
-target_id=target_id,
-
+        target_id=target_id,
+        target_ids=target_ids,
     )
 
     response = client.get_httpx_client().request(
@@ -115,18 +104,20 @@ target_id=target_id,
 
     return _build_response(client=client, response=response)
 
+
 def sync(
     *,
     client: AuthenticatedClient,
     target_kind: str,
-    target_id: str,
-
-) -> Optional[Union[Error, GetContentReactionsResponse200]]:
-    """ List all reactions on a target (public within the ecosystem)
+    target_id: Unset | str = UNSET,
+    target_ids: Unset | str = UNSET,
+) -> Error | GetContentReactionsResponse200 | None:
+    """List all reactions on one target, or a batch of them (public within the ecosystem)
 
     Args:
         target_kind (str):
-        target_id (str):
+        target_id (Union[Unset, str]):
+        target_ids (Union[Unset, str]):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -134,28 +125,29 @@ def sync(
 
     Returns:
         Union[Error, GetContentReactionsResponse200]
-     """
-
+    """
 
     return sync_detailed(
         client=client,
-target_kind=target_kind,
-target_id=target_id,
-
+        target_kind=target_kind,
+        target_id=target_id,
+        target_ids=target_ids,
     ).parsed
+
 
 async def asyncio_detailed(
     *,
     client: AuthenticatedClient,
     target_kind: str,
-    target_id: str,
-
-) -> Response[Union[Error, GetContentReactionsResponse200]]:
-    """ List all reactions on a target (public within the ecosystem)
+    target_id: Unset | str = UNSET,
+    target_ids: Unset | str = UNSET,
+) -> Response[Error | GetContentReactionsResponse200]:
+    """List all reactions on one target, or a batch of them (public within the ecosystem)
 
     Args:
         target_kind (str):
-        target_id (str):
+        target_id (Union[Unset, str]):
+        target_ids (Union[Unset, str]):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -163,33 +155,32 @@ async def asyncio_detailed(
 
     Returns:
         Response[Union[Error, GetContentReactionsResponse200]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         target_kind=target_kind,
-target_id=target_id,
-
+        target_id=target_id,
+        target_ids=target_ids,
     )
 
-    response = await client.get_async_httpx_client().request(
-        **kwargs
-    )
+    response = await client.get_async_httpx_client().request(**kwargs)
 
     return _build_response(client=client, response=response)
+
 
 async def asyncio(
     *,
     client: AuthenticatedClient,
     target_kind: str,
-    target_id: str,
-
-) -> Optional[Union[Error, GetContentReactionsResponse200]]:
-    """ List all reactions on a target (public within the ecosystem)
+    target_id: Unset | str = UNSET,
+    target_ids: Unset | str = UNSET,
+) -> Error | GetContentReactionsResponse200 | None:
+    """List all reactions on one target, or a batch of them (public within the ecosystem)
 
     Args:
         target_kind (str):
-        target_id (str):
+        target_id (Union[Unset, str]):
+        target_ids (Union[Unset, str]):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -197,12 +188,13 @@ async def asyncio(
 
     Returns:
         Union[Error, GetContentReactionsResponse200]
-     """
+    """
 
-
-    return (await asyncio_detailed(
-        client=client,
-target_kind=target_kind,
-target_id=target_id,
-
-    )).parsed
+    return (
+        await asyncio_detailed(
+            client=client,
+            target_kind=target_kind,
+            target_id=target_id,
+            target_ids=target_ids,
+        )
+    ).parsed

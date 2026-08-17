@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class PostCustomerLoginMfaBodyMethod(str, Enum):
     RECOVERY = "recovery"
     SMS = "sms"

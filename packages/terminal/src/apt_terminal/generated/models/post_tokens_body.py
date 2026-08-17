@@ -1,54 +1,39 @@
+import datetime
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
-
-from ..types import UNSET, Unset
-
-from ..types import UNSET, Unset
 from dateutil.parser import isoparse
-from typing import cast
-from typing import cast, Union
-from typing import Union
-import datetime
 
-
-
-
-
+from ..types import UNSET, Unset
 
 T = TypeVar("T", bound="PostTokensBody")
 
 
-
 @_attrs_define
 class PostTokensBody:
-    """ 
-        Attributes:
-            name (str):
-            description (Union[Unset, str]):
-            expires_at (Union[None, Unset, datetime.datetime]):
-            ecosystem_id (Union[Unset, str]): The ecosystem (rdid or uuid; must be manageable by the caller) the token — and
-                its isolated bucket — binds to. Omitted: the owner’s own ecosystem.
-     """
+    """
+    Attributes:
+        name (str):
+        description (Union[Unset, str]):
+        expires_at (Union[None, Unset, datetime.datetime]):
+        ecosystem_id (Union[Unset, str]): The ecosystem (rdid or uuid; must be manageable by the caller) the token — and
+            its isolated bucket — binds to. Omitted: the owner’s own ecosystem.
+    """
 
     name: str
-    description: Union[Unset, str] = UNSET
-    expires_at: Union[None, Unset, datetime.datetime] = UNSET
-    ecosystem_id: Union[Unset, str] = UNSET
+    description: Unset | str = UNSET
+    expires_at: None | Unset | datetime.datetime = UNSET
+    ecosystem_id: Unset | str = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         name = self.name
 
         description = self.description
 
-        expires_at: Union[None, Unset, str]
+        expires_at: None | Unset | str
         if isinstance(self.expires_at, Unset):
             expires_at = UNSET
         elif isinstance(self.expires_at, datetime.datetime):
@@ -58,12 +43,13 @@ class PostTokensBody:
 
         ecosystem_id = self.ecosystem_id
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "name": name,
-        })
+        field_dict.update(
+            {
+                "name": name,
+            }
+        )
         if description is not UNSET:
             field_dict["description"] = description
         if expires_at is not UNSET:
@@ -73,8 +59,6 @@ class PostTokensBody:
 
         return field_dict
 
-
-
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
@@ -82,7 +66,7 @@ class PostTokensBody:
 
         description = d.pop("description", UNSET)
 
-        def _parse_expires_at(data: object) -> Union[None, Unset, datetime.datetime]:
+        def _parse_expires_at(data: object) -> None | Unset | datetime.datetime:
             if data is None:
                 return data
             if isinstance(data, Unset):
@@ -92,15 +76,12 @@ class PostTokensBody:
                     raise TypeError()
                 expires_at_type_0 = isoparse(data)
 
-
-
                 return expires_at_type_0
-            except: # noqa: E722
+            except:  # noqa: E722
                 pass
-            return cast(Union[None, Unset, datetime.datetime], data)
+            return cast(None | Unset | datetime.datetime, data)
 
         expires_at = _parse_expires_at(d.pop("expiresAt", UNSET))
-
 
         ecosystem_id = d.pop("ecosystemId", UNSET)
 
@@ -110,7 +91,6 @@ class PostTokensBody:
             expires_at=expires_at,
             ecosystem_id=ecosystem_id,
         )
-
 
         post_tokens_body.additional_properties = d
         return post_tokens_body

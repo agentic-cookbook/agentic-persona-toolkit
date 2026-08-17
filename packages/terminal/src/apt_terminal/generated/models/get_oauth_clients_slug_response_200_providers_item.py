@@ -1,41 +1,31 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
-
-from ..models.get_oauth_clients_slug_response_200_providers_item_auth_type import GetOauthClientsSlugResponse200ProvidersItemAuthType
-
-
-
-
-
+from ..models.get_oauth_clients_slug_response_200_providers_item_auth_type import (
+    GetOauthClientsSlugResponse200ProvidersItemAuthType,
+)
 
 T = TypeVar("T", bound="GetOauthClientsSlugResponse200ProvidersItem")
 
 
-
 @_attrs_define
 class GetOauthClientsSlugResponse200ProvidersItem:
-    """ 
-        Attributes:
-            id (str):
-            slug (str):
-            name (str):
-            auth_type (GetOauthClientsSlugResponse200ProvidersItemAuthType):
-     """
+    """
+    Attributes:
+        id (str):
+        slug (str):
+        name (str):
+        auth_type (GetOauthClientsSlugResponse200ProvidersItemAuthType):
+    """
 
     id: str
     slug: str
     name: str
     auth_type: GetOauthClientsSlugResponse200ProvidersItemAuthType
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         id = self.id
@@ -46,19 +36,18 @@ class GetOauthClientsSlugResponse200ProvidersItem:
 
         auth_type = self.auth_type.value
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "id": id,
-            "slug": slug,
-            "name": name,
-            "authType": auth_type,
-        })
+        field_dict.update(
+            {
+                "id": id,
+                "slug": slug,
+                "name": name,
+                "authType": auth_type,
+            }
+        )
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -71,16 +60,12 @@ class GetOauthClientsSlugResponse200ProvidersItem:
 
         auth_type = GetOauthClientsSlugResponse200ProvidersItemAuthType(d.pop("authType"))
 
-
-
-
         get_oauth_clients_slug_response_200_providers_item = cls(
             id=id,
             slug=slug,
             name=name,
             auth_type=auth_type,
         )
-
 
         get_oauth_clients_slug_response_200_providers_item.additional_properties = d
         return get_oauth_clients_slug_response_200_providers_item

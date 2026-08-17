@@ -1,34 +1,24 @@
 from http import HTTPStatus
-from typing import Any, Optional, Union, cast
+from typing import Any
 
 import httpx
 
-from ...client import AuthenticatedClient, Client
-from ...types import Response, UNSET
 from ... import errors
-
+from ...client import AuthenticatedClient, Client
 from ...models.get_integrations_response_200 import GetIntegrationsResponse200
 from ...models.problem_details import ProblemDetails
-from typing import cast
-
+from ...types import UNSET, Response
 
 
 def _get_kwargs(
     *,
     ecosystem_id: str,
-
 ) -> dict[str, Any]:
-    
-
-    
-
     params: dict[str, Any] = {}
 
     params["ecosystemId"] = ecosystem_id
 
-
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
-
 
     _kwargs: dict[str, Any] = {
         "method": "get",
@@ -36,44 +26,34 @@ def _get_kwargs(
         "params": params,
     }
 
-
     return _kwargs
 
 
-
-def _parse_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Optional[Union[GetIntegrationsResponse200, ProblemDetails]]:
+def _parse_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> GetIntegrationsResponse200 | ProblemDetails | None:
     if response.status_code == 200:
         response_200 = GetIntegrationsResponse200.from_dict(response.json())
-
-
 
         return response_200
 
     if response.status_code == 400:
         response_400 = ProblemDetails.from_dict(response.json())
 
-
-
         return response_400
 
     if response.status_code == 401:
         response_401 = ProblemDetails.from_dict(response.json())
-
-
 
         return response_401
 
     if response.status_code == 403:
         response_403 = ProblemDetails.from_dict(response.json())
 
-
-
         return response_403
 
     if response.status_code == 404:
         response_404 = ProblemDetails.from_dict(response.json())
-
-
 
         return response_404
 
@@ -83,7 +63,9 @@ def _parse_response(*, client: Union[AuthenticatedClient, Client], response: htt
         return None
 
 
-def _build_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Response[Union[GetIntegrationsResponse200, ProblemDetails]]:
+def _build_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Response[GetIntegrationsResponse200 | ProblemDetails]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -96,9 +78,8 @@ def sync_detailed(
     *,
     client: AuthenticatedClient,
     ecosystem_id: str,
-
-) -> Response[Union[GetIntegrationsResponse200, ProblemDetails]]:
-    """ List a target ecosystem's connections (secrets redacted)
+) -> Response[GetIntegrationsResponse200 | ProblemDetails]:
+    """List a target ecosystem's connections (secrets redacted)
 
      Returns every integration connection OWNED by the target ecosystem `ecosystemId` (the caller must
     manage it). Secret columns are never included. 400 when `ecosystemId` is omitted; 404/403 when the
@@ -113,12 +94,10 @@ def sync_detailed(
 
     Returns:
         Response[Union[GetIntegrationsResponse200, ProblemDetails]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         ecosystem_id=ecosystem_id,
-
     )
 
     response = client.get_httpx_client().request(
@@ -127,13 +106,13 @@ def sync_detailed(
 
     return _build_response(client=client, response=response)
 
+
 def sync(
     *,
     client: AuthenticatedClient,
     ecosystem_id: str,
-
-) -> Optional[Union[GetIntegrationsResponse200, ProblemDetails]]:
-    """ List a target ecosystem's connections (secrets redacted)
+) -> GetIntegrationsResponse200 | ProblemDetails | None:
+    """List a target ecosystem's connections (secrets redacted)
 
      Returns every integration connection OWNED by the target ecosystem `ecosystemId` (the caller must
     manage it). Secret columns are never included. 400 when `ecosystemId` is omitted; 404/403 when the
@@ -148,22 +127,20 @@ def sync(
 
     Returns:
         Union[GetIntegrationsResponse200, ProblemDetails]
-     """
-
+    """
 
     return sync_detailed(
         client=client,
-ecosystem_id=ecosystem_id,
-
+        ecosystem_id=ecosystem_id,
     ).parsed
+
 
 async def asyncio_detailed(
     *,
     client: AuthenticatedClient,
     ecosystem_id: str,
-
-) -> Response[Union[GetIntegrationsResponse200, ProblemDetails]]:
-    """ List a target ecosystem's connections (secrets redacted)
+) -> Response[GetIntegrationsResponse200 | ProblemDetails]:
+    """List a target ecosystem's connections (secrets redacted)
 
      Returns every integration connection OWNED by the target ecosystem `ecosystemId` (the caller must
     manage it). Secret columns are never included. 400 when `ecosystemId` is omitted; 404/403 when the
@@ -178,27 +155,23 @@ async def asyncio_detailed(
 
     Returns:
         Response[Union[GetIntegrationsResponse200, ProblemDetails]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         ecosystem_id=ecosystem_id,
-
     )
 
-    response = await client.get_async_httpx_client().request(
-        **kwargs
-    )
+    response = await client.get_async_httpx_client().request(**kwargs)
 
     return _build_response(client=client, response=response)
+
 
 async def asyncio(
     *,
     client: AuthenticatedClient,
     ecosystem_id: str,
-
-) -> Optional[Union[GetIntegrationsResponse200, ProblemDetails]]:
-    """ List a target ecosystem's connections (secrets redacted)
+) -> GetIntegrationsResponse200 | ProblemDetails | None:
+    """List a target ecosystem's connections (secrets redacted)
 
      Returns every integration connection OWNED by the target ecosystem `ecosystemId` (the caller must
     manage it). Secret columns are never included. 400 when `ecosystemId` is omitted; 404/403 when the
@@ -213,11 +186,11 @@ async def asyncio(
 
     Returns:
         Union[GetIntegrationsResponse200, ProblemDetails]
-     """
+    """
 
-
-    return (await asyncio_detailed(
-        client=client,
-ecosystem_id=ecosystem_id,
-
-    )).parsed
+    return (
+        await asyncio_detailed(
+            client=client,
+            ecosystem_id=ecosystem_id,
+        )
+    ).parsed

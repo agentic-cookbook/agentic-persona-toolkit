@@ -1,36 +1,27 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
-
 from ..models.integration_connect_request_type_2_type import IntegrationConnectRequestType2Type
 from ..types import UNSET, Unset
-from typing import Union
-
-
-
-
-
 
 T = TypeVar("T", bound="IntegrationConnectRequestType2")
 
 
-
 @_attrs_define
 class IntegrationConnectRequestType2:
-    """ 
-        Attributes:
-            type_ (IntegrationConnectRequestType2Type):
-            provider_id (str):
-            service_type (str):
-            ecosystem_id (str): Target ecosystem id (the caller must manage it)
-            identifier (str):
-            password (str):
-            instance_url (Union[Unset, str]):
-     """
+    """
+    Attributes:
+        type_ (IntegrationConnectRequestType2Type):
+        provider_id (str):
+        service_type (str):
+        ecosystem_id (str): Target ecosystem id (the caller must manage it)
+        identifier (str):
+        password (str):
+        instance_url (Union[Unset, str]):
+    """
 
     type_: IntegrationConnectRequestType2Type
     provider_id: str
@@ -38,12 +29,8 @@ class IntegrationConnectRequestType2:
     ecosystem_id: str
     identifier: str
     password: str
-    instance_url: Union[Unset, str] = UNSET
+    instance_url: Unset | str = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         type_ = self.type_.value
@@ -60,31 +47,27 @@ class IntegrationConnectRequestType2:
 
         instance_url = self.instance_url
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "type": type_,
-            "providerId": provider_id,
-            "serviceType": service_type,
-            "ecosystemId": ecosystem_id,
-            "identifier": identifier,
-            "password": password,
-        })
+        field_dict.update(
+            {
+                "type": type_,
+                "providerId": provider_id,
+                "serviceType": service_type,
+                "ecosystemId": ecosystem_id,
+                "identifier": identifier,
+                "password": password,
+            }
+        )
         if instance_url is not UNSET:
             field_dict["instanceUrl"] = instance_url
 
         return field_dict
 
-
-
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
         type_ = IntegrationConnectRequestType2Type(d.pop("type"))
-
-
-
 
         provider_id = d.pop("providerId")
 
@@ -107,7 +90,6 @@ class IntegrationConnectRequestType2:
             password=password,
             instance_url=instance_url,
         )
-
 
         integration_connect_request_type_2.additional_properties = d
         return integration_connect_request_type_2

@@ -1,53 +1,39 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 from ..types import UNSET, Unset
 
-from ..types import UNSET, Unset
-from typing import cast
-from typing import Union
-
-
-
-
-
-
 T = TypeVar("T", bound="GetOauthProvidersSlugResponse200IdentityMapping")
-
 
 
 @_attrs_define
 class GetOauthProvidersSlugResponse200IdentityMapping:
-    """ 
-        Attributes:
-            subject_field (Union[Unset, str]):
-            email_field (Union[Unset, str]):
-            name_field (Union[Unset, str]):
-            avatar_field (Union[Unset, str]):
-            verification_url (Union[Unset, str]):
-            jwks_url (Union[Unset, str]):
-            require_email_verified (Union[Unset, bool]):
-            allowed_audiences (Union[Unset, list[str]]):
-            secondary_email_url (Union[Unset, str]):
-     """
+    """
+    Attributes:
+        subject_field (Union[Unset, str]):
+        email_field (Union[Unset, str]):
+        name_field (Union[Unset, str]):
+        avatar_field (Union[Unset, str]):
+        verification_url (Union[Unset, str]):
+        jwks_url (Union[Unset, str]):
+        require_email_verified (Union[Unset, bool]):
+        allowed_audiences (Union[Unset, list[str]]):
+        secondary_email_url (Union[Unset, str]):
+    """
 
-    subject_field: Union[Unset, str] = UNSET
-    email_field: Union[Unset, str] = UNSET
-    name_field: Union[Unset, str] = UNSET
-    avatar_field: Union[Unset, str] = UNSET
-    verification_url: Union[Unset, str] = UNSET
-    jwks_url: Union[Unset, str] = UNSET
-    require_email_verified: Union[Unset, bool] = UNSET
-    allowed_audiences: Union[Unset, list[str]] = UNSET
-    secondary_email_url: Union[Unset, str] = UNSET
+    subject_field: Unset | str = UNSET
+    email_field: Unset | str = UNSET
+    name_field: Unset | str = UNSET
+    avatar_field: Unset | str = UNSET
+    verification_url: Unset | str = UNSET
+    jwks_url: Unset | str = UNSET
+    require_email_verified: Unset | bool = UNSET
+    allowed_audiences: Unset | list[str] = UNSET
+    secondary_email_url: Unset | str = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         subject_field = self.subject_field
@@ -64,19 +50,15 @@ class GetOauthProvidersSlugResponse200IdentityMapping:
 
         require_email_verified = self.require_email_verified
 
-        allowed_audiences: Union[Unset, list[str]] = UNSET
+        allowed_audiences: Unset | list[str] = UNSET
         if not isinstance(self.allowed_audiences, Unset):
             allowed_audiences = self.allowed_audiences
 
-
-
         secondary_email_url = self.secondary_email_url
-
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-        })
+        field_dict.update({})
         if subject_field is not UNSET:
             field_dict["subjectField"] = subject_field
         if email_field is not UNSET:
@@ -98,8 +80,6 @@ class GetOauthProvidersSlugResponse200IdentityMapping:
 
         return field_dict
 
-
-
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
@@ -119,7 +99,6 @@ class GetOauthProvidersSlugResponse200IdentityMapping:
 
         allowed_audiences = cast(list[str], d.pop("allowedAudiences", UNSET))
 
-
         secondary_email_url = d.pop("secondaryEmailUrl", UNSET)
 
         get_oauth_providers_slug_response_200_identity_mapping = cls(
@@ -133,7 +112,6 @@ class GetOauthProvidersSlugResponse200IdentityMapping:
             allowed_audiences=allowed_audiences,
             secondary_email_url=secondary_email_url,
         )
-
 
         get_oauth_providers_slug_response_200_identity_mapping.additional_properties = d
         return get_oauth_providers_slug_response_200_identity_mapping

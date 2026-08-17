@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class PostProjectProjectsIdWorkItemsBodyAssigneeKind(str, Enum):
     CUSTOMER = "customer"
     PERSONA = "persona"

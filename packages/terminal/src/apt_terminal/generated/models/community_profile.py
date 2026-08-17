@@ -1,43 +1,29 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 from ..types import UNSET, Unset
 
-from ..types import UNSET, Unset
-from typing import cast, Union
-from typing import Union
-
-
-
-
-
-
 T = TypeVar("T", bound="CommunityProfile")
-
 
 
 @_attrs_define
 class CommunityProfile:
-    """ 
-        Attributes:
-            customer_id (str):
-            slug (str):
-            avatar_url (str):
-            display_name (Union[None, Unset, str]):
-     """
+    """
+    Attributes:
+        customer_id (str):
+        slug (str):
+        avatar_url (str):
+        display_name (Union[None, Unset, str]):
+    """
 
     customer_id: str
     slug: str
     avatar_url: str
-    display_name: Union[None, Unset, str] = UNSET
+    display_name: None | Unset | str = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         customer_id = self.customer_id
@@ -46,26 +32,25 @@ class CommunityProfile:
 
         avatar_url = self.avatar_url
 
-        display_name: Union[None, Unset, str]
+        display_name: None | Unset | str
         if isinstance(self.display_name, Unset):
             display_name = UNSET
         else:
             display_name = self.display_name
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "customerId": customer_id,
-            "slug": slug,
-            "avatarUrl": avatar_url,
-        })
+        field_dict.update(
+            {
+                "customerId": customer_id,
+                "slug": slug,
+                "avatarUrl": avatar_url,
+            }
+        )
         if display_name is not UNSET:
             field_dict["displayName"] = display_name
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -76,15 +61,14 @@ class CommunityProfile:
 
         avatar_url = d.pop("avatarUrl")
 
-        def _parse_display_name(data: object) -> Union[None, Unset, str]:
+        def _parse_display_name(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         display_name = _parse_display_name(d.pop("displayName", UNSET))
-
 
         community_profile = cls(
             customer_id=customer_id,
@@ -92,7 +76,6 @@ class CommunityProfile:
             avatar_url=avatar_url,
             display_name=display_name,
         )
-
 
         community_profile.additional_properties = d
         return community_profile

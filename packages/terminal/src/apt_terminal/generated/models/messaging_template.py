@@ -1,35 +1,26 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 from ..types import UNSET, Unset
 
-from ..types import UNSET, Unset
-from typing import Union
-
-
-
-
-
-
 T = TypeVar("T", bound="MessagingTemplate")
-
 
 
 @_attrs_define
 class MessagingTemplate:
-    """ 
-        Attributes:
-            id (str):
-            name (str):
-            subject (str):
-            html_body (str):
-            text_body (str):
-            category (str):
-            sms_body (Union[Unset, str]):
-     """
+    """
+    Attributes:
+        id (str):
+        name (str):
+        subject (str):
+        html_body (str):
+        text_body (str):
+        category (str):
+        sms_body (Union[Unset, str]):
+    """
 
     id: str
     name: str
@@ -37,12 +28,8 @@ class MessagingTemplate:
     html_body: str
     text_body: str
     category: str
-    sms_body: Union[Unset, str] = UNSET
+    sms_body: Unset | str = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         id = self.id
@@ -59,23 +46,22 @@ class MessagingTemplate:
 
         sms_body = self.sms_body
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "id": id,
-            "name": name,
-            "subject": subject,
-            "htmlBody": html_body,
-            "textBody": text_body,
-            "category": category,
-        })
+        field_dict.update(
+            {
+                "id": id,
+                "name": name,
+                "subject": subject,
+                "htmlBody": html_body,
+                "textBody": text_body,
+                "category": category,
+            }
+        )
         if sms_body is not UNSET:
             field_dict["smsBody"] = sms_body
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -103,7 +89,6 @@ class MessagingTemplate:
             category=category,
             sms_body=sms_body,
         )
-
 
         messaging_template.additional_properties = d
         return messaging_template

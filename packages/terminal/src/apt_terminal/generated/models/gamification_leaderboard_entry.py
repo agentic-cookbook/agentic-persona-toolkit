@@ -1,47 +1,33 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 from ..types import UNSET, Unset
 
-from ..types import UNSET, Unset
-from typing import cast, Union
-from typing import Union
-
-
-
-
-
-
 T = TypeVar("T", bound="GamificationLeaderboardEntry")
-
 
 
 @_attrs_define
 class GamificationLeaderboardEntry:
-    """ 
-        Attributes:
-            subject_type (str):
-            subject_id (str):
-            avatar_url (str):
-            total_points (int):
-            name (Union[None, Unset, str]): Display name (users only)
-            level (Union[None, Unset, str]):
-     """
+    """
+    Attributes:
+        subject_type (str):
+        subject_id (str):
+        avatar_url (str):
+        total_points (int):
+        name (Union[None, Unset, str]): Display name (users only)
+        level (Union[None, Unset, str]):
+    """
 
     subject_type: str
     subject_id: str
     avatar_url: str
     total_points: int
-    name: Union[None, Unset, str] = UNSET
-    level: Union[None, Unset, str] = UNSET
+    name: None | Unset | str = UNSET
+    level: None | Unset | str = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         subject_type = self.subject_type
@@ -52,35 +38,34 @@ class GamificationLeaderboardEntry:
 
         total_points = self.total_points
 
-        name: Union[None, Unset, str]
+        name: None | Unset | str
         if isinstance(self.name, Unset):
             name = UNSET
         else:
             name = self.name
 
-        level: Union[None, Unset, str]
+        level: None | Unset | str
         if isinstance(self.level, Unset):
             level = UNSET
         else:
             level = self.level
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "subjectType": subject_type,
-            "subjectId": subject_id,
-            "avatarUrl": avatar_url,
-            "totalPoints": total_points,
-        })
+        field_dict.update(
+            {
+                "subjectType": subject_type,
+                "subjectId": subject_id,
+                "avatarUrl": avatar_url,
+                "totalPoints": total_points,
+            }
+        )
         if name is not UNSET:
             field_dict["name"] = name
         if level is not UNSET:
             field_dict["level"] = level
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -93,25 +78,23 @@ class GamificationLeaderboardEntry:
 
         total_points = d.pop("totalPoints")
 
-        def _parse_name(data: object) -> Union[None, Unset, str]:
+        def _parse_name(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         name = _parse_name(d.pop("name", UNSET))
 
-
-        def _parse_level(data: object) -> Union[None, Unset, str]:
+        def _parse_level(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         level = _parse_level(d.pop("level", UNSET))
-
 
         gamification_leaderboard_entry = cls(
             subject_type=subject_type,
@@ -121,7 +104,6 @@ class GamificationLeaderboardEntry:
             name=name,
             level=level,
         )
-
 
         gamification_leaderboard_entry.additional_properties = d
         return gamification_leaderboard_entry

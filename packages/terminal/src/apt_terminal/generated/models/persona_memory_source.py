@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class PersonaMemorySource(str, Enum):
     INFERRED = "inferred"
     TOOL = "tool"

@@ -1,30 +1,21 @@
 from http import HTTPStatus
-from typing import Any, Optional, Union, cast
+from typing import Any
 
 import httpx
 
-from ...client import AuthenticatedClient, Client
-from ...types import Response, UNSET
 from ... import errors
-
+from ...client import AuthenticatedClient, Client
 from ...models.error import Error
 from ...models.patch_auth_me_body import PatchAuthMeBody
 from ...models.user import User
-from typing import cast
-
+from ...types import Response
 
 
 def _get_kwargs(
     *,
     body: PatchAuthMeBody,
-
 ) -> dict[str, Any]:
     headers: dict[str, Any] = {}
-
-
-    
-
-    
 
     _kwargs: dict[str, Any] = {
         "method": "patch",
@@ -33,47 +24,37 @@ def _get_kwargs(
 
     _kwargs["json"] = body.to_dict()
 
-
     headers["Content-Type"] = "application/json"
 
     _kwargs["headers"] = headers
     return _kwargs
 
 
-
-def _parse_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Optional[Union[Error, User]]:
+def _parse_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Error | User | None:
     if response.status_code == 200:
         response_200 = User.from_dict(response.json())
-
-
 
         return response_200
 
     if response.status_code == 400:
         response_400 = Error.from_dict(response.json())
 
-
-
         return response_400
 
     if response.status_code == 401:
         response_401 = Error.from_dict(response.json())
-
-
 
         return response_401
 
     if response.status_code == 404:
         response_404 = Error.from_dict(response.json())
 
-
-
         return response_404
 
     if response.status_code == 409:
         response_409 = Error.from_dict(response.json())
-
-
 
         return response_409
 
@@ -83,7 +64,9 @@ def _parse_response(*, client: Union[AuthenticatedClient, Client], response: htt
         return None
 
 
-def _build_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Response[Union[Error, User]]:
+def _build_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Response[Error | User]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -96,9 +79,8 @@ def sync_detailed(
     *,
     client: AuthenticatedClient,
     body: PatchAuthMeBody,
-
-) -> Response[Union[Error, User]]:
-    """ Update the caller's own profile (name, slug, avatar, public-profile toggle)
+) -> Response[Error | User]:
+    """Update the caller's own profile (name, slug, avatar, public-profile toggle)
 
     Args:
         body (PatchAuthMeBody): At least one profile field is required.
@@ -109,12 +91,10 @@ def sync_detailed(
 
     Returns:
         Response[Union[Error, User]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         body=body,
-
     )
 
     response = client.get_httpx_client().request(
@@ -123,13 +103,13 @@ def sync_detailed(
 
     return _build_response(client=client, response=response)
 
+
 def sync(
     *,
     client: AuthenticatedClient,
     body: PatchAuthMeBody,
-
-) -> Optional[Union[Error, User]]:
-    """ Update the caller's own profile (name, slug, avatar, public-profile toggle)
+) -> Error | User | None:
+    """Update the caller's own profile (name, slug, avatar, public-profile toggle)
 
     Args:
         body (PatchAuthMeBody): At least one profile field is required.
@@ -140,22 +120,20 @@ def sync(
 
     Returns:
         Union[Error, User]
-     """
-
+    """
 
     return sync_detailed(
         client=client,
-body=body,
-
+        body=body,
     ).parsed
+
 
 async def asyncio_detailed(
     *,
     client: AuthenticatedClient,
     body: PatchAuthMeBody,
-
-) -> Response[Union[Error, User]]:
-    """ Update the caller's own profile (name, slug, avatar, public-profile toggle)
+) -> Response[Error | User]:
+    """Update the caller's own profile (name, slug, avatar, public-profile toggle)
 
     Args:
         body (PatchAuthMeBody): At least one profile field is required.
@@ -166,27 +144,23 @@ async def asyncio_detailed(
 
     Returns:
         Response[Union[Error, User]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         body=body,
-
     )
 
-    response = await client.get_async_httpx_client().request(
-        **kwargs
-    )
+    response = await client.get_async_httpx_client().request(**kwargs)
 
     return _build_response(client=client, response=response)
+
 
 async def asyncio(
     *,
     client: AuthenticatedClient,
     body: PatchAuthMeBody,
-
-) -> Optional[Union[Error, User]]:
-    """ Update the caller's own profile (name, slug, avatar, public-profile toggle)
+) -> Error | User | None:
+    """Update the caller's own profile (name, slug, avatar, public-profile toggle)
 
     Args:
         body (PatchAuthMeBody): At least one profile field is required.
@@ -197,11 +171,11 @@ async def asyncio(
 
     Returns:
         Union[Error, User]
-     """
+    """
 
-
-    return (await asyncio_detailed(
-        client=client,
-body=body,
-
-    )).parsed
+    return (
+        await asyncio_detailed(
+            client=client,
+            body=body,
+        )
+    ).parsed

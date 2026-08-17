@@ -1,56 +1,42 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 from ..types import UNSET, Unset
 
-from ..types import UNSET, Unset
-from typing import Union
-
-
-
-
-
-
 T = TypeVar("T", bound="PostIntegrationsProvidersProviderIdLinkTokenBody")
-
 
 
 @_attrs_define
 class PostIntegrationsProvidersProviderIdLinkTokenBody:
-    """ 
-        Attributes:
-            ecosystem_id (str): Target ecosystem id (the caller must manage it)
-            service_type (Union[Unset, str]): Defaults to the provider primary service type
-     """
+    """
+    Attributes:
+        ecosystem_id (str): Target ecosystem id (the caller must manage it)
+        service_type (Union[Unset, str]): Defaults to the provider primary service type
+    """
 
     ecosystem_id: str
-    service_type: Union[Unset, str] = UNSET
+    service_type: Unset | str = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         ecosystem_id = self.ecosystem_id
 
         service_type = self.service_type
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "ecosystemId": ecosystem_id,
-        })
+        field_dict.update(
+            {
+                "ecosystemId": ecosystem_id,
+            }
+        )
         if service_type is not UNSET:
             field_dict["serviceType"] = service_type
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -63,7 +49,6 @@ class PostIntegrationsProvidersProviderIdLinkTokenBody:
             ecosystem_id=ecosystem_id,
             service_type=service_type,
         )
-
 
         post_integrations_providers_provider_id_link_token_body.additional_properties = d
         return post_integrations_providers_provider_id_link_token_body

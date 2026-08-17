@@ -2,3 +2,23 @@
 # apt_terminal.generated (no project metadata; see --meta none).
 package_name_override: generated
 use_path_prefixes_for_title_model_names: false
+
+# The generator's own default post-hooks, with one flag added. Spelled out here
+# rather than inherited because the default `ruff check . --fix --extend-select=I`
+# FAILS the whole generation, and it fails for a reason that is not a defect in the
+# output: ruff resolves its config by walking up from the output directory, so it
+# picks up this package's `[tool.ruff]` — `select = ["E","F","I","UP","B","SIM","RUF"]`
+# — and applies the hand-written package's rule set to machine-emitted code. That
+# same pyproject already says the opposite in `extend-exclude`, but an exclusion does
+# not apply to a path passed explicitly on the command line (which `.` is), so the
+# post-hook lints what the project has declared out of scope and exits 1 on the
+# ~1100 diagnostics it cannot autofix.
+#
+# `--exit-zero` keeps every safe fix and the import sort — the parts that actually
+# shape the committed tree — and drops only the verdict, which is the same verdict
+# `extend-exclude` already renders. Without it the target is unrunnable: `ruff` is
+# `>=0.5` in this package's dev extra while the generator is pinned, so any new rule
+# in any future ruff release breaks generation again.
+post_hooks:
+  - "ruff check . --fix --extend-select=I --exit-zero"
+  - "ruff format ."

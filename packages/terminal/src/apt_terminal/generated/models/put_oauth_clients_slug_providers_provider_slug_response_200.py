@@ -1,38 +1,25 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
-
-
-
-
-
-
-
 T = TypeVar("T", bound="PutOauthClientsSlugProvidersProviderSlugResponse200")
-
 
 
 @_attrs_define
 class PutOauthClientsSlugProvidersProviderSlugResponse200:
-    """ 
-        Attributes:
-            client_slug (str):
-            provider_slug (str):
-            has_overrides (bool):
-     """
+    """
+    Attributes:
+        client_slug (str):
+        provider_slug (str):
+        has_overrides (bool):
+    """
 
     client_slug: str
     provider_slug: str
     has_overrides: bool
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         client_slug = self.client_slug
@@ -41,18 +28,17 @@ class PutOauthClientsSlugProvidersProviderSlugResponse200:
 
         has_overrides = self.has_overrides
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "clientSlug": client_slug,
-            "providerSlug": provider_slug,
-            "hasOverrides": has_overrides,
-        })
+        field_dict.update(
+            {
+                "clientSlug": client_slug,
+                "providerSlug": provider_slug,
+                "hasOverrides": has_overrides,
+            }
+        )
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -68,7 +54,6 @@ class PutOauthClientsSlugProvidersProviderSlugResponse200:
             provider_slug=provider_slug,
             has_overrides=has_overrides,
         )
-
 
         put_oauth_clients_slug_providers_provider_slug_response_200.additional_properties = d
         return put_oauth_clients_slug_providers_provider_slug_response_200

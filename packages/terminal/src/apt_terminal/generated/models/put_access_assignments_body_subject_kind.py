@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class PutAccessAssignmentsBodySubjectKind(str, Enum):
     CUSTOMER = "customer"
     PERSONA = "persona"

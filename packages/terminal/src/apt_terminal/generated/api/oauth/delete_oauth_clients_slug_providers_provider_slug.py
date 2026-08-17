@@ -1,39 +1,29 @@
 from http import HTTPStatus
-from typing import Any, Optional, Union, cast
+from typing import Any, cast
 
 import httpx
 
-from ...client import AuthenticatedClient, Client
-from ...types import Response, UNSET
 from ... import errors
-
+from ...client import AuthenticatedClient, Client
 from ...models.error import Error
-from typing import cast
-
+from ...types import Response
 
 
 def _get_kwargs(
     slug: str,
     provider_slug: str,
-
 ) -> dict[str, Any]:
-    
-
-    
-
-    
-
     _kwargs: dict[str, Any] = {
         "method": "delete",
-        "url": "/oauth/clients/{slug}/providers/{provider_slug}".format(slug=slug,provider_slug=provider_slug,),
+        "url": f"/oauth/clients/{slug}/providers/{provider_slug}",
     }
-
 
     return _kwargs
 
 
-
-def _parse_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Optional[Union[Any, Error]]:
+def _parse_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Any | Error | None:
     if response.status_code == 204:
         response_204 = cast(Any, None)
         return response_204
@@ -41,14 +31,10 @@ def _parse_response(*, client: Union[AuthenticatedClient, Client], response: htt
     if response.status_code == 401:
         response_401 = Error.from_dict(response.json())
 
-
-
         return response_401
 
     if response.status_code == 404:
         response_404 = Error.from_dict(response.json())
-
-
 
         return response_404
 
@@ -58,7 +44,9 @@ def _parse_response(*, client: Union[AuthenticatedClient, Client], response: htt
         return None
 
 
-def _build_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Response[Union[Any, Error]]:
+def _build_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Response[Any | Error]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -72,9 +60,8 @@ def sync_detailed(
     provider_slug: str,
     *,
     client: AuthenticatedClient,
-
-) -> Response[Union[Any, Error]]:
-    """ Unlink a provider from a client (admin)
+) -> Response[Any | Error]:
+    """Unlink a provider from a client (admin)
 
     Args:
         slug (str):
@@ -86,13 +73,11 @@ def sync_detailed(
 
     Returns:
         Response[Union[Any, Error]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         slug=slug,
-provider_slug=provider_slug,
-
+        provider_slug=provider_slug,
     )
 
     response = client.get_httpx_client().request(
@@ -101,14 +86,14 @@ provider_slug=provider_slug,
 
     return _build_response(client=client, response=response)
 
+
 def sync(
     slug: str,
     provider_slug: str,
     *,
     client: AuthenticatedClient,
-
-) -> Optional[Union[Any, Error]]:
-    """ Unlink a provider from a client (admin)
+) -> Any | Error | None:
+    """Unlink a provider from a client (admin)
 
     Args:
         slug (str):
@@ -120,24 +105,22 @@ def sync(
 
     Returns:
         Union[Any, Error]
-     """
-
+    """
 
     return sync_detailed(
         slug=slug,
-provider_slug=provider_slug,
-client=client,
-
+        provider_slug=provider_slug,
+        client=client,
     ).parsed
+
 
 async def asyncio_detailed(
     slug: str,
     provider_slug: str,
     *,
     client: AuthenticatedClient,
-
-) -> Response[Union[Any, Error]]:
-    """ Unlink a provider from a client (admin)
+) -> Response[Any | Error]:
+    """Unlink a provider from a client (admin)
 
     Args:
         slug (str):
@@ -149,29 +132,25 @@ async def asyncio_detailed(
 
     Returns:
         Response[Union[Any, Error]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         slug=slug,
-provider_slug=provider_slug,
-
+        provider_slug=provider_slug,
     )
 
-    response = await client.get_async_httpx_client().request(
-        **kwargs
-    )
+    response = await client.get_async_httpx_client().request(**kwargs)
 
     return _build_response(client=client, response=response)
+
 
 async def asyncio(
     slug: str,
     provider_slug: str,
     *,
     client: AuthenticatedClient,
-
-) -> Optional[Union[Any, Error]]:
-    """ Unlink a provider from a client (admin)
+) -> Any | Error | None:
+    """Unlink a provider from a client (admin)
 
     Args:
         slug (str):
@@ -183,12 +162,12 @@ async def asyncio(
 
     Returns:
         Union[Any, Error]
-     """
+    """
 
-
-    return (await asyncio_detailed(
-        slug=slug,
-provider_slug=provider_slug,
-client=client,
-
-    )).parsed
+    return (
+        await asyncio_detailed(
+            slug=slug,
+            provider_slug=provider_slug,
+            client=client,
+        )
+    ).parsed

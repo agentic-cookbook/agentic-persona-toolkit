@@ -1,46 +1,31 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar, cast
 
 from attrs import define as _attrs_define
-from attrs import field as _attrs_field
 
 from ..types import UNSET, Unset
-
-from ..types import UNSET, Unset
-from typing import cast, Union
-from typing import Union
-
-
-
-
-
 
 T = TypeVar("T", bound="PostMonitoringHealthChecksBody")
 
 
-
 @_attrs_define
 class PostMonitoringHealthChecksBody:
-    """ 
-        Attributes:
-            endpoint_id (str):
-            status (str):
-            checked_at (str):
-            response_time_ms (Union[None, Unset, int]):
-            status_code (Union[None, Unset, int]):
-            error_message (Union[None, Unset, str]):
-     """
+    """
+    Attributes:
+        endpoint_id (str):
+        status (str):
+        checked_at (str):
+        response_time_ms (Union[None, Unset, int]):
+        status_code (Union[None, Unset, int]):
+        error_message (Union[None, Unset, str]):
+    """
 
     endpoint_id: str
     status: str
     checked_at: str
-    response_time_ms: Union[None, Unset, int] = UNSET
-    status_code: Union[None, Unset, int] = UNSET
-    error_message: Union[None, Unset, str] = UNSET
-
-
-
-
+    response_time_ms: None | Unset | int = UNSET
+    status_code: None | Unset | int = UNSET
+    error_message: None | Unset | str = UNSET
 
     def to_dict(self) -> dict[str, Any]:
         endpoint_id = self.endpoint_id
@@ -49,32 +34,33 @@ class PostMonitoringHealthChecksBody:
 
         checked_at = self.checked_at
 
-        response_time_ms: Union[None, Unset, int]
+        response_time_ms: None | Unset | int
         if isinstance(self.response_time_ms, Unset):
             response_time_ms = UNSET
         else:
             response_time_ms = self.response_time_ms
 
-        status_code: Union[None, Unset, int]
+        status_code: None | Unset | int
         if isinstance(self.status_code, Unset):
             status_code = UNSET
         else:
             status_code = self.status_code
 
-        error_message: Union[None, Unset, str]
+        error_message: None | Unset | str
         if isinstance(self.error_message, Unset):
             error_message = UNSET
         else:
             error_message = self.error_message
 
-
         field_dict: dict[str, Any] = {}
 
-        field_dict.update({
-            "endpointId": endpoint_id,
-            "status": status,
-            "checkedAt": checked_at,
-        })
+        field_dict.update(
+            {
+                "endpointId": endpoint_id,
+                "status": status,
+                "checkedAt": checked_at,
+            }
+        )
         if response_time_ms is not UNSET:
             field_dict["responseTimeMs"] = response_time_ms
         if status_code is not UNSET:
@@ -83,8 +69,6 @@ class PostMonitoringHealthChecksBody:
             field_dict["errorMessage"] = error_message
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -95,35 +79,32 @@ class PostMonitoringHealthChecksBody:
 
         checked_at = d.pop("checkedAt")
 
-        def _parse_response_time_ms(data: object) -> Union[None, Unset, int]:
+        def _parse_response_time_ms(data: object) -> None | Unset | int:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, int], data)
+            return cast(None | Unset | int, data)
 
         response_time_ms = _parse_response_time_ms(d.pop("responseTimeMs", UNSET))
 
-
-        def _parse_status_code(data: object) -> Union[None, Unset, int]:
+        def _parse_status_code(data: object) -> None | Unset | int:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, int], data)
+            return cast(None | Unset | int, data)
 
         status_code = _parse_status_code(d.pop("statusCode", UNSET))
 
-
-        def _parse_error_message(data: object) -> Union[None, Unset, str]:
+        def _parse_error_message(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         error_message = _parse_error_message(d.pop("errorMessage", UNSET))
-
 
         post_monitoring_health_checks_body = cls(
             endpoint_id=endpoint_id,
@@ -135,4 +116,3 @@ class PostMonitoringHealthChecksBody:
         )
 
         return post_monitoring_health_checks_body
-

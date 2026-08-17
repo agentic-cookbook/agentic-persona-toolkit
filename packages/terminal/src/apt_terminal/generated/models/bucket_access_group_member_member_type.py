@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class BucketAccessGroupMemberMemberType(str, Enum):
     APP = "app"
     ORGANIZATION = "organization"

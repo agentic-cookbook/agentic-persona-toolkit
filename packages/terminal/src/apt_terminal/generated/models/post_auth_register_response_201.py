@@ -1,50 +1,37 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import TYPE_CHECKING, Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 from ..types import UNSET, Unset
 
-from ..types import UNSET, Unset
-from typing import cast
-from typing import Union
-
 if TYPE_CHECKING:
-  from ..models.user import User
-
-
-
+    from ..models.user import User
 
 
 T = TypeVar("T", bound="PostAuthRegisterResponse201")
 
 
-
 @_attrs_define
 class PostAuthRegisterResponse201:
-    """ 
-        Attributes:
-            token (str): JWT access token (Bearer credential)
-            refresh_token (str): Opaque refresh token (rotated on use)
-            user (User):
-            email_verification_required (bool):
-            email_in_use (Union[Unset, bool]):
-     """
+    """
+    Attributes:
+        token (str): JWT access token (Bearer credential)
+        refresh_token (str): Opaque refresh token (rotated on use)
+        user (User):
+        email_verification_required (bool):
+        email_in_use (Union[Unset, bool]):
+    """
 
     token: str
     refresh_token: str
-    user: 'User'
+    user: "User"
     email_verification_required: bool
-    email_in_use: Union[Unset, bool] = UNSET
+    email_in_use: Unset | bool = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
-
-
-
-
     def to_dict(self) -> dict[str, Any]:
-        from ..models.user import User
         token = self.token
 
         refresh_token = self.refresh_token
@@ -55,34 +42,31 @@ class PostAuthRegisterResponse201:
 
         email_in_use = self.email_in_use
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "token": token,
-            "refreshToken": refresh_token,
-            "user": user,
-            "emailVerificationRequired": email_verification_required,
-        })
+        field_dict.update(
+            {
+                "token": token,
+                "refreshToken": refresh_token,
+                "user": user,
+                "emailVerificationRequired": email_verification_required,
+            }
+        )
         if email_in_use is not UNSET:
             field_dict["emailInUse"] = email_in_use
 
         return field_dict
 
-
-
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.user import User
+
         d = dict(src_dict)
         token = d.pop("token")
 
         refresh_token = d.pop("refreshToken")
 
         user = User.from_dict(d.pop("user"))
-
-
-
 
         email_verification_required = d.pop("emailVerificationRequired")
 
@@ -95,7 +79,6 @@ class PostAuthRegisterResponse201:
             email_verification_required=email_verification_required,
             email_in_use=email_in_use,
         )
-
 
         post_auth_register_response_201.additional_properties = d
         return post_auth_register_response_201

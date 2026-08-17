@@ -1,49 +1,34 @@
 from http import HTTPStatus
-from typing import Any, Optional, Union, cast
+from typing import Any
 
 import httpx
 
-from ...client import AuthenticatedClient, Client
-from ...types import Response, UNSET
 from ... import errors
-
+from ...client import AuthenticatedClient, Client
 from ...models.error import Error
 from ...models.get_system_debug_env_response_200 import GetSystemDebugEnvResponse200
-from typing import cast
+from ...types import Response
 
 
-
-def _get_kwargs(
-    
-) -> dict[str, Any]:
-    
-
-    
-
-    
-
+def _get_kwargs() -> dict[str, Any]:
     _kwargs: dict[str, Any] = {
         "method": "get",
         "url": "/system/debug-env",
     }
 
-
     return _kwargs
 
 
-
-def _parse_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Optional[Union[Error, GetSystemDebugEnvResponse200]]:
+def _parse_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Error | GetSystemDebugEnvResponse200 | None:
     if response.status_code == 200:
         response_200 = GetSystemDebugEnvResponse200.from_dict(response.json())
-
-
 
         return response_200
 
     if response.status_code == 404:
         response_404 = Error.from_dict(response.json())
-
-
 
         return response_404
 
@@ -53,7 +38,9 @@ def _parse_response(*, client: Union[AuthenticatedClient, Client], response: htt
         return None
 
 
-def _build_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Response[Union[Error, GetSystemDebugEnvResponse200]]:
+def _build_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Response[Error | GetSystemDebugEnvResponse200]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -64,10 +51,9 @@ def _build_response(*, client: Union[AuthenticatedClient, Client], response: htt
 
 def sync_detailed(
     *,
-    client: Union[AuthenticatedClient, Client],
-
-) -> Response[Union[Error, GetSystemDebugEnvResponse200]]:
-    """ Env vars the backend reads (local-only, masked; 404 on deployed envs)
+    client: AuthenticatedClient | Client,
+) -> Response[Error | GetSystemDebugEnvResponse200]:
+    """Env vars the backend reads (local-only, masked; 404 on deployed envs)
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -75,12 +61,9 @@ def sync_detailed(
 
     Returns:
         Response[Union[Error, GetSystemDebugEnvResponse200]]
-     """
+    """
 
-
-    kwargs = _get_kwargs(
-        
-    )
+    kwargs = _get_kwargs()
 
     response = client.get_httpx_client().request(
         **kwargs,
@@ -88,12 +71,12 @@ def sync_detailed(
 
     return _build_response(client=client, response=response)
 
+
 def sync(
     *,
-    client: Union[AuthenticatedClient, Client],
-
-) -> Optional[Union[Error, GetSystemDebugEnvResponse200]]:
-    """ Env vars the backend reads (local-only, masked; 404 on deployed envs)
+    client: AuthenticatedClient | Client,
+) -> Error | GetSystemDebugEnvResponse200 | None:
+    """Env vars the backend reads (local-only, masked; 404 on deployed envs)
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -101,20 +84,18 @@ def sync(
 
     Returns:
         Union[Error, GetSystemDebugEnvResponse200]
-     """
-
+    """
 
     return sync_detailed(
         client=client,
-
     ).parsed
+
 
 async def asyncio_detailed(
     *,
-    client: Union[AuthenticatedClient, Client],
-
-) -> Response[Union[Error, GetSystemDebugEnvResponse200]]:
-    """ Env vars the backend reads (local-only, masked; 404 on deployed envs)
+    client: AuthenticatedClient | Client,
+) -> Response[Error | GetSystemDebugEnvResponse200]:
+    """Env vars the backend reads (local-only, masked; 404 on deployed envs)
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -122,25 +103,20 @@ async def asyncio_detailed(
 
     Returns:
         Response[Union[Error, GetSystemDebugEnvResponse200]]
-     """
+    """
 
+    kwargs = _get_kwargs()
 
-    kwargs = _get_kwargs(
-        
-    )
-
-    response = await client.get_async_httpx_client().request(
-        **kwargs
-    )
+    response = await client.get_async_httpx_client().request(**kwargs)
 
     return _build_response(client=client, response=response)
 
+
 async def asyncio(
     *,
-    client: Union[AuthenticatedClient, Client],
-
-) -> Optional[Union[Error, GetSystemDebugEnvResponse200]]:
-    """ Env vars the backend reads (local-only, masked; 404 on deployed envs)
+    client: AuthenticatedClient | Client,
+) -> Error | GetSystemDebugEnvResponse200 | None:
+    """Env vars the backend reads (local-only, masked; 404 on deployed envs)
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -148,10 +124,10 @@ async def asyncio(
 
     Returns:
         Union[Error, GetSystemDebugEnvResponse200]
-     """
+    """
 
-
-    return (await asyncio_detailed(
-        client=client,
-
-    )).parsed
+    return (
+        await asyncio_detailed(
+            client=client,
+        )
+    ).parsed

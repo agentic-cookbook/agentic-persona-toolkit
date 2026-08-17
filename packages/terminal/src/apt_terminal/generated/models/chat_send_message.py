@@ -1,56 +1,42 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 from ..types import UNSET, Unset
 
-from ..types import UNSET, Unset
-from typing import Union
-
-
-
-
-
-
 T = TypeVar("T", bound="ChatSendMessage")
-
 
 
 @_attrs_define
 class ChatSendMessage:
-    """ 
-        Attributes:
-            message (str):
-            client_message_id (Union[Unset, str]): Idempotency key for the user message
-     """
+    """
+    Attributes:
+        message (str):
+        client_message_id (Union[Unset, str]): Idempotency key for the user message
+    """
 
     message: str
-    client_message_id: Union[Unset, str] = UNSET
+    client_message_id: Unset | str = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         message = self.message
 
         client_message_id = self.client_message_id
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "message": message,
-        })
+        field_dict.update(
+            {
+                "message": message,
+            }
+        )
         if client_message_id is not UNSET:
             field_dict["clientMessageId"] = client_message_id
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -63,7 +49,6 @@ class ChatSendMessage:
             message=message,
             client_message_id=client_message_id,
         )
-
 
         chat_send_message.additional_properties = d
         return chat_send_message

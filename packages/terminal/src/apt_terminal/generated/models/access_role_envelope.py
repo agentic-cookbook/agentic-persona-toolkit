@@ -1,66 +1,49 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import TYPE_CHECKING, Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
-
-from typing import cast
-
 if TYPE_CHECKING:
-  from ..models.access_role import AccessRole
-
-
-
+    from ..models.access_role import AccessRole
 
 
 T = TypeVar("T", bound="AccessRoleEnvelope")
 
 
-
 @_attrs_define
 class AccessRoleEnvelope:
-    """ 
-        Attributes:
-            role (AccessRole):
-     """
+    """
+    Attributes:
+        role (AccessRole):
+    """
 
-    role: 'AccessRole'
+    role: "AccessRole"
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
-
-
-
-
     def to_dict(self) -> dict[str, Any]:
-        from ..models.access_role import AccessRole
         role = self.role.to_dict()
-
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "role": role,
-        })
+        field_dict.update(
+            {
+                "role": role,
+            }
+        )
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.access_role import AccessRole
+
         d = dict(src_dict)
         role = AccessRole.from_dict(d.pop("role"))
-
-
-
 
         access_role_envelope = cls(
             role=role,
         )
-
 
         access_role_envelope.additional_properties = d
         return access_role_envelope

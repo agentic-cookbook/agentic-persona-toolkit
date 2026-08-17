@@ -1,6 +1,9 @@
 from enum import Enum
 
+
 class PatchProjectProjectsIdStatusesStatusIdBodyCategory(str, Enum):
+    BACKLOG = "backlog"
+    CANCELED = "canceled"
     DONE = "done"
     IN_PROGRESS = "in_progress"
     TODO = "todo"

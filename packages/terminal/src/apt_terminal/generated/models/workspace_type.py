@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class WorkspaceType(str, Enum):
     INDIVIDUAL = "individual"
     ORGANIZATION = "organization"

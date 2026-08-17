@@ -1,48 +1,33 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
-
-from typing import cast
-from typing import cast, Union
-
-
-
-
-
-
 T = TypeVar("T", bound="User")
-
 
 
 @_attrs_define
 class User:
-    """ 
-        Attributes:
-            id (str):
-            email (str):
-            name (str):
-            avatar_url (str):
-            slug (Union[None, str]):
-            public_profile_enabled (bool): Whether the public profile card is visible at /public/users/:slug
-            capabilities (list[str]):
-     """
+    """
+    Attributes:
+        id (str):
+        email (str):
+        name (str):
+        avatar_url (str):
+        slug (Union[None, str]):
+        public_profile_enabled (bool): Whether the public profile card is visible at /public/users/:slug
+        capabilities (list[str]):
+    """
 
     id: str
     email: str
     name: str
     avatar_url: str
-    slug: Union[None, str]
+    slug: None | str
     public_profile_enabled: bool
     capabilities: list[str]
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         id = self.id
@@ -53,31 +38,28 @@ class User:
 
         avatar_url = self.avatar_url
 
-        slug: Union[None, str]
+        slug: None | str
         slug = self.slug
 
         public_profile_enabled = self.public_profile_enabled
 
         capabilities = self.capabilities
 
-
-
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "id": id,
-            "email": email,
-            "name": name,
-            "avatarUrl": avatar_url,
-            "slug": slug,
-            "publicProfileEnabled": public_profile_enabled,
-            "capabilities": capabilities,
-        })
+        field_dict.update(
+            {
+                "id": id,
+                "email": email,
+                "name": name,
+                "avatarUrl": avatar_url,
+                "slug": slug,
+                "publicProfileEnabled": public_profile_enabled,
+                "capabilities": capabilities,
+            }
+        )
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -90,18 +72,16 @@ class User:
 
         avatar_url = d.pop("avatarUrl")
 
-        def _parse_slug(data: object) -> Union[None, str]:
+        def _parse_slug(data: object) -> None | str:
             if data is None:
                 return data
-            return cast(Union[None, str], data)
+            return cast(None | str, data)
 
         slug = _parse_slug(d.pop("slug"))
-
 
         public_profile_enabled = d.pop("publicProfileEnabled")
 
         capabilities = cast(list[str], d.pop("capabilities"))
-
 
         user = cls(
             id=id,
@@ -112,7 +92,6 @@ class User:
             public_profile_enabled=public_profile_enabled,
             capabilities=capabilities,
         )
-
 
         user.additional_properties = d
         return user

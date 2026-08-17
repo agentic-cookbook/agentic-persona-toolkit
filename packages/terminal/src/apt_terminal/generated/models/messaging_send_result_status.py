@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class MessagingSendResultStatus(str, Enum):
     FAILED = "failed"
     SENT = "sent"

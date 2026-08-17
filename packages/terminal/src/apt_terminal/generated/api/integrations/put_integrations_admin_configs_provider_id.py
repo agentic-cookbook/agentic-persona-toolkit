@@ -1,39 +1,31 @@
 from http import HTTPStatus
-from typing import Any, Optional, Union, cast
+from typing import Any
 
 import httpx
 
-from ...client import AuthenticatedClient, Client
-from ...types import Response, UNSET
 from ... import errors
-
+from ...client import AuthenticatedClient, Client
 from ...models.integration_global_config import IntegrationGlobalConfig
 from ...models.problem_details import ProblemDetails
-from ...models.put_integrations_admin_configs_provider_id_body import PutIntegrationsAdminConfigsProviderIdBody
-from typing import cast
-
+from ...models.put_integrations_admin_configs_provider_id_body import (
+    PutIntegrationsAdminConfigsProviderIdBody,
+)
+from ...types import Response
 
 
 def _get_kwargs(
     provider_id: str,
     *,
     body: PutIntegrationsAdminConfigsProviderIdBody,
-
 ) -> dict[str, Any]:
     headers: dict[str, Any] = {}
 
-
-    
-
-    
-
     _kwargs: dict[str, Any] = {
         "method": "put",
-        "url": "/integrations/admin/configs/{provider_id}".format(provider_id=provider_id,),
+        "url": f"/integrations/admin/configs/{provider_id}",
     }
 
     _kwargs["json"] = body.to_dict()
-
 
     headers["Content-Type"] = "application/json"
 
@@ -41,40 +33,31 @@ def _get_kwargs(
     return _kwargs
 
 
-
-def _parse_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Optional[Union[IntegrationGlobalConfig, ProblemDetails]]:
+def _parse_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> IntegrationGlobalConfig | ProblemDetails | None:
     if response.status_code == 200:
         response_200 = IntegrationGlobalConfig.from_dict(response.json())
-
-
 
         return response_200
 
     if response.status_code == 400:
         response_400 = ProblemDetails.from_dict(response.json())
 
-
-
         return response_400
 
     if response.status_code == 401:
         response_401 = ProblemDetails.from_dict(response.json())
-
-
 
         return response_401
 
     if response.status_code == 403:
         response_403 = ProblemDetails.from_dict(response.json())
 
-
-
         return response_403
 
     if response.status_code == 404:
         response_404 = ProblemDetails.from_dict(response.json())
-
-
 
         return response_404
 
@@ -84,7 +67,9 @@ def _parse_response(*, client: Union[AuthenticatedClient, Client], response: htt
         return None
 
 
-def _build_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Response[Union[IntegrationGlobalConfig, ProblemDetails]]:
+def _build_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Response[IntegrationGlobalConfig | ProblemDetails]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -98,9 +83,8 @@ def sync_detailed(
     *,
     client: AuthenticatedClient,
     body: PutIntegrationsAdminConfigsProviderIdBody,
-
-) -> Response[Union[IntegrationGlobalConfig, ProblemDetails]]:
-    """ Upsert a provider global config (admin)
+) -> Response[IntegrationGlobalConfig | ProblemDetails]:
+    """Upsert a provider global config (admin)
 
      Merges the non-secret config; a blank/absent clientSecret preserves the stored encrypted secret, a
     present one is encrypted at rest.
@@ -115,13 +99,11 @@ def sync_detailed(
 
     Returns:
         Response[Union[IntegrationGlobalConfig, ProblemDetails]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         provider_id=provider_id,
-body=body,
-
+        body=body,
     )
 
     response = client.get_httpx_client().request(
@@ -130,14 +112,14 @@ body=body,
 
     return _build_response(client=client, response=response)
 
+
 def sync(
     provider_id: str,
     *,
     client: AuthenticatedClient,
     body: PutIntegrationsAdminConfigsProviderIdBody,
-
-) -> Optional[Union[IntegrationGlobalConfig, ProblemDetails]]:
-    """ Upsert a provider global config (admin)
+) -> IntegrationGlobalConfig | ProblemDetails | None:
+    """Upsert a provider global config (admin)
 
      Merges the non-secret config; a blank/absent clientSecret preserves the stored encrypted secret, a
     present one is encrypted at rest.
@@ -152,24 +134,22 @@ def sync(
 
     Returns:
         Union[IntegrationGlobalConfig, ProblemDetails]
-     """
-
+    """
 
     return sync_detailed(
         provider_id=provider_id,
-client=client,
-body=body,
-
+        client=client,
+        body=body,
     ).parsed
+
 
 async def asyncio_detailed(
     provider_id: str,
     *,
     client: AuthenticatedClient,
     body: PutIntegrationsAdminConfigsProviderIdBody,
-
-) -> Response[Union[IntegrationGlobalConfig, ProblemDetails]]:
-    """ Upsert a provider global config (admin)
+) -> Response[IntegrationGlobalConfig | ProblemDetails]:
+    """Upsert a provider global config (admin)
 
      Merges the non-secret config; a blank/absent clientSecret preserves the stored encrypted secret, a
     present one is encrypted at rest.
@@ -184,29 +164,25 @@ async def asyncio_detailed(
 
     Returns:
         Response[Union[IntegrationGlobalConfig, ProblemDetails]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         provider_id=provider_id,
-body=body,
-
+        body=body,
     )
 
-    response = await client.get_async_httpx_client().request(
-        **kwargs
-    )
+    response = await client.get_async_httpx_client().request(**kwargs)
 
     return _build_response(client=client, response=response)
+
 
 async def asyncio(
     provider_id: str,
     *,
     client: AuthenticatedClient,
     body: PutIntegrationsAdminConfigsProviderIdBody,
-
-) -> Optional[Union[IntegrationGlobalConfig, ProblemDetails]]:
-    """ Upsert a provider global config (admin)
+) -> IntegrationGlobalConfig | ProblemDetails | None:
+    """Upsert a provider global config (admin)
 
      Merges the non-secret config; a blank/absent clientSecret preserves the stored encrypted secret, a
     present one is encrypted at rest.
@@ -221,12 +197,12 @@ async def asyncio(
 
     Returns:
         Union[IntegrationGlobalConfig, ProblemDetails]
-     """
+    """
 
-
-    return (await asyncio_detailed(
-        provider_id=provider_id,
-client=client,
-body=body,
-
-    )).parsed
+    return (
+        await asyncio_detailed(
+            provider_id=provider_id,
+            client=client,
+            body=body,
+        )
+    ).parsed

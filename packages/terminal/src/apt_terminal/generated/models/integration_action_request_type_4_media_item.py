@@ -1,56 +1,42 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 from ..types import UNSET, Unset
 
-from ..types import UNSET, Unset
-from typing import Union
-
-
-
-
-
-
 T = TypeVar("T", bound="IntegrationActionRequestType4MediaItem")
-
 
 
 @_attrs_define
 class IntegrationActionRequestType4MediaItem:
-    """ 
-        Attributes:
-            url (str):
-            alt_text (Union[Unset, str]):
-     """
+    """
+    Attributes:
+        url (str):
+        alt_text (Union[Unset, str]):
+    """
 
     url: str
-    alt_text: Union[Unset, str] = UNSET
+    alt_text: Unset | str = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         url = self.url
 
         alt_text = self.alt_text
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "url": url,
-        })
+        field_dict.update(
+            {
+                "url": url,
+            }
+        )
         if alt_text is not UNSET:
             field_dict["altText"] = alt_text
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -63,7 +49,6 @@ class IntegrationActionRequestType4MediaItem:
             url=url,
             alt_text=alt_text,
         )
-
 
         integration_action_request_type_4_media_item.additional_properties = d
         return integration_action_request_type_4_media_item

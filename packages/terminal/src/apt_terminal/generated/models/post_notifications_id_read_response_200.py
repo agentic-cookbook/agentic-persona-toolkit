@@ -1,48 +1,34 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
-
-
-
-
-
-
-
 T = TypeVar("T", bound="PostNotificationsIdReadResponse200")
-
 
 
 @_attrs_define
 class PostNotificationsIdReadResponse200:
-    """ 
-        Attributes:
-            success (bool):
-     """
+    """
+    Attributes:
+        success (bool):
+    """
 
     success: bool
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
-
-
-
-
     def to_dict(self) -> dict[str, Any]:
         success = self.success
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "success": success,
-        })
+        field_dict.update(
+            {
+                "success": success,
+            }
+        )
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -52,7 +38,6 @@ class PostNotificationsIdReadResponse200:
         post_notifications_id_read_response_200 = cls(
             success=success,
         )
-
 
         post_notifications_id_read_response_200.additional_properties = d
         return post_notifications_id_read_response_200

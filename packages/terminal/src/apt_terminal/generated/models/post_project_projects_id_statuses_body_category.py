@@ -1,6 +1,9 @@
 from enum import Enum
 
+
 class PostProjectProjectsIdStatusesBodyCategory(str, Enum):
+    BACKLOG = "backlog"
+    CANCELED = "canceled"
     DONE = "done"
     IN_PROGRESS = "in_progress"
     TODO = "todo"

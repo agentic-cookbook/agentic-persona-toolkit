@@ -1,62 +1,48 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
-
-from ..models.post_bucket_access_groups_group_id_members_body_member_type import PostBucketAccessGroupsGroupIdMembersBodyMemberType
-
-
-
-
-
+from ..models.post_bucket_access_groups_group_id_members_body_member_type import (
+    PostBucketAccessGroupsGroupIdMembersBodyMemberType,
+)
 
 T = TypeVar("T", bound="PostBucketAccessGroupsGroupIdMembersBody")
 
 
-
 @_attrs_define
 class PostBucketAccessGroupsGroupIdMembersBody:
-    """ 
-        Attributes:
-            member_type (PostBucketAccessGroupsGroupIdMembersBodyMemberType):
-            member_id (str):
-     """
+    """
+    Attributes:
+        member_type (PostBucketAccessGroupsGroupIdMembersBodyMemberType):
+        member_id (str):
+    """
 
     member_type: PostBucketAccessGroupsGroupIdMembersBodyMemberType
     member_id: str
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         member_type = self.member_type.value
 
         member_id = self.member_id
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "memberType": member_type,
-            "memberId": member_id,
-        })
+        field_dict.update(
+            {
+                "memberType": member_type,
+                "memberId": member_id,
+            }
+        )
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
         member_type = PostBucketAccessGroupsGroupIdMembersBodyMemberType(d.pop("memberType"))
-
-
-
 
         member_id = d.pop("memberId")
 
@@ -64,7 +50,6 @@ class PostBucketAccessGroupsGroupIdMembersBody:
             member_type=member_type,
             member_id=member_id,
         )
-
 
         post_bucket_access_groups_group_id_members_body.additional_properties = d
         return post_bucket_access_groups_group_id_members_body

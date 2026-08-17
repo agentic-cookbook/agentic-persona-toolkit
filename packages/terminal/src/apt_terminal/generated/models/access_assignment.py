@@ -1,40 +1,30 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
-
 from ..models.access_assignment_subject_kind import AccessAssignmentSubjectKind
 from ..types import UNSET, Unset
-from typing import cast, Union
-from typing import Union
-
-
-
-
-
 
 T = TypeVar("T", bound="AccessAssignment")
 
 
-
 @_attrs_define
 class AccessAssignment:
-    """ 
-        Attributes:
-            id (str):
-            subject_kind (AccessAssignmentSubjectKind):
-            subject_id (str):
-            scope_feature (str): '' = workspace-wide
-            scope_item_id (str): '' = workspace-wide
-            role_id (str):
-            role_slug (Union[Unset, str]):
-            role_name (Union[Unset, str]):
-            granted_by (Union[None, Unset, str]):
-            granted_at (Union[Unset, str]):
-     """
+    """
+    Attributes:
+        id (str):
+        subject_kind (AccessAssignmentSubjectKind):
+        subject_id (str):
+        scope_feature (str): '' = workspace-wide
+        scope_item_id (str): '' = workspace-wide
+        role_id (str):
+        role_slug (Union[Unset, str]):
+        role_name (Union[Unset, str]):
+        granted_by (Union[None, Unset, str]):
+        granted_at (Union[Unset, str]):
+    """
 
     id: str
     subject_kind: AccessAssignmentSubjectKind
@@ -42,15 +32,11 @@ class AccessAssignment:
     scope_feature: str
     scope_item_id: str
     role_id: str
-    role_slug: Union[Unset, str] = UNSET
-    role_name: Union[Unset, str] = UNSET
-    granted_by: Union[None, Unset, str] = UNSET
-    granted_at: Union[Unset, str] = UNSET
+    role_slug: Unset | str = UNSET
+    role_name: Unset | str = UNSET
+    granted_by: None | Unset | str = UNSET
+    granted_at: Unset | str = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         id = self.id
@@ -69,7 +55,7 @@ class AccessAssignment:
 
         role_name = self.role_name
 
-        granted_by: Union[None, Unset, str]
+        granted_by: None | Unset | str
         if isinstance(self.granted_by, Unset):
             granted_by = UNSET
         else:
@@ -77,17 +63,18 @@ class AccessAssignment:
 
         granted_at = self.granted_at
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "id": id,
-            "subjectKind": subject_kind,
-            "subjectId": subject_id,
-            "scopeFeature": scope_feature,
-            "scopeItemId": scope_item_id,
-            "roleId": role_id,
-        })
+        field_dict.update(
+            {
+                "id": id,
+                "subjectKind": subject_kind,
+                "subjectId": subject_id,
+                "scopeFeature": scope_feature,
+                "scopeItemId": scope_item_id,
+                "roleId": role_id,
+            }
+        )
         if role_slug is not UNSET:
             field_dict["roleSlug"] = role_slug
         if role_name is not UNSET:
@@ -99,17 +86,12 @@ class AccessAssignment:
 
         return field_dict
 
-
-
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
         id = d.pop("id")
 
         subject_kind = AccessAssignmentSubjectKind(d.pop("subjectKind"))
-
-
-
 
         subject_id = d.pop("subjectId")
 
@@ -123,15 +105,14 @@ class AccessAssignment:
 
         role_name = d.pop("roleName", UNSET)
 
-        def _parse_granted_by(data: object) -> Union[None, Unset, str]:
+        def _parse_granted_by(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         granted_by = _parse_granted_by(d.pop("grantedBy", UNSET))
-
 
         granted_at = d.pop("grantedAt", UNSET)
 
@@ -147,7 +128,6 @@ class AccessAssignment:
             granted_by=granted_by,
             granted_at=granted_at,
         )
-
 
         access_assignment.additional_properties = d
         return access_assignment

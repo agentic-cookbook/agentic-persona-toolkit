@@ -1,47 +1,34 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import TYPE_CHECKING, Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
-
-from typing import cast
-
 if TYPE_CHECKING:
-  from ..models.access_effective_decided_by import AccessEffectiveDecidedBy
-
-
-
+    from ..models.access_effective_decided_by import AccessEffectiveDecidedBy
 
 
 T = TypeVar("T", bound="AccessEffective")
 
 
-
 @_attrs_define
 class AccessEffective:
-    """ 
-        Attributes:
-            item_verbs (str):
-            subitem_verbs (str):
-            restricted (bool):
-            decided_by (AccessEffectiveDecidedBy): per-verb provenance (the explainer): verb → {kind: 'owner'|'admin-
-                role'|'grant', roleSlug?, via?, scopeItemId?}; sub-item verbs keyed 'sub:<verb>'
-     """
+    """
+    Attributes:
+        item_verbs (str):
+        subitem_verbs (str):
+        restricted (bool):
+        decided_by (AccessEffectiveDecidedBy): per-verb provenance (the explainer): verb → {kind: 'owner'|'admin-
+            role'|'grant', roleSlug?, via?, scopeItemId?}; sub-item verbs keyed 'sub:<verb>'
+    """
 
     item_verbs: str
     subitem_verbs: str
     restricted: bool
-    decided_by: 'AccessEffectiveDecidedBy'
+    decided_by: "AccessEffectiveDecidedBy"
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
-
-
-
-
     def to_dict(self) -> dict[str, Any]:
-        from ..models.access_effective_decided_by import AccessEffectiveDecidedBy
         item_verbs = self.item_verbs
 
         subitem_verbs = self.subitem_verbs
@@ -50,23 +37,23 @@ class AccessEffective:
 
         decided_by = self.decided_by.to_dict()
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "itemVerbs": item_verbs,
-            "subitemVerbs": subitem_verbs,
-            "restricted": restricted,
-            "decidedBy": decided_by,
-        })
+        field_dict.update(
+            {
+                "itemVerbs": item_verbs,
+                "subitemVerbs": subitem_verbs,
+                "restricted": restricted,
+                "decidedBy": decided_by,
+            }
+        )
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.access_effective_decided_by import AccessEffectiveDecidedBy
+
         d = dict(src_dict)
         item_verbs = d.pop("itemVerbs")
 
@@ -76,16 +63,12 @@ class AccessEffective:
 
         decided_by = AccessEffectiveDecidedBy.from_dict(d.pop("decidedBy"))
 
-
-
-
         access_effective = cls(
             item_verbs=item_verbs,
             subitem_verbs=subitem_verbs,
             restricted=restricted,
             decided_by=decided_by,
         )
-
 
         access_effective.additional_properties = d
         return access_effective

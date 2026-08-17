@@ -1,81 +1,70 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar, cast
 
 from attrs import define as _attrs_define
-from attrs import field as _attrs_field
-
-from ..types import UNSET, Unset
-
-from typing import cast, Union
-
-
-
-
-
 
 T = TypeVar("T", bound="PutIntegrationIntegrationMediaItemsIdResponse200")
 
 
-
 @_attrs_define
 class PutIntegrationIntegrationMediaItemsIdResponse200:
-    """ 
-        Attributes:
-            id (str):
-            customer_id (str):
-            deleted_at (Union[None, str]):
-            ecosystem_id (str):
-            connection_id (str):
-            external_id (str):
-            source_provider (str):
-            media_type (str):
-            title (str):
-            artist (Union[None, str]):
-            album (Union[None, str]):
-            image_url (Union[None, str]):
-            external_url (Union[None, str]):
-            duration_ms (Union[None, int]):
-            popularity (Union[None, int]):
-            is_saved (bool):
-            last_played_at (Union[None, str]):
-            is_deleted (bool):
-            sync_version (int):
-            created_at (str):
-            updated_at (str):
-     """
+    """
+    Attributes:
+        id (str):
+        customer_id (str):
+        deleted_at (Union[None, str]):
+        ecosystem_id (str):
+        connection_id (str):
+        external_id (str):
+        source_provider (str):
+        media_type (str):
+        title (str):
+        artist (Union[None, str]):
+        album (Union[None, str]):
+        image_url (Union[None, str]):
+        external_url (Union[None, str]):
+        duration_ms (Union[None, int]):
+        popularity (Union[None, int]):
+        is_saved (bool):
+        last_played_at (Union[None, str]):
+        is_deleted (bool):
+        created_at (str):
+        updated_at (str):
+        sync_version (int):
+        sync_stamped_at (Union[None, str]):
+        sync_txid (int):
+    """
 
     id: str
     customer_id: str
-    deleted_at: Union[None, str]
+    deleted_at: None | str
     ecosystem_id: str
     connection_id: str
     external_id: str
     source_provider: str
     media_type: str
     title: str
-    artist: Union[None, str]
-    album: Union[None, str]
-    image_url: Union[None, str]
-    external_url: Union[None, str]
-    duration_ms: Union[None, int]
-    popularity: Union[None, int]
+    artist: None | str
+    album: None | str
+    image_url: None | str
+    external_url: None | str
+    duration_ms: None | int
+    popularity: None | int
     is_saved: bool
-    last_played_at: Union[None, str]
+    last_played_at: None | str
     is_deleted: bool
-    sync_version: int
     created_at: str
     updated_at: str
-
-
-
-
+    sync_version: int
+    sync_stamped_at: None | str
+    sync_txid: int
 
     def to_dict(self) -> dict[str, Any]:
         id = self.id
 
         customer_id = self.customer_id
 
-        deleted_at: Union[None, str]
+        deleted_at: None | str
         deleted_at = self.deleted_at
 
         ecosystem_id = self.ecosystem_id
@@ -90,67 +79,73 @@ class PutIntegrationIntegrationMediaItemsIdResponse200:
 
         title = self.title
 
-        artist: Union[None, str]
+        artist: None | str
         artist = self.artist
 
-        album: Union[None, str]
+        album: None | str
         album = self.album
 
-        image_url: Union[None, str]
+        image_url: None | str
         image_url = self.image_url
 
-        external_url: Union[None, str]
+        external_url: None | str
         external_url = self.external_url
 
-        duration_ms: Union[None, int]
+        duration_ms: None | int
         duration_ms = self.duration_ms
 
-        popularity: Union[None, int]
+        popularity: None | int
         popularity = self.popularity
 
         is_saved = self.is_saved
 
-        last_played_at: Union[None, str]
+        last_played_at: None | str
         last_played_at = self.last_played_at
 
         is_deleted = self.is_deleted
-
-        sync_version = self.sync_version
 
         created_at = self.created_at
 
         updated_at = self.updated_at
 
+        sync_version = self.sync_version
+
+        sync_stamped_at: None | str
+        sync_stamped_at = self.sync_stamped_at
+
+        sync_txid = self.sync_txid
 
         field_dict: dict[str, Any] = {}
 
-        field_dict.update({
-            "id": id,
-            "customerId": customer_id,
-            "deletedAt": deleted_at,
-            "ecosystemId": ecosystem_id,
-            "connectionId": connection_id,
-            "externalId": external_id,
-            "sourceProvider": source_provider,
-            "mediaType": media_type,
-            "title": title,
-            "artist": artist,
-            "album": album,
-            "imageUrl": image_url,
-            "externalUrl": external_url,
-            "durationMs": duration_ms,
-            "popularity": popularity,
-            "isSaved": is_saved,
-            "lastPlayedAt": last_played_at,
-            "isDeleted": is_deleted,
-            "syncVersion": sync_version,
-            "createdAt": created_at,
-            "updatedAt": updated_at,
-        })
+        field_dict.update(
+            {
+                "id": id,
+                "customerId": customer_id,
+                "deletedAt": deleted_at,
+                "ecosystemId": ecosystem_id,
+                "connectionId": connection_id,
+                "externalId": external_id,
+                "sourceProvider": source_provider,
+                "mediaType": media_type,
+                "title": title,
+                "artist": artist,
+                "album": album,
+                "imageUrl": image_url,
+                "externalUrl": external_url,
+                "durationMs": duration_ms,
+                "popularity": popularity,
+                "isSaved": is_saved,
+                "lastPlayedAt": last_played_at,
+                "isDeleted": is_deleted,
+                "createdAt": created_at,
+                "updatedAt": updated_at,
+                "syncVersion": sync_version,
+                "syncStampedAt": sync_stamped_at,
+                "syncTxid": sync_txid,
+            }
+        )
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -159,13 +154,12 @@ class PutIntegrationIntegrationMediaItemsIdResponse200:
 
         customer_id = d.pop("customerId")
 
-        def _parse_deleted_at(data: object) -> Union[None, str]:
+        def _parse_deleted_at(data: object) -> None | str:
             if data is None:
                 return data
-            return cast(Union[None, str], data)
+            return cast(None | str, data)
 
         deleted_at = _parse_deleted_at(d.pop("deletedAt"))
-
 
         ecosystem_id = d.pop("ecosystemId")
 
@@ -179,71 +173,73 @@ class PutIntegrationIntegrationMediaItemsIdResponse200:
 
         title = d.pop("title")
 
-        def _parse_artist(data: object) -> Union[None, str]:
+        def _parse_artist(data: object) -> None | str:
             if data is None:
                 return data
-            return cast(Union[None, str], data)
+            return cast(None | str, data)
 
         artist = _parse_artist(d.pop("artist"))
 
-
-        def _parse_album(data: object) -> Union[None, str]:
+        def _parse_album(data: object) -> None | str:
             if data is None:
                 return data
-            return cast(Union[None, str], data)
+            return cast(None | str, data)
 
         album = _parse_album(d.pop("album"))
 
-
-        def _parse_image_url(data: object) -> Union[None, str]:
+        def _parse_image_url(data: object) -> None | str:
             if data is None:
                 return data
-            return cast(Union[None, str], data)
+            return cast(None | str, data)
 
         image_url = _parse_image_url(d.pop("imageUrl"))
 
-
-        def _parse_external_url(data: object) -> Union[None, str]:
+        def _parse_external_url(data: object) -> None | str:
             if data is None:
                 return data
-            return cast(Union[None, str], data)
+            return cast(None | str, data)
 
         external_url = _parse_external_url(d.pop("externalUrl"))
 
-
-        def _parse_duration_ms(data: object) -> Union[None, int]:
+        def _parse_duration_ms(data: object) -> None | int:
             if data is None:
                 return data
-            return cast(Union[None, int], data)
+            return cast(None | int, data)
 
         duration_ms = _parse_duration_ms(d.pop("durationMs"))
 
-
-        def _parse_popularity(data: object) -> Union[None, int]:
+        def _parse_popularity(data: object) -> None | int:
             if data is None:
                 return data
-            return cast(Union[None, int], data)
+            return cast(None | int, data)
 
         popularity = _parse_popularity(d.pop("popularity"))
 
-
         is_saved = d.pop("isSaved")
 
-        def _parse_last_played_at(data: object) -> Union[None, str]:
+        def _parse_last_played_at(data: object) -> None | str:
             if data is None:
                 return data
-            return cast(Union[None, str], data)
+            return cast(None | str, data)
 
         last_played_at = _parse_last_played_at(d.pop("lastPlayedAt"))
 
-
         is_deleted = d.pop("isDeleted")
-
-        sync_version = d.pop("syncVersion")
 
         created_at = d.pop("createdAt")
 
         updated_at = d.pop("updatedAt")
+
+        sync_version = d.pop("syncVersion")
+
+        def _parse_sync_stamped_at(data: object) -> None | str:
+            if data is None:
+                return data
+            return cast(None | str, data)
+
+        sync_stamped_at = _parse_sync_stamped_at(d.pop("syncStampedAt"))
+
+        sync_txid = d.pop("syncTxid")
 
         put_integration_integration_media_items_id_response_200 = cls(
             id=id,
@@ -264,10 +260,11 @@ class PutIntegrationIntegrationMediaItemsIdResponse200:
             is_saved=is_saved,
             last_played_at=last_played_at,
             is_deleted=is_deleted,
-            sync_version=sync_version,
             created_at=created_at,
             updated_at=updated_at,
+            sync_version=sync_version,
+            sync_stamped_at=sync_stamped_at,
+            sync_txid=sync_txid,
         )
 
         return put_integration_integration_media_items_id_response_200
-

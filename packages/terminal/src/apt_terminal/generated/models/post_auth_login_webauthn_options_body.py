@@ -1,48 +1,34 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
-
-
-
-
-
-
-
 T = TypeVar("T", bound="PostAuthLoginWebauthnOptionsBody")
-
 
 
 @_attrs_define
 class PostAuthLoginWebauthnOptionsBody:
-    """ 
-        Attributes:
-            identifier (str): Email or login slug
-     """
+    """
+    Attributes:
+        identifier (str): Email or login slug
+    """
 
     identifier: str
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
-
-
-
-
     def to_dict(self) -> dict[str, Any]:
         identifier = self.identifier
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "identifier": identifier,
-        })
+        field_dict.update(
+            {
+                "identifier": identifier,
+            }
+        )
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -52,7 +38,6 @@ class PostAuthLoginWebauthnOptionsBody:
         post_auth_login_webauthn_options_body = cls(
             identifier=identifier,
         )
-
 
         post_auth_login_webauthn_options_body.additional_properties = d
         return post_auth_login_webauthn_options_body

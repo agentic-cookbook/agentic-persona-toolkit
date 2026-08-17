@@ -1,76 +1,57 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import TYPE_CHECKING, Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
-
-from typing import cast
-
 if TYPE_CHECKING:
-  from ..models.access_role import AccessRole
-
-
-
+    from ..models.access_role import AccessRole
 
 
 T = TypeVar("T", bound="AccessRoleList")
 
 
-
 @_attrs_define
 class AccessRoleList:
-    """ 
-        Attributes:
-            roles (list['AccessRole']):
-     """
+    """
+    Attributes:
+        roles (list['AccessRole']):
+    """
 
-    roles: list['AccessRole']
+    roles: list["AccessRole"]
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
-
-
-
-
     def to_dict(self) -> dict[str, Any]:
-        from ..models.access_role import AccessRole
         roles = []
         for roles_item_data in self.roles:
             roles_item = roles_item_data.to_dict()
             roles.append(roles_item)
 
-
-
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "roles": roles,
-        })
+        field_dict.update(
+            {
+                "roles": roles,
+            }
+        )
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.access_role import AccessRole
+
         d = dict(src_dict)
         roles = []
         _roles = d.pop("roles")
-        for roles_item_data in (_roles):
+        for roles_item_data in _roles:
             roles_item = AccessRole.from_dict(roles_item_data)
 
-
-
             roles.append(roles_item)
-
 
         access_role_list = cls(
             roles=roles,
         )
-
 
         access_role_list.additional_properties = d
         return access_role_list

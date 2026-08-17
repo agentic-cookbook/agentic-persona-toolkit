@@ -1,57 +1,41 @@
 from http import HTTPStatus
-from typing import Any, Optional, Union, cast
+from typing import Any
 
 import httpx
 
-from ...client import AuthenticatedClient, Client
-from ...types import Response, UNSET
 from ... import errors
-
+from ...client import AuthenticatedClient, Client
 from ...models.error import Error
 from ...models.feed_item import FeedItem
-from typing import cast
-
+from ...types import Response
 
 
 def _get_kwargs(
     id: str,
-
 ) -> dict[str, Any]:
-    
-
-    
-
-    
-
     _kwargs: dict[str, Any] = {
         "method": "get",
-        "url": "/content/feed/{id}".format(id=id,),
+        "url": f"/content/feed/{id}",
     }
-
 
     return _kwargs
 
 
-
-def _parse_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Optional[Union[Error, FeedItem]]:
+def _parse_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Error | FeedItem | None:
     if response.status_code == 200:
         response_200 = FeedItem.from_dict(response.json())
-
-
 
         return response_200
 
     if response.status_code == 401:
         response_401 = Error.from_dict(response.json())
 
-
-
         return response_401
 
     if response.status_code == 404:
         response_404 = Error.from_dict(response.json())
-
-
 
         return response_404
 
@@ -61,7 +45,9 @@ def _parse_response(*, client: Union[AuthenticatedClient, Client], response: htt
         return None
 
 
-def _build_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Response[Union[Error, FeedItem]]:
+def _build_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Response[Error | FeedItem]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -74,9 +60,8 @@ def sync_detailed(
     id: str,
     *,
     client: AuthenticatedClient,
-
-) -> Response[Union[Error, FeedItem]]:
-    """ Get one of the caller’s feed entries
+) -> Response[Error | FeedItem]:
+    """Get one of the caller’s feed entries
 
     Args:
         id (str):
@@ -87,12 +72,10 @@ def sync_detailed(
 
     Returns:
         Response[Union[Error, FeedItem]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         id=id,
-
     )
 
     response = client.get_httpx_client().request(
@@ -101,13 +84,13 @@ def sync_detailed(
 
     return _build_response(client=client, response=response)
 
+
 def sync(
     id: str,
     *,
     client: AuthenticatedClient,
-
-) -> Optional[Union[Error, FeedItem]]:
-    """ Get one of the caller’s feed entries
+) -> Error | FeedItem | None:
+    """Get one of the caller’s feed entries
 
     Args:
         id (str):
@@ -118,22 +101,20 @@ def sync(
 
     Returns:
         Union[Error, FeedItem]
-     """
-
+    """
 
     return sync_detailed(
         id=id,
-client=client,
-
+        client=client,
     ).parsed
+
 
 async def asyncio_detailed(
     id: str,
     *,
     client: AuthenticatedClient,
-
-) -> Response[Union[Error, FeedItem]]:
-    """ Get one of the caller’s feed entries
+) -> Response[Error | FeedItem]:
+    """Get one of the caller’s feed entries
 
     Args:
         id (str):
@@ -144,27 +125,23 @@ async def asyncio_detailed(
 
     Returns:
         Response[Union[Error, FeedItem]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         id=id,
-
     )
 
-    response = await client.get_async_httpx_client().request(
-        **kwargs
-    )
+    response = await client.get_async_httpx_client().request(**kwargs)
 
     return _build_response(client=client, response=response)
+
 
 async def asyncio(
     id: str,
     *,
     client: AuthenticatedClient,
-
-) -> Optional[Union[Error, FeedItem]]:
-    """ Get one of the caller’s feed entries
+) -> Error | FeedItem | None:
+    """Get one of the caller’s feed entries
 
     Args:
         id (str):
@@ -175,11 +152,11 @@ async def asyncio(
 
     Returns:
         Union[Error, FeedItem]
-     """
+    """
 
-
-    return (await asyncio_detailed(
-        id=id,
-client=client,
-
-    )).parsed
+    return (
+        await asyncio_detailed(
+            id=id,
+            client=client,
+        )
+    ).parsed

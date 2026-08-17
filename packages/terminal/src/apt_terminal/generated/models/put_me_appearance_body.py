@@ -1,10 +1,8 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
-
-from ..types import UNSET, Unset
 
 from ..models.put_me_appearance_body_color_mode import PutMeAppearanceBodyColorMode
 from ..models.put_me_appearance_body_contrast import PutMeAppearanceBodyContrast
@@ -12,79 +10,61 @@ from ..models.put_me_appearance_body_reduce_motion import PutMeAppearanceBodyRed
 from ..models.put_me_appearance_body_spacing import PutMeAppearanceBodySpacing
 from ..models.put_me_appearance_body_text_size import PutMeAppearanceBodyTextSize
 from ..types import UNSET, Unset
-from typing import Union
-
-
-
-
-
 
 T = TypeVar("T", bound="PutMeAppearanceBody")
 
 
-
 @_attrs_define
 class PutMeAppearanceBody:
-    """ 
-        Attributes:
-            color_mode (Union[Unset, PutMeAppearanceBodyColorMode]): The user's colour scheme; 'auto' follows the operating
-                system
-            reduce_motion (Union[Unset, PutMeAppearanceBodyReduceMotion]):
-            contrast (Union[Unset, PutMeAppearanceBodyContrast]):
-            text_size (Union[Unset, PutMeAppearanceBodyTextSize]):
-            spacing (Union[Unset, PutMeAppearanceBodySpacing]):
-            focus_outlines (Union[Unset, bool]):
-            underline_links (Union[Unset, bool]):
-     """
+    """
+    Attributes:
+        color_mode (Union[Unset, PutMeAppearanceBodyColorMode]): The user's colour scheme; 'auto' follows the operating
+            system
+        reduce_motion (Union[Unset, PutMeAppearanceBodyReduceMotion]):
+        contrast (Union[Unset, PutMeAppearanceBodyContrast]):
+        text_size (Union[Unset, PutMeAppearanceBodyTextSize]):
+        spacing (Union[Unset, PutMeAppearanceBodySpacing]):
+        focus_outlines (Union[Unset, bool]):
+        underline_links (Union[Unset, bool]):
+    """
 
-    color_mode: Union[Unset, PutMeAppearanceBodyColorMode] = UNSET
-    reduce_motion: Union[Unset, PutMeAppearanceBodyReduceMotion] = UNSET
-    contrast: Union[Unset, PutMeAppearanceBodyContrast] = UNSET
-    text_size: Union[Unset, PutMeAppearanceBodyTextSize] = UNSET
-    spacing: Union[Unset, PutMeAppearanceBodySpacing] = UNSET
-    focus_outlines: Union[Unset, bool] = UNSET
-    underline_links: Union[Unset, bool] = UNSET
+    color_mode: Unset | PutMeAppearanceBodyColorMode = UNSET
+    reduce_motion: Unset | PutMeAppearanceBodyReduceMotion = UNSET
+    contrast: Unset | PutMeAppearanceBodyContrast = UNSET
+    text_size: Unset | PutMeAppearanceBodyTextSize = UNSET
+    spacing: Unset | PutMeAppearanceBodySpacing = UNSET
+    focus_outlines: Unset | bool = UNSET
+    underline_links: Unset | bool = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
-
-
-
-
     def to_dict(self) -> dict[str, Any]:
-        color_mode: Union[Unset, str] = UNSET
+        color_mode: Unset | str = UNSET
         if not isinstance(self.color_mode, Unset):
             color_mode = self.color_mode.value
 
-
-        reduce_motion: Union[Unset, str] = UNSET
+        reduce_motion: Unset | str = UNSET
         if not isinstance(self.reduce_motion, Unset):
             reduce_motion = self.reduce_motion.value
 
-
-        contrast: Union[Unset, str] = UNSET
+        contrast: Unset | str = UNSET
         if not isinstance(self.contrast, Unset):
             contrast = self.contrast.value
 
-
-        text_size: Union[Unset, str] = UNSET
+        text_size: Unset | str = UNSET
         if not isinstance(self.text_size, Unset):
             text_size = self.text_size.value
 
-
-        spacing: Union[Unset, str] = UNSET
+        spacing: Unset | str = UNSET
         if not isinstance(self.spacing, Unset):
             spacing = self.spacing.value
-
 
         focus_outlines = self.focus_outlines
 
         underline_links = self.underline_links
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-        })
+        field_dict.update({})
         if color_mode is not UNSET:
             field_dict["colorMode"] = color_mode
         if reduce_motion is not UNSET:
@@ -102,60 +82,43 @@ class PutMeAppearanceBody:
 
         return field_dict
 
-
-
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
         _color_mode = d.pop("colorMode", UNSET)
-        color_mode: Union[Unset, PutMeAppearanceBodyColorMode]
-        if isinstance(_color_mode,  Unset):
+        color_mode: Unset | PutMeAppearanceBodyColorMode
+        if isinstance(_color_mode, Unset):
             color_mode = UNSET
         else:
             color_mode = PutMeAppearanceBodyColorMode(_color_mode)
 
-
-
-
         _reduce_motion = d.pop("reduceMotion", UNSET)
-        reduce_motion: Union[Unset, PutMeAppearanceBodyReduceMotion]
-        if isinstance(_reduce_motion,  Unset):
+        reduce_motion: Unset | PutMeAppearanceBodyReduceMotion
+        if isinstance(_reduce_motion, Unset):
             reduce_motion = UNSET
         else:
             reduce_motion = PutMeAppearanceBodyReduceMotion(_reduce_motion)
 
-
-
-
         _contrast = d.pop("contrast", UNSET)
-        contrast: Union[Unset, PutMeAppearanceBodyContrast]
-        if isinstance(_contrast,  Unset):
+        contrast: Unset | PutMeAppearanceBodyContrast
+        if isinstance(_contrast, Unset):
             contrast = UNSET
         else:
             contrast = PutMeAppearanceBodyContrast(_contrast)
 
-
-
-
         _text_size = d.pop("textSize", UNSET)
-        text_size: Union[Unset, PutMeAppearanceBodyTextSize]
-        if isinstance(_text_size,  Unset):
+        text_size: Unset | PutMeAppearanceBodyTextSize
+        if isinstance(_text_size, Unset):
             text_size = UNSET
         else:
             text_size = PutMeAppearanceBodyTextSize(_text_size)
 
-
-
-
         _spacing = d.pop("spacing", UNSET)
-        spacing: Union[Unset, PutMeAppearanceBodySpacing]
-        if isinstance(_spacing,  Unset):
+        spacing: Unset | PutMeAppearanceBodySpacing
+        if isinstance(_spacing, Unset):
             spacing = UNSET
         else:
             spacing = PutMeAppearanceBodySpacing(_spacing)
-
-
-
 
         focus_outlines = d.pop("focusOutlines", UNSET)
 
@@ -170,7 +133,6 @@ class PutMeAppearanceBody:
             focus_outlines=focus_outlines,
             underline_links=underline_links,
         )
-
 
         put_me_appearance_body.additional_properties = d
         return put_me_appearance_body

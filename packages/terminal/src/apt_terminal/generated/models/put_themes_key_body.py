@@ -1,64 +1,48 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import TYPE_CHECKING, Any, TypeVar, Union, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 from ..types import UNSET, Unset
 
-from ..types import UNSET, Unset
-from typing import cast
-from typing import cast, Union
-from typing import Union
-
 if TYPE_CHECKING:
-  from ..models.put_themes_key_body_data import PutThemesKeyBodyData
-
-
-
+    from ..models.put_themes_key_body_data import PutThemesKeyBodyData
 
 
 T = TypeVar("T", bound="PutThemesKeyBody")
 
 
-
 @_attrs_define
 class PutThemesKeyBody:
-    """ 
-        Attributes:
-            label (Union[Unset, str]):
-            based_on (Union[None, Unset, str]):
-            data (Union[Unset, PutThemesKeyBodyData]):
-     """
+    """
+    Attributes:
+        label (Union[Unset, str]):
+        based_on (Union[None, Unset, str]):
+        data (Union[Unset, PutThemesKeyBodyData]):
+    """
 
-    label: Union[Unset, str] = UNSET
-    based_on: Union[None, Unset, str] = UNSET
-    data: Union[Unset, 'PutThemesKeyBodyData'] = UNSET
+    label: Unset | str = UNSET
+    based_on: None | Unset | str = UNSET
+    data: Union[Unset, "PutThemesKeyBodyData"] = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
-
-
-
-
     def to_dict(self) -> dict[str, Any]:
-        from ..models.put_themes_key_body_data import PutThemesKeyBodyData
         label = self.label
 
-        based_on: Union[None, Unset, str]
+        based_on: None | Unset | str
         if isinstance(self.based_on, Unset):
             based_on = UNSET
         else:
             based_on = self.based_on
 
-        data: Union[Unset, dict[str, Any]] = UNSET
+        data: Unset | dict[str, Any] = UNSET
         if not isinstance(self.data, Unset):
             data = self.data.to_dict()
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-        })
+        field_dict.update({})
         if label is not UNSET:
             field_dict["label"] = label
         if based_on is not UNSET:
@@ -68,40 +52,34 @@ class PutThemesKeyBody:
 
         return field_dict
 
-
-
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.put_themes_key_body_data import PutThemesKeyBodyData
+
         d = dict(src_dict)
         label = d.pop("label", UNSET)
 
-        def _parse_based_on(data: object) -> Union[None, Unset, str]:
+        def _parse_based_on(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         based_on = _parse_based_on(d.pop("basedOn", UNSET))
 
-
         _data = d.pop("data", UNSET)
-        data: Union[Unset, PutThemesKeyBodyData]
-        if isinstance(_data,  Unset):
+        data: Unset | PutThemesKeyBodyData
+        if isinstance(_data, Unset):
             data = UNSET
         else:
             data = PutThemesKeyBodyData.from_dict(_data)
-
-
-
 
         put_themes_key_body = cls(
             label=label,
             based_on=based_on,
             data=data,
         )
-
 
         put_themes_key_body.additional_properties = d
         return put_themes_key_body

@@ -1,57 +1,41 @@
 from http import HTTPStatus
-from typing import Any, Optional, Union, cast
+from typing import Any
 
 import httpx
 
-from ...client import AuthenticatedClient, Client
-from ...types import Response, UNSET
 from ... import errors
-
+from ...client import AuthenticatedClient, Client
 from ...models.error import Error
 from ...models.notification_preference import NotificationPreference
-from typing import cast
-
+from ...types import Response
 
 
 def _get_kwargs(
     category: str,
-
 ) -> dict[str, Any]:
-    
-
-    
-
-    
-
     _kwargs: dict[str, Any] = {
         "method": "get",
-        "url": "/notifications/preferences/{category}".format(category=category,),
+        "url": f"/notifications/preferences/{category}",
     }
-
 
     return _kwargs
 
 
-
-def _parse_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Optional[Union[Error, NotificationPreference]]:
+def _parse_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Error | NotificationPreference | None:
     if response.status_code == 200:
         response_200 = NotificationPreference.from_dict(response.json())
-
-
 
         return response_200
 
     if response.status_code == 400:
         response_400 = Error.from_dict(response.json())
 
-
-
         return response_400
 
     if response.status_code == 401:
         response_401 = Error.from_dict(response.json())
-
-
 
         return response_401
 
@@ -61,7 +45,9 @@ def _parse_response(*, client: Union[AuthenticatedClient, Client], response: htt
         return None
 
 
-def _build_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Response[Union[Error, NotificationPreference]]:
+def _build_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Response[Error | NotificationPreference]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -74,9 +60,8 @@ def sync_detailed(
     category: str,
     *,
     client: AuthenticatedClient,
-
-) -> Response[Union[Error, NotificationPreference]]:
-    """ Get the caller's preference for one category (defaults if unset)
+) -> Response[Error | NotificationPreference]:
+    """Get the caller's preference for one category (defaults if unset)
 
     Args:
         category (str):
@@ -87,12 +72,10 @@ def sync_detailed(
 
     Returns:
         Response[Union[Error, NotificationPreference]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         category=category,
-
     )
 
     response = client.get_httpx_client().request(
@@ -101,13 +84,13 @@ def sync_detailed(
 
     return _build_response(client=client, response=response)
 
+
 def sync(
     category: str,
     *,
     client: AuthenticatedClient,
-
-) -> Optional[Union[Error, NotificationPreference]]:
-    """ Get the caller's preference for one category (defaults if unset)
+) -> Error | NotificationPreference | None:
+    """Get the caller's preference for one category (defaults if unset)
 
     Args:
         category (str):
@@ -118,22 +101,20 @@ def sync(
 
     Returns:
         Union[Error, NotificationPreference]
-     """
-
+    """
 
     return sync_detailed(
         category=category,
-client=client,
-
+        client=client,
     ).parsed
+
 
 async def asyncio_detailed(
     category: str,
     *,
     client: AuthenticatedClient,
-
-) -> Response[Union[Error, NotificationPreference]]:
-    """ Get the caller's preference for one category (defaults if unset)
+) -> Response[Error | NotificationPreference]:
+    """Get the caller's preference for one category (defaults if unset)
 
     Args:
         category (str):
@@ -144,27 +125,23 @@ async def asyncio_detailed(
 
     Returns:
         Response[Union[Error, NotificationPreference]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         category=category,
-
     )
 
-    response = await client.get_async_httpx_client().request(
-        **kwargs
-    )
+    response = await client.get_async_httpx_client().request(**kwargs)
 
     return _build_response(client=client, response=response)
+
 
 async def asyncio(
     category: str,
     *,
     client: AuthenticatedClient,
-
-) -> Optional[Union[Error, NotificationPreference]]:
-    """ Get the caller's preference for one category (defaults if unset)
+) -> Error | NotificationPreference | None:
+    """Get the caller's preference for one category (defaults if unset)
 
     Args:
         category (str):
@@ -175,11 +152,11 @@ async def asyncio(
 
     Returns:
         Union[Error, NotificationPreference]
-     """
+    """
 
-
-    return (await asyncio_detailed(
-        category=category,
-client=client,
-
-    )).parsed
+    return (
+        await asyncio_detailed(
+            category=category,
+            client=client,
+        )
+    ).parsed

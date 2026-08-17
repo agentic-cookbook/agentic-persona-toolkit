@@ -1,49 +1,37 @@
 from http import HTTPStatus
-from typing import Any, Optional, Union, cast
+from typing import Any
 
 import httpx
 
-from ...client import AuthenticatedClient, Client
-from ...types import Response, UNSET
 from ... import errors
-
+from ...client import AuthenticatedClient, Client
 from ...models.error import Error
 from ...models.markdown_document import MarkdownDocument
 from ...models.post_content_markdown_id_publish_body import PostContentMarkdownIdPublishBody
-from ...types import UNSET, Unset
-from typing import cast
-from typing import Union
-
+from ...types import UNSET, Response, Unset
 
 
 def _get_kwargs(
     id: str,
     *,
     body: PostContentMarkdownIdPublishBody,
-    workspace: Union[Unset, str] = UNSET,
-
+    workspace: Unset | str = UNSET,
 ) -> dict[str, Any]:
     headers: dict[str, Any] = {}
-
-
-    
 
     params: dict[str, Any] = {}
 
     params["workspace"] = workspace
 
-
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
-
 
     _kwargs: dict[str, Any] = {
         "method": "post",
-        "url": "/content/markdown/{id}/publish".format(id=id,),
+        "url": f"/content/markdown/{id}/publish",
         "params": params,
     }
 
     _kwargs["json"] = body.to_dict()
-
 
     headers["Content-Type"] = "application/json"
 
@@ -51,40 +39,31 @@ def _get_kwargs(
     return _kwargs
 
 
-
-def _parse_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Optional[Union[Error, MarkdownDocument]]:
+def _parse_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Error | MarkdownDocument | None:
     if response.status_code == 200:
         response_200 = MarkdownDocument.from_dict(response.json())
-
-
 
         return response_200
 
     if response.status_code == 400:
         response_400 = Error.from_dict(response.json())
 
-
-
         return response_400
 
     if response.status_code == 401:
         response_401 = Error.from_dict(response.json())
-
-
 
         return response_401
 
     if response.status_code == 404:
         response_404 = Error.from_dict(response.json())
 
-
-
         return response_404
 
     if response.status_code == 409:
         response_409 = Error.from_dict(response.json())
-
-
 
         return response_409
 
@@ -94,7 +73,9 @@ def _parse_response(*, client: Union[AuthenticatedClient, Client], response: htt
         return None
 
 
-def _build_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Response[Union[Error, MarkdownDocument]]:
+def _build_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Response[Error | MarkdownDocument]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -108,10 +89,9 @@ def sync_detailed(
     *,
     client: AuthenticatedClient,
     body: PostContentMarkdownIdPublishBody,
-    workspace: Union[Unset, str] = UNSET,
-
-) -> Response[Union[Error, MarkdownDocument]]:
-    """ Publish a document under an author-defined public route slug
+    workspace: Unset | str = UNSET,
+) -> Response[Error | MarkdownDocument]:
+    """Publish a document under an author-defined public route slug
 
      Makes the document readable UNAUTHENTICATED at /public/users/{slug}/papers/{route}. The route is
     lowercase, url-safe, and UNIQUE PER AUTHOR — a collision with another of the caller’s live papers
@@ -128,14 +108,12 @@ def sync_detailed(
 
     Returns:
         Response[Union[Error, MarkdownDocument]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         id=id,
-body=body,
-workspace=workspace,
-
+        body=body,
+        workspace=workspace,
     )
 
     response = client.get_httpx_client().request(
@@ -144,15 +122,15 @@ workspace=workspace,
 
     return _build_response(client=client, response=response)
 
+
 def sync(
     id: str,
     *,
     client: AuthenticatedClient,
     body: PostContentMarkdownIdPublishBody,
-    workspace: Union[Unset, str] = UNSET,
-
-) -> Optional[Union[Error, MarkdownDocument]]:
-    """ Publish a document under an author-defined public route slug
+    workspace: Unset | str = UNSET,
+) -> Error | MarkdownDocument | None:
+    """Publish a document under an author-defined public route slug
 
      Makes the document readable UNAUTHENTICATED at /public/users/{slug}/papers/{route}. The route is
     lowercase, url-safe, and UNIQUE PER AUTHOR — a collision with another of the caller’s live papers
@@ -169,26 +147,24 @@ def sync(
 
     Returns:
         Union[Error, MarkdownDocument]
-     """
-
+    """
 
     return sync_detailed(
         id=id,
-client=client,
-body=body,
-workspace=workspace,
-
+        client=client,
+        body=body,
+        workspace=workspace,
     ).parsed
+
 
 async def asyncio_detailed(
     id: str,
     *,
     client: AuthenticatedClient,
     body: PostContentMarkdownIdPublishBody,
-    workspace: Union[Unset, str] = UNSET,
-
-) -> Response[Union[Error, MarkdownDocument]]:
-    """ Publish a document under an author-defined public route slug
+    workspace: Unset | str = UNSET,
+) -> Response[Error | MarkdownDocument]:
+    """Publish a document under an author-defined public route slug
 
      Makes the document readable UNAUTHENTICATED at /public/users/{slug}/papers/{route}. The route is
     lowercase, url-safe, and UNIQUE PER AUTHOR — a collision with another of the caller’s live papers
@@ -205,31 +181,27 @@ async def asyncio_detailed(
 
     Returns:
         Response[Union[Error, MarkdownDocument]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         id=id,
-body=body,
-workspace=workspace,
-
+        body=body,
+        workspace=workspace,
     )
 
-    response = await client.get_async_httpx_client().request(
-        **kwargs
-    )
+    response = await client.get_async_httpx_client().request(**kwargs)
 
     return _build_response(client=client, response=response)
+
 
 async def asyncio(
     id: str,
     *,
     client: AuthenticatedClient,
     body: PostContentMarkdownIdPublishBody,
-    workspace: Union[Unset, str] = UNSET,
-
-) -> Optional[Union[Error, MarkdownDocument]]:
-    """ Publish a document under an author-defined public route slug
+    workspace: Unset | str = UNSET,
+) -> Error | MarkdownDocument | None:
+    """Publish a document under an author-defined public route slug
 
      Makes the document readable UNAUTHENTICATED at /public/users/{slug}/papers/{route}. The route is
     lowercase, url-safe, and UNIQUE PER AUTHOR — a collision with another of the caller’s live papers
@@ -246,13 +218,13 @@ async def asyncio(
 
     Returns:
         Union[Error, MarkdownDocument]
-     """
+    """
 
-
-    return (await asyncio_detailed(
-        id=id,
-client=client,
-body=body,
-workspace=workspace,
-
-    )).parsed
+    return (
+        await asyncio_detailed(
+            id=id,
+            client=client,
+            body=body,
+            workspace=workspace,
+        )
+    ).parsed

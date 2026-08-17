@@ -1,46 +1,33 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 from ..types import UNSET, Unset
 
-from ..types import UNSET, Unset
-from typing import Union
-
-
-
-
-
-
 T = TypeVar("T", bound="PostOauthSigninCompleteBody")
-
 
 
 @_attrs_define
 class PostOauthSigninCompleteBody:
-    """ 
-        Attributes:
-            client_slug (str):
-            provider_slug (str):
-            code (Union[Unset, str]):
-            access_token (Union[Unset, str]):
-            id_token (Union[Unset, str]):
-            redirect_uri (Union[Unset, str]):
-     """
+    """
+    Attributes:
+        client_slug (str):
+        provider_slug (str):
+        code (Union[Unset, str]):
+        access_token (Union[Unset, str]):
+        id_token (Union[Unset, str]):
+        redirect_uri (Union[Unset, str]):
+    """
 
     client_slug: str
     provider_slug: str
-    code: Union[Unset, str] = UNSET
-    access_token: Union[Unset, str] = UNSET
-    id_token: Union[Unset, str] = UNSET
-    redirect_uri: Union[Unset, str] = UNSET
+    code: Unset | str = UNSET
+    access_token: Unset | str = UNSET
+    id_token: Unset | str = UNSET
+    redirect_uri: Unset | str = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         client_slug = self.client_slug
@@ -55,13 +42,14 @@ class PostOauthSigninCompleteBody:
 
         redirect_uri = self.redirect_uri
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "clientSlug": client_slug,
-            "providerSlug": provider_slug,
-        })
+        field_dict.update(
+            {
+                "clientSlug": client_slug,
+                "providerSlug": provider_slug,
+            }
+        )
         if code is not UNSET:
             field_dict["code"] = code
         if access_token is not UNSET:
@@ -72,8 +60,6 @@ class PostOauthSigninCompleteBody:
             field_dict["redirectUri"] = redirect_uri
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -98,7 +84,6 @@ class PostOauthSigninCompleteBody:
             id_token=id_token,
             redirect_uri=redirect_uri,
         )
-
 
         post_oauth_signin_complete_body.additional_properties = d
         return post_oauth_signin_complete_body

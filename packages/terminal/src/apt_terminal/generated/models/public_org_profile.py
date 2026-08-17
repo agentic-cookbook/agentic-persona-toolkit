@@ -1,0 +1,111 @@
+from collections.abc import Mapping
+from typing import TYPE_CHECKING, Any, TypeVar, cast
+
+from attrs import define as _attrs_define
+from attrs import field as _attrs_field
+
+if TYPE_CHECKING:
+    from ..models.public_persona_summary import PublicPersonaSummary
+
+
+T = TypeVar("T", bound="PublicOrgProfile")
+
+
+@_attrs_define
+class PublicOrgProfile:
+    """
+    Attributes:
+        slug (str):
+        display_name (str):
+        description (Union[None, str]):
+        created_at (str):
+        personas (list['PublicPersonaSummary']):
+    """
+
+    slug: str
+    display_name: str
+    description: None | str
+    created_at: str
+    personas: list["PublicPersonaSummary"]
+    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
+
+    def to_dict(self) -> dict[str, Any]:
+        slug = self.slug
+
+        display_name = self.display_name
+
+        description: None | str
+        description = self.description
+
+        created_at = self.created_at
+
+        personas = []
+        for personas_item_data in self.personas:
+            personas_item = personas_item_data.to_dict()
+            personas.append(personas_item)
+
+        field_dict: dict[str, Any] = {}
+        field_dict.update(self.additional_properties)
+        field_dict.update(
+            {
+                "slug": slug,
+                "displayName": display_name,
+                "description": description,
+                "createdAt": created_at,
+                "personas": personas,
+            }
+        )
+
+        return field_dict
+
+    @classmethod
+    def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
+        from ..models.public_persona_summary import PublicPersonaSummary
+
+        d = dict(src_dict)
+        slug = d.pop("slug")
+
+        display_name = d.pop("displayName")
+
+        def _parse_description(data: object) -> None | str:
+            if data is None:
+                return data
+            return cast(None | str, data)
+
+        description = _parse_description(d.pop("description"))
+
+        created_at = d.pop("createdAt")
+
+        personas = []
+        _personas = d.pop("personas")
+        for personas_item_data in _personas:
+            personas_item = PublicPersonaSummary.from_dict(personas_item_data)
+
+            personas.append(personas_item)
+
+        public_org_profile = cls(
+            slug=slug,
+            display_name=display_name,
+            description=description,
+            created_at=created_at,
+            personas=personas,
+        )
+
+        public_org_profile.additional_properties = d
+        return public_org_profile
+
+    @property
+    def additional_keys(self) -> list[str]:
+        return list(self.additional_properties.keys())
+
+    def __getitem__(self, key: str) -> Any:
+        return self.additional_properties[key]
+
+    def __setitem__(self, key: str, value: Any) -> None:
+        self.additional_properties[key] = value
+
+    def __delitem__(self, key: str) -> None:
+        del self.additional_properties[key]
+
+    def __contains__(self, key: str) -> bool:
+        return key in self.additional_properties

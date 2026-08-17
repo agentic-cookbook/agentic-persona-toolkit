@@ -1,74 +1,60 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 from ..types import UNSET, Unset
 
-from ..types import UNSET, Unset
-from typing import cast, Union
-from typing import Union
-
-
-
-
-
-
 T = TypeVar("T", bound="DiscussionPost")
-
 
 
 @_attrs_define
 class DiscussionPost:
-    """ 
-        Attributes:
-            id (str):
-            topic_id (str):
-            parent_post_id (Union[None, str]):
-            post_number (int):
-            body_document_id (Union[None, str]): The content.markdown doc backing this post’s body.
-            created_at (str):
-            updated_at (str):
-            customer_id (Union[Unset, str]): Author (server-stamped principal). Omitted on the public surface.
-            ecosystem_id (Union[Unset, str]): Owning ecosystem (present on create only).
-            community_id (Union[Unset, str]): The community instance (inherited from the topic; present on create only).
-            content (Union[None, Unset, str]): Resolved markdown body (present on the list routes; null if the body doc was
-                deleted).
-            is_deleted (Union[Unset, bool]):
-            deleted_at (Union[None, Unset, str]):
-     """
+    """
+    Attributes:
+        id (str):
+        topic_id (str):
+        parent_post_id (Union[None, str]):
+        post_number (int):
+        body_document_id (Union[None, str]): The content.markdown doc backing this post’s body.
+        created_at (str):
+        updated_at (str):
+        customer_id (Union[Unset, str]): Author (server-stamped principal). Omitted on the public surface.
+        ecosystem_id (Union[Unset, str]): Owning ecosystem (present on create only).
+        community_id (Union[Unset, str]): The community instance (inherited from the topic; present on create only).
+        content (Union[None, Unset, str]): Resolved markdown body (present on the list routes; null if the body doc was
+            deleted).
+        is_deleted (Union[Unset, bool]):
+        deleted_at (Union[None, Unset, str]):
+    """
 
     id: str
     topic_id: str
-    parent_post_id: Union[None, str]
+    parent_post_id: None | str
     post_number: int
-    body_document_id: Union[None, str]
+    body_document_id: None | str
     created_at: str
     updated_at: str
-    customer_id: Union[Unset, str] = UNSET
-    ecosystem_id: Union[Unset, str] = UNSET
-    community_id: Union[Unset, str] = UNSET
-    content: Union[None, Unset, str] = UNSET
-    is_deleted: Union[Unset, bool] = UNSET
-    deleted_at: Union[None, Unset, str] = UNSET
+    customer_id: Unset | str = UNSET
+    ecosystem_id: Unset | str = UNSET
+    community_id: Unset | str = UNSET
+    content: None | Unset | str = UNSET
+    is_deleted: Unset | bool = UNSET
+    deleted_at: None | Unset | str = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         id = self.id
 
         topic_id = self.topic_id
 
-        parent_post_id: Union[None, str]
+        parent_post_id: None | str
         parent_post_id = self.parent_post_id
 
         post_number = self.post_number
 
-        body_document_id: Union[None, str]
+        body_document_id: None | str
         body_document_id = self.body_document_id
 
         created_at = self.created_at
@@ -81,7 +67,7 @@ class DiscussionPost:
 
         community_id = self.community_id
 
-        content: Union[None, Unset, str]
+        content: None | Unset | str
         if isinstance(self.content, Unset):
             content = UNSET
         else:
@@ -89,24 +75,25 @@ class DiscussionPost:
 
         is_deleted = self.is_deleted
 
-        deleted_at: Union[None, Unset, str]
+        deleted_at: None | Unset | str
         if isinstance(self.deleted_at, Unset):
             deleted_at = UNSET
         else:
             deleted_at = self.deleted_at
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "id": id,
-            "topicId": topic_id,
-            "parentPostId": parent_post_id,
-            "postNumber": post_number,
-            "bodyDocumentId": body_document_id,
-            "createdAt": created_at,
-            "updatedAt": updated_at,
-        })
+        field_dict.update(
+            {
+                "id": id,
+                "topicId": topic_id,
+                "parentPostId": parent_post_id,
+                "postNumber": post_number,
+                "bodyDocumentId": body_document_id,
+                "createdAt": created_at,
+                "updatedAt": updated_at,
+            }
+        )
         if customer_id is not UNSET:
             field_dict["customerId"] = customer_id
         if ecosystem_id is not UNSET:
@@ -122,8 +109,6 @@ class DiscussionPost:
 
         return field_dict
 
-
-
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
@@ -131,23 +116,21 @@ class DiscussionPost:
 
         topic_id = d.pop("topicId")
 
-        def _parse_parent_post_id(data: object) -> Union[None, str]:
+        def _parse_parent_post_id(data: object) -> None | str:
             if data is None:
                 return data
-            return cast(Union[None, str], data)
+            return cast(None | str, data)
 
         parent_post_id = _parse_parent_post_id(d.pop("parentPostId"))
 
-
         post_number = d.pop("postNumber")
 
-        def _parse_body_document_id(data: object) -> Union[None, str]:
+        def _parse_body_document_id(data: object) -> None | str:
             if data is None:
                 return data
-            return cast(Union[None, str], data)
+            return cast(None | str, data)
 
         body_document_id = _parse_body_document_id(d.pop("bodyDocumentId"))
-
 
         created_at = d.pop("createdAt")
 
@@ -159,27 +142,25 @@ class DiscussionPost:
 
         community_id = d.pop("communityId", UNSET)
 
-        def _parse_content(data: object) -> Union[None, Unset, str]:
+        def _parse_content(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         content = _parse_content(d.pop("content", UNSET))
 
-
         is_deleted = d.pop("isDeleted", UNSET)
 
-        def _parse_deleted_at(data: object) -> Union[None, Unset, str]:
+        def _parse_deleted_at(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         deleted_at = _parse_deleted_at(d.pop("deletedAt", UNSET))
-
 
         discussion_post = cls(
             id=id,
@@ -196,7 +177,6 @@ class DiscussionPost:
             is_deleted=is_deleted,
             deleted_at=deleted_at,
         )
-
 
         discussion_post.additional_properties = d
         return discussion_post

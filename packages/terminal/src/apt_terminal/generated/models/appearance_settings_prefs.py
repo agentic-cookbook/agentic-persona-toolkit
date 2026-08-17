@@ -1,10 +1,8 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
-
-from ..types import UNSET, Unset
 
 from ..models.appearance_settings_prefs_color_mode import AppearanceSettingsPrefsColorMode
 from ..models.appearance_settings_prefs_contrast import AppearanceSettingsPrefsContrast
@@ -12,80 +10,62 @@ from ..models.appearance_settings_prefs_reduce_motion import AppearanceSettingsP
 from ..models.appearance_settings_prefs_spacing import AppearanceSettingsPrefsSpacing
 from ..models.appearance_settings_prefs_text_size import AppearanceSettingsPrefsTextSize
 from ..types import UNSET, Unset
-from typing import Union
-
-
-
-
-
 
 T = TypeVar("T", bound="AppearanceSettingsPrefs")
 
 
-
 @_attrs_define
 class AppearanceSettingsPrefs:
-    """ Empty object when the user has never saved a preference (client defaults apply)
+    """Empty object when the user has never saved a preference (client defaults apply)
 
-        Attributes:
-            color_mode (Union[Unset, AppearanceSettingsPrefsColorMode]): The user's colour scheme; 'auto' follows the
-                operating system
-            reduce_motion (Union[Unset, AppearanceSettingsPrefsReduceMotion]):
-            contrast (Union[Unset, AppearanceSettingsPrefsContrast]):
-            text_size (Union[Unset, AppearanceSettingsPrefsTextSize]):
-            spacing (Union[Unset, AppearanceSettingsPrefsSpacing]):
-            focus_outlines (Union[Unset, bool]):
-            underline_links (Union[Unset, bool]):
-     """
+    Attributes:
+        color_mode (Union[Unset, AppearanceSettingsPrefsColorMode]): The user's colour scheme; 'auto' follows the
+            operating system
+        reduce_motion (Union[Unset, AppearanceSettingsPrefsReduceMotion]):
+        contrast (Union[Unset, AppearanceSettingsPrefsContrast]):
+        text_size (Union[Unset, AppearanceSettingsPrefsTextSize]):
+        spacing (Union[Unset, AppearanceSettingsPrefsSpacing]):
+        focus_outlines (Union[Unset, bool]):
+        underline_links (Union[Unset, bool]):
+    """
 
-    color_mode: Union[Unset, AppearanceSettingsPrefsColorMode] = UNSET
-    reduce_motion: Union[Unset, AppearanceSettingsPrefsReduceMotion] = UNSET
-    contrast: Union[Unset, AppearanceSettingsPrefsContrast] = UNSET
-    text_size: Union[Unset, AppearanceSettingsPrefsTextSize] = UNSET
-    spacing: Union[Unset, AppearanceSettingsPrefsSpacing] = UNSET
-    focus_outlines: Union[Unset, bool] = UNSET
-    underline_links: Union[Unset, bool] = UNSET
+    color_mode: Unset | AppearanceSettingsPrefsColorMode = UNSET
+    reduce_motion: Unset | AppearanceSettingsPrefsReduceMotion = UNSET
+    contrast: Unset | AppearanceSettingsPrefsContrast = UNSET
+    text_size: Unset | AppearanceSettingsPrefsTextSize = UNSET
+    spacing: Unset | AppearanceSettingsPrefsSpacing = UNSET
+    focus_outlines: Unset | bool = UNSET
+    underline_links: Unset | bool = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
-
-
-
-
     def to_dict(self) -> dict[str, Any]:
-        color_mode: Union[Unset, str] = UNSET
+        color_mode: Unset | str = UNSET
         if not isinstance(self.color_mode, Unset):
             color_mode = self.color_mode.value
 
-
-        reduce_motion: Union[Unset, str] = UNSET
+        reduce_motion: Unset | str = UNSET
         if not isinstance(self.reduce_motion, Unset):
             reduce_motion = self.reduce_motion.value
 
-
-        contrast: Union[Unset, str] = UNSET
+        contrast: Unset | str = UNSET
         if not isinstance(self.contrast, Unset):
             contrast = self.contrast.value
 
-
-        text_size: Union[Unset, str] = UNSET
+        text_size: Unset | str = UNSET
         if not isinstance(self.text_size, Unset):
             text_size = self.text_size.value
 
-
-        spacing: Union[Unset, str] = UNSET
+        spacing: Unset | str = UNSET
         if not isinstance(self.spacing, Unset):
             spacing = self.spacing.value
-
 
         focus_outlines = self.focus_outlines
 
         underline_links = self.underline_links
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-        })
+        field_dict.update({})
         if color_mode is not UNSET:
             field_dict["colorMode"] = color_mode
         if reduce_motion is not UNSET:
@@ -103,60 +83,43 @@ class AppearanceSettingsPrefs:
 
         return field_dict
 
-
-
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
         _color_mode = d.pop("colorMode", UNSET)
-        color_mode: Union[Unset, AppearanceSettingsPrefsColorMode]
-        if isinstance(_color_mode,  Unset):
+        color_mode: Unset | AppearanceSettingsPrefsColorMode
+        if isinstance(_color_mode, Unset):
             color_mode = UNSET
         else:
             color_mode = AppearanceSettingsPrefsColorMode(_color_mode)
 
-
-
-
         _reduce_motion = d.pop("reduceMotion", UNSET)
-        reduce_motion: Union[Unset, AppearanceSettingsPrefsReduceMotion]
-        if isinstance(_reduce_motion,  Unset):
+        reduce_motion: Unset | AppearanceSettingsPrefsReduceMotion
+        if isinstance(_reduce_motion, Unset):
             reduce_motion = UNSET
         else:
             reduce_motion = AppearanceSettingsPrefsReduceMotion(_reduce_motion)
 
-
-
-
         _contrast = d.pop("contrast", UNSET)
-        contrast: Union[Unset, AppearanceSettingsPrefsContrast]
-        if isinstance(_contrast,  Unset):
+        contrast: Unset | AppearanceSettingsPrefsContrast
+        if isinstance(_contrast, Unset):
             contrast = UNSET
         else:
             contrast = AppearanceSettingsPrefsContrast(_contrast)
 
-
-
-
         _text_size = d.pop("textSize", UNSET)
-        text_size: Union[Unset, AppearanceSettingsPrefsTextSize]
-        if isinstance(_text_size,  Unset):
+        text_size: Unset | AppearanceSettingsPrefsTextSize
+        if isinstance(_text_size, Unset):
             text_size = UNSET
         else:
             text_size = AppearanceSettingsPrefsTextSize(_text_size)
 
-
-
-
         _spacing = d.pop("spacing", UNSET)
-        spacing: Union[Unset, AppearanceSettingsPrefsSpacing]
-        if isinstance(_spacing,  Unset):
+        spacing: Unset | AppearanceSettingsPrefsSpacing
+        if isinstance(_spacing, Unset):
             spacing = UNSET
         else:
             spacing = AppearanceSettingsPrefsSpacing(_spacing)
-
-
-
 
         focus_outlines = d.pop("focusOutlines", UNSET)
 
@@ -171,7 +134,6 @@ class AppearanceSettingsPrefs:
             focus_outlines=focus_outlines,
             underline_links=underline_links,
         )
-
 
         appearance_settings_prefs.additional_properties = d
         return appearance_settings_prefs

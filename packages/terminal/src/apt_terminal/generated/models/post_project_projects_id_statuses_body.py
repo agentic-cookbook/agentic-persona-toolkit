@@ -1,43 +1,32 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
+from ..models.post_project_projects_id_statuses_body_category import (
+    PostProjectProjectsIdStatusesBodyCategory,
+)
 from ..types import UNSET, Unset
-
-from ..models.post_project_projects_id_statuses_body_category import PostProjectProjectsIdStatusesBodyCategory
-from ..types import UNSET, Unset
-from typing import Union
-
-
-
-
-
 
 T = TypeVar("T", bound="PostProjectProjectsIdStatusesBody")
 
 
-
 @_attrs_define
 class PostProjectProjectsIdStatusesBody:
-    """ 
-        Attributes:
-            key (str):
-            label (str):
-            category (PostProjectProjectsIdStatusesBodyCategory):
-            position (Union[Unset, int]): explicit column order; defaults to append (max+1)
-     """
+    """
+    Attributes:
+        key (str):
+        label (str):
+        category (PostProjectProjectsIdStatusesBodyCategory):
+        position (Union[Unset, int]): explicit column order; defaults to append (max+1)
+    """
 
     key: str
     label: str
     category: PostProjectProjectsIdStatusesBodyCategory
-    position: Union[Unset, int] = UNSET
+    position: Unset | int = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         key = self.key
@@ -48,20 +37,19 @@ class PostProjectProjectsIdStatusesBody:
 
         position = self.position
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "key": key,
-            "label": label,
-            "category": category,
-        })
+        field_dict.update(
+            {
+                "key": key,
+                "label": label,
+                "category": category,
+            }
+        )
         if position is not UNSET:
             field_dict["position"] = position
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -72,9 +60,6 @@ class PostProjectProjectsIdStatusesBody:
 
         category = PostProjectProjectsIdStatusesBodyCategory(d.pop("category"))
 
-
-
-
         position = d.pop("position", UNSET)
 
         post_project_projects_id_statuses_body = cls(
@@ -83,7 +68,6 @@ class PostProjectProjectsIdStatusesBody:
             category=category,
             position=position,
         )
-
 
         post_project_projects_id_statuses_body.additional_properties = d
         return post_project_projects_id_statuses_body

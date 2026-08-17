@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class PatchProjectProjectsIdFieldsFieldIdBodyType(str, Enum):
     CHECKBOX = "checkbox"
     DATE = "date"

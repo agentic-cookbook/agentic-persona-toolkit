@@ -1,69 +1,55 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import TYPE_CHECKING, Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 from ..types import UNSET, Unset
 
-from ..types import UNSET, Unset
-from typing import cast
-from typing import Union
-
 if TYPE_CHECKING:
-  from ..models.post_oauth_clients_response_201_client import PostOauthClientsResponse201Client
-
-
-
+    from ..models.post_oauth_clients_response_201_client import PostOauthClientsResponse201Client
 
 
 T = TypeVar("T", bound="PostOauthClientsResponse201")
 
 
-
 @_attrs_define
 class PostOauthClientsResponse201:
-    """ 
-        Attributes:
-            client (PostOauthClientsResponse201Client):
-            app_token (Union[Unset, str]):
-     """
+    """
+    Attributes:
+        client (PostOauthClientsResponse201Client):
+        app_token (Union[Unset, str]):
+    """
 
-    client: 'PostOauthClientsResponse201Client'
-    app_token: Union[Unset, str] = UNSET
+    client: "PostOauthClientsResponse201Client"
+    app_token: Unset | str = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
-
-
-
-
     def to_dict(self) -> dict[str, Any]:
-        from ..models.post_oauth_clients_response_201_client import PostOauthClientsResponse201Client
         client = self.client.to_dict()
 
         app_token = self.app_token
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "client": client,
-        })
+        field_dict.update(
+            {
+                "client": client,
+            }
+        )
         if app_token is not UNSET:
             field_dict["appToken"] = app_token
 
         return field_dict
 
-
-
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.post_oauth_clients_response_201_client import PostOauthClientsResponse201Client
+        from ..models.post_oauth_clients_response_201_client import (
+            PostOauthClientsResponse201Client,
+        )
+
         d = dict(src_dict)
         client = PostOauthClientsResponse201Client.from_dict(d.pop("client"))
-
-
-
 
         app_token = d.pop("appToken", UNSET)
 
@@ -71,7 +57,6 @@ class PostOauthClientsResponse201:
             client=client,
             app_token=app_token,
         )
-
 
         post_oauth_clients_response_201.additional_properties = d
         return post_oauth_clients_response_201

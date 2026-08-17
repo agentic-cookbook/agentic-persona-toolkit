@@ -1,37 +1,28 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar
+from uuid import UUID
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
-
-from uuid import UUID
-
-
-
-
-
-
 T = TypeVar("T", bound="AiProcessingJob")
-
 
 
 @_attrs_define
 class AiProcessingJob:
-    """ 
-        Attributes:
-            id (UUID):
-            job_type (str): Discriminator for worker routing (e.g. categorize_and_tag)
-            target_kind (str): Namespace of the target entity (e.g. content.markdown)
-            target_id (str): UUID of the target entity
-            status (str): Current lifecycle status (queued | claimed | succeeded | dead)
-            priority (int): Higher value = claimed first; default 0
-            attempts (int): Number of claim attempts so far
-            max_attempts (int): Maximum allowed claim attempts before dead-lettering
-            created_at (str): Timestamp when the job was enqueued
-            updated_at (str): Timestamp of the last status transition
-     """
+    """
+    Attributes:
+        id (UUID):
+        job_type (str): Discriminator for worker routing (e.g. categorize_and_tag)
+        target_kind (str): Namespace of the target entity (e.g. content.markdown)
+        target_id (str): UUID of the target entity
+        status (str): Current lifecycle status (queued | claimed | succeeded | dead)
+        priority (int): Higher value = claimed first; default 0
+        attempts (int): Number of claim attempts so far
+        max_attempts (int): Maximum allowed claim attempts before dead-lettering
+        created_at (str): Timestamp when the job was enqueued
+        updated_at (str): Timestamp of the last status transition
+    """
 
     id: UUID
     job_type: str
@@ -44,10 +35,6 @@ class AiProcessingJob:
     created_at: str
     updated_at: str
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         id = str(self.id)
@@ -70,33 +57,29 @@ class AiProcessingJob:
 
         updated_at = self.updated_at
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "id": id,
-            "jobType": job_type,
-            "targetKind": target_kind,
-            "targetId": target_id,
-            "status": status,
-            "priority": priority,
-            "attempts": attempts,
-            "maxAttempts": max_attempts,
-            "createdAt": created_at,
-            "updatedAt": updated_at,
-        })
+        field_dict.update(
+            {
+                "id": id,
+                "jobType": job_type,
+                "targetKind": target_kind,
+                "targetId": target_id,
+                "status": status,
+                "priority": priority,
+                "attempts": attempts,
+                "maxAttempts": max_attempts,
+                "createdAt": created_at,
+                "updatedAt": updated_at,
+            }
+        )
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
         id = UUID(d.pop("id"))
-
-
-
 
         job_type = d.pop("jobType")
 
@@ -128,7 +111,6 @@ class AiProcessingJob:
             created_at=created_at,
             updated_at=updated_at,
         )
-
 
         ai_processing_job.additional_properties = d
         return ai_processing_job

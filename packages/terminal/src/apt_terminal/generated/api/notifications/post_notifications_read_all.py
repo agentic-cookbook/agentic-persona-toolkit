@@ -1,49 +1,34 @@
 from http import HTTPStatus
-from typing import Any, Optional, Union, cast
+from typing import Any
 
 import httpx
 
-from ...client import AuthenticatedClient, Client
-from ...types import Response, UNSET
 from ... import errors
-
+from ...client import AuthenticatedClient, Client
 from ...models.error import Error
 from ...models.post_notifications_read_all_response_200 import PostNotificationsReadAllResponse200
-from typing import cast
+from ...types import Response
 
 
-
-def _get_kwargs(
-    
-) -> dict[str, Any]:
-    
-
-    
-
-    
-
+def _get_kwargs() -> dict[str, Any]:
     _kwargs: dict[str, Any] = {
         "method": "post",
         "url": "/notifications/read-all",
     }
 
-
     return _kwargs
 
 
-
-def _parse_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Optional[Union[Error, PostNotificationsReadAllResponse200]]:
+def _parse_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Error | PostNotificationsReadAllResponse200 | None:
     if response.status_code == 200:
         response_200 = PostNotificationsReadAllResponse200.from_dict(response.json())
-
-
 
         return response_200
 
     if response.status_code == 401:
         response_401 = Error.from_dict(response.json())
-
-
 
         return response_401
 
@@ -53,7 +38,9 @@ def _parse_response(*, client: Union[AuthenticatedClient, Client], response: htt
         return None
 
 
-def _build_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Response[Union[Error, PostNotificationsReadAllResponse200]]:
+def _build_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Response[Error | PostNotificationsReadAllResponse200]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -65,9 +52,8 @@ def _build_response(*, client: Union[AuthenticatedClient, Client], response: htt
 def sync_detailed(
     *,
     client: AuthenticatedClient,
-
-) -> Response[Union[Error, PostNotificationsReadAllResponse200]]:
-    """ Mark all of the caller's notifications as read
+) -> Response[Error | PostNotificationsReadAllResponse200]:
+    """Mark all of the caller's notifications as read
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -75,12 +61,9 @@ def sync_detailed(
 
     Returns:
         Response[Union[Error, PostNotificationsReadAllResponse200]]
-     """
+    """
 
-
-    kwargs = _get_kwargs(
-        
-    )
+    kwargs = _get_kwargs()
 
     response = client.get_httpx_client().request(
         **kwargs,
@@ -88,12 +71,12 @@ def sync_detailed(
 
     return _build_response(client=client, response=response)
 
+
 def sync(
     *,
     client: AuthenticatedClient,
-
-) -> Optional[Union[Error, PostNotificationsReadAllResponse200]]:
-    """ Mark all of the caller's notifications as read
+) -> Error | PostNotificationsReadAllResponse200 | None:
+    """Mark all of the caller's notifications as read
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -101,20 +84,18 @@ def sync(
 
     Returns:
         Union[Error, PostNotificationsReadAllResponse200]
-     """
-
+    """
 
     return sync_detailed(
         client=client,
-
     ).parsed
+
 
 async def asyncio_detailed(
     *,
     client: AuthenticatedClient,
-
-) -> Response[Union[Error, PostNotificationsReadAllResponse200]]:
-    """ Mark all of the caller's notifications as read
+) -> Response[Error | PostNotificationsReadAllResponse200]:
+    """Mark all of the caller's notifications as read
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -122,25 +103,20 @@ async def asyncio_detailed(
 
     Returns:
         Response[Union[Error, PostNotificationsReadAllResponse200]]
-     """
+    """
 
+    kwargs = _get_kwargs()
 
-    kwargs = _get_kwargs(
-        
-    )
-
-    response = await client.get_async_httpx_client().request(
-        **kwargs
-    )
+    response = await client.get_async_httpx_client().request(**kwargs)
 
     return _build_response(client=client, response=response)
+
 
 async def asyncio(
     *,
     client: AuthenticatedClient,
-
-) -> Optional[Union[Error, PostNotificationsReadAllResponse200]]:
-    """ Mark all of the caller's notifications as read
+) -> Error | PostNotificationsReadAllResponse200 | None:
+    """Mark all of the caller's notifications as read
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -148,10 +124,10 @@ async def asyncio(
 
     Returns:
         Union[Error, PostNotificationsReadAllResponse200]
-     """
+    """
 
-
-    return (await asyncio_detailed(
-        client=client,
-
-    )).parsed
+    return (
+        await asyncio_detailed(
+            client=client,
+        )
+    ).parsed

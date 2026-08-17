@@ -1,74 +1,63 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import TYPE_CHECKING, Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
-
-from typing import cast
-
 if TYPE_CHECKING:
-  from ..models.patch_integrations_connection_id_settings_response_200_sync_settings import PatchIntegrationsConnectionIdSettingsResponse200SyncSettings
-
-
-
+    from ..models.patch_integrations_connection_id_settings_response_200_sync_settings import (
+        PatchIntegrationsConnectionIdSettingsResponse200SyncSettings,
+    )
 
 
 T = TypeVar("T", bound="PatchIntegrationsConnectionIdSettingsResponse200")
 
 
-
 @_attrs_define
 class PatchIntegrationsConnectionIdSettingsResponse200:
-    """ 
-        Attributes:
-            ok (bool):
-            sync_settings (PatchIntegrationsConnectionIdSettingsResponse200SyncSettings):
-     """
+    """
+    Attributes:
+        ok (bool):
+        sync_settings (PatchIntegrationsConnectionIdSettingsResponse200SyncSettings):
+    """
 
     ok: bool
-    sync_settings: 'PatchIntegrationsConnectionIdSettingsResponse200SyncSettings'
+    sync_settings: "PatchIntegrationsConnectionIdSettingsResponse200SyncSettings"
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
-
-
-
-
     def to_dict(self) -> dict[str, Any]:
-        from ..models.patch_integrations_connection_id_settings_response_200_sync_settings import PatchIntegrationsConnectionIdSettingsResponse200SyncSettings
         ok = self.ok
 
         sync_settings = self.sync_settings.to_dict()
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "ok": ok,
-            "syncSettings": sync_settings,
-        })
+        field_dict.update(
+            {
+                "ok": ok,
+                "syncSettings": sync_settings,
+            }
+        )
 
         return field_dict
 
-
-
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.patch_integrations_connection_id_settings_response_200_sync_settings import PatchIntegrationsConnectionIdSettingsResponse200SyncSettings
+        from ..models.patch_integrations_connection_id_settings_response_200_sync_settings import (
+            PatchIntegrationsConnectionIdSettingsResponse200SyncSettings,
+        )
+
         d = dict(src_dict)
         ok = d.pop("ok")
 
-        sync_settings = PatchIntegrationsConnectionIdSettingsResponse200SyncSettings.from_dict(d.pop("syncSettings"))
-
-
-
+        sync_settings = PatchIntegrationsConnectionIdSettingsResponse200SyncSettings.from_dict(
+            d.pop("syncSettings")
+        )
 
         patch_integrations_connection_id_settings_response_200 = cls(
             ok=ok,
             sync_settings=sync_settings,
         )
-
 
         patch_integrations_connection_id_settings_response_200.additional_properties = d
         return patch_integrations_connection_id_settings_response_200

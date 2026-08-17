@@ -1,140 +1,129 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar, cast
 
 from attrs import define as _attrs_define
-from attrs import field as _attrs_field
-
-from ..types import UNSET, Unset
-
-from typing import cast, Union
-
-
-
-
-
 
 T = TypeVar("T", bound="PutIntegrationIntegrationCalendarEventsIdResponse200")
 
 
-
 @_attrs_define
 class PutIntegrationIntegrationCalendarEventsIdResponse200:
-    """ 
-        Attributes:
-            id (str):
-            title (str):
-            description (Union[None, str]):
-            start_time (Union[None, str]):
-            end_time (Union[None, str]):
-            start_date (Union[None, str]):
-            end_date (Union[None, str]):
-            is_all_day (bool):
-            location (Union[None, str]):
-            source (str):
-            external_id (str):
-            connection_id (Union[None, str]):
-            calendar_name (Union[None, str]):
-            calendar_color (Union[None, str]):
-            status (str):
-            organizer (Union[None, str]):
-            attendees (Union[None, str]):
-            reminders (Union[None, str]):
-            url (Union[None, str]):
-            ai_extraction (Union[None, str]):
-            created_at (str):
-            updated_at (str):
-            is_deleted (bool):
-            sync_version (int):
-            customer_id (str):
-            deleted_at (Union[None, str]):
-            ecosystem_id (str):
-     """
+    """
+    Attributes:
+        id (str):
+        title (str):
+        description (Union[None, str]):
+        start_time (Union[None, str]):
+        end_time (Union[None, str]):
+        start_date (Union[None, str]):
+        end_date (Union[None, str]):
+        is_all_day (bool):
+        location (Union[None, str]):
+        source (str):
+        external_id (str):
+        connection_id (Union[None, str]):
+        calendar_name (Union[None, str]):
+        calendar_color (Union[None, str]):
+        status (str):
+        organizer (Union[None, str]):
+        attendees (Union[None, str]):
+        reminders (Union[None, str]):
+        url (Union[None, str]):
+        ai_extraction (Union[None, str]):
+        created_at (str):
+        updated_at (str):
+        is_deleted (bool):
+        customer_id (str):
+        deleted_at (Union[None, str]):
+        ecosystem_id (str):
+        sync_version (int):
+        sync_stamped_at (Union[None, str]):
+        sync_txid (int):
+    """
 
     id: str
     title: str
-    description: Union[None, str]
-    start_time: Union[None, str]
-    end_time: Union[None, str]
-    start_date: Union[None, str]
-    end_date: Union[None, str]
+    description: None | str
+    start_time: None | str
+    end_time: None | str
+    start_date: None | str
+    end_date: None | str
     is_all_day: bool
-    location: Union[None, str]
+    location: None | str
     source: str
     external_id: str
-    connection_id: Union[None, str]
-    calendar_name: Union[None, str]
-    calendar_color: Union[None, str]
+    connection_id: None | str
+    calendar_name: None | str
+    calendar_color: None | str
     status: str
-    organizer: Union[None, str]
-    attendees: Union[None, str]
-    reminders: Union[None, str]
-    url: Union[None, str]
-    ai_extraction: Union[None, str]
+    organizer: None | str
+    attendees: None | str
+    reminders: None | str
+    url: None | str
+    ai_extraction: None | str
     created_at: str
     updated_at: str
     is_deleted: bool
-    sync_version: int
     customer_id: str
-    deleted_at: Union[None, str]
+    deleted_at: None | str
     ecosystem_id: str
-
-
-
-
+    sync_version: int
+    sync_stamped_at: None | str
+    sync_txid: int
 
     def to_dict(self) -> dict[str, Any]:
         id = self.id
 
         title = self.title
 
-        description: Union[None, str]
+        description: None | str
         description = self.description
 
-        start_time: Union[None, str]
+        start_time: None | str
         start_time = self.start_time
 
-        end_time: Union[None, str]
+        end_time: None | str
         end_time = self.end_time
 
-        start_date: Union[None, str]
+        start_date: None | str
         start_date = self.start_date
 
-        end_date: Union[None, str]
+        end_date: None | str
         end_date = self.end_date
 
         is_all_day = self.is_all_day
 
-        location: Union[None, str]
+        location: None | str
         location = self.location
 
         source = self.source
 
         external_id = self.external_id
 
-        connection_id: Union[None, str]
+        connection_id: None | str
         connection_id = self.connection_id
 
-        calendar_name: Union[None, str]
+        calendar_name: None | str
         calendar_name = self.calendar_name
 
-        calendar_color: Union[None, str]
+        calendar_color: None | str
         calendar_color = self.calendar_color
 
         status = self.status
 
-        organizer: Union[None, str]
+        organizer: None | str
         organizer = self.organizer
 
-        attendees: Union[None, str]
+        attendees: None | str
         attendees = self.attendees
 
-        reminders: Union[None, str]
+        reminders: None | str
         reminders = self.reminders
 
-        url: Union[None, str]
+        url: None | str
         url = self.url
 
-        ai_extraction: Union[None, str]
+        ai_extraction: None | str
         ai_extraction = self.ai_extraction
 
         created_at = self.created_at
@@ -143,51 +132,57 @@ class PutIntegrationIntegrationCalendarEventsIdResponse200:
 
         is_deleted = self.is_deleted
 
-        sync_version = self.sync_version
-
         customer_id = self.customer_id
 
-        deleted_at: Union[None, str]
+        deleted_at: None | str
         deleted_at = self.deleted_at
 
         ecosystem_id = self.ecosystem_id
 
+        sync_version = self.sync_version
+
+        sync_stamped_at: None | str
+        sync_stamped_at = self.sync_stamped_at
+
+        sync_txid = self.sync_txid
 
         field_dict: dict[str, Any] = {}
 
-        field_dict.update({
-            "id": id,
-            "title": title,
-            "description": description,
-            "startTime": start_time,
-            "endTime": end_time,
-            "startDate": start_date,
-            "endDate": end_date,
-            "isAllDay": is_all_day,
-            "location": location,
-            "source": source,
-            "externalId": external_id,
-            "connectionId": connection_id,
-            "calendarName": calendar_name,
-            "calendarColor": calendar_color,
-            "status": status,
-            "organizer": organizer,
-            "attendees": attendees,
-            "reminders": reminders,
-            "url": url,
-            "aiExtraction": ai_extraction,
-            "createdAt": created_at,
-            "updatedAt": updated_at,
-            "isDeleted": is_deleted,
-            "syncVersion": sync_version,
-            "customerId": customer_id,
-            "deletedAt": deleted_at,
-            "ecosystemId": ecosystem_id,
-        })
+        field_dict.update(
+            {
+                "id": id,
+                "title": title,
+                "description": description,
+                "startTime": start_time,
+                "endTime": end_time,
+                "startDate": start_date,
+                "endDate": end_date,
+                "isAllDay": is_all_day,
+                "location": location,
+                "source": source,
+                "externalId": external_id,
+                "connectionId": connection_id,
+                "calendarName": calendar_name,
+                "calendarColor": calendar_color,
+                "status": status,
+                "organizer": organizer,
+                "attendees": attendees,
+                "reminders": reminders,
+                "url": url,
+                "aiExtraction": ai_extraction,
+                "createdAt": created_at,
+                "updatedAt": updated_at,
+                "isDeleted": is_deleted,
+                "customerId": customer_id,
+                "deletedAt": deleted_at,
+                "ecosystemId": ecosystem_id,
+                "syncVersion": sync_version,
+                "syncStampedAt": sync_stamped_at,
+                "syncTxid": sync_txid,
+            }
+        )
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -196,125 +191,111 @@ class PutIntegrationIntegrationCalendarEventsIdResponse200:
 
         title = d.pop("title")
 
-        def _parse_description(data: object) -> Union[None, str]:
+        def _parse_description(data: object) -> None | str:
             if data is None:
                 return data
-            return cast(Union[None, str], data)
+            return cast(None | str, data)
 
         description = _parse_description(d.pop("description"))
 
-
-        def _parse_start_time(data: object) -> Union[None, str]:
+        def _parse_start_time(data: object) -> None | str:
             if data is None:
                 return data
-            return cast(Union[None, str], data)
+            return cast(None | str, data)
 
         start_time = _parse_start_time(d.pop("startTime"))
 
-
-        def _parse_end_time(data: object) -> Union[None, str]:
+        def _parse_end_time(data: object) -> None | str:
             if data is None:
                 return data
-            return cast(Union[None, str], data)
+            return cast(None | str, data)
 
         end_time = _parse_end_time(d.pop("endTime"))
 
-
-        def _parse_start_date(data: object) -> Union[None, str]:
+        def _parse_start_date(data: object) -> None | str:
             if data is None:
                 return data
-            return cast(Union[None, str], data)
+            return cast(None | str, data)
 
         start_date = _parse_start_date(d.pop("startDate"))
 
-
-        def _parse_end_date(data: object) -> Union[None, str]:
+        def _parse_end_date(data: object) -> None | str:
             if data is None:
                 return data
-            return cast(Union[None, str], data)
+            return cast(None | str, data)
 
         end_date = _parse_end_date(d.pop("endDate"))
 
-
         is_all_day = d.pop("isAllDay")
 
-        def _parse_location(data: object) -> Union[None, str]:
+        def _parse_location(data: object) -> None | str:
             if data is None:
                 return data
-            return cast(Union[None, str], data)
+            return cast(None | str, data)
 
         location = _parse_location(d.pop("location"))
-
 
         source = d.pop("source")
 
         external_id = d.pop("externalId")
 
-        def _parse_connection_id(data: object) -> Union[None, str]:
+        def _parse_connection_id(data: object) -> None | str:
             if data is None:
                 return data
-            return cast(Union[None, str], data)
+            return cast(None | str, data)
 
         connection_id = _parse_connection_id(d.pop("connectionId"))
 
-
-        def _parse_calendar_name(data: object) -> Union[None, str]:
+        def _parse_calendar_name(data: object) -> None | str:
             if data is None:
                 return data
-            return cast(Union[None, str], data)
+            return cast(None | str, data)
 
         calendar_name = _parse_calendar_name(d.pop("calendarName"))
 
-
-        def _parse_calendar_color(data: object) -> Union[None, str]:
+        def _parse_calendar_color(data: object) -> None | str:
             if data is None:
                 return data
-            return cast(Union[None, str], data)
+            return cast(None | str, data)
 
         calendar_color = _parse_calendar_color(d.pop("calendarColor"))
 
-
         status = d.pop("status")
 
-        def _parse_organizer(data: object) -> Union[None, str]:
+        def _parse_organizer(data: object) -> None | str:
             if data is None:
                 return data
-            return cast(Union[None, str], data)
+            return cast(None | str, data)
 
         organizer = _parse_organizer(d.pop("organizer"))
 
-
-        def _parse_attendees(data: object) -> Union[None, str]:
+        def _parse_attendees(data: object) -> None | str:
             if data is None:
                 return data
-            return cast(Union[None, str], data)
+            return cast(None | str, data)
 
         attendees = _parse_attendees(d.pop("attendees"))
 
-
-        def _parse_reminders(data: object) -> Union[None, str]:
+        def _parse_reminders(data: object) -> None | str:
             if data is None:
                 return data
-            return cast(Union[None, str], data)
+            return cast(None | str, data)
 
         reminders = _parse_reminders(d.pop("reminders"))
 
-
-        def _parse_url(data: object) -> Union[None, str]:
+        def _parse_url(data: object) -> None | str:
             if data is None:
                 return data
-            return cast(Union[None, str], data)
+            return cast(None | str, data)
 
         url = _parse_url(d.pop("url"))
 
-
-        def _parse_ai_extraction(data: object) -> Union[None, str]:
+        def _parse_ai_extraction(data: object) -> None | str:
             if data is None:
                 return data
-            return cast(Union[None, str], data)
+            return cast(None | str, data)
 
         ai_extraction = _parse_ai_extraction(d.pop("aiExtraction"))
-
 
         created_at = d.pop("createdAt")
 
@@ -322,19 +303,27 @@ class PutIntegrationIntegrationCalendarEventsIdResponse200:
 
         is_deleted = d.pop("isDeleted")
 
-        sync_version = d.pop("syncVersion")
-
         customer_id = d.pop("customerId")
 
-        def _parse_deleted_at(data: object) -> Union[None, str]:
+        def _parse_deleted_at(data: object) -> None | str:
             if data is None:
                 return data
-            return cast(Union[None, str], data)
+            return cast(None | str, data)
 
         deleted_at = _parse_deleted_at(d.pop("deletedAt"))
 
-
         ecosystem_id = d.pop("ecosystemId")
+
+        sync_version = d.pop("syncVersion")
+
+        def _parse_sync_stamped_at(data: object) -> None | str:
+            if data is None:
+                return data
+            return cast(None | str, data)
+
+        sync_stamped_at = _parse_sync_stamped_at(d.pop("syncStampedAt"))
+
+        sync_txid = d.pop("syncTxid")
 
         put_integration_integration_calendar_events_id_response_200 = cls(
             id=id,
@@ -360,11 +349,12 @@ class PutIntegrationIntegrationCalendarEventsIdResponse200:
             created_at=created_at,
             updated_at=updated_at,
             is_deleted=is_deleted,
-            sync_version=sync_version,
             customer_id=customer_id,
             deleted_at=deleted_at,
             ecosystem_id=ecosystem_id,
+            sync_version=sync_version,
+            sync_stamped_at=sync_stamped_at,
+            sync_txid=sync_txid,
         )
 
         return put_integration_integration_calendar_events_id_response_200
-

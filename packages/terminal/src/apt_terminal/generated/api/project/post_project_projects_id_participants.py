@@ -1,39 +1,31 @@
 from http import HTTPStatus
-from typing import Any, Optional, Union, cast
+from typing import Any
 
 import httpx
 
-from ...client import AuthenticatedClient, Client
-from ...types import Response, UNSET
 from ... import errors
-
+from ...client import AuthenticatedClient, Client
 from ...models.error import Error
-from ...models.post_project_projects_id_participants_body import PostProjectProjectsIdParticipantsBody
+from ...models.post_project_projects_id_participants_body import (
+    PostProjectProjectsIdParticipantsBody,
+)
 from ...models.project_participant import ProjectParticipant
-from typing import cast
-
+from ...types import Response
 
 
 def _get_kwargs(
     id: str,
     *,
     body: PostProjectProjectsIdParticipantsBody,
-
 ) -> dict[str, Any]:
     headers: dict[str, Any] = {}
 
-
-    
-
-    
-
     _kwargs: dict[str, Any] = {
         "method": "post",
-        "url": "/project/projects/{id}/participants".format(id=id,),
+        "url": f"/project/projects/{id}/participants",
     }
 
     _kwargs["json"] = body.to_dict()
-
 
     headers["Content-Type"] = "application/json"
 
@@ -41,40 +33,31 @@ def _get_kwargs(
     return _kwargs
 
 
-
-def _parse_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Optional[Union[Error, ProjectParticipant]]:
+def _parse_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Error | ProjectParticipant | None:
     if response.status_code == 201:
         response_201 = ProjectParticipant.from_dict(response.json())
-
-
 
         return response_201
 
     if response.status_code == 400:
         response_400 = Error.from_dict(response.json())
 
-
-
         return response_400
 
     if response.status_code == 401:
         response_401 = Error.from_dict(response.json())
-
-
 
         return response_401
 
     if response.status_code == 404:
         response_404 = Error.from_dict(response.json())
 
-
-
         return response_404
 
     if response.status_code == 409:
         response_409 = Error.from_dict(response.json())
-
-
 
         return response_409
 
@@ -84,7 +67,9 @@ def _parse_response(*, client: Union[AuthenticatedClient, Client], response: htt
         return None
 
 
-def _build_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Response[Union[Error, ProjectParticipant]]:
+def _build_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Response[Error | ProjectParticipant]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -98,9 +83,8 @@ def sync_detailed(
     *,
     client: AuthenticatedClient,
     body: PostProjectProjectsIdParticipantsBody,
-
-) -> Response[Union[Error, ProjectParticipant]]:
-    """ Attach a customer / persona / team (+ a participant.added activity)
+) -> Response[Error | ProjectParticipant]:
+    """Attach a customer / persona / team (+ a participant.added activity)
 
     Args:
         id (str):
@@ -112,13 +96,11 @@ def sync_detailed(
 
     Returns:
         Response[Union[Error, ProjectParticipant]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         id=id,
-body=body,
-
+        body=body,
     )
 
     response = client.get_httpx_client().request(
@@ -127,14 +109,14 @@ body=body,
 
     return _build_response(client=client, response=response)
 
+
 def sync(
     id: str,
     *,
     client: AuthenticatedClient,
     body: PostProjectProjectsIdParticipantsBody,
-
-) -> Optional[Union[Error, ProjectParticipant]]:
-    """ Attach a customer / persona / team (+ a participant.added activity)
+) -> Error | ProjectParticipant | None:
+    """Attach a customer / persona / team (+ a participant.added activity)
 
     Args:
         id (str):
@@ -146,24 +128,22 @@ def sync(
 
     Returns:
         Union[Error, ProjectParticipant]
-     """
-
+    """
 
     return sync_detailed(
         id=id,
-client=client,
-body=body,
-
+        client=client,
+        body=body,
     ).parsed
+
 
 async def asyncio_detailed(
     id: str,
     *,
     client: AuthenticatedClient,
     body: PostProjectProjectsIdParticipantsBody,
-
-) -> Response[Union[Error, ProjectParticipant]]:
-    """ Attach a customer / persona / team (+ a participant.added activity)
+) -> Response[Error | ProjectParticipant]:
+    """Attach a customer / persona / team (+ a participant.added activity)
 
     Args:
         id (str):
@@ -175,29 +155,25 @@ async def asyncio_detailed(
 
     Returns:
         Response[Union[Error, ProjectParticipant]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         id=id,
-body=body,
-
+        body=body,
     )
 
-    response = await client.get_async_httpx_client().request(
-        **kwargs
-    )
+    response = await client.get_async_httpx_client().request(**kwargs)
 
     return _build_response(client=client, response=response)
+
 
 async def asyncio(
     id: str,
     *,
     client: AuthenticatedClient,
     body: PostProjectProjectsIdParticipantsBody,
-
-) -> Optional[Union[Error, ProjectParticipant]]:
-    """ Attach a customer / persona / team (+ a participant.added activity)
+) -> Error | ProjectParticipant | None:
+    """Attach a customer / persona / team (+ a participant.added activity)
 
     Args:
         id (str):
@@ -209,12 +185,12 @@ async def asyncio(
 
     Returns:
         Union[Error, ProjectParticipant]
-     """
+    """
 
-
-    return (await asyncio_detailed(
-        id=id,
-client=client,
-body=body,
-
-    )).parsed
+    return (
+        await asyncio_detailed(
+            id=id,
+            client=client,
+            body=body,
+        )
+    ).parsed

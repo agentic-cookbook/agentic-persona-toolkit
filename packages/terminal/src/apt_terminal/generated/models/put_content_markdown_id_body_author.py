@@ -1,42 +1,29 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 from ..types import UNSET, Unset
 
-from ..types import UNSET, Unset
-from typing import Union
-
-
-
-
-
-
 T = TypeVar("T", bound="PutContentMarkdownIdBodyAuthor")
-
 
 
 @_attrs_define
 class PutContentMarkdownIdBodyAuthor:
-    """ Author of this revision; omit to attribute to the calling customer. customer/user are pinned to the caller; other
+    """Author of this revision; omit to attribute to the calling customer. customer/user are pinned to the caller; other
     types are caller-asserted (unverified).
 
         Attributes:
             type_ (Union[Unset, str]): Lower-cased. e.g. 'customer', 'user', 'persona', 'agent', 'system'.
             id (Union[Unset, str]): Id within that type's namespace (ignored for customer/user — pinned to the caller).
             name (Union[Unset, str]): Display label; ignored for customer/user (taken from the principal).
-     """
+    """
 
-    type_: Union[Unset, str] = UNSET
-    id: Union[Unset, str] = UNSET
-    name: Union[Unset, str] = UNSET
+    type_: Unset | str = UNSET
+    id: Unset | str = UNSET
+    name: Unset | str = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         type_ = self.type_
@@ -45,11 +32,9 @@ class PutContentMarkdownIdBodyAuthor:
 
         name = self.name
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-        })
+        field_dict.update({})
         if type_ is not UNSET:
             field_dict["type"] = type_
         if id is not UNSET:
@@ -58,8 +43,6 @@ class PutContentMarkdownIdBodyAuthor:
             field_dict["name"] = name
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -75,7 +58,6 @@ class PutContentMarkdownIdBodyAuthor:
             id=id,
             name=name,
         )
-
 
         put_content_markdown_id_body_author.additional_properties = d
         return put_content_markdown_id_body_author

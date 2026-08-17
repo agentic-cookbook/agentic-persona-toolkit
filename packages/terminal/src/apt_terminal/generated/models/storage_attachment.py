@@ -1,53 +1,44 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import TYPE_CHECKING, Any, TypeVar, Union, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
-
 from ..models.storage_attachment_status import StorageAttachmentStatus
 from ..types import UNSET, Unset
-from typing import cast
-from typing import cast, Union
-from typing import Union
 
 if TYPE_CHECKING:
-  from ..models.storage_attachment_metadata_type_0 import StorageAttachmentMetadataType0
-
-
-
+    from ..models.storage_attachment_metadata_type_0 import StorageAttachmentMetadataType0
 
 
 T = TypeVar("T", bound="StorageAttachment")
 
 
-
 @_attrs_define
 class StorageAttachment:
-    """ 
-        Attributes:
-            id (str):
-            ecosystem_id (str):
-            customer_id (str):
-            owner_type (str): e.g. 'standalone', 'chat_message', 'document'
-            object_key (str): R2 object key the presigned URLs address.
-            storage_kind (str): Backing store, e.g. 'r2'.
-            filename (str):
-            content_type (str):
-            size_bytes (int):
-            content_hash (str):
-            status (StorageAttachmentStatus): 'pending' (presigned, awaiting upload) → 'ready' (bytes confirmed).
-            created_at (str):
-            updated_at (str):
-            owner_id (Union[None, Unset, str]): Polymorphic domain owner (NOT the tenant).
-            width (Union[None, Unset, int]):
-            height (Union[None, Unset, int]):
-            duration_ms (Union[None, Unset, int]):
-            metadata (Union['StorageAttachmentMetadataType0', None, Unset]): Caller-supplied JSON metadata (jsonb) —
-                intentionally open.
-            deleted_at (Union[None, Unset, str]):
-     """
+    """
+    Attributes:
+        id (str):
+        ecosystem_id (str):
+        customer_id (str):
+        owner_type (str): e.g. 'standalone', 'chat_message', 'document'
+        object_key (str): R2 object key the presigned URLs address.
+        storage_kind (str): Backing store, e.g. 'r2'.
+        filename (str):
+        content_type (str):
+        size_bytes (int):
+        content_hash (str):
+        status (StorageAttachmentStatus): 'pending' (presigned, awaiting upload) → 'ready' (bytes confirmed).
+        created_at (str):
+        updated_at (str):
+        owner_id (Union[None, Unset, str]): Polymorphic domain owner (NOT the tenant).
+        width (Union[None, Unset, int]):
+        height (Union[None, Unset, int]):
+        duration_ms (Union[None, Unset, int]):
+        metadata (Union['StorageAttachmentMetadataType0', None, Unset]): Caller-supplied JSON metadata (jsonb) —
+            intentionally open.
+        deleted_at (Union[None, Unset, str]):
+    """
 
     id: str
     ecosystem_id: str
@@ -62,20 +53,17 @@ class StorageAttachment:
     status: StorageAttachmentStatus
     created_at: str
     updated_at: str
-    owner_id: Union[None, Unset, str] = UNSET
-    width: Union[None, Unset, int] = UNSET
-    height: Union[None, Unset, int] = UNSET
-    duration_ms: Union[None, Unset, int] = UNSET
-    metadata: Union['StorageAttachmentMetadataType0', None, Unset] = UNSET
-    deleted_at: Union[None, Unset, str] = UNSET
+    owner_id: None | Unset | str = UNSET
+    width: None | Unset | int = UNSET
+    height: None | Unset | int = UNSET
+    duration_ms: None | Unset | int = UNSET
+    metadata: Union["StorageAttachmentMetadataType0", None, Unset] = UNSET
+    deleted_at: None | Unset | str = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         from ..models.storage_attachment_metadata_type_0 import StorageAttachmentMetadataType0
+
         id = self.id
 
         ecosystem_id = self.ecosystem_id
@@ -102,31 +90,31 @@ class StorageAttachment:
 
         updated_at = self.updated_at
 
-        owner_id: Union[None, Unset, str]
+        owner_id: None | Unset | str
         if isinstance(self.owner_id, Unset):
             owner_id = UNSET
         else:
             owner_id = self.owner_id
 
-        width: Union[None, Unset, int]
+        width: None | Unset | int
         if isinstance(self.width, Unset):
             width = UNSET
         else:
             width = self.width
 
-        height: Union[None, Unset, int]
+        height: None | Unset | int
         if isinstance(self.height, Unset):
             height = UNSET
         else:
             height = self.height
 
-        duration_ms: Union[None, Unset, int]
+        duration_ms: None | Unset | int
         if isinstance(self.duration_ms, Unset):
             duration_ms = UNSET
         else:
             duration_ms = self.duration_ms
 
-        metadata: Union[None, Unset, dict[str, Any]]
+        metadata: None | Unset | dict[str, Any]
         if isinstance(self.metadata, Unset):
             metadata = UNSET
         elif isinstance(self.metadata, StorageAttachmentMetadataType0):
@@ -134,30 +122,31 @@ class StorageAttachment:
         else:
             metadata = self.metadata
 
-        deleted_at: Union[None, Unset, str]
+        deleted_at: None | Unset | str
         if isinstance(self.deleted_at, Unset):
             deleted_at = UNSET
         else:
             deleted_at = self.deleted_at
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "id": id,
-            "ecosystemId": ecosystem_id,
-            "customerId": customer_id,
-            "ownerType": owner_type,
-            "objectKey": object_key,
-            "storageKind": storage_kind,
-            "filename": filename,
-            "contentType": content_type,
-            "sizeBytes": size_bytes,
-            "contentHash": content_hash,
-            "status": status,
-            "createdAt": created_at,
-            "updatedAt": updated_at,
-        })
+        field_dict.update(
+            {
+                "id": id,
+                "ecosystemId": ecosystem_id,
+                "customerId": customer_id,
+                "ownerType": owner_type,
+                "objectKey": object_key,
+                "storageKind": storage_kind,
+                "filename": filename,
+                "contentType": content_type,
+                "sizeBytes": size_bytes,
+                "contentHash": content_hash,
+                "status": status,
+                "createdAt": created_at,
+                "updatedAt": updated_at,
+            }
+        )
         if owner_id is not UNSET:
             field_dict["ownerId"] = owner_id
         if width is not UNSET:
@@ -173,11 +162,10 @@ class StorageAttachment:
 
         return field_dict
 
-
-
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.storage_attachment_metadata_type_0 import StorageAttachmentMetadataType0
+
         d = dict(src_dict)
         id = d.pop("id")
 
@@ -201,54 +189,47 @@ class StorageAttachment:
 
         status = StorageAttachmentStatus(d.pop("status"))
 
-
-
-
         created_at = d.pop("createdAt")
 
         updated_at = d.pop("updatedAt")
 
-        def _parse_owner_id(data: object) -> Union[None, Unset, str]:
+        def _parse_owner_id(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         owner_id = _parse_owner_id(d.pop("ownerId", UNSET))
 
-
-        def _parse_width(data: object) -> Union[None, Unset, int]:
+        def _parse_width(data: object) -> None | Unset | int:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, int], data)
+            return cast(None | Unset | int, data)
 
         width = _parse_width(d.pop("width", UNSET))
 
-
-        def _parse_height(data: object) -> Union[None, Unset, int]:
+        def _parse_height(data: object) -> None | Unset | int:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, int], data)
+            return cast(None | Unset | int, data)
 
         height = _parse_height(d.pop("height", UNSET))
 
-
-        def _parse_duration_ms(data: object) -> Union[None, Unset, int]:
+        def _parse_duration_ms(data: object) -> None | Unset | int:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, int], data)
+            return cast(None | Unset | int, data)
 
         duration_ms = _parse_duration_ms(d.pop("durationMs", UNSET))
 
-
-        def _parse_metadata(data: object) -> Union['StorageAttachmentMetadataType0', None, Unset]:
+        def _parse_metadata(data: object) -> Union["StorageAttachmentMetadataType0", None, Unset]:
             if data is None:
                 return data
             if isinstance(data, Unset):
@@ -258,25 +239,21 @@ class StorageAttachment:
                     raise TypeError()
                 metadata_type_0 = StorageAttachmentMetadataType0.from_dict(data)
 
-
-
                 return metadata_type_0
-            except: # noqa: E722
+            except:  # noqa: E722
                 pass
-            return cast(Union['StorageAttachmentMetadataType0', None, Unset], data)
+            return cast(Union["StorageAttachmentMetadataType0", None, Unset], data)
 
         metadata = _parse_metadata(d.pop("metadata", UNSET))
 
-
-        def _parse_deleted_at(data: object) -> Union[None, Unset, str]:
+        def _parse_deleted_at(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         deleted_at = _parse_deleted_at(d.pop("deletedAt", UNSET))
-
 
         storage_attachment = cls(
             id=id,
@@ -299,7 +276,6 @@ class StorageAttachment:
             metadata=metadata,
             deleted_at=deleted_at,
         )
-
 
         storage_attachment.additional_properties = d
         return storage_attachment

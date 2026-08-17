@@ -1,41 +1,29 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
-from attrs import field as _attrs_field
 
 from ..types import UNSET, Unset
-
-from ..types import UNSET, Unset
-from typing import Union
-
-
-
-
-
 
 T = TypeVar("T", bound="PostPersonaMemoryLinksBody")
 
 
-
 @_attrs_define
 class PostPersonaMemoryLinksBody:
-    """ 
-        Attributes:
-            src_id (str):
-            dst_id (str):
-            ecosystem_id (Union[Unset, str]):
-            relation (Union[Unset, str]):
-     """
+    """
+    Attributes:
+        src_id (str):
+        dst_id (str):
+        ecosystem_id (Union[Unset, str]):
+        relation (Union[Unset, str]):
+        sync_txid (Union[Unset, int]):
+    """
 
     src_id: str
     dst_id: str
-    ecosystem_id: Union[Unset, str] = UNSET
-    relation: Union[Unset, str] = UNSET
-
-
-
-
+    ecosystem_id: Unset | str = UNSET
+    relation: Unset | str = UNSET
+    sync_txid: Unset | int = UNSET
 
     def to_dict(self) -> dict[str, Any]:
         src_id = self.src_id
@@ -46,21 +34,24 @@ class PostPersonaMemoryLinksBody:
 
         relation = self.relation
 
+        sync_txid = self.sync_txid
 
         field_dict: dict[str, Any] = {}
 
-        field_dict.update({
-            "srcId": src_id,
-            "dstId": dst_id,
-        })
+        field_dict.update(
+            {
+                "srcId": src_id,
+                "dstId": dst_id,
+            }
+        )
         if ecosystem_id is not UNSET:
             field_dict["ecosystemId"] = ecosystem_id
         if relation is not UNSET:
             field_dict["relation"] = relation
+        if sync_txid is not UNSET:
+            field_dict["syncTxid"] = sync_txid
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -73,12 +64,14 @@ class PostPersonaMemoryLinksBody:
 
         relation = d.pop("relation", UNSET)
 
+        sync_txid = d.pop("syncTxid", UNSET)
+
         post_persona_memory_links_body = cls(
             src_id=src_id,
             dst_id=dst_id,
             ecosystem_id=ecosystem_id,
             relation=relation,
+            sync_txid=sync_txid,
         )
 
         return post_persona_memory_links_body
-

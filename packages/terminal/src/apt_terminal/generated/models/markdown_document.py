@@ -1,62 +1,55 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import TYPE_CHECKING, Any, TypeVar, Union, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
-
-from ..types import UNSET, Unset
 
 from ..models.markdown_document_kind import MarkdownDocumentKind
 from ..models.markdown_document_owner_kind import MarkdownDocumentOwnerKind
 from ..models.markdown_document_stage import MarkdownDocumentStage
 from ..models.markdown_document_visibility import MarkdownDocumentVisibility
 from ..types import UNSET, Unset
-from typing import cast
-from typing import cast, Union
-from typing import Union
 
 if TYPE_CHECKING:
-  from ..models.markdown_document_frontmatter_type_0 import MarkdownDocumentFrontmatterType0
-
-
-
+    from ..models.markdown_document_frontmatter_type_0 import MarkdownDocumentFrontmatterType0
 
 
 T = TypeVar("T", bound="MarkdownDocument")
 
 
-
 @_attrs_define
 class MarkdownDocument:
-    """ 
-        Attributes:
-            id (str):
-            customer_id (str): The CREATOR/author (public routes key on this).
-            ecosystem_id (str): Ecosystem (tenant) id.
-            owner_kind (MarkdownDocumentOwnerKind): The kind of principal that OWNS the doc (what access scopes by).
-            owner_id (str): The owning principal (customer or organization id); server-stamped from the verified ?workspace=
-                scope, else the creator.
-            title (str):
-            content (str): Full raw markdown, byte-exact.
-            tags (list[str]): Tag set (defaults to []).
-            visibility (MarkdownDocumentVisibility): Publication state: 'public' is readable on the public surface,
-                'private' is a draft.
-            stage (MarkdownDocumentStage): Editorial stage: 'draft' is editable; 'final' is immutable (content/title edits +
-                version writes are rejected).
-            kind (MarkdownDocumentKind): Document kind: 'paper' (ordinary) or 'research' (AI-ingested, carries an adh_source
-                frontmatter key).
-            content_hash (str): SHA-256 hex of content (ETag).
-            size_bytes (int):
-            current_version (int): The current revision number (incremented on every edit).
-            created_at (str):
-            updated_at (str):
-            is_deleted (bool):
-            deleted_at (Union[None, Unset, str]):
-            frontmatter (Union['MarkdownDocumentFrontmatterType0', None, Unset]):
-            category (Union[None, Unset, str]): Optional classification label.
-            public_route (Union[None, Unset, str]): Public route slug (non-null iff visibility='public'); unique per author.
-            latest_version_id (Union[None, Unset, str]):
-     """
+    """
+    Attributes:
+        id (str):
+        customer_id (str): The CREATOR/author (public routes key on this).
+        ecosystem_id (str): Ecosystem (tenant) id.
+        owner_kind (MarkdownDocumentOwnerKind): The kind of principal that OWNS the doc (what access scopes by).
+        owner_id (str): The owning principal (customer or organization id); server-stamped from the verified ?workspace=
+            scope, else the creator.
+        title (str): Server-derived, read-only: the frontmatter `title` then `name`, else the first non-empty line of
+            the body (frontmatter and code fences ignored, leading markdown syntax stripped), else 'Untitled'. Capped at 500
+            characters.
+        content (str): Full raw markdown, byte-exact.
+        tags (list[str]): Tag set (defaults to []).
+        visibility (MarkdownDocumentVisibility): Publication state: 'public' is readable on the public surface,
+            'private' is a draft.
+        stage (MarkdownDocumentStage): Editorial stage: 'draft' is editable; 'final' is immutable (content edits +
+            version writes are rejected).
+        kind (MarkdownDocumentKind): Document kind: 'paper' (ordinary) or 'research' (AI-ingested, carries an adh_source
+            frontmatter key).
+        content_hash (str): SHA-256 hex of content (ETag).
+        size_bytes (int):
+        current_version (int): The current revision number (incremented on every edit).
+        created_at (str):
+        updated_at (str):
+        is_deleted (bool):
+        deleted_at (Union[None, Unset, str]):
+        frontmatter (Union['MarkdownDocumentFrontmatterType0', None, Unset]):
+        category (Union[None, Unset, str]): Optional classification label.
+        public_route (Union[None, Unset, str]): Public route slug (non-null iff visibility='public'); unique per author.
+        latest_version_id (Union[None, Unset, str]):
+    """
 
     id: str
     customer_id: str
@@ -75,19 +68,16 @@ class MarkdownDocument:
     created_at: str
     updated_at: str
     is_deleted: bool
-    deleted_at: Union[None, Unset, str] = UNSET
-    frontmatter: Union['MarkdownDocumentFrontmatterType0', None, Unset] = UNSET
-    category: Union[None, Unset, str] = UNSET
-    public_route: Union[None, Unset, str] = UNSET
-    latest_version_id: Union[None, Unset, str] = UNSET
+    deleted_at: None | Unset | str = UNSET
+    frontmatter: Union["MarkdownDocumentFrontmatterType0", None, Unset] = UNSET
+    category: None | Unset | str = UNSET
+    public_route: None | Unset | str = UNSET
+    latest_version_id: None | Unset | str = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         from ..models.markdown_document_frontmatter_type_0 import MarkdownDocumentFrontmatterType0
+
         id = self.id
 
         customer_id = self.customer_id
@@ -103,8 +93,6 @@ class MarkdownDocument:
         content = self.content
 
         tags = self.tags
-
-
 
         visibility = self.visibility.value
 
@@ -124,13 +112,13 @@ class MarkdownDocument:
 
         is_deleted = self.is_deleted
 
-        deleted_at: Union[None, Unset, str]
+        deleted_at: None | Unset | str
         if isinstance(self.deleted_at, Unset):
             deleted_at = UNSET
         else:
             deleted_at = self.deleted_at
 
-        frontmatter: Union[None, Unset, dict[str, Any]]
+        frontmatter: None | Unset | dict[str, Any]
         if isinstance(self.frontmatter, Unset):
             frontmatter = UNSET
         elif isinstance(self.frontmatter, MarkdownDocumentFrontmatterType0):
@@ -138,46 +126,47 @@ class MarkdownDocument:
         else:
             frontmatter = self.frontmatter
 
-        category: Union[None, Unset, str]
+        category: None | Unset | str
         if isinstance(self.category, Unset):
             category = UNSET
         else:
             category = self.category
 
-        public_route: Union[None, Unset, str]
+        public_route: None | Unset | str
         if isinstance(self.public_route, Unset):
             public_route = UNSET
         else:
             public_route = self.public_route
 
-        latest_version_id: Union[None, Unset, str]
+        latest_version_id: None | Unset | str
         if isinstance(self.latest_version_id, Unset):
             latest_version_id = UNSET
         else:
             latest_version_id = self.latest_version_id
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "id": id,
-            "customerId": customer_id,
-            "ecosystemId": ecosystem_id,
-            "ownerKind": owner_kind,
-            "ownerId": owner_id,
-            "title": title,
-            "content": content,
-            "tags": tags,
-            "visibility": visibility,
-            "stage": stage,
-            "kind": kind,
-            "contentHash": content_hash,
-            "sizeBytes": size_bytes,
-            "currentVersion": current_version,
-            "createdAt": created_at,
-            "updatedAt": updated_at,
-            "isDeleted": is_deleted,
-        })
+        field_dict.update(
+            {
+                "id": id,
+                "customerId": customer_id,
+                "ecosystemId": ecosystem_id,
+                "ownerKind": owner_kind,
+                "ownerId": owner_id,
+                "title": title,
+                "content": content,
+                "tags": tags,
+                "visibility": visibility,
+                "stage": stage,
+                "kind": kind,
+                "contentHash": content_hash,
+                "sizeBytes": size_bytes,
+                "currentVersion": current_version,
+                "createdAt": created_at,
+                "updatedAt": updated_at,
+                "isDeleted": is_deleted,
+            }
+        )
         if deleted_at is not UNSET:
             field_dict["deletedAt"] = deleted_at
         if frontmatter is not UNSET:
@@ -191,11 +180,10 @@ class MarkdownDocument:
 
         return field_dict
 
-
-
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.markdown_document_frontmatter_type_0 import MarkdownDocumentFrontmatterType0
+
         d = dict(src_dict)
         id = d.pop("id")
 
@@ -205,9 +193,6 @@ class MarkdownDocument:
 
         owner_kind = MarkdownDocumentOwnerKind(d.pop("ownerKind"))
 
-
-
-
         owner_id = d.pop("ownerId")
 
         title = d.pop("title")
@@ -216,21 +201,11 @@ class MarkdownDocument:
 
         tags = cast(list[str], d.pop("tags"))
 
-
         visibility = MarkdownDocumentVisibility(d.pop("visibility"))
-
-
-
 
         stage = MarkdownDocumentStage(d.pop("stage"))
 
-
-
-
         kind = MarkdownDocumentKind(d.pop("kind"))
-
-
-
 
         content_hash = d.pop("contentHash")
 
@@ -244,17 +219,18 @@ class MarkdownDocument:
 
         is_deleted = d.pop("isDeleted")
 
-        def _parse_deleted_at(data: object) -> Union[None, Unset, str]:
+        def _parse_deleted_at(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         deleted_at = _parse_deleted_at(d.pop("deletedAt", UNSET))
 
-
-        def _parse_frontmatter(data: object) -> Union['MarkdownDocumentFrontmatterType0', None, Unset]:
+        def _parse_frontmatter(
+            data: object,
+        ) -> Union["MarkdownDocumentFrontmatterType0", None, Unset]:
             if data is None:
                 return data
             if isinstance(data, Unset):
@@ -264,45 +240,39 @@ class MarkdownDocument:
                     raise TypeError()
                 frontmatter_type_0 = MarkdownDocumentFrontmatterType0.from_dict(data)
 
-
-
                 return frontmatter_type_0
-            except: # noqa: E722
+            except:  # noqa: E722
                 pass
-            return cast(Union['MarkdownDocumentFrontmatterType0', None, Unset], data)
+            return cast(Union["MarkdownDocumentFrontmatterType0", None, Unset], data)
 
         frontmatter = _parse_frontmatter(d.pop("frontmatter", UNSET))
 
-
-        def _parse_category(data: object) -> Union[None, Unset, str]:
+        def _parse_category(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         category = _parse_category(d.pop("category", UNSET))
 
-
-        def _parse_public_route(data: object) -> Union[None, Unset, str]:
+        def _parse_public_route(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         public_route = _parse_public_route(d.pop("publicRoute", UNSET))
 
-
-        def _parse_latest_version_id(data: object) -> Union[None, Unset, str]:
+        def _parse_latest_version_id(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         latest_version_id = _parse_latest_version_id(d.pop("latestVersionId", UNSET))
-
 
         markdown_document = cls(
             id=id,
@@ -328,7 +298,6 @@ class MarkdownDocument:
             public_route=public_route,
             latest_version_id=latest_version_id,
         )
-
 
         markdown_document.additional_properties = d
         return markdown_document

@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class PutMeAppearanceBodySpacing(str, Enum):
     COMFORTABLE = "comfortable"
     COMPACT = "compact"

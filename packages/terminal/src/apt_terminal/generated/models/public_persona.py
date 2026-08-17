@@ -1,193 +1,195 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import TYPE_CHECKING, Any, TypeVar, Union, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
+from ..models.public_persona_visibility import PublicPersonaVisibility
 from ..types import UNSET, Unset
 
-from ..models.public_persona_visibility import PublicPersonaVisibility
-from typing import cast
-from typing import cast, Union
-
 if TYPE_CHECKING:
-  from ..models.public_owner_type_0 import PublicOwnerType0
-
-
-
+    from ..models.public_owner_type_0 import PublicOwnerType0
+    from ..models.public_persona_chat_status_type_0 import PublicPersonaChatStatusType0
 
 
 T = TypeVar("T", bound="PublicPersona")
 
 
-
 @_attrs_define
 class PublicPersona:
-    """ 
-        Attributes:
-            slug (str):
-            name (str):
-            description (Union[None, str]):
-            model_prompt (str):
-            provider (Union[None, str]):
-            model (str):
-            avatar_url (Union[None, str]):
-            voice (Union[None, str]):
-            character (Union[None, str]):
-            examples (Union[None, str]):
-            visibility (PublicPersonaVisibility):
-            created_at (str):
-            owner (Union['PublicOwnerType0', None]):
-     """
+    """
+    Attributes:
+        slug (str):
+        name (str):
+        description (Union[None, str]):
+        model_prompt (str):
+        provider (Union[None, str]):
+        model (str):
+        avatar_url (Union[None, str]):
+        voice (Union[None, str]):
+        character (Union[None, str]):
+        examples (Union[None, str]):
+        visibility (PublicPersonaVisibility):
+        created_at (str):
+        owner (Union['PublicOwnerType0', None]):
+        demo_enabled (bool):
+        chat_status (Union['PublicPersonaChatStatusType0', None, Unset]): Per-persona chat status configuration: word
+            pairs, glyph sets and tint. Resolved and rendered client-side.
+    """
 
     slug: str
     name: str
-    description: Union[None, str]
+    description: None | str
     model_prompt: str
-    provider: Union[None, str]
+    provider: None | str
     model: str
-    avatar_url: Union[None, str]
-    voice: Union[None, str]
-    character: Union[None, str]
-    examples: Union[None, str]
+    avatar_url: None | str
+    voice: None | str
+    character: None | str
+    examples: None | str
     visibility: PublicPersonaVisibility
     created_at: str
-    owner: Union['PublicOwnerType0', None]
+    owner: Union["PublicOwnerType0", None]
+    demo_enabled: bool
+    chat_status: Union["PublicPersonaChatStatusType0", None, Unset] = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         from ..models.public_owner_type_0 import PublicOwnerType0
+        from ..models.public_persona_chat_status_type_0 import PublicPersonaChatStatusType0
+
         slug = self.slug
 
         name = self.name
 
-        description: Union[None, str]
+        description: None | str
         description = self.description
 
         model_prompt = self.model_prompt
 
-        provider: Union[None, str]
+        provider: None | str
         provider = self.provider
 
         model = self.model
 
-        avatar_url: Union[None, str]
+        avatar_url: None | str
         avatar_url = self.avatar_url
 
-        voice: Union[None, str]
+        voice: None | str
         voice = self.voice
 
-        character: Union[None, str]
+        character: None | str
         character = self.character
 
-        examples: Union[None, str]
+        examples: None | str
         examples = self.examples
 
         visibility = self.visibility.value
 
         created_at = self.created_at
 
-        owner: Union[None, dict[str, Any]]
+        owner: None | dict[str, Any]
         if isinstance(self.owner, PublicOwnerType0):
             owner = self.owner.to_dict()
         else:
             owner = self.owner
 
+        demo_enabled = self.demo_enabled
+
+        chat_status: None | Unset | dict[str, Any]
+        if isinstance(self.chat_status, Unset):
+            chat_status = UNSET
+        elif isinstance(self.chat_status, PublicPersonaChatStatusType0):
+            chat_status = self.chat_status.to_dict()
+        else:
+            chat_status = self.chat_status
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "slug": slug,
-            "name": name,
-            "description": description,
-            "modelPrompt": model_prompt,
-            "provider": provider,
-            "model": model,
-            "avatarUrl": avatar_url,
-            "voice": voice,
-            "character": character,
-            "examples": examples,
-            "visibility": visibility,
-            "createdAt": created_at,
-            "owner": owner,
-        })
+        field_dict.update(
+            {
+                "slug": slug,
+                "name": name,
+                "description": description,
+                "modelPrompt": model_prompt,
+                "provider": provider,
+                "model": model,
+                "avatarUrl": avatar_url,
+                "voice": voice,
+                "character": character,
+                "examples": examples,
+                "visibility": visibility,
+                "createdAt": created_at,
+                "owner": owner,
+                "demoEnabled": demo_enabled,
+            }
+        )
+        if chat_status is not UNSET:
+            field_dict["chatStatus"] = chat_status
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.public_owner_type_0 import PublicOwnerType0
+        from ..models.public_persona_chat_status_type_0 import PublicPersonaChatStatusType0
+
         d = dict(src_dict)
         slug = d.pop("slug")
 
         name = d.pop("name")
 
-        def _parse_description(data: object) -> Union[None, str]:
+        def _parse_description(data: object) -> None | str:
             if data is None:
                 return data
-            return cast(Union[None, str], data)
+            return cast(None | str, data)
 
         description = _parse_description(d.pop("description"))
 
-
         model_prompt = d.pop("modelPrompt")
 
-        def _parse_provider(data: object) -> Union[None, str]:
+        def _parse_provider(data: object) -> None | str:
             if data is None:
                 return data
-            return cast(Union[None, str], data)
+            return cast(None | str, data)
 
         provider = _parse_provider(d.pop("provider"))
 
-
         model = d.pop("model")
 
-        def _parse_avatar_url(data: object) -> Union[None, str]:
+        def _parse_avatar_url(data: object) -> None | str:
             if data is None:
                 return data
-            return cast(Union[None, str], data)
+            return cast(None | str, data)
 
         avatar_url = _parse_avatar_url(d.pop("avatarUrl"))
 
-
-        def _parse_voice(data: object) -> Union[None, str]:
+        def _parse_voice(data: object) -> None | str:
             if data is None:
                 return data
-            return cast(Union[None, str], data)
+            return cast(None | str, data)
 
         voice = _parse_voice(d.pop("voice"))
 
-
-        def _parse_character(data: object) -> Union[None, str]:
+        def _parse_character(data: object) -> None | str:
             if data is None:
                 return data
-            return cast(Union[None, str], data)
+            return cast(None | str, data)
 
         character = _parse_character(d.pop("character"))
 
-
-        def _parse_examples(data: object) -> Union[None, str]:
+        def _parse_examples(data: object) -> None | str:
             if data is None:
                 return data
-            return cast(Union[None, str], data)
+            return cast(None | str, data)
 
         examples = _parse_examples(d.pop("examples"))
 
-
         visibility = PublicPersonaVisibility(d.pop("visibility"))
-
-
-
 
         created_at = d.pop("createdAt")
 
-        def _parse_owner(data: object) -> Union['PublicOwnerType0', None]:
+        def _parse_owner(data: object) -> Union["PublicOwnerType0", None]:
             if data is None:
                 return data
             try:
@@ -195,15 +197,31 @@ class PublicPersona:
                     raise TypeError()
                 componentsschemas_public_owner_type_0 = PublicOwnerType0.from_dict(data)
 
-
-
                 return componentsschemas_public_owner_type_0
-            except: # noqa: E722
+            except:  # noqa: E722
                 pass
-            return cast(Union['PublicOwnerType0', None], data)
+            return cast(Union["PublicOwnerType0", None], data)
 
         owner = _parse_owner(d.pop("owner"))
 
+        demo_enabled = d.pop("demoEnabled")
+
+        def _parse_chat_status(data: object) -> Union["PublicPersonaChatStatusType0", None, Unset]:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            try:
+                if not isinstance(data, dict):
+                    raise TypeError()
+                chat_status_type_0 = PublicPersonaChatStatusType0.from_dict(data)
+
+                return chat_status_type_0
+            except:  # noqa: E722
+                pass
+            return cast(Union["PublicPersonaChatStatusType0", None, Unset], data)
+
+        chat_status = _parse_chat_status(d.pop("chatStatus", UNSET))
 
         public_persona = cls(
             slug=slug,
@@ -219,8 +237,9 @@ class PublicPersona:
             visibility=visibility,
             created_at=created_at,
             owner=owner,
+            demo_enabled=demo_enabled,
+            chat_status=chat_status,
         )
-
 
         public_persona.additional_properties = d
         return public_persona

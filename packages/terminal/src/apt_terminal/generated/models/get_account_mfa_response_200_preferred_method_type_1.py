@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class GetAccountMfaResponse200PreferredMethodType1(str, Enum):
     SMS = "sms"
     TOTP = "totp"

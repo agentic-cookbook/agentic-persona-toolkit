@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class PutIntegrationsAdminConfigsProviderIdBodyCredentialStyle(str, Enum):
     BASIC_AUTH = "basic_auth"
     FORM_BODY = "form_body"

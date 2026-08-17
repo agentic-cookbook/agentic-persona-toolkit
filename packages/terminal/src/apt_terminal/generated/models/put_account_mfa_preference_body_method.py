@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class PutAccountMfaPreferenceBodyMethod(str, Enum):
     SMS = "sms"
     TOTP = "totp"

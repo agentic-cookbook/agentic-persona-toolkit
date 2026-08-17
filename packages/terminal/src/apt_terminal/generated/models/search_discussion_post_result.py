@@ -1,47 +1,33 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 from ..types import UNSET, Unset
 
-from ..types import UNSET, Unset
-from typing import cast, Union
-from typing import Union
-
-
-
-
-
-
 T = TypeVar("T", bound="SearchDiscussionPostResult")
-
 
 
 @_attrs_define
 class SearchDiscussionPostResult:
-    """ 
-        Attributes:
-            id (str):
-            topic_id (str):
-            post_number (int):
-            created_at (str):
-            rank (float): ts_rank relevance score
-            body_document_id (Union[None, Unset, str]):
-     """
+    """
+    Attributes:
+        id (str):
+        topic_id (str):
+        post_number (int):
+        created_at (str):
+        rank (float): ts_rank relevance score
+        body_document_id (Union[None, Unset, str]):
+    """
 
     id: str
     topic_id: str
     post_number: int
     created_at: str
     rank: float
-    body_document_id: Union[None, Unset, str] = UNSET
+    body_document_id: None | Unset | str = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         id = self.id
@@ -54,28 +40,27 @@ class SearchDiscussionPostResult:
 
         rank = self.rank
 
-        body_document_id: Union[None, Unset, str]
+        body_document_id: None | Unset | str
         if isinstance(self.body_document_id, Unset):
             body_document_id = UNSET
         else:
             body_document_id = self.body_document_id
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "id": id,
-            "topicId": topic_id,
-            "postNumber": post_number,
-            "createdAt": created_at,
-            "rank": rank,
-        })
+        field_dict.update(
+            {
+                "id": id,
+                "topicId": topic_id,
+                "postNumber": post_number,
+                "createdAt": created_at,
+                "rank": rank,
+            }
+        )
         if body_document_id is not UNSET:
             field_dict["bodyDocumentId"] = body_document_id
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -90,15 +75,14 @@ class SearchDiscussionPostResult:
 
         rank = d.pop("rank")
 
-        def _parse_body_document_id(data: object) -> Union[None, Unset, str]:
+        def _parse_body_document_id(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         body_document_id = _parse_body_document_id(d.pop("bodyDocumentId", UNSET))
-
 
         search_discussion_post_result = cls(
             id=id,
@@ -108,7 +92,6 @@ class SearchDiscussionPostResult:
             rank=rank,
             body_document_id=body_document_id,
         )
-
 
         search_discussion_post_result.additional_properties = d
         return search_discussion_post_result

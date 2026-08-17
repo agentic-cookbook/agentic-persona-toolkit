@@ -1,107 +1,90 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar, cast
 
 from attrs import define as _attrs_define
-from attrs import field as _attrs_field
 
 from ..types import UNSET, Unset
-
-from ..types import UNSET, Unset
-from typing import cast, Union
-from typing import Union
-
-
-
-
-
 
 T = TypeVar("T", bound="PutIntegrationIntegrationCalendarEventsIdBody")
 
 
-
 @_attrs_define
 class PutIntegrationIntegrationCalendarEventsIdBody:
-    """ 
-        Attributes:
-            title (Union[Unset, str]):
-            description (Union[None, Unset, str]):
-            start_time (Union[None, Unset, str]):
-            end_time (Union[None, Unset, str]):
-            start_date (Union[None, Unset, str]):
-            end_date (Union[None, Unset, str]):
-            is_all_day (Union[Unset, bool]):
-            location (Union[None, Unset, str]):
-            source (Union[Unset, str]):
-            external_id (Union[Unset, str]):
-            connection_id (Union[None, Unset, str]):
-            calendar_name (Union[None, Unset, str]):
-            calendar_color (Union[None, Unset, str]):
-            status (Union[Unset, str]):
-            organizer (Union[None, Unset, str]):
-            attendees (Union[None, Unset, str]):
-            reminders (Union[None, Unset, str]):
-            url (Union[None, Unset, str]):
-            ai_extraction (Union[None, Unset, str]):
-            is_deleted (Union[Unset, bool]):
-            deleted_at (Union[None, Unset, str]):
-            ecosystem_id (Union[Unset, str]):
-     """
+    """
+    Attributes:
+        title (Union[Unset, str]):
+        description (Union[None, Unset, str]):
+        start_time (Union[None, Unset, str]):
+        end_time (Union[None, Unset, str]):
+        start_date (Union[None, Unset, str]):
+        end_date (Union[None, Unset, str]):
+        is_all_day (Union[Unset, bool]):
+        location (Union[None, Unset, str]):
+        source (Union[Unset, str]):
+        external_id (Union[Unset, str]):
+        connection_id (Union[None, Unset, str]):
+        calendar_name (Union[None, Unset, str]):
+        calendar_color (Union[None, Unset, str]):
+        status (Union[Unset, str]):
+        organizer (Union[None, Unset, str]):
+        attendees (Union[None, Unset, str]):
+        reminders (Union[None, Unset, str]):
+        url (Union[None, Unset, str]):
+        ai_extraction (Union[None, Unset, str]):
+        ecosystem_id (Union[Unset, str]):
+        sync_txid (Union[Unset, int]):
+    """
 
-    title: Union[Unset, str] = UNSET
-    description: Union[None, Unset, str] = UNSET
-    start_time: Union[None, Unset, str] = UNSET
-    end_time: Union[None, Unset, str] = UNSET
-    start_date: Union[None, Unset, str] = UNSET
-    end_date: Union[None, Unset, str] = UNSET
-    is_all_day: Union[Unset, bool] = UNSET
-    location: Union[None, Unset, str] = UNSET
-    source: Union[Unset, str] = UNSET
-    external_id: Union[Unset, str] = UNSET
-    connection_id: Union[None, Unset, str] = UNSET
-    calendar_name: Union[None, Unset, str] = UNSET
-    calendar_color: Union[None, Unset, str] = UNSET
-    status: Union[Unset, str] = UNSET
-    organizer: Union[None, Unset, str] = UNSET
-    attendees: Union[None, Unset, str] = UNSET
-    reminders: Union[None, Unset, str] = UNSET
-    url: Union[None, Unset, str] = UNSET
-    ai_extraction: Union[None, Unset, str] = UNSET
-    is_deleted: Union[Unset, bool] = UNSET
-    deleted_at: Union[None, Unset, str] = UNSET
-    ecosystem_id: Union[Unset, str] = UNSET
-
-
-
-
+    title: Unset | str = UNSET
+    description: None | Unset | str = UNSET
+    start_time: None | Unset | str = UNSET
+    end_time: None | Unset | str = UNSET
+    start_date: None | Unset | str = UNSET
+    end_date: None | Unset | str = UNSET
+    is_all_day: Unset | bool = UNSET
+    location: None | Unset | str = UNSET
+    source: Unset | str = UNSET
+    external_id: Unset | str = UNSET
+    connection_id: None | Unset | str = UNSET
+    calendar_name: None | Unset | str = UNSET
+    calendar_color: None | Unset | str = UNSET
+    status: Unset | str = UNSET
+    organizer: None | Unset | str = UNSET
+    attendees: None | Unset | str = UNSET
+    reminders: None | Unset | str = UNSET
+    url: None | Unset | str = UNSET
+    ai_extraction: None | Unset | str = UNSET
+    ecosystem_id: Unset | str = UNSET
+    sync_txid: Unset | int = UNSET
 
     def to_dict(self) -> dict[str, Any]:
         title = self.title
 
-        description: Union[None, Unset, str]
+        description: None | Unset | str
         if isinstance(self.description, Unset):
             description = UNSET
         else:
             description = self.description
 
-        start_time: Union[None, Unset, str]
+        start_time: None | Unset | str
         if isinstance(self.start_time, Unset):
             start_time = UNSET
         else:
             start_time = self.start_time
 
-        end_time: Union[None, Unset, str]
+        end_time: None | Unset | str
         if isinstance(self.end_time, Unset):
             end_time = UNSET
         else:
             end_time = self.end_time
 
-        start_date: Union[None, Unset, str]
+        start_date: None | Unset | str
         if isinstance(self.start_date, Unset):
             start_date = UNSET
         else:
             start_date = self.start_date
 
-        end_date: Union[None, Unset, str]
+        end_date: None | Unset | str
         if isinstance(self.end_date, Unset):
             end_date = UNSET
         else:
@@ -109,7 +92,7 @@ class PutIntegrationIntegrationCalendarEventsIdBody:
 
         is_all_day = self.is_all_day
 
-        location: Union[None, Unset, str]
+        location: None | Unset | str
         if isinstance(self.location, Unset):
             location = UNSET
         else:
@@ -119,19 +102,19 @@ class PutIntegrationIntegrationCalendarEventsIdBody:
 
         external_id = self.external_id
 
-        connection_id: Union[None, Unset, str]
+        connection_id: None | Unset | str
         if isinstance(self.connection_id, Unset):
             connection_id = UNSET
         else:
             connection_id = self.connection_id
 
-        calendar_name: Union[None, Unset, str]
+        calendar_name: None | Unset | str
         if isinstance(self.calendar_name, Unset):
             calendar_name = UNSET
         else:
             calendar_name = self.calendar_name
 
-        calendar_color: Union[None, Unset, str]
+        calendar_color: None | Unset | str
         if isinstance(self.calendar_color, Unset):
             calendar_color = UNSET
         else:
@@ -139,51 +122,43 @@ class PutIntegrationIntegrationCalendarEventsIdBody:
 
         status = self.status
 
-        organizer: Union[None, Unset, str]
+        organizer: None | Unset | str
         if isinstance(self.organizer, Unset):
             organizer = UNSET
         else:
             organizer = self.organizer
 
-        attendees: Union[None, Unset, str]
+        attendees: None | Unset | str
         if isinstance(self.attendees, Unset):
             attendees = UNSET
         else:
             attendees = self.attendees
 
-        reminders: Union[None, Unset, str]
+        reminders: None | Unset | str
         if isinstance(self.reminders, Unset):
             reminders = UNSET
         else:
             reminders = self.reminders
 
-        url: Union[None, Unset, str]
+        url: None | Unset | str
         if isinstance(self.url, Unset):
             url = UNSET
         else:
             url = self.url
 
-        ai_extraction: Union[None, Unset, str]
+        ai_extraction: None | Unset | str
         if isinstance(self.ai_extraction, Unset):
             ai_extraction = UNSET
         else:
             ai_extraction = self.ai_extraction
 
-        is_deleted = self.is_deleted
-
-        deleted_at: Union[None, Unset, str]
-        if isinstance(self.deleted_at, Unset):
-            deleted_at = UNSET
-        else:
-            deleted_at = self.deleted_at
-
         ecosystem_id = self.ecosystem_id
 
+        sync_txid = self.sync_txid
 
         field_dict: dict[str, Any] = {}
 
-        field_dict.update({
-        })
+        field_dict.update({})
         if title is not UNSET:
             field_dict["title"] = title
         if description is not UNSET:
@@ -222,183 +197,155 @@ class PutIntegrationIntegrationCalendarEventsIdBody:
             field_dict["url"] = url
         if ai_extraction is not UNSET:
             field_dict["aiExtraction"] = ai_extraction
-        if is_deleted is not UNSET:
-            field_dict["isDeleted"] = is_deleted
-        if deleted_at is not UNSET:
-            field_dict["deletedAt"] = deleted_at
         if ecosystem_id is not UNSET:
             field_dict["ecosystemId"] = ecosystem_id
+        if sync_txid is not UNSET:
+            field_dict["syncTxid"] = sync_txid
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
         title = d.pop("title", UNSET)
 
-        def _parse_description(data: object) -> Union[None, Unset, str]:
+        def _parse_description(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         description = _parse_description(d.pop("description", UNSET))
 
-
-        def _parse_start_time(data: object) -> Union[None, Unset, str]:
+        def _parse_start_time(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         start_time = _parse_start_time(d.pop("startTime", UNSET))
 
-
-        def _parse_end_time(data: object) -> Union[None, Unset, str]:
+        def _parse_end_time(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         end_time = _parse_end_time(d.pop("endTime", UNSET))
 
-
-        def _parse_start_date(data: object) -> Union[None, Unset, str]:
+        def _parse_start_date(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         start_date = _parse_start_date(d.pop("startDate", UNSET))
 
-
-        def _parse_end_date(data: object) -> Union[None, Unset, str]:
+        def _parse_end_date(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         end_date = _parse_end_date(d.pop("endDate", UNSET))
 
-
         is_all_day = d.pop("isAllDay", UNSET)
 
-        def _parse_location(data: object) -> Union[None, Unset, str]:
+        def _parse_location(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         location = _parse_location(d.pop("location", UNSET))
-
 
         source = d.pop("source", UNSET)
 
         external_id = d.pop("externalId", UNSET)
 
-        def _parse_connection_id(data: object) -> Union[None, Unset, str]:
+        def _parse_connection_id(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         connection_id = _parse_connection_id(d.pop("connectionId", UNSET))
 
-
-        def _parse_calendar_name(data: object) -> Union[None, Unset, str]:
+        def _parse_calendar_name(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         calendar_name = _parse_calendar_name(d.pop("calendarName", UNSET))
 
-
-        def _parse_calendar_color(data: object) -> Union[None, Unset, str]:
+        def _parse_calendar_color(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         calendar_color = _parse_calendar_color(d.pop("calendarColor", UNSET))
 
-
         status = d.pop("status", UNSET)
 
-        def _parse_organizer(data: object) -> Union[None, Unset, str]:
+        def _parse_organizer(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         organizer = _parse_organizer(d.pop("organizer", UNSET))
 
-
-        def _parse_attendees(data: object) -> Union[None, Unset, str]:
+        def _parse_attendees(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         attendees = _parse_attendees(d.pop("attendees", UNSET))
 
-
-        def _parse_reminders(data: object) -> Union[None, Unset, str]:
+        def _parse_reminders(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         reminders = _parse_reminders(d.pop("reminders", UNSET))
 
-
-        def _parse_url(data: object) -> Union[None, Unset, str]:
+        def _parse_url(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         url = _parse_url(d.pop("url", UNSET))
 
-
-        def _parse_ai_extraction(data: object) -> Union[None, Unset, str]:
+        def _parse_ai_extraction(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         ai_extraction = _parse_ai_extraction(d.pop("aiExtraction", UNSET))
 
-
-        is_deleted = d.pop("isDeleted", UNSET)
-
-        def _parse_deleted_at(data: object) -> Union[None, Unset, str]:
-            if data is None:
-                return data
-            if isinstance(data, Unset):
-                return data
-            return cast(Union[None, Unset, str], data)
-
-        deleted_at = _parse_deleted_at(d.pop("deletedAt", UNSET))
-
-
         ecosystem_id = d.pop("ecosystemId", UNSET)
+
+        sync_txid = d.pop("syncTxid", UNSET)
 
         put_integration_integration_calendar_events_id_body = cls(
             title=title,
@@ -420,10 +367,8 @@ class PutIntegrationIntegrationCalendarEventsIdBody:
             reminders=reminders,
             url=url,
             ai_extraction=ai_extraction,
-            is_deleted=is_deleted,
-            deleted_at=deleted_at,
             ecosystem_id=ecosystem_id,
+            sync_txid=sync_txid,
         )
 
         return put_integration_integration_calendar_events_id_body
-

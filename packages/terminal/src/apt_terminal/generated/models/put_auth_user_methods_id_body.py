@@ -1,40 +1,27 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 from ..types import UNSET, Unset
 
-from ..types import UNSET, Unset
-from typing import Union
-
-
-
-
-
-
 T = TypeVar("T", bound="PutAuthUserMethodsIdBody")
-
 
 
 @_attrs_define
 class PutAuthUserMethodsIdBody:
-    """ 
-        Attributes:
-            provider_id (Union[Unset, str]):
-            credential (Union[Unset, str]):
-            clear_credential (Union[Unset, bool]):
-     """
+    """
+    Attributes:
+        provider_id (Union[Unset, str]):
+        credential (Union[Unset, str]):
+        clear_credential (Union[Unset, bool]):
+    """
 
-    provider_id: Union[Unset, str] = UNSET
-    credential: Union[Unset, str] = UNSET
-    clear_credential: Union[Unset, bool] = UNSET
+    provider_id: Unset | str = UNSET
+    credential: Unset | str = UNSET
+    clear_credential: Unset | bool = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         provider_id = self.provider_id
@@ -43,11 +30,9 @@ class PutAuthUserMethodsIdBody:
 
         clear_credential = self.clear_credential
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-        })
+        field_dict.update({})
         if provider_id is not UNSET:
             field_dict["providerId"] = provider_id
         if credential is not UNSET:
@@ -56,8 +41,6 @@ class PutAuthUserMethodsIdBody:
             field_dict["clearCredential"] = clear_credential
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -73,7 +56,6 @@ class PutAuthUserMethodsIdBody:
             credential=credential,
             clear_credential=clear_credential,
         )
-
 
         put_auth_user_methods_id_body.additional_properties = d
         return put_auth_user_methods_id_body

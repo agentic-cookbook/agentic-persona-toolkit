@@ -1,62 +1,47 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
-
-from ..models.post_account_mfa_webauthn_register_options_body_kind import PostAccountMfaWebauthnRegisterOptionsBodyKind
-
-
-
-
-
+from ..models.post_account_mfa_webauthn_register_options_body_kind import (
+    PostAccountMfaWebauthnRegisterOptionsBodyKind,
+)
 
 T = TypeVar("T", bound="PostAccountMfaWebauthnRegisterOptionsBody")
 
 
-
 @_attrs_define
 class PostAccountMfaWebauthnRegisterOptionsBody:
-    """ 
-        Attributes:
-            kind (PostAccountMfaWebauthnRegisterOptionsBodyKind):
-     """
+    """
+    Attributes:
+        kind (PostAccountMfaWebauthnRegisterOptionsBodyKind):
+    """
 
     kind: PostAccountMfaWebauthnRegisterOptionsBodyKind
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
-
-
-
-
     def to_dict(self) -> dict[str, Any]:
         kind = self.kind.value
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "kind": kind,
-        })
+        field_dict.update(
+            {
+                "kind": kind,
+            }
+        )
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
         kind = PostAccountMfaWebauthnRegisterOptionsBodyKind(d.pop("kind"))
 
-
-
-
         post_account_mfa_webauthn_register_options_body = cls(
             kind=kind,
         )
-
 
         post_account_mfa_webauthn_register_options_body.additional_properties = d
         return post_account_mfa_webauthn_register_options_body

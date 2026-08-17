@@ -1,48 +1,34 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
-
-
-
-
-
-
-
 T = TypeVar("T", bound="PostProjectWorkItemsIdDependenciesBody")
-
 
 
 @_attrs_define
 class PostProjectWorkItemsIdDependenciesBody:
-    """ 
-        Attributes:
-            depends_on_id (str): a live work item in the same project (not self; must not close a cycle)
-     """
+    """
+    Attributes:
+        depends_on_id (str): a live work item in the same project (not self; must not close a cycle)
+    """
 
     depends_on_id: str
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
-
-
-
-
     def to_dict(self) -> dict[str, Any]:
         depends_on_id = self.depends_on_id
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "dependsOnId": depends_on_id,
-        })
+        field_dict.update(
+            {
+                "dependsOnId": depends_on_id,
+            }
+        )
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -52,7 +38,6 @@ class PostProjectWorkItemsIdDependenciesBody:
         post_project_work_items_id_dependencies_body = cls(
             depends_on_id=depends_on_id,
         )
-
 
         post_project_work_items_id_dependencies_body.additional_properties = d
         return post_project_work_items_id_dependencies_body

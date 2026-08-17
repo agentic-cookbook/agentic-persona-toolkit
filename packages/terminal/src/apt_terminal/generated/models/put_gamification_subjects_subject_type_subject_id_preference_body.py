@@ -1,48 +1,34 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
-
-
-
-
-
-
-
 T = TypeVar("T", bound="PutGamificationSubjectsSubjectTypeSubjectIdPreferenceBody")
-
 
 
 @_attrs_define
 class PutGamificationSubjectsSubjectTypeSubjectIdPreferenceBody:
-    """ 
-        Attributes:
-            opted_out (bool):
-     """
+    """
+    Attributes:
+        opted_out (bool):
+    """
 
     opted_out: bool
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
-
-
-
-
     def to_dict(self) -> dict[str, Any]:
         opted_out = self.opted_out
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "optedOut": opted_out,
-        })
+        field_dict.update(
+            {
+                "optedOut": opted_out,
+            }
+        )
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -52,7 +38,6 @@ class PutGamificationSubjectsSubjectTypeSubjectIdPreferenceBody:
         put_gamification_subjects_subject_type_subject_id_preference_body = cls(
             opted_out=opted_out,
         )
-
 
         put_gamification_subjects_subject_type_subject_id_preference_body.additional_properties = d
         return put_gamification_subjects_subject_type_subject_id_preference_body

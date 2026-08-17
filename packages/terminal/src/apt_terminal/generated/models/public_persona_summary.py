@@ -1,109 +1,94 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import TYPE_CHECKING, Any, TypeVar, Union, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
-
 from ..models.public_persona_summary_visibility import PublicPersonaSummaryVisibility
-from typing import cast
-from typing import cast, Union
 
 if TYPE_CHECKING:
-  from ..models.public_owner_type_0 import PublicOwnerType0
-
-
-
+    from ..models.public_owner_type_0 import PublicOwnerType0
 
 
 T = TypeVar("T", bound="PublicPersonaSummary")
 
 
-
 @_attrs_define
 class PublicPersonaSummary:
-    """ 
-        Attributes:
-            slug (str):
-            name (str):
-            description (Union[None, str]):
-            visibility (PublicPersonaSummaryVisibility):
-            created_at (str):
-            owner (Union['PublicOwnerType0', None]):
-     """
+    """
+    Attributes:
+        slug (str):
+        name (str):
+        description (Union[None, str]):
+        visibility (PublicPersonaSummaryVisibility):
+        created_at (str):
+        owner (Union['PublicOwnerType0', None]):
+    """
 
     slug: str
     name: str
-    description: Union[None, str]
+    description: None | str
     visibility: PublicPersonaSummaryVisibility
     created_at: str
-    owner: Union['PublicOwnerType0', None]
+    owner: Union["PublicOwnerType0", None]
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         from ..models.public_owner_type_0 import PublicOwnerType0
+
         slug = self.slug
 
         name = self.name
 
-        description: Union[None, str]
+        description: None | str
         description = self.description
 
         visibility = self.visibility.value
 
         created_at = self.created_at
 
-        owner: Union[None, dict[str, Any]]
+        owner: None | dict[str, Any]
         if isinstance(self.owner, PublicOwnerType0):
             owner = self.owner.to_dict()
         else:
             owner = self.owner
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "slug": slug,
-            "name": name,
-            "description": description,
-            "visibility": visibility,
-            "createdAt": created_at,
-            "owner": owner,
-        })
+        field_dict.update(
+            {
+                "slug": slug,
+                "name": name,
+                "description": description,
+                "visibility": visibility,
+                "createdAt": created_at,
+                "owner": owner,
+            }
+        )
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.public_owner_type_0 import PublicOwnerType0
+
         d = dict(src_dict)
         slug = d.pop("slug")
 
         name = d.pop("name")
 
-        def _parse_description(data: object) -> Union[None, str]:
+        def _parse_description(data: object) -> None | str:
             if data is None:
                 return data
-            return cast(Union[None, str], data)
+            return cast(None | str, data)
 
         description = _parse_description(d.pop("description"))
 
-
         visibility = PublicPersonaSummaryVisibility(d.pop("visibility"))
-
-
-
 
         created_at = d.pop("createdAt")
 
-        def _parse_owner(data: object) -> Union['PublicOwnerType0', None]:
+        def _parse_owner(data: object) -> Union["PublicOwnerType0", None]:
             if data is None:
                 return data
             try:
@@ -111,15 +96,12 @@ class PublicPersonaSummary:
                     raise TypeError()
                 componentsschemas_public_owner_type_0 = PublicOwnerType0.from_dict(data)
 
-
-
                 return componentsschemas_public_owner_type_0
-            except: # noqa: E722
+            except:  # noqa: E722
                 pass
-            return cast(Union['PublicOwnerType0', None], data)
+            return cast(Union["PublicOwnerType0", None], data)
 
         owner = _parse_owner(d.pop("owner"))
-
 
         public_persona_summary = cls(
             slug=slug,
@@ -129,7 +111,6 @@ class PublicPersonaSummary:
             created_at=created_at,
             owner=owner,
         )
-
 
         public_persona_summary.additional_properties = d
         return public_persona_summary

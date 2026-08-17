@@ -1,81 +1,63 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import TYPE_CHECKING, Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
-
-from typing import cast
-
 if TYPE_CHECKING:
-  from ..models.search_document_result import SearchDocumentResult
-
-
-
+    from ..models.search_document_result import SearchDocumentResult
 
 
 T = TypeVar("T", bound="GetSearchDocumentsResponse200")
 
 
-
 @_attrs_define
 class GetSearchDocumentsResponse200:
-    """ 
-        Attributes:
-            results (list['SearchDocumentResult']):
-            limit (int):
-            has_more (bool):
-     """
+    """
+    Attributes:
+        results (list['SearchDocumentResult']):
+        limit (int):
+        has_more (bool):
+    """
 
-    results: list['SearchDocumentResult']
+    results: list["SearchDocumentResult"]
     limit: int
     has_more: bool
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
-
-
-
-
     def to_dict(self) -> dict[str, Any]:
-        from ..models.search_document_result import SearchDocumentResult
         results = []
         for results_item_data in self.results:
             results_item = results_item_data.to_dict()
             results.append(results_item)
 
-
-
         limit = self.limit
 
         has_more = self.has_more
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "results": results,
-            "limit": limit,
-            "hasMore": has_more,
-        })
+        field_dict.update(
+            {
+                "results": results,
+                "limit": limit,
+                "hasMore": has_more,
+            }
+        )
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.search_document_result import SearchDocumentResult
+
         d = dict(src_dict)
         results = []
         _results = d.pop("results")
-        for results_item_data in (_results):
+        for results_item_data in _results:
             results_item = SearchDocumentResult.from_dict(results_item_data)
 
-
-
             results.append(results_item)
-
 
         limit = d.pop("limit")
 
@@ -86,7 +68,6 @@ class GetSearchDocumentsResponse200:
             limit=limit,
             has_more=has_more,
         )
-
 
         get_search_documents_response_200.additional_properties = d
         return get_search_documents_response_200

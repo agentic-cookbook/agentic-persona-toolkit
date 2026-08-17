@@ -1,57 +1,41 @@
 from http import HTTPStatus
-from typing import Any, Optional, Union, cast
+from typing import Any
 
 import httpx
 
-from ...client import AuthenticatedClient, Client
-from ...types import Response, UNSET
 from ... import errors
-
+from ...client import AuthenticatedClient, Client
 from ...models.error import Error
 from ...models.registry_identifier import RegistryIdentifier
-from typing import cast
-
+from ...types import Response
 
 
 def _get_kwargs(
     rdid: str,
-
 ) -> dict[str, Any]:
-    
-
-    
-
-    
-
     _kwargs: dict[str, Any] = {
         "method": "get",
-        "url": "/registry/identifiers/{rdid}".format(rdid=rdid,),
+        "url": f"/registry/identifiers/{rdid}",
     }
-
 
     return _kwargs
 
 
-
-def _parse_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Optional[Union[Error, RegistryIdentifier]]:
+def _parse_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Error | RegistryIdentifier | None:
     if response.status_code == 200:
         response_200 = RegistryIdentifier.from_dict(response.json())
-
-
 
         return response_200
 
     if response.status_code == 401:
         response_401 = Error.from_dict(response.json())
 
-
-
         return response_401
 
     if response.status_code == 404:
         response_404 = Error.from_dict(response.json())
-
-
 
         return response_404
 
@@ -61,7 +45,9 @@ def _parse_response(*, client: Union[AuthenticatedClient, Client], response: htt
         return None
 
 
-def _build_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Response[Union[Error, RegistryIdentifier]]:
+def _build_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Response[Error | RegistryIdentifier]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -74,9 +60,8 @@ def sync_detailed(
     rdid: str,
     *,
     client: AuthenticatedClient,
-
-) -> Response[Union[Error, RegistryIdentifier]]:
-    """ Resolve an rdid -> entity
+) -> Response[Error | RegistryIdentifier]:
+    """Resolve an rdid -> entity
 
     Args:
         rdid (str):
@@ -87,12 +72,10 @@ def sync_detailed(
 
     Returns:
         Response[Union[Error, RegistryIdentifier]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         rdid=rdid,
-
     )
 
     response = client.get_httpx_client().request(
@@ -101,13 +84,13 @@ def sync_detailed(
 
     return _build_response(client=client, response=response)
 
+
 def sync(
     rdid: str,
     *,
     client: AuthenticatedClient,
-
-) -> Optional[Union[Error, RegistryIdentifier]]:
-    """ Resolve an rdid -> entity
+) -> Error | RegistryIdentifier | None:
+    """Resolve an rdid -> entity
 
     Args:
         rdid (str):
@@ -118,22 +101,20 @@ def sync(
 
     Returns:
         Union[Error, RegistryIdentifier]
-     """
-
+    """
 
     return sync_detailed(
         rdid=rdid,
-client=client,
-
+        client=client,
     ).parsed
+
 
 async def asyncio_detailed(
     rdid: str,
     *,
     client: AuthenticatedClient,
-
-) -> Response[Union[Error, RegistryIdentifier]]:
-    """ Resolve an rdid -> entity
+) -> Response[Error | RegistryIdentifier]:
+    """Resolve an rdid -> entity
 
     Args:
         rdid (str):
@@ -144,27 +125,23 @@ async def asyncio_detailed(
 
     Returns:
         Response[Union[Error, RegistryIdentifier]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         rdid=rdid,
-
     )
 
-    response = await client.get_async_httpx_client().request(
-        **kwargs
-    )
+    response = await client.get_async_httpx_client().request(**kwargs)
 
     return _build_response(client=client, response=response)
+
 
 async def asyncio(
     rdid: str,
     *,
     client: AuthenticatedClient,
-
-) -> Optional[Union[Error, RegistryIdentifier]]:
-    """ Resolve an rdid -> entity
+) -> Error | RegistryIdentifier | None:
+    """Resolve an rdid -> entity
 
     Args:
         rdid (str):
@@ -175,11 +152,11 @@ async def asyncio(
 
     Returns:
         Union[Error, RegistryIdentifier]
-     """
+    """
 
-
-    return (await asyncio_detailed(
-        rdid=rdid,
-client=client,
-
-    )).parsed
+    return (
+        await asyncio_detailed(
+            rdid=rdid,
+            client=client,
+        )
+    ).parsed

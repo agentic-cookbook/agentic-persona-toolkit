@@ -1,33 +1,25 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
-
 from ..models.integration_connect_request_type_4_type import IntegrationConnectRequestType4Type
-
-
-
-
-
 
 T = TypeVar("T", bound="IntegrationConnectRequestType4")
 
 
-
 @_attrs_define
 class IntegrationConnectRequestType4:
-    """ 
-        Attributes:
-            type_ (IntegrationConnectRequestType4Type):
-            provider_id (str):
-            service_type (str):
-            ecosystem_id (str): Target ecosystem id (the caller must manage it)
-            code (str):
-            state (str):
-     """
+    """
+    Attributes:
+        type_ (IntegrationConnectRequestType4Type):
+        provider_id (str):
+        service_type (str):
+        ecosystem_id (str): Target ecosystem id (the caller must manage it)
+        code (str):
+        state (str):
+    """
 
     type_: IntegrationConnectRequestType4Type
     provider_id: str
@@ -36,10 +28,6 @@ class IntegrationConnectRequestType4:
     code: str
     state: str
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         type_ = self.type_.value
@@ -54,29 +42,25 @@ class IntegrationConnectRequestType4:
 
         state = self.state
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "type": type_,
-            "providerId": provider_id,
-            "serviceType": service_type,
-            "ecosystemId": ecosystem_id,
-            "code": code,
-            "state": state,
-        })
+        field_dict.update(
+            {
+                "type": type_,
+                "providerId": provider_id,
+                "serviceType": service_type,
+                "ecosystemId": ecosystem_id,
+                "code": code,
+                "state": state,
+            }
+        )
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
         type_ = IntegrationConnectRequestType4Type(d.pop("type"))
-
-
-
 
         provider_id = d.pop("providerId")
 
@@ -96,7 +80,6 @@ class IntegrationConnectRequestType4:
             code=code,
             state=state,
         )
-
 
         integration_connect_request_type_4.additional_properties = d
         return integration_connect_request_type_4

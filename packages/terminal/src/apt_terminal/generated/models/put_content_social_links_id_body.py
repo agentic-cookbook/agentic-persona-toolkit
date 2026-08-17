@@ -1,58 +1,37 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
-from attrs import field as _attrs_field
 
 from ..types import UNSET, Unset
-
-from ..types import UNSET, Unset
-from typing import cast, Union
-from typing import Union
-
-
-
-
-
 
 T = TypeVar("T", bound="PutContentSocialLinksIdBody")
 
 
-
 @_attrs_define
 class PutContentSocialLinksIdBody:
-    """ 
-        Attributes:
-            deleted_at (Union[None, Unset, str]):
-            ecosystem_id (Union[Unset, str]):
-            owner_kind (Union[Unset, str]):
-            owner_id (Union[Unset, str]):
-            platform (Union[Unset, str]):
-            url (Union[Unset, str]):
-            handle (Union[Unset, str]):
-            sort_order (Union[Unset, int]):
-     """
+    """
+    Attributes:
+        ecosystem_id (Union[Unset, str]):
+        owner_kind (Union[Unset, str]):
+        owner_id (Union[Unset, str]):
+        platform (Union[Unset, str]):
+        url (Union[Unset, str]):
+        handle (Union[Unset, str]):
+        sort_order (Union[Unset, int]):
+        sync_txid (Union[Unset, int]):
+    """
 
-    deleted_at: Union[None, Unset, str] = UNSET
-    ecosystem_id: Union[Unset, str] = UNSET
-    owner_kind: Union[Unset, str] = UNSET
-    owner_id: Union[Unset, str] = UNSET
-    platform: Union[Unset, str] = UNSET
-    url: Union[Unset, str] = UNSET
-    handle: Union[Unset, str] = UNSET
-    sort_order: Union[Unset, int] = UNSET
-
-
-
-
+    ecosystem_id: Unset | str = UNSET
+    owner_kind: Unset | str = UNSET
+    owner_id: Unset | str = UNSET
+    platform: Unset | str = UNSET
+    url: Unset | str = UNSET
+    handle: Unset | str = UNSET
+    sort_order: Unset | int = UNSET
+    sync_txid: Unset | int = UNSET
 
     def to_dict(self) -> dict[str, Any]:
-        deleted_at: Union[None, Unset, str]
-        if isinstance(self.deleted_at, Unset):
-            deleted_at = UNSET
-        else:
-            deleted_at = self.deleted_at
-
         ecosystem_id = self.ecosystem_id
 
         owner_kind = self.owner_kind
@@ -67,13 +46,11 @@ class PutContentSocialLinksIdBody:
 
         sort_order = self.sort_order
 
+        sync_txid = self.sync_txid
 
         field_dict: dict[str, Any] = {}
 
-        field_dict.update({
-        })
-        if deleted_at is not UNSET:
-            field_dict["deletedAt"] = deleted_at
+        field_dict.update({})
         if ecosystem_id is not UNSET:
             field_dict["ecosystemId"] = ecosystem_id
         if owner_kind is not UNSET:
@@ -88,24 +65,14 @@ class PutContentSocialLinksIdBody:
             field_dict["handle"] = handle
         if sort_order is not UNSET:
             field_dict["sortOrder"] = sort_order
+        if sync_txid is not UNSET:
+            field_dict["syncTxid"] = sync_txid
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
-        def _parse_deleted_at(data: object) -> Union[None, Unset, str]:
-            if data is None:
-                return data
-            if isinstance(data, Unset):
-                return data
-            return cast(Union[None, Unset, str], data)
-
-        deleted_at = _parse_deleted_at(d.pop("deletedAt", UNSET))
-
-
         ecosystem_id = d.pop("ecosystemId", UNSET)
 
         owner_kind = d.pop("ownerKind", UNSET)
@@ -120,8 +87,9 @@ class PutContentSocialLinksIdBody:
 
         sort_order = d.pop("sortOrder", UNSET)
 
+        sync_txid = d.pop("syncTxid", UNSET)
+
         put_content_social_links_id_body = cls(
-            deleted_at=deleted_at,
             ecosystem_id=ecosystem_id,
             owner_kind=owner_kind,
             owner_id=owner_id,
@@ -129,7 +97,7 @@ class PutContentSocialLinksIdBody:
             url=url,
             handle=handle,
             sort_order=sort_order,
+            sync_txid=sync_txid,
         )
 
         return put_content_social_links_id_body
-

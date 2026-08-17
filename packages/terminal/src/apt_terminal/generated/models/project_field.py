@@ -1,40 +1,29 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
-
 from ..models.project_field_type import ProjectFieldType
 from ..types import UNSET, Unset
-from typing import cast
-from typing import cast, Union
-from typing import Union
-
-
-
-
-
 
 T = TypeVar("T", bound="ProjectField")
 
 
-
 @_attrs_define
 class ProjectField:
-    """ 
-        Attributes:
-            id (str):
-            ecosystem_id (str):
-            project_id (str):
-            key (str): stable identifier, unique within the project
-            label (str):
-            type_ (ProjectFieldType):
-            position (int): field order (ascending)
-            created_at (str):
-            options (Union[None, Unset, list[str]]): the choices for a select field (non-empty); null for every other type
-     """
+    """
+    Attributes:
+        id (str):
+        ecosystem_id (str):
+        project_id (str):
+        key (str): stable identifier, unique within the project
+        label (str):
+        type_ (ProjectFieldType):
+        position (int): field order (ascending)
+        created_at (str):
+        options (Union[None, Unset, list[str]]): the choices for a select field (non-empty); null for every other type
+    """
 
     id: str
     ecosystem_id: str
@@ -44,12 +33,8 @@ class ProjectField:
     type_: ProjectFieldType
     position: int
     created_at: str
-    options: Union[None, Unset, list[str]] = UNSET
+    options: None | Unset | list[str] = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         id = self.id
@@ -68,35 +53,33 @@ class ProjectField:
 
         created_at = self.created_at
 
-        options: Union[None, Unset, list[str]]
+        options: None | Unset | list[str]
         if isinstance(self.options, Unset):
             options = UNSET
         elif isinstance(self.options, list):
             options = self.options
 
-
         else:
             options = self.options
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "id": id,
-            "ecosystemId": ecosystem_id,
-            "projectId": project_id,
-            "key": key,
-            "label": label,
-            "type": type_,
-            "position": position,
-            "createdAt": created_at,
-        })
+        field_dict.update(
+            {
+                "id": id,
+                "ecosystemId": ecosystem_id,
+                "projectId": project_id,
+                "key": key,
+                "label": label,
+                "type": type_,
+                "position": position,
+                "createdAt": created_at,
+            }
+        )
         if options is not UNSET:
             field_dict["options"] = options
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -113,14 +96,11 @@ class ProjectField:
 
         type_ = ProjectFieldType(d.pop("type"))
 
-
-
-
         position = d.pop("position")
 
         created_at = d.pop("createdAt")
 
-        def _parse_options(data: object) -> Union[None, Unset, list[str]]:
+        def _parse_options(data: object) -> None | Unset | list[str]:
             if data is None:
                 return data
             if isinstance(data, Unset):
@@ -131,12 +111,11 @@ class ProjectField:
                 options_type_0 = cast(list[str], data)
 
                 return options_type_0
-            except: # noqa: E722
+            except:  # noqa: E722
                 pass
-            return cast(Union[None, Unset, list[str]], data)
+            return cast(None | Unset | list[str], data)
 
         options = _parse_options(d.pop("options", UNSET))
-
 
         project_field = cls(
             id=id,
@@ -149,7 +128,6 @@ class ProjectField:
             created_at=created_at,
             options=options,
         )
-
 
         project_field.additional_properties = d
         return project_field

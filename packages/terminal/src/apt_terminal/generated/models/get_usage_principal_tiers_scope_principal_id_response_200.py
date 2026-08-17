@@ -1,37 +1,23 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
-from attrs import field as _attrs_field
-
-from ..types import UNSET, Unset
-
-
-
-
-
-
 
 T = TypeVar("T", bound="GetUsagePrincipalTiersScopePrincipalIdResponse200")
 
 
-
 @_attrs_define
 class GetUsagePrincipalTiersScopePrincipalIdResponse200:
-    """ 
-        Attributes:
-            scope (str):
-            principal_id (str):
-            tier_id (str):
-     """
+    """
+    Attributes:
+        scope (str):
+        principal_id (str):
+        tier_id (str):
+    """
 
     scope: str
     principal_id: str
     tier_id: str
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         scope = self.scope
@@ -40,18 +26,17 @@ class GetUsagePrincipalTiersScopePrincipalIdResponse200:
 
         tier_id = self.tier_id
 
-
         field_dict: dict[str, Any] = {}
 
-        field_dict.update({
-            "scope": scope,
-            "principalId": principal_id,
-            "tierId": tier_id,
-        })
+        field_dict.update(
+            {
+                "scope": scope,
+                "principalId": principal_id,
+                "tierId": tier_id,
+            }
+        )
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -69,4 +54,3 @@ class GetUsagePrincipalTiersScopePrincipalIdResponse200:
         )
 
         return get_usage_principal_tiers_scope_principal_id_response_200
-

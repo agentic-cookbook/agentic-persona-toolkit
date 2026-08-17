@@ -1,46 +1,38 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar, cast
 
 from attrs import define as _attrs_define
-from attrs import field as _attrs_field
-
-from ..types import UNSET, Unset
-
-from typing import cast, Union
-
-
-
-
-
 
 T = TypeVar("T", bound="GetContentAddressesResponse200Item")
 
 
-
 @_attrs_define
 class GetContentAddressesResponse200Item:
-    """ 
-        Attributes:
-            id (str):
-            customer_id (str):
-            deleted_at (Union[None, str]):
-            ecosystem_id (str):
-            owner_kind (str):
-            owner_id (str):
-            label (str):
-            line1 (str):
-            line2 (str):
-            city (str):
-            region (str):
-            postal_code (str):
-            country (str):
-            created_at (str):
-            updated_at (str):
-     """
+    """
+    Attributes:
+        id (str):
+        customer_id (str):
+        deleted_at (Union[None, str]):
+        ecosystem_id (str):
+        owner_kind (str):
+        owner_id (str):
+        label (str):
+        line1 (str):
+        line2 (str):
+        city (str):
+        region (str):
+        postal_code (str):
+        country (str):
+        created_at (str):
+        updated_at (str):
+        sync_version (int):
+        sync_stamped_at (Union[None, str]):
+        sync_txid (int):
+    """
 
     id: str
     customer_id: str
-    deleted_at: Union[None, str]
+    deleted_at: None | str
     ecosystem_id: str
     owner_kind: str
     owner_id: str
@@ -53,17 +45,16 @@ class GetContentAddressesResponse200Item:
     country: str
     created_at: str
     updated_at: str
-
-
-
-
+    sync_version: int
+    sync_stamped_at: None | str
+    sync_txid: int
 
     def to_dict(self) -> dict[str, Any]:
         id = self.id
 
         customer_id = self.customer_id
 
-        deleted_at: Union[None, str]
+        deleted_at: None | str
         deleted_at = self.deleted_at
 
         ecosystem_id = self.ecosystem_id
@@ -90,30 +81,39 @@ class GetContentAddressesResponse200Item:
 
         updated_at = self.updated_at
 
+        sync_version = self.sync_version
+
+        sync_stamped_at: None | str
+        sync_stamped_at = self.sync_stamped_at
+
+        sync_txid = self.sync_txid
 
         field_dict: dict[str, Any] = {}
 
-        field_dict.update({
-            "id": id,
-            "customerId": customer_id,
-            "deletedAt": deleted_at,
-            "ecosystemId": ecosystem_id,
-            "ownerKind": owner_kind,
-            "ownerId": owner_id,
-            "label": label,
-            "line1": line1,
-            "line2": line2,
-            "city": city,
-            "region": region,
-            "postalCode": postal_code,
-            "country": country,
-            "createdAt": created_at,
-            "updatedAt": updated_at,
-        })
+        field_dict.update(
+            {
+                "id": id,
+                "customerId": customer_id,
+                "deletedAt": deleted_at,
+                "ecosystemId": ecosystem_id,
+                "ownerKind": owner_kind,
+                "ownerId": owner_id,
+                "label": label,
+                "line1": line1,
+                "line2": line2,
+                "city": city,
+                "region": region,
+                "postalCode": postal_code,
+                "country": country,
+                "createdAt": created_at,
+                "updatedAt": updated_at,
+                "syncVersion": sync_version,
+                "syncStampedAt": sync_stamped_at,
+                "syncTxid": sync_txid,
+            }
+        )
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -122,13 +122,12 @@ class GetContentAddressesResponse200Item:
 
         customer_id = d.pop("customerId")
 
-        def _parse_deleted_at(data: object) -> Union[None, str]:
+        def _parse_deleted_at(data: object) -> None | str:
             if data is None:
                 return data
-            return cast(Union[None, str], data)
+            return cast(None | str, data)
 
         deleted_at = _parse_deleted_at(d.pop("deletedAt"))
-
 
         ecosystem_id = d.pop("ecosystemId")
 
@@ -154,6 +153,17 @@ class GetContentAddressesResponse200Item:
 
         updated_at = d.pop("updatedAt")
 
+        sync_version = d.pop("syncVersion")
+
+        def _parse_sync_stamped_at(data: object) -> None | str:
+            if data is None:
+                return data
+            return cast(None | str, data)
+
+        sync_stamped_at = _parse_sync_stamped_at(d.pop("syncStampedAt"))
+
+        sync_txid = d.pop("syncTxid")
+
         get_content_addresses_response_200_item = cls(
             id=id,
             customer_id=customer_id,
@@ -170,7 +180,9 @@ class GetContentAddressesResponse200Item:
             country=country,
             created_at=created_at,
             updated_at=updated_at,
+            sync_version=sync_version,
+            sync_stamped_at=sync_stamped_at,
+            sync_txid=sync_txid,
         )
 
         return get_content_addresses_response_200_item
-

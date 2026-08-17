@@ -1,38 +1,27 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar, cast
 
 from attrs import define as _attrs_define
-from attrs import field as _attrs_field
-
-from ..types import UNSET, Unset
-
-from typing import cast, Union
-
-
-
-
-
 
 T = TypeVar("T", bound="GetBillingSubscriptionsIdResponse200")
 
 
-
 @_attrs_define
 class GetBillingSubscriptionsIdResponse200:
-    """ 
-        Attributes:
-            id (str):
-            user_id (str):
-            ecosystem_id (str):
-            tier_id (str):
-            status (str):
-            source (str):
-            started_at (str):
-            expires_at (Union[None, str]):
-            assigned_by (Union[None, str]):
-            created_at (str):
-            updated_at (str):
-     """
+    """
+    Attributes:
+        id (str):
+        user_id (str):
+        ecosystem_id (str):
+        tier_id (str):
+        status (str):
+        source (str):
+        started_at (str):
+        expires_at (Union[None, str]):
+        assigned_by (Union[None, str]):
+        created_at (str):
+        updated_at (str):
+    """
 
     id: str
     user_id: str
@@ -41,14 +30,10 @@ class GetBillingSubscriptionsIdResponse200:
     status: str
     source: str
     started_at: str
-    expires_at: Union[None, str]
-    assigned_by: Union[None, str]
+    expires_at: None | str
+    assigned_by: None | str
     created_at: str
     updated_at: str
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         id = self.id
@@ -65,36 +50,35 @@ class GetBillingSubscriptionsIdResponse200:
 
         started_at = self.started_at
 
-        expires_at: Union[None, str]
+        expires_at: None | str
         expires_at = self.expires_at
 
-        assigned_by: Union[None, str]
+        assigned_by: None | str
         assigned_by = self.assigned_by
 
         created_at = self.created_at
 
         updated_at = self.updated_at
 
-
         field_dict: dict[str, Any] = {}
 
-        field_dict.update({
-            "id": id,
-            "userId": user_id,
-            "ecosystemId": ecosystem_id,
-            "tierId": tier_id,
-            "status": status,
-            "source": source,
-            "startedAt": started_at,
-            "expiresAt": expires_at,
-            "assignedBy": assigned_by,
-            "createdAt": created_at,
-            "updatedAt": updated_at,
-        })
+        field_dict.update(
+            {
+                "id": id,
+                "userId": user_id,
+                "ecosystemId": ecosystem_id,
+                "tierId": tier_id,
+                "status": status,
+                "source": source,
+                "startedAt": started_at,
+                "expiresAt": expires_at,
+                "assignedBy": assigned_by,
+                "createdAt": created_at,
+                "updatedAt": updated_at,
+            }
+        )
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -113,21 +97,19 @@ class GetBillingSubscriptionsIdResponse200:
 
         started_at = d.pop("startedAt")
 
-        def _parse_expires_at(data: object) -> Union[None, str]:
+        def _parse_expires_at(data: object) -> None | str:
             if data is None:
                 return data
-            return cast(Union[None, str], data)
+            return cast(None | str, data)
 
         expires_at = _parse_expires_at(d.pop("expiresAt"))
 
-
-        def _parse_assigned_by(data: object) -> Union[None, str]:
+        def _parse_assigned_by(data: object) -> None | str:
             if data is None:
                 return data
-            return cast(Union[None, str], data)
+            return cast(None | str, data)
 
         assigned_by = _parse_assigned_by(d.pop("assignedBy"))
-
 
         created_at = d.pop("createdAt")
 
@@ -148,4 +130,3 @@ class GetBillingSubscriptionsIdResponse200:
         )
 
         return get_billing_subscriptions_id_response_200
-

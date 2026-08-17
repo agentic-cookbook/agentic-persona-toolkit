@@ -1,32 +1,22 @@
 from http import HTTPStatus
-from typing import Any, Optional, Union, cast
+from typing import Any
 
 import httpx
 
-from ...client import AuthenticatedClient, Client
-from ...types import Response, UNSET
 from ... import errors
-
+from ...client import AuthenticatedClient, Client
 from ...models.error import Error
 from ...models.provider_template_list import ProviderTemplateList
-from ...types import UNSET, Unset
-from typing import cast
-from typing import Union
-
+from ...types import UNSET, Response, Unset
 
 
 def _get_kwargs(
     *,
-    q: Union[Unset, str] = UNSET,
-    provider_kind: Union[Unset, str] = UNSET,
-    page: Union[Unset, str] = UNSET,
-    page_size: Union[Unset, str] = UNSET,
-
+    q: Unset | str = UNSET,
+    provider_kind: Unset | str = UNSET,
+    page: Unset | str = UNSET,
+    page_size: Unset | str = UNSET,
 ) -> dict[str, Any]:
-    
-
-    
-
     params: dict[str, Any] = {}
 
     params["q"] = q
@@ -37,9 +27,7 @@ def _get_kwargs(
 
     params["pageSize"] = page_size
 
-
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
-
 
     _kwargs: dict[str, Any] = {
         "method": "get",
@@ -47,23 +35,19 @@ def _get_kwargs(
         "params": params,
     }
 
-
     return _kwargs
 
 
-
-def _parse_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Optional[Union[Error, ProviderTemplateList]]:
+def _parse_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Error | ProviderTemplateList | None:
     if response.status_code == 200:
         response_200 = ProviderTemplateList.from_dict(response.json())
-
-
 
         return response_200
 
     if response.status_code == 400:
         response_400 = Error.from_dict(response.json())
-
-
 
         return response_400
 
@@ -73,7 +57,9 @@ def _parse_response(*, client: Union[AuthenticatedClient, Client], response: htt
         return None
 
 
-def _build_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Response[Union[Error, ProviderTemplateList]]:
+def _build_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Response[Error | ProviderTemplateList]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -84,14 +70,13 @@ def _build_response(*, client: Union[AuthenticatedClient, Client], response: htt
 
 def sync_detailed(
     *,
-    client: Union[AuthenticatedClient, Client],
-    q: Union[Unset, str] = UNSET,
-    provider_kind: Union[Unset, str] = UNSET,
-    page: Union[Unset, str] = UNSET,
-    page_size: Union[Unset, str] = UNSET,
-
-) -> Response[Union[Error, ProviderTemplateList]]:
-    """ List/search LLM provider templates (public; ?q= substring on name/kind, ?providerKind= exact,
+    client: AuthenticatedClient | Client,
+    q: Unset | str = UNSET,
+    provider_kind: Unset | str = UNSET,
+    page: Unset | str = UNSET,
+    page_size: Unset | str = UNSET,
+) -> Response[Error | ProviderTemplateList]:
+    """List/search LLM provider templates (public; ?q= substring on name/kind, ?providerKind= exact,
     paginated)
 
     Args:
@@ -106,15 +91,13 @@ def sync_detailed(
 
     Returns:
         Response[Union[Error, ProviderTemplateList]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         q=q,
-provider_kind=provider_kind,
-page=page,
-page_size=page_size,
-
+        provider_kind=provider_kind,
+        page=page,
+        page_size=page_size,
     )
 
     response = client.get_httpx_client().request(
@@ -123,16 +106,16 @@ page_size=page_size,
 
     return _build_response(client=client, response=response)
 
+
 def sync(
     *,
-    client: Union[AuthenticatedClient, Client],
-    q: Union[Unset, str] = UNSET,
-    provider_kind: Union[Unset, str] = UNSET,
-    page: Union[Unset, str] = UNSET,
-    page_size: Union[Unset, str] = UNSET,
-
-) -> Optional[Union[Error, ProviderTemplateList]]:
-    """ List/search LLM provider templates (public; ?q= substring on name/kind, ?providerKind= exact,
+    client: AuthenticatedClient | Client,
+    q: Unset | str = UNSET,
+    provider_kind: Unset | str = UNSET,
+    page: Unset | str = UNSET,
+    page_size: Unset | str = UNSET,
+) -> Error | ProviderTemplateList | None:
+    """List/search LLM provider templates (public; ?q= substring on name/kind, ?providerKind= exact,
     paginated)
 
     Args:
@@ -147,28 +130,26 @@ def sync(
 
     Returns:
         Union[Error, ProviderTemplateList]
-     """
-
+    """
 
     return sync_detailed(
         client=client,
-q=q,
-provider_kind=provider_kind,
-page=page,
-page_size=page_size,
-
+        q=q,
+        provider_kind=provider_kind,
+        page=page,
+        page_size=page_size,
     ).parsed
+
 
 async def asyncio_detailed(
     *,
-    client: Union[AuthenticatedClient, Client],
-    q: Union[Unset, str] = UNSET,
-    provider_kind: Union[Unset, str] = UNSET,
-    page: Union[Unset, str] = UNSET,
-    page_size: Union[Unset, str] = UNSET,
-
-) -> Response[Union[Error, ProviderTemplateList]]:
-    """ List/search LLM provider templates (public; ?q= substring on name/kind, ?providerKind= exact,
+    client: AuthenticatedClient | Client,
+    q: Unset | str = UNSET,
+    provider_kind: Unset | str = UNSET,
+    page: Unset | str = UNSET,
+    page_size: Unset | str = UNSET,
+) -> Response[Error | ProviderTemplateList]:
+    """List/search LLM provider templates (public; ?q= substring on name/kind, ?providerKind= exact,
     paginated)
 
     Args:
@@ -183,33 +164,29 @@ async def asyncio_detailed(
 
     Returns:
         Response[Union[Error, ProviderTemplateList]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         q=q,
-provider_kind=provider_kind,
-page=page,
-page_size=page_size,
-
+        provider_kind=provider_kind,
+        page=page,
+        page_size=page_size,
     )
 
-    response = await client.get_async_httpx_client().request(
-        **kwargs
-    )
+    response = await client.get_async_httpx_client().request(**kwargs)
 
     return _build_response(client=client, response=response)
 
+
 async def asyncio(
     *,
-    client: Union[AuthenticatedClient, Client],
-    q: Union[Unset, str] = UNSET,
-    provider_kind: Union[Unset, str] = UNSET,
-    page: Union[Unset, str] = UNSET,
-    page_size: Union[Unset, str] = UNSET,
-
-) -> Optional[Union[Error, ProviderTemplateList]]:
-    """ List/search LLM provider templates (public; ?q= substring on name/kind, ?providerKind= exact,
+    client: AuthenticatedClient | Client,
+    q: Unset | str = UNSET,
+    provider_kind: Unset | str = UNSET,
+    page: Unset | str = UNSET,
+    page_size: Unset | str = UNSET,
+) -> Error | ProviderTemplateList | None:
+    """List/search LLM provider templates (public; ?q= substring on name/kind, ?providerKind= exact,
     paginated)
 
     Args:
@@ -224,14 +201,14 @@ async def asyncio(
 
     Returns:
         Union[Error, ProviderTemplateList]
-     """
+    """
 
-
-    return (await asyncio_detailed(
-        client=client,
-q=q,
-provider_kind=provider_kind,
-page=page,
-page_size=page_size,
-
-    )).parsed
+    return (
+        await asyncio_detailed(
+            client=client,
+            q=q,
+            provider_kind=provider_kind,
+            page=page,
+            page_size=page_size,
+        )
+    ).parsed

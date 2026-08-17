@@ -1,49 +1,31 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
-
-
-
-
-
-
-
 T = TypeVar("T", bound="IntegrationConnectionSyncSettingsType0")
-
 
 
 @_attrs_define
 class IntegrationConnectionSyncSettingsType0:
-    """ Caller-tunable sync settings (gmailLabelIds / redditSubreddits / …) — non-secret, returned so settings forms can
+    """Caller-tunable sync settings (gmailLabelIds / redditSubreddits / …) — non-secret, returned so settings forms can
     prefill instead of blind-overwriting.
 
-     """
+    """
 
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
-
-
-
-
     def to_dict(self) -> dict[str, Any]:
-        
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
 
         return field_dict
 
-
-
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
-        integration_connection_sync_settings_type_0 = cls(
-        )
-
+        integration_connection_sync_settings_type_0 = cls()
 
         integration_connection_sync_settings_type_0.additional_properties = d
         return integration_connection_sync_settings_type_0

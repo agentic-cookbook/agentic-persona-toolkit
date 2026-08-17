@@ -1,43 +1,33 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
-from attrs import field as _attrs_field
-
-from ..types import UNSET, Unset
-
-
-
-
-
-
 
 T = TypeVar("T", bound="PostUsageUsageCountersResponse201")
 
 
-
 @_attrs_define
 class PostUsageUsageCountersResponse201:
-    """ 
-        Attributes:
-            scope (str):
-            principal_id (str):
-            period_start (str):
-            requests (int):
-            bytes_ (int):
-            updated_at (str):
-     """
+    """
+    Attributes:
+        scope (str):
+        principal_id (str):
+        period_start (str):
+        requests (int):
+        bytes_ (int):
+        tokens (int):
+        cost_micros (int):
+        updated_at (str):
+    """
 
     scope: str
     principal_id: str
     period_start: str
     requests: int
     bytes_: int
+    tokens: int
+    cost_micros: int
     updated_at: str
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         scope = self.scope
@@ -50,23 +40,28 @@ class PostUsageUsageCountersResponse201:
 
         bytes_ = self.bytes_
 
-        updated_at = self.updated_at
+        tokens = self.tokens
 
+        cost_micros = self.cost_micros
+
+        updated_at = self.updated_at
 
         field_dict: dict[str, Any] = {}
 
-        field_dict.update({
-            "scope": scope,
-            "principalId": principal_id,
-            "periodStart": period_start,
-            "requests": requests,
-            "bytes": bytes_,
-            "updatedAt": updated_at,
-        })
+        field_dict.update(
+            {
+                "scope": scope,
+                "principalId": principal_id,
+                "periodStart": period_start,
+                "requests": requests,
+                "bytes": bytes_,
+                "tokens": tokens,
+                "costMicros": cost_micros,
+                "updatedAt": updated_at,
+            }
+        )
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -81,6 +76,10 @@ class PostUsageUsageCountersResponse201:
 
         bytes_ = d.pop("bytes")
 
+        tokens = d.pop("tokens")
+
+        cost_micros = d.pop("costMicros")
+
         updated_at = d.pop("updatedAt")
 
         post_usage_usage_counters_response_201 = cls(
@@ -89,8 +88,9 @@ class PostUsageUsageCountersResponse201:
             period_start=period_start,
             requests=requests,
             bytes_=bytes_,
+            tokens=tokens,
+            cost_micros=cost_micros,
             updated_at=updated_at,
         )
 
         return post_usage_usage_counters_response_201
-

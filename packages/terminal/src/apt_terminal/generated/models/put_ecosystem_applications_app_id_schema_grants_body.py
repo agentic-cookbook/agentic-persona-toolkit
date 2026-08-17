@@ -1,76 +1,63 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import TYPE_CHECKING, Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
-
-from typing import cast
-
 if TYPE_CHECKING:
-  from ..models.put_ecosystem_applications_app_id_schema_grants_body_grants_item import PutEcosystemApplicationsAppIdSchemaGrantsBodyGrantsItem
-
-
-
+    from ..models.put_ecosystem_applications_app_id_schema_grants_body_grants_item import (
+        PutEcosystemApplicationsAppIdSchemaGrantsBodyGrantsItem,
+    )
 
 
 T = TypeVar("T", bound="PutEcosystemApplicationsAppIdSchemaGrantsBody")
 
 
-
 @_attrs_define
 class PutEcosystemApplicationsAppIdSchemaGrantsBody:
-    """ 
-        Attributes:
-            grants (list['PutEcosystemApplicationsAppIdSchemaGrantsBodyGrantsItem']):
-     """
+    """
+    Attributes:
+        grants (list['PutEcosystemApplicationsAppIdSchemaGrantsBodyGrantsItem']):
+    """
 
-    grants: list['PutEcosystemApplicationsAppIdSchemaGrantsBodyGrantsItem']
+    grants: list["PutEcosystemApplicationsAppIdSchemaGrantsBodyGrantsItem"]
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
-
-
-
-
     def to_dict(self) -> dict[str, Any]:
-        from ..models.put_ecosystem_applications_app_id_schema_grants_body_grants_item import PutEcosystemApplicationsAppIdSchemaGrantsBodyGrantsItem
         grants = []
         for grants_item_data in self.grants:
             grants_item = grants_item_data.to_dict()
             grants.append(grants_item)
 
-
-
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "grants": grants,
-        })
+        field_dict.update(
+            {
+                "grants": grants,
+            }
+        )
 
         return field_dict
 
-
-
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.put_ecosystem_applications_app_id_schema_grants_body_grants_item import PutEcosystemApplicationsAppIdSchemaGrantsBodyGrantsItem
+        from ..models.put_ecosystem_applications_app_id_schema_grants_body_grants_item import (
+            PutEcosystemApplicationsAppIdSchemaGrantsBodyGrantsItem,
+        )
+
         d = dict(src_dict)
         grants = []
         _grants = d.pop("grants")
-        for grants_item_data in (_grants):
-            grants_item = PutEcosystemApplicationsAppIdSchemaGrantsBodyGrantsItem.from_dict(grants_item_data)
-
-
+        for grants_item_data in _grants:
+            grants_item = PutEcosystemApplicationsAppIdSchemaGrantsBodyGrantsItem.from_dict(
+                grants_item_data
+            )
 
             grants.append(grants_item)
-
 
         put_ecosystem_applications_app_id_schema_grants_body = cls(
             grants=grants,
         )
-
 
         put_ecosystem_applications_app_id_schema_grants_body.additional_properties = d
         return put_ecosystem_applications_app_id_schema_grants_body

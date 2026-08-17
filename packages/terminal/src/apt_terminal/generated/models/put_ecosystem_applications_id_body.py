@@ -1,43 +1,29 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
-from attrs import field as _attrs_field
 
 from ..types import UNSET, Unset
-
-from ..types import UNSET, Unset
-from typing import Union
-
-
-
-
-
 
 T = TypeVar("T", bound="PutEcosystemApplicationsIdBody")
 
 
-
 @_attrs_define
 class PutEcosystemApplicationsIdBody:
-    """ 
-        Attributes:
-            ecosystem_id (Union[Unset, str]):
-            slug (Union[Unset, str]):
-            display_name (Union[Unset, str]):
-            consumer_kind (Union[Unset, str]):
-            is_deleted (Union[Unset, bool]):
-     """
+    """
+    Attributes:
+        ecosystem_id (Union[Unset, str]):
+        slug (Union[Unset, str]):
+        display_name (Union[Unset, str]):
+        consumer_kind (Union[Unset, str]):
+        sync_txid (Union[Unset, int]):
+    """
 
-    ecosystem_id: Union[Unset, str] = UNSET
-    slug: Union[Unset, str] = UNSET
-    display_name: Union[Unset, str] = UNSET
-    consumer_kind: Union[Unset, str] = UNSET
-    is_deleted: Union[Unset, bool] = UNSET
-
-
-
-
+    ecosystem_id: Unset | str = UNSET
+    slug: Unset | str = UNSET
+    display_name: Unset | str = UNSET
+    consumer_kind: Unset | str = UNSET
+    sync_txid: Unset | int = UNSET
 
     def to_dict(self) -> dict[str, Any]:
         ecosystem_id = self.ecosystem_id
@@ -48,13 +34,11 @@ class PutEcosystemApplicationsIdBody:
 
         consumer_kind = self.consumer_kind
 
-        is_deleted = self.is_deleted
-
+        sync_txid = self.sync_txid
 
         field_dict: dict[str, Any] = {}
 
-        field_dict.update({
-        })
+        field_dict.update({})
         if ecosystem_id is not UNSET:
             field_dict["ecosystemId"] = ecosystem_id
         if slug is not UNSET:
@@ -63,12 +47,10 @@ class PutEcosystemApplicationsIdBody:
             field_dict["displayName"] = display_name
         if consumer_kind is not UNSET:
             field_dict["consumerKind"] = consumer_kind
-        if is_deleted is not UNSET:
-            field_dict["isDeleted"] = is_deleted
+        if sync_txid is not UNSET:
+            field_dict["syncTxid"] = sync_txid
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -81,15 +63,14 @@ class PutEcosystemApplicationsIdBody:
 
         consumer_kind = d.pop("consumerKind", UNSET)
 
-        is_deleted = d.pop("isDeleted", UNSET)
+        sync_txid = d.pop("syncTxid", UNSET)
 
         put_ecosystem_applications_id_body = cls(
             ecosystem_id=ecosystem_id,
             slug=slug,
             display_name=display_name,
             consumer_kind=consumer_kind,
-            is_deleted=is_deleted,
+            sync_txid=sync_txid,
         )
 
         return put_ecosystem_applications_id_body
-

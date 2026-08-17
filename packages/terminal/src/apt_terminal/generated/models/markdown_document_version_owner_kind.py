@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class MarkdownDocumentVersionOwnerKind(str, Enum):
     CUSTOMER = "customer"
     ORGANIZATION = "organization"

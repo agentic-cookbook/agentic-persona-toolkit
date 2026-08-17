@@ -1,84 +1,60 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import TYPE_CHECKING, Any, TypeVar, Union, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 from ..types import UNSET, Unset
 
-from ..types import UNSET, Unset
-from typing import cast
-from typing import cast, Union
-from typing import Union
-
 if TYPE_CHECKING:
-  from ..models.put_content_markdown_id_body_author import PutContentMarkdownIdBodyAuthor
-
-
-
+    from ..models.put_content_markdown_id_body_author import PutContentMarkdownIdBodyAuthor
 
 
 T = TypeVar("T", bound="PutContentMarkdownIdBody")
 
 
-
 @_attrs_define
 class PutContentMarkdownIdBody:
-    """ At least one of content/title/category/tags. A content or title change appends a full-state version (author attaches
-    to it); a category/tags-only change updates the head in place WITHOUT a new version; a no-op returns the doc
-    unchanged.
+    """At least one of content/category/tags. A content change appends a full-state version (author attaches to it) and re-
+    derives the title; a category/tags-only change updates the head in place WITHOUT a new version; a no-op returns the
+    doc unchanged.
 
         Attributes:
-            content (Union[Unset, str]): New raw markdown; a real change bumps current_version.
-            title (Union[Unset, str]):
+            content (Union[Unset, str]): New raw markdown; a real change bumps current_version and re-derives the title.
             category (Union[None, Unset, str]): Classification label; send null to clear, omit to leave unchanged.
             tags (Union[Unset, list[str]]): Replacement tag set (trimmed + de-duplicated); omit to leave unchanged.
             author (Union[Unset, PutContentMarkdownIdBodyAuthor]): Author of this revision; omit to attribute to the calling
                 customer. customer/user are pinned to the caller; other types are caller-asserted (unverified).
-     """
+    """
 
-    content: Union[Unset, str] = UNSET
-    title: Union[Unset, str] = UNSET
-    category: Union[None, Unset, str] = UNSET
-    tags: Union[Unset, list[str]] = UNSET
-    author: Union[Unset, 'PutContentMarkdownIdBodyAuthor'] = UNSET
+    content: Unset | str = UNSET
+    category: None | Unset | str = UNSET
+    tags: Unset | list[str] = UNSET
+    author: Union[Unset, "PutContentMarkdownIdBodyAuthor"] = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
-
-
-
-
     def to_dict(self) -> dict[str, Any]:
-        from ..models.put_content_markdown_id_body_author import PutContentMarkdownIdBodyAuthor
         content = self.content
 
-        title = self.title
-
-        category: Union[None, Unset, str]
+        category: None | Unset | str
         if isinstance(self.category, Unset):
             category = UNSET
         else:
             category = self.category
 
-        tags: Union[Unset, list[str]] = UNSET
+        tags: Unset | list[str] = UNSET
         if not isinstance(self.tags, Unset):
             tags = self.tags
 
-
-
-        author: Union[Unset, dict[str, Any]] = UNSET
+        author: Unset | dict[str, Any] = UNSET
         if not isinstance(self.author, Unset):
             author = self.author.to_dict()
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-        })
+        field_dict.update({})
         if content is not UNSET:
             field_dict["content"] = content
-        if title is not UNSET:
-            field_dict["title"] = title
         if category is not UNSET:
             field_dict["category"] = category
         if tags is not UNSET:
@@ -88,47 +64,37 @@ class PutContentMarkdownIdBody:
 
         return field_dict
 
-
-
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.put_content_markdown_id_body_author import PutContentMarkdownIdBodyAuthor
+
         d = dict(src_dict)
         content = d.pop("content", UNSET)
 
-        title = d.pop("title", UNSET)
-
-        def _parse_category(data: object) -> Union[None, Unset, str]:
+        def _parse_category(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         category = _parse_category(d.pop("category", UNSET))
 
-
         tags = cast(list[str], d.pop("tags", UNSET))
 
-
         _author = d.pop("author", UNSET)
-        author: Union[Unset, PutContentMarkdownIdBodyAuthor]
-        if isinstance(_author,  Unset):
+        author: Unset | PutContentMarkdownIdBodyAuthor
+        if isinstance(_author, Unset):
             author = UNSET
         else:
             author = PutContentMarkdownIdBodyAuthor.from_dict(_author)
 
-
-
-
         put_content_markdown_id_body = cls(
             content=content,
-            title=title,
             category=category,
             tags=tags,
             author=author,
         )
-
 
         put_content_markdown_id_body.additional_properties = d
         return put_content_markdown_id_body

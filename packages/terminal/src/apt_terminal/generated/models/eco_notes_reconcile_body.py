@@ -1,44 +1,31 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import TYPE_CHECKING, Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
-
-from typing import cast
-
 if TYPE_CHECKING:
-  from ..models.eco_notes_reconcile_body_notes_item import EcoNotesReconcileBodyNotesItem
-
-
-
+    from ..models.eco_notes_reconcile_body_notes_item import EcoNotesReconcileBodyNotesItem
 
 
 T = TypeVar("T", bound="EcoNotesReconcileBody")
 
 
-
 @_attrs_define
 class EcoNotesReconcileBody:
-    """ 
-        Attributes:
-            subject_table (str):
-            subject_id (str):
-            notes (list['EcoNotesReconcileBodyNotesItem']):
-     """
+    """
+    Attributes:
+        subject_table (str):
+        subject_id (str):
+        notes (list['EcoNotesReconcileBodyNotesItem']):
+    """
 
     subject_table: str
     subject_id: str
-    notes: list['EcoNotesReconcileBodyNotesItem']
+    notes: list["EcoNotesReconcileBodyNotesItem"]
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
-
-
-
-
     def to_dict(self) -> dict[str, Any]:
-        from ..models.eco_notes_reconcile_body_notes_item import EcoNotesReconcileBodyNotesItem
         subject_table = self.subject_table
 
         subject_id = self.subject_id
@@ -48,24 +35,22 @@ class EcoNotesReconcileBody:
             notes_item = notes_item_data.to_dict()
             notes.append(notes_item)
 
-
-
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "subjectTable": subject_table,
-            "subjectId": subject_id,
-            "notes": notes,
-        })
+        field_dict.update(
+            {
+                "subjectTable": subject_table,
+                "subjectId": subject_id,
+                "notes": notes,
+            }
+        )
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.eco_notes_reconcile_body_notes_item import EcoNotesReconcileBodyNotesItem
+
         d = dict(src_dict)
         subject_table = d.pop("subjectTable")
 
@@ -73,20 +58,16 @@ class EcoNotesReconcileBody:
 
         notes = []
         _notes = d.pop("notes")
-        for notes_item_data in (_notes):
+        for notes_item_data in _notes:
             notes_item = EcoNotesReconcileBodyNotesItem.from_dict(notes_item_data)
 
-
-
             notes.append(notes_item)
-
 
         eco_notes_reconcile_body = cls(
             subject_table=subject_table,
             subject_id=subject_id,
             notes=notes,
         )
-
 
         eco_notes_reconcile_body.additional_properties = d
         return eco_notes_reconcile_body

@@ -1,49 +1,41 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar, cast
 
 from attrs import define as _attrs_define
-from attrs import field as _attrs_field
-
-from ..types import UNSET, Unset
-
-from typing import cast, Union
-
-
-
-
-
 
 T = TypeVar("T", bound="GetContentContactsResponse200Item")
 
 
-
 @_attrs_define
 class GetContentContactsResponse200Item:
-    """ 
-        Attributes:
-            id (str):
-            customer_id (str):
-            deleted_at (Union[None, str]):
-            ecosystem_id (str):
-            owner_kind (str):
-            owner_id (str):
-            person_user_id (Union[None, str]):
-            full_name (str):
-            nickname (str):
-            email (str):
-            phone (str):
-            notes (str):
-            created_at (str):
-            updated_at (str):
-     """
+    """
+    Attributes:
+        id (str):
+        customer_id (str):
+        deleted_at (Union[None, str]):
+        ecosystem_id (str):
+        owner_kind (str):
+        owner_id (str):
+        person_user_id (Union[None, str]):
+        full_name (str):
+        nickname (str):
+        email (str):
+        phone (str):
+        notes (str):
+        created_at (str):
+        updated_at (str):
+        sync_version (int):
+        sync_stamped_at (Union[None, str]):
+        sync_txid (int):
+    """
 
     id: str
     customer_id: str
-    deleted_at: Union[None, str]
+    deleted_at: None | str
     ecosystem_id: str
     owner_kind: str
     owner_id: str
-    person_user_id: Union[None, str]
+    person_user_id: None | str
     full_name: str
     nickname: str
     email: str
@@ -51,17 +43,16 @@ class GetContentContactsResponse200Item:
     notes: str
     created_at: str
     updated_at: str
-
-
-
-
+    sync_version: int
+    sync_stamped_at: None | str
+    sync_txid: int
 
     def to_dict(self) -> dict[str, Any]:
         id = self.id
 
         customer_id = self.customer_id
 
-        deleted_at: Union[None, str]
+        deleted_at: None | str
         deleted_at = self.deleted_at
 
         ecosystem_id = self.ecosystem_id
@@ -70,7 +61,7 @@ class GetContentContactsResponse200Item:
 
         owner_id = self.owner_id
 
-        person_user_id: Union[None, str]
+        person_user_id: None | str
         person_user_id = self.person_user_id
 
         full_name = self.full_name
@@ -87,29 +78,38 @@ class GetContentContactsResponse200Item:
 
         updated_at = self.updated_at
 
+        sync_version = self.sync_version
+
+        sync_stamped_at: None | str
+        sync_stamped_at = self.sync_stamped_at
+
+        sync_txid = self.sync_txid
 
         field_dict: dict[str, Any] = {}
 
-        field_dict.update({
-            "id": id,
-            "customerId": customer_id,
-            "deletedAt": deleted_at,
-            "ecosystemId": ecosystem_id,
-            "ownerKind": owner_kind,
-            "ownerId": owner_id,
-            "personUserId": person_user_id,
-            "fullName": full_name,
-            "nickname": nickname,
-            "email": email,
-            "phone": phone,
-            "notes": notes,
-            "createdAt": created_at,
-            "updatedAt": updated_at,
-        })
+        field_dict.update(
+            {
+                "id": id,
+                "customerId": customer_id,
+                "deletedAt": deleted_at,
+                "ecosystemId": ecosystem_id,
+                "ownerKind": owner_kind,
+                "ownerId": owner_id,
+                "personUserId": person_user_id,
+                "fullName": full_name,
+                "nickname": nickname,
+                "email": email,
+                "phone": phone,
+                "notes": notes,
+                "createdAt": created_at,
+                "updatedAt": updated_at,
+                "syncVersion": sync_version,
+                "syncStampedAt": sync_stamped_at,
+                "syncTxid": sync_txid,
+            }
+        )
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -118,13 +118,12 @@ class GetContentContactsResponse200Item:
 
         customer_id = d.pop("customerId")
 
-        def _parse_deleted_at(data: object) -> Union[None, str]:
+        def _parse_deleted_at(data: object) -> None | str:
             if data is None:
                 return data
-            return cast(Union[None, str], data)
+            return cast(None | str, data)
 
         deleted_at = _parse_deleted_at(d.pop("deletedAt"))
-
 
         ecosystem_id = d.pop("ecosystemId")
 
@@ -132,13 +131,12 @@ class GetContentContactsResponse200Item:
 
         owner_id = d.pop("ownerId")
 
-        def _parse_person_user_id(data: object) -> Union[None, str]:
+        def _parse_person_user_id(data: object) -> None | str:
             if data is None:
                 return data
-            return cast(Union[None, str], data)
+            return cast(None | str, data)
 
         person_user_id = _parse_person_user_id(d.pop("personUserId"))
-
 
         full_name = d.pop("fullName")
 
@@ -153,6 +151,17 @@ class GetContentContactsResponse200Item:
         created_at = d.pop("createdAt")
 
         updated_at = d.pop("updatedAt")
+
+        sync_version = d.pop("syncVersion")
+
+        def _parse_sync_stamped_at(data: object) -> None | str:
+            if data is None:
+                return data
+            return cast(None | str, data)
+
+        sync_stamped_at = _parse_sync_stamped_at(d.pop("syncStampedAt"))
+
+        sync_txid = d.pop("syncTxid")
 
         get_content_contacts_response_200_item = cls(
             id=id,
@@ -169,7 +178,9 @@ class GetContentContactsResponse200Item:
             notes=notes,
             created_at=created_at,
             updated_at=updated_at,
+            sync_version=sync_version,
+            sync_stamped_at=sync_stamped_at,
+            sync_txid=sync_txid,
         )
 
         return get_content_contacts_response_200_item
-

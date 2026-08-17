@@ -1,0 +1,196 @@
+from collections.abc import Mapping
+from typing import TYPE_CHECKING, Any, TypeVar, Union, cast
+
+from attrs import define as _attrs_define
+from attrs import field as _attrs_field
+
+from ..models.game_definition_status import GameDefinitionStatus
+from ..types import UNSET, Unset
+
+if TYPE_CHECKING:
+    from ..models.game_definition_data_type_0 import GameDefinitionDataType0
+
+
+T = TypeVar("T", bound="GameDefinition")
+
+
+@_attrs_define
+class GameDefinition:
+    """
+    Attributes:
+        id (str):
+        game_id (str):
+        kind (str):
+        key (str):
+        name (str):
+        status (GameDefinitionStatus):
+        created_at (str):
+        updated_at (str):
+        description (Union[None, Unset, str]):
+        author_customer_id (Union[None, Unset, str]):
+        data (Union['GameDefinitionDataType0', None, Unset]):
+    """
+
+    id: str
+    game_id: str
+    kind: str
+    key: str
+    name: str
+    status: GameDefinitionStatus
+    created_at: str
+    updated_at: str
+    description: None | Unset | str = UNSET
+    author_customer_id: None | Unset | str = UNSET
+    data: Union["GameDefinitionDataType0", None, Unset] = UNSET
+    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
+
+    def to_dict(self) -> dict[str, Any]:
+        from ..models.game_definition_data_type_0 import GameDefinitionDataType0
+
+        id = self.id
+
+        game_id = self.game_id
+
+        kind = self.kind
+
+        key = self.key
+
+        name = self.name
+
+        status = self.status.value
+
+        created_at = self.created_at
+
+        updated_at = self.updated_at
+
+        description: None | Unset | str
+        if isinstance(self.description, Unset):
+            description = UNSET
+        else:
+            description = self.description
+
+        author_customer_id: None | Unset | str
+        if isinstance(self.author_customer_id, Unset):
+            author_customer_id = UNSET
+        else:
+            author_customer_id = self.author_customer_id
+
+        data: None | Unset | dict[str, Any]
+        if isinstance(self.data, Unset):
+            data = UNSET
+        elif isinstance(self.data, GameDefinitionDataType0):
+            data = self.data.to_dict()
+        else:
+            data = self.data
+
+        field_dict: dict[str, Any] = {}
+        field_dict.update(self.additional_properties)
+        field_dict.update(
+            {
+                "id": id,
+                "gameId": game_id,
+                "kind": kind,
+                "key": key,
+                "name": name,
+                "status": status,
+                "createdAt": created_at,
+                "updatedAt": updated_at,
+            }
+        )
+        if description is not UNSET:
+            field_dict["description"] = description
+        if author_customer_id is not UNSET:
+            field_dict["authorCustomerId"] = author_customer_id
+        if data is not UNSET:
+            field_dict["data"] = data
+
+        return field_dict
+
+    @classmethod
+    def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
+        from ..models.game_definition_data_type_0 import GameDefinitionDataType0
+
+        d = dict(src_dict)
+        id = d.pop("id")
+
+        game_id = d.pop("gameId")
+
+        kind = d.pop("kind")
+
+        key = d.pop("key")
+
+        name = d.pop("name")
+
+        status = GameDefinitionStatus(d.pop("status"))
+
+        created_at = d.pop("createdAt")
+
+        updated_at = d.pop("updatedAt")
+
+        def _parse_description(data: object) -> None | Unset | str:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(None | Unset | str, data)
+
+        description = _parse_description(d.pop("description", UNSET))
+
+        def _parse_author_customer_id(data: object) -> None | Unset | str:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(None | Unset | str, data)
+
+        author_customer_id = _parse_author_customer_id(d.pop("authorCustomerId", UNSET))
+
+        def _parse_data(data: object) -> Union["GameDefinitionDataType0", None, Unset]:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            try:
+                if not isinstance(data, dict):
+                    raise TypeError()
+                data_type_0 = GameDefinitionDataType0.from_dict(data)
+
+                return data_type_0
+            except:  # noqa: E722
+                pass
+            return cast(Union["GameDefinitionDataType0", None, Unset], data)
+
+        data = _parse_data(d.pop("data", UNSET))
+
+        game_definition = cls(
+            id=id,
+            game_id=game_id,
+            kind=kind,
+            key=key,
+            name=name,
+            status=status,
+            created_at=created_at,
+            updated_at=updated_at,
+            description=description,
+            author_customer_id=author_customer_id,
+            data=data,
+        )
+
+        game_definition.additional_properties = d
+        return game_definition
+
+    @property
+    def additional_keys(self) -> list[str]:
+        return list(self.additional_properties.keys())
+
+    def __getitem__(self, key: str) -> Any:
+        return self.additional_properties[key]
+
+    def __setitem__(self, key: str, value: Any) -> None:
+        self.additional_properties[key] = value
+
+    def __delitem__(self, key: str) -> None:
+        del self.additional_properties[key]
+
+    def __contains__(self, key: str) -> bool:
+        return key in self.additional_properties

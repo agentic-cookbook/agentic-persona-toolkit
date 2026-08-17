@@ -1,57 +1,41 @@
 from http import HTTPStatus
-from typing import Any, Optional, Union, cast
+from typing import Any
 
 import httpx
 
-from ...client import AuthenticatedClient, Client
-from ...types import Response, UNSET
 from ... import errors
-
+from ...client import AuthenticatedClient, Client
 from ...models.bucket_access_group_list import BucketAccessGroupList
 from ...models.error import Error
-from typing import cast
-
+from ...types import Response
 
 
 def _get_kwargs(
     bucket_id: str,
-
 ) -> dict[str, Any]:
-    
-
-    
-
-    
-
     _kwargs: dict[str, Any] = {
         "method": "get",
-        "url": "/bucket/buckets/{bucket_id}/access-groups".format(bucket_id=bucket_id,),
+        "url": f"/bucket/buckets/{bucket_id}/access-groups",
     }
-
 
     return _kwargs
 
 
-
-def _parse_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Optional[Union[BucketAccessGroupList, Error]]:
+def _parse_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> BucketAccessGroupList | Error | None:
     if response.status_code == 200:
         response_200 = BucketAccessGroupList.from_dict(response.json())
-
-
 
         return response_200
 
     if response.status_code == 401:
         response_401 = Error.from_dict(response.json())
 
-
-
         return response_401
 
     if response.status_code == 404:
         response_404 = Error.from_dict(response.json())
-
-
 
         return response_404
 
@@ -61,7 +45,9 @@ def _parse_response(*, client: Union[AuthenticatedClient, Client], response: htt
         return None
 
 
-def _build_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Response[Union[BucketAccessGroupList, Error]]:
+def _build_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Response[BucketAccessGroupList | Error]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -74,9 +60,8 @@ def sync_detailed(
     bucket_id: str,
     *,
     client: AuthenticatedClient,
-
-) -> Response[Union[BucketAccessGroupList, Error]]:
-    """ List access groups in a bucket
+) -> Response[BucketAccessGroupList | Error]:
+    """List access groups in a bucket
 
     Args:
         bucket_id (str):
@@ -87,12 +72,10 @@ def sync_detailed(
 
     Returns:
         Response[Union[BucketAccessGroupList, Error]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         bucket_id=bucket_id,
-
     )
 
     response = client.get_httpx_client().request(
@@ -101,13 +84,13 @@ def sync_detailed(
 
     return _build_response(client=client, response=response)
 
+
 def sync(
     bucket_id: str,
     *,
     client: AuthenticatedClient,
-
-) -> Optional[Union[BucketAccessGroupList, Error]]:
-    """ List access groups in a bucket
+) -> BucketAccessGroupList | Error | None:
+    """List access groups in a bucket
 
     Args:
         bucket_id (str):
@@ -118,22 +101,20 @@ def sync(
 
     Returns:
         Union[BucketAccessGroupList, Error]
-     """
-
+    """
 
     return sync_detailed(
         bucket_id=bucket_id,
-client=client,
-
+        client=client,
     ).parsed
+
 
 async def asyncio_detailed(
     bucket_id: str,
     *,
     client: AuthenticatedClient,
-
-) -> Response[Union[BucketAccessGroupList, Error]]:
-    """ List access groups in a bucket
+) -> Response[BucketAccessGroupList | Error]:
+    """List access groups in a bucket
 
     Args:
         bucket_id (str):
@@ -144,27 +125,23 @@ async def asyncio_detailed(
 
     Returns:
         Response[Union[BucketAccessGroupList, Error]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         bucket_id=bucket_id,
-
     )
 
-    response = await client.get_async_httpx_client().request(
-        **kwargs
-    )
+    response = await client.get_async_httpx_client().request(**kwargs)
 
     return _build_response(client=client, response=response)
+
 
 async def asyncio(
     bucket_id: str,
     *,
     client: AuthenticatedClient,
-
-) -> Optional[Union[BucketAccessGroupList, Error]]:
-    """ List access groups in a bucket
+) -> BucketAccessGroupList | Error | None:
+    """List access groups in a bucket
 
     Args:
         bucket_id (str):
@@ -175,11 +152,11 @@ async def asyncio(
 
     Returns:
         Union[BucketAccessGroupList, Error]
-     """
+    """
 
-
-    return (await asyncio_detailed(
-        bucket_id=bucket_id,
-client=client,
-
-    )).parsed
+    return (
+        await asyncio_detailed(
+            bucket_id=bucket_id,
+            client=client,
+        )
+    ).parsed

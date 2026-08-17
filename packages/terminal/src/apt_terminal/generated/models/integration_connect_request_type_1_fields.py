@@ -1,49 +1,31 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
-
-
-
-
-
-
-
 T = TypeVar("T", bound="IntegrationConnectRequestType1Fields")
-
 
 
 @_attrs_define
 class IntegrationConnectRequestType1Fields:
-    """ The provider's declared config fields (configFields), keyed by field key; validated + split into the secret vs non-
+    """The provider's declared config fields (configFields), keyed by field key; validated + split into the secret vs non-
     secret config against the spec.
 
-     """
+    """
 
     additional_properties: dict[str, str] = _attrs_field(init=False, factory=dict)
 
-
-
-
-
     def to_dict(self) -> dict[str, Any]:
-        
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
 
         return field_dict
 
-
-
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
-        integration_connect_request_type_1_fields = cls(
-        )
-
+        integration_connect_request_type_1_fields = cls()
 
         integration_connect_request_type_1_fields.additional_properties = d
         return integration_connect_request_type_1_fields

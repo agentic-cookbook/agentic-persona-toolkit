@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class AppearanceSettingsPrefsReduceMotion(str, Enum):
     AUTO = "auto"
     OFF = "off"

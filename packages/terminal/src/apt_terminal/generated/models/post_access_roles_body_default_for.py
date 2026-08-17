@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class PostAccessRolesBodyDefaultFor(str, Enum):
     CUSTOMER = "customer"
     PERSONA = "persona"

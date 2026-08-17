@@ -1,66 +1,50 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import TYPE_CHECKING, Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
-
-from typing import cast
-
 if TYPE_CHECKING:
-  from ..models.storage_attachment import StorageAttachment
-
-
-
+    from ..models.storage_attachment import StorageAttachment
 
 
 T = TypeVar("T", bound="StoragePresignedUpload")
 
 
-
 @_attrs_define
 class StoragePresignedUpload:
-    """ 
-        Attributes:
-            attachment (StorageAttachment):
-            upload_url (str): Presigned PUT URL — upload the bytes directly to R2.
-     """
+    """
+    Attributes:
+        attachment (StorageAttachment):
+        upload_url (str): Presigned PUT URL — upload the bytes directly to R2.
+    """
 
-    attachment: 'StorageAttachment'
+    attachment: "StorageAttachment"
     upload_url: str
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
-
-
-
-
     def to_dict(self) -> dict[str, Any]:
-        from ..models.storage_attachment import StorageAttachment
         attachment = self.attachment.to_dict()
 
         upload_url = self.upload_url
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "attachment": attachment,
-            "uploadUrl": upload_url,
-        })
+        field_dict.update(
+            {
+                "attachment": attachment,
+                "uploadUrl": upload_url,
+            }
+        )
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.storage_attachment import StorageAttachment
+
         d = dict(src_dict)
         attachment = StorageAttachment.from_dict(d.pop("attachment"))
-
-
-
 
         upload_url = d.pop("uploadUrl")
 
@@ -68,7 +52,6 @@ class StoragePresignedUpload:
             attachment=attachment,
             upload_url=upload_url,
         )
-
 
         storage_presigned_upload.additional_properties = d
         return storage_presigned_upload

@@ -1,50 +1,43 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar, cast
 
 from attrs import define as _attrs_define
-from attrs import field as _attrs_field
-
-from ..types import UNSET, Unset
-
-from typing import cast, Union
-
-
-
-
-
 
 T = TypeVar("T", bound="GetContentCategoryItemsIdResponse200")
 
 
-
 @_attrs_define
 class GetContentCategoryItemsIdResponse200:
-    """ 
-        Attributes:
-            id (str):
-            ecosystem_id (str):
-            customer_id (str):
-            deleted_at (Union[None, str]):
-            category_id (str):
-            target_kind (str):
-            target_id (str):
-            sort_order (int):
-            created_at (str):
-     """
+    """
+    Attributes:
+        id (str):
+        ecosystem_id (str):
+        customer_id (str):
+        deleted_at (Union[None, str]):
+        category_id (str):
+        target_kind (str):
+        target_id (str):
+        sort_order (int):
+        created_at (str):
+        updated_at (str):
+        sync_version (int):
+        sync_stamped_at (Union[None, str]):
+        sync_txid (int):
+    """
 
     id: str
     ecosystem_id: str
     customer_id: str
-    deleted_at: Union[None, str]
+    deleted_at: None | str
     category_id: str
     target_kind: str
     target_id: str
     sort_order: int
     created_at: str
-
-
-
-
+    updated_at: str
+    sync_version: int
+    sync_stamped_at: None | str
+    sync_txid: int
 
     def to_dict(self) -> dict[str, Any]:
         id = self.id
@@ -53,7 +46,7 @@ class GetContentCategoryItemsIdResponse200:
 
         customer_id = self.customer_id
 
-        deleted_at: Union[None, str]
+        deleted_at: None | str
         deleted_at = self.deleted_at
 
         category_id = self.category_id
@@ -66,24 +59,36 @@ class GetContentCategoryItemsIdResponse200:
 
         created_at = self.created_at
 
+        updated_at = self.updated_at
+
+        sync_version = self.sync_version
+
+        sync_stamped_at: None | str
+        sync_stamped_at = self.sync_stamped_at
+
+        sync_txid = self.sync_txid
 
         field_dict: dict[str, Any] = {}
 
-        field_dict.update({
-            "id": id,
-            "ecosystemId": ecosystem_id,
-            "customerId": customer_id,
-            "deletedAt": deleted_at,
-            "categoryId": category_id,
-            "targetKind": target_kind,
-            "targetId": target_id,
-            "sortOrder": sort_order,
-            "createdAt": created_at,
-        })
+        field_dict.update(
+            {
+                "id": id,
+                "ecosystemId": ecosystem_id,
+                "customerId": customer_id,
+                "deletedAt": deleted_at,
+                "categoryId": category_id,
+                "targetKind": target_kind,
+                "targetId": target_id,
+                "sortOrder": sort_order,
+                "createdAt": created_at,
+                "updatedAt": updated_at,
+                "syncVersion": sync_version,
+                "syncStampedAt": sync_stamped_at,
+                "syncTxid": sync_txid,
+            }
+        )
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -94,13 +99,12 @@ class GetContentCategoryItemsIdResponse200:
 
         customer_id = d.pop("customerId")
 
-        def _parse_deleted_at(data: object) -> Union[None, str]:
+        def _parse_deleted_at(data: object) -> None | str:
             if data is None:
                 return data
-            return cast(Union[None, str], data)
+            return cast(None | str, data)
 
         deleted_at = _parse_deleted_at(d.pop("deletedAt"))
-
 
         category_id = d.pop("categoryId")
 
@@ -112,6 +116,19 @@ class GetContentCategoryItemsIdResponse200:
 
         created_at = d.pop("createdAt")
 
+        updated_at = d.pop("updatedAt")
+
+        sync_version = d.pop("syncVersion")
+
+        def _parse_sync_stamped_at(data: object) -> None | str:
+            if data is None:
+                return data
+            return cast(None | str, data)
+
+        sync_stamped_at = _parse_sync_stamped_at(d.pop("syncStampedAt"))
+
+        sync_txid = d.pop("syncTxid")
+
         get_content_category_items_id_response_200 = cls(
             id=id,
             ecosystem_id=ecosystem_id,
@@ -122,7 +139,10 @@ class GetContentCategoryItemsIdResponse200:
             target_id=target_id,
             sort_order=sort_order,
             created_at=created_at,
+            updated_at=updated_at,
+            sync_version=sync_version,
+            sync_stamped_at=sync_stamped_at,
+            sync_txid=sync_txid,
         )
 
         return get_content_category_items_id_response_200
-

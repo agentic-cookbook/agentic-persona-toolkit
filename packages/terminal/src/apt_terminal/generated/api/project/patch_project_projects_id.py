@@ -1,39 +1,29 @@
 from http import HTTPStatus
-from typing import Any, Optional, Union, cast
+from typing import Any
 
 import httpx
 
-from ...client import AuthenticatedClient, Client
-from ...types import Response, UNSET
 from ... import errors
-
+from ...client import AuthenticatedClient, Client
 from ...models.error import Error
 from ...models.patch_project_projects_id_body import PatchProjectProjectsIdBody
 from ...models.project import Project
-from typing import cast
-
+from ...types import Response
 
 
 def _get_kwargs(
     id: str,
     *,
     body: PatchProjectProjectsIdBody,
-
 ) -> dict[str, Any]:
     headers: dict[str, Any] = {}
 
-
-    
-
-    
-
     _kwargs: dict[str, Any] = {
         "method": "patch",
-        "url": "/project/projects/{id}".format(id=id,),
+        "url": f"/project/projects/{id}",
     }
 
     _kwargs["json"] = body.to_dict()
-
 
     headers["Content-Type"] = "application/json"
 
@@ -41,35 +31,38 @@ def _get_kwargs(
     return _kwargs
 
 
-
-def _parse_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Optional[Union[Error, Project]]:
+def _parse_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Error | Project | None:
     if response.status_code == 200:
         response_200 = Project.from_dict(response.json())
-
-
 
         return response_200
 
     if response.status_code == 400:
         response_400 = Error.from_dict(response.json())
 
-
-
         return response_400
 
     if response.status_code == 401:
         response_401 = Error.from_dict(response.json())
 
-
-
         return response_401
+
+    if response.status_code == 403:
+        response_403 = Error.from_dict(response.json())
+
+        return response_403
 
     if response.status_code == 404:
         response_404 = Error.from_dict(response.json())
 
-
-
         return response_404
+
+    if response.status_code == 409:
+        response_409 = Error.from_dict(response.json())
+
+        return response_409
 
     if client.raise_on_unexpected_status:
         raise errors.UnexpectedStatus(response.status_code, response.content)
@@ -77,7 +70,9 @@ def _parse_response(*, client: Union[AuthenticatedClient, Client], response: htt
         return None
 
 
-def _build_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Response[Union[Error, Project]]:
+def _build_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Response[Error | Project]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -91,9 +86,11 @@ def sync_detailed(
     *,
     client: AuthenticatedClient,
     body: PatchProjectProjectsIdBody,
+) -> Response[Error | Project]:
+    """Update a project (+ a project.updated activity)
 
-) -> Response[Union[Error, Project]]:
-    """ Update a project (+ a project.updated activity)
+     Requires the project’s projects item U verb. A patch that changes nothing is a true no-op: no write,
+    no updated_at bump, and no project.updated{changed:[]} row.
 
     Args:
         id (str):
@@ -105,13 +102,11 @@ def sync_detailed(
 
     Returns:
         Response[Union[Error, Project]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         id=id,
-body=body,
-
+        body=body,
     )
 
     response = client.get_httpx_client().request(
@@ -120,14 +115,17 @@ body=body,
 
     return _build_response(client=client, response=response)
 
+
 def sync(
     id: str,
     *,
     client: AuthenticatedClient,
     body: PatchProjectProjectsIdBody,
+) -> Error | Project | None:
+    """Update a project (+ a project.updated activity)
 
-) -> Optional[Union[Error, Project]]:
-    """ Update a project (+ a project.updated activity)
+     Requires the project’s projects item U verb. A patch that changes nothing is a true no-op: no write,
+    no updated_at bump, and no project.updated{changed:[]} row.
 
     Args:
         id (str):
@@ -139,24 +137,25 @@ def sync(
 
     Returns:
         Union[Error, Project]
-     """
-
+    """
 
     return sync_detailed(
         id=id,
-client=client,
-body=body,
-
+        client=client,
+        body=body,
     ).parsed
+
 
 async def asyncio_detailed(
     id: str,
     *,
     client: AuthenticatedClient,
     body: PatchProjectProjectsIdBody,
+) -> Response[Error | Project]:
+    """Update a project (+ a project.updated activity)
 
-) -> Response[Union[Error, Project]]:
-    """ Update a project (+ a project.updated activity)
+     Requires the project’s projects item U verb. A patch that changes nothing is a true no-op: no write,
+    no updated_at bump, and no project.updated{changed:[]} row.
 
     Args:
         id (str):
@@ -168,29 +167,28 @@ async def asyncio_detailed(
 
     Returns:
         Response[Union[Error, Project]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         id=id,
-body=body,
-
+        body=body,
     )
 
-    response = await client.get_async_httpx_client().request(
-        **kwargs
-    )
+    response = await client.get_async_httpx_client().request(**kwargs)
 
     return _build_response(client=client, response=response)
+
 
 async def asyncio(
     id: str,
     *,
     client: AuthenticatedClient,
     body: PatchProjectProjectsIdBody,
+) -> Error | Project | None:
+    """Update a project (+ a project.updated activity)
 
-) -> Optional[Union[Error, Project]]:
-    """ Update a project (+ a project.updated activity)
+     Requires the project’s projects item U verb. A patch that changes nothing is a true no-op: no write,
+    no updated_at bump, and no project.updated{changed:[]} row.
 
     Args:
         id (str):
@@ -202,12 +200,12 @@ async def asyncio(
 
     Returns:
         Union[Error, Project]
-     """
+    """
 
-
-    return (await asyncio_detailed(
-        id=id,
-client=client,
-body=body,
-
-    )).parsed
+    return (
+        await asyncio_detailed(
+            id=id,
+            client=client,
+            body=body,
+        )
+    ).parsed

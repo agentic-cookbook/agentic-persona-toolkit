@@ -1,45 +1,37 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar, cast
 
 from attrs import define as _attrs_define
-from attrs import field as _attrs_field
-
-from ..types import UNSET, Unset
-
-from typing import cast, Union
-
-
-
-
-
 
 T = TypeVar("T", bound="GetContentLocationsIdResponse200")
 
 
-
 @_attrs_define
 class GetContentLocationsIdResponse200:
-    """ 
-        Attributes:
-            id (str):
-            customer_id (str):
-            deleted_at (Union[None, str]):
-            ecosystem_id (str):
-            owner_kind (str):
-            owner_id (str):
-            place (str):
-            region (str):
-            country (str):
-            start_date (str):
-            end_date (Union[None, str]):
-            notes (str):
-            created_at (str):
-            updated_at (str):
-     """
+    """
+    Attributes:
+        id (str):
+        customer_id (str):
+        deleted_at (Union[None, str]):
+        ecosystem_id (str):
+        owner_kind (str):
+        owner_id (str):
+        place (str):
+        region (str):
+        country (str):
+        start_date (str):
+        end_date (Union[None, str]):
+        notes (str):
+        created_at (str):
+        updated_at (str):
+        sync_version (int):
+        sync_stamped_at (Union[None, str]):
+        sync_txid (int):
+    """
 
     id: str
     customer_id: str
-    deleted_at: Union[None, str]
+    deleted_at: None | str
     ecosystem_id: str
     owner_kind: str
     owner_id: str
@@ -47,21 +39,20 @@ class GetContentLocationsIdResponse200:
     region: str
     country: str
     start_date: str
-    end_date: Union[None, str]
+    end_date: None | str
     notes: str
     created_at: str
     updated_at: str
-
-
-
-
+    sync_version: int
+    sync_stamped_at: None | str
+    sync_txid: int
 
     def to_dict(self) -> dict[str, Any]:
         id = self.id
 
         customer_id = self.customer_id
 
-        deleted_at: Union[None, str]
+        deleted_at: None | str
         deleted_at = self.deleted_at
 
         ecosystem_id = self.ecosystem_id
@@ -78,7 +69,7 @@ class GetContentLocationsIdResponse200:
 
         start_date = self.start_date
 
-        end_date: Union[None, str]
+        end_date: None | str
         end_date = self.end_date
 
         notes = self.notes
@@ -87,29 +78,38 @@ class GetContentLocationsIdResponse200:
 
         updated_at = self.updated_at
 
+        sync_version = self.sync_version
+
+        sync_stamped_at: None | str
+        sync_stamped_at = self.sync_stamped_at
+
+        sync_txid = self.sync_txid
 
         field_dict: dict[str, Any] = {}
 
-        field_dict.update({
-            "id": id,
-            "customerId": customer_id,
-            "deletedAt": deleted_at,
-            "ecosystemId": ecosystem_id,
-            "ownerKind": owner_kind,
-            "ownerId": owner_id,
-            "place": place,
-            "region": region,
-            "country": country,
-            "startDate": start_date,
-            "endDate": end_date,
-            "notes": notes,
-            "createdAt": created_at,
-            "updatedAt": updated_at,
-        })
+        field_dict.update(
+            {
+                "id": id,
+                "customerId": customer_id,
+                "deletedAt": deleted_at,
+                "ecosystemId": ecosystem_id,
+                "ownerKind": owner_kind,
+                "ownerId": owner_id,
+                "place": place,
+                "region": region,
+                "country": country,
+                "startDate": start_date,
+                "endDate": end_date,
+                "notes": notes,
+                "createdAt": created_at,
+                "updatedAt": updated_at,
+                "syncVersion": sync_version,
+                "syncStampedAt": sync_stamped_at,
+                "syncTxid": sync_txid,
+            }
+        )
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -118,13 +118,12 @@ class GetContentLocationsIdResponse200:
 
         customer_id = d.pop("customerId")
 
-        def _parse_deleted_at(data: object) -> Union[None, str]:
+        def _parse_deleted_at(data: object) -> None | str:
             if data is None:
                 return data
-            return cast(Union[None, str], data)
+            return cast(None | str, data)
 
         deleted_at = _parse_deleted_at(d.pop("deletedAt"))
-
 
         ecosystem_id = d.pop("ecosystemId")
 
@@ -140,19 +139,29 @@ class GetContentLocationsIdResponse200:
 
         start_date = d.pop("startDate")
 
-        def _parse_end_date(data: object) -> Union[None, str]:
+        def _parse_end_date(data: object) -> None | str:
             if data is None:
                 return data
-            return cast(Union[None, str], data)
+            return cast(None | str, data)
 
         end_date = _parse_end_date(d.pop("endDate"))
-
 
         notes = d.pop("notes")
 
         created_at = d.pop("createdAt")
 
         updated_at = d.pop("updatedAt")
+
+        sync_version = d.pop("syncVersion")
+
+        def _parse_sync_stamped_at(data: object) -> None | str:
+            if data is None:
+                return data
+            return cast(None | str, data)
+
+        sync_stamped_at = _parse_sync_stamped_at(d.pop("syncStampedAt"))
+
+        sync_txid = d.pop("syncTxid")
 
         get_content_locations_id_response_200 = cls(
             id=id,
@@ -169,7 +178,9 @@ class GetContentLocationsIdResponse200:
             notes=notes,
             created_at=created_at,
             updated_at=updated_at,
+            sync_version=sync_version,
+            sync_stamped_at=sync_stamped_at,
+            sync_txid=sync_txid,
         )
 
         return get_content_locations_id_response_200
-

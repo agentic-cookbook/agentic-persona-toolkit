@@ -1,41 +1,32 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar, cast
 
 from attrs import define as _attrs_define
-from attrs import field as _attrs_field
-
-from ..types import UNSET, Unset
-
-from typing import cast, Union
-
-
-
-
-
 
 T = TypeVar("T", bound="GetEcosystemEcosystemsIdResponse200")
 
 
-
 @_attrs_define
 class GetEcosystemEcosystemsIdResponse200:
-    """ 
-        Attributes:
-            id (str):
-            owner_id (str):
-            slug (str):
-            name (str):
-            description (str):
-            region (str):
-            dedicated_db_connection_id (Union[None, str]):
-            primary_domain (str):
-            created_at (str):
-            updated_at (str):
-            is_deleted (bool):
-            is_default (bool):
-            is_infrastructure (bool):
-            namespace_id (Union[None, str]):
-     """
+    """
+    Attributes:
+        id (str):
+        owner_id (str):
+        slug (str):
+        name (str):
+        description (str):
+        region (str):
+        dedicated_db_connection_id (Union[None, str]):
+        primary_domain (str):
+        created_at (str):
+        updated_at (str):
+        is_deleted (bool):
+        is_default (bool):
+        is_infrastructure (bool):
+        namespace_id (Union[None, str]):
+        parent_id (Union[None, str]):
+        archived_at (Union[None, str]):
+    """
 
     id: str
     owner_id: str
@@ -43,18 +34,16 @@ class GetEcosystemEcosystemsIdResponse200:
     name: str
     description: str
     region: str
-    dedicated_db_connection_id: Union[None, str]
+    dedicated_db_connection_id: None | str
     primary_domain: str
     created_at: str
     updated_at: str
     is_deleted: bool
     is_default: bool
     is_infrastructure: bool
-    namespace_id: Union[None, str]
-
-
-
-
+    namespace_id: None | str
+    parent_id: None | str
+    archived_at: None | str
 
     def to_dict(self) -> dict[str, Any]:
         id = self.id
@@ -69,7 +58,7 @@ class GetEcosystemEcosystemsIdResponse200:
 
         region = self.region
 
-        dedicated_db_connection_id: Union[None, str]
+        dedicated_db_connection_id: None | str
         dedicated_db_connection_id = self.dedicated_db_connection_id
 
         primary_domain = self.primary_domain
@@ -84,32 +73,39 @@ class GetEcosystemEcosystemsIdResponse200:
 
         is_infrastructure = self.is_infrastructure
 
-        namespace_id: Union[None, str]
+        namespace_id: None | str
         namespace_id = self.namespace_id
 
+        parent_id: None | str
+        parent_id = self.parent_id
+
+        archived_at: None | str
+        archived_at = self.archived_at
 
         field_dict: dict[str, Any] = {}
 
-        field_dict.update({
-            "id": id,
-            "ownerId": owner_id,
-            "slug": slug,
-            "name": name,
-            "description": description,
-            "region": region,
-            "dedicatedDbConnectionId": dedicated_db_connection_id,
-            "primaryDomain": primary_domain,
-            "createdAt": created_at,
-            "updatedAt": updated_at,
-            "isDeleted": is_deleted,
-            "isDefault": is_default,
-            "isInfrastructure": is_infrastructure,
-            "namespaceId": namespace_id,
-        })
+        field_dict.update(
+            {
+                "id": id,
+                "ownerId": owner_id,
+                "slug": slug,
+                "name": name,
+                "description": description,
+                "region": region,
+                "dedicatedDbConnectionId": dedicated_db_connection_id,
+                "primaryDomain": primary_domain,
+                "createdAt": created_at,
+                "updatedAt": updated_at,
+                "isDeleted": is_deleted,
+                "isDefault": is_default,
+                "isInfrastructure": is_infrastructure,
+                "namespaceId": namespace_id,
+                "parentId": parent_id,
+                "archivedAt": archived_at,
+            }
+        )
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -126,13 +122,14 @@ class GetEcosystemEcosystemsIdResponse200:
 
         region = d.pop("region")
 
-        def _parse_dedicated_db_connection_id(data: object) -> Union[None, str]:
+        def _parse_dedicated_db_connection_id(data: object) -> None | str:
             if data is None:
                 return data
-            return cast(Union[None, str], data)
+            return cast(None | str, data)
 
-        dedicated_db_connection_id = _parse_dedicated_db_connection_id(d.pop("dedicatedDbConnectionId"))
-
+        dedicated_db_connection_id = _parse_dedicated_db_connection_id(
+            d.pop("dedicatedDbConnectionId")
+        )
 
         primary_domain = d.pop("primaryDomain")
 
@@ -146,13 +143,26 @@ class GetEcosystemEcosystemsIdResponse200:
 
         is_infrastructure = d.pop("isInfrastructure")
 
-        def _parse_namespace_id(data: object) -> Union[None, str]:
+        def _parse_namespace_id(data: object) -> None | str:
             if data is None:
                 return data
-            return cast(Union[None, str], data)
+            return cast(None | str, data)
 
         namespace_id = _parse_namespace_id(d.pop("namespaceId"))
 
+        def _parse_parent_id(data: object) -> None | str:
+            if data is None:
+                return data
+            return cast(None | str, data)
+
+        parent_id = _parse_parent_id(d.pop("parentId"))
+
+        def _parse_archived_at(data: object) -> None | str:
+            if data is None:
+                return data
+            return cast(None | str, data)
+
+        archived_at = _parse_archived_at(d.pop("archivedAt"))
 
         get_ecosystem_ecosystems_id_response_200 = cls(
             id=id,
@@ -169,7 +179,8 @@ class GetEcosystemEcosystemsIdResponse200:
             is_default=is_default,
             is_infrastructure=is_infrastructure,
             namespace_id=namespace_id,
+            parent_id=parent_id,
+            archived_at=archived_at,
         )
 
         return get_ecosystem_ecosystems_id_response_200
-

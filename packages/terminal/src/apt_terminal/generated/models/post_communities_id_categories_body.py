@@ -1,44 +1,31 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 from ..types import UNSET, Unset
 
-from ..types import UNSET, Unset
-from typing import Union
-
-
-
-
-
-
 T = TypeVar("T", bound="PostCommunitiesIdCategoriesBody")
-
 
 
 @_attrs_define
 class PostCommunitiesIdCategoriesBody:
-    """ 
-        Attributes:
-            slug (str): Unique per community.
-            name (str):
-            description (Union[Unset, str]):
-            color (Union[Unset, str]): Display color (e.g. a hex string).
-            display_order (Union[Unset, int]): Sort order within the community.
-     """
+    """
+    Attributes:
+        slug (str): Unique per community.
+        name (str):
+        description (Union[Unset, str]):
+        color (Union[Unset, str]): Display color (e.g. a hex string).
+        display_order (Union[Unset, int]): Sort order within the community.
+    """
 
     slug: str
     name: str
-    description: Union[Unset, str] = UNSET
-    color: Union[Unset, str] = UNSET
-    display_order: Union[Unset, int] = UNSET
+    description: Unset | str = UNSET
+    color: Unset | str = UNSET
+    display_order: Unset | int = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         slug = self.slug
@@ -51,13 +38,14 @@ class PostCommunitiesIdCategoriesBody:
 
         display_order = self.display_order
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "slug": slug,
-            "name": name,
-        })
+        field_dict.update(
+            {
+                "slug": slug,
+                "name": name,
+            }
+        )
         if description is not UNSET:
             field_dict["description"] = description
         if color is not UNSET:
@@ -66,8 +54,6 @@ class PostCommunitiesIdCategoriesBody:
             field_dict["displayOrder"] = display_order
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -89,7 +75,6 @@ class PostCommunitiesIdCategoriesBody:
             color=color,
             display_order=display_order,
         )
-
 
         post_communities_id_categories_body.additional_properties = d
         return post_communities_id_categories_body

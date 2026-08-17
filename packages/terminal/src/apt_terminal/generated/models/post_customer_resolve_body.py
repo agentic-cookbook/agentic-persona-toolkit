@@ -1,40 +1,27 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 from ..types import UNSET, Unset
 
-from ..types import UNSET, Unset
-from typing import Union
-
-
-
-
-
-
 T = TypeVar("T", bound="PostCustomerResolveBody")
-
 
 
 @_attrs_define
 class PostCustomerResolveBody:
-    """ 
-        Attributes:
-            external_id (str): The developer's own end-user id (the BYO join key).
-            email (Union[Unset, str]):
-            display_name (Union[Unset, str]):
-     """
+    """
+    Attributes:
+        external_id (str): The developer's own end-user id (the BYO join key).
+        email (Union[Unset, str]):
+        display_name (Union[Unset, str]):
+    """
 
     external_id: str
-    email: Union[Unset, str] = UNSET
-    display_name: Union[Unset, str] = UNSET
+    email: Unset | str = UNSET
+    display_name: Unset | str = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         external_id = self.external_id
@@ -43,20 +30,19 @@ class PostCustomerResolveBody:
 
         display_name = self.display_name
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "externalId": external_id,
-        })
+        field_dict.update(
+            {
+                "externalId": external_id,
+            }
+        )
         if email is not UNSET:
             field_dict["email"] = email
         if display_name is not UNSET:
             field_dict["displayName"] = display_name
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -72,7 +58,6 @@ class PostCustomerResolveBody:
             email=email,
             display_name=display_name,
         )
-
 
         post_customer_resolve_body.additional_properties = d
         return post_customer_resolve_body

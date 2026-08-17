@@ -1,0 +1,465 @@
+from collections.abc import Mapping
+from typing import TYPE_CHECKING, Any, TypeVar, Union, cast
+
+from attrs import define as _attrs_define
+
+if TYPE_CHECKING:
+    from ..models.get_integration_integration_audience_contacts_response_200_item_fields_type_0_type_1 import (
+        GetIntegrationIntegrationAudienceContactsResponse200ItemFieldsType0Type1,
+    )
+    from ..models.get_integration_integration_audience_contacts_response_200_item_raw_type_0_type_1 import (
+        GetIntegrationIntegrationAudienceContactsResponse200ItemRawType0Type1,
+    )
+    from ..models.get_integration_integration_audience_contacts_response_200_item_tags_type_0_type_1 import (
+        GetIntegrationIntegrationAudienceContactsResponse200ItemTagsType0Type1,
+    )
+
+
+T = TypeVar("T", bound="GetIntegrationIntegrationAudienceContactsResponse200Item")
+
+
+@_attrs_define
+class GetIntegrationIntegrationAudienceContactsResponse200Item:
+    """
+    Attributes:
+        id (str):
+        customer_id (str):
+        ecosystem_id (str):
+        owner_kind (str):
+        owner_id (str):
+        connection_id (str):
+        provider (str):
+        audience_id (str):
+        external_id (str):
+        email (str):
+        status (str):
+        first_name (Union[None, str]):
+        last_name (Union[None, str]):
+        tags (Union['GetIntegrationIntegrationAudienceContactsResponse200ItemTagsType0Type1', None, bool, float,
+            list[Any], str]):
+        fields (Union['GetIntegrationIntegrationAudienceContactsResponse200ItemFieldsType0Type1', None, bool, float,
+            list[Any], str]):
+        subscribed_at (Union[None, str]):
+        raw (Union['GetIntegrationIntegrationAudienceContactsResponse200ItemRawType0Type1', None, bool, float,
+            list[Any], str]):
+        is_deleted (bool):
+        deleted_at (Union[None, str]):
+        created_at (str):
+        updated_at (str):
+        sync_version (int):
+        sync_stamped_at (Union[None, str]):
+        sync_txid (int):
+    """
+
+    id: str
+    customer_id: str
+    ecosystem_id: str
+    owner_kind: str
+    owner_id: str
+    connection_id: str
+    provider: str
+    audience_id: str
+    external_id: str
+    email: str
+    status: str
+    first_name: None | str
+    last_name: None | str
+    tags: Union[
+        "GetIntegrationIntegrationAudienceContactsResponse200ItemTagsType0Type1",
+        None,
+        bool,
+        float,
+        list[Any],
+        str,
+    ]
+    fields: Union[
+        "GetIntegrationIntegrationAudienceContactsResponse200ItemFieldsType0Type1",
+        None,
+        bool,
+        float,
+        list[Any],
+        str,
+    ]
+    subscribed_at: None | str
+    raw: Union[
+        "GetIntegrationIntegrationAudienceContactsResponse200ItemRawType0Type1",
+        None,
+        bool,
+        float,
+        list[Any],
+        str,
+    ]
+    is_deleted: bool
+    deleted_at: None | str
+    created_at: str
+    updated_at: str
+    sync_version: int
+    sync_stamped_at: None | str
+    sync_txid: int
+
+    def to_dict(self) -> dict[str, Any]:
+        from ..models.get_integration_integration_audience_contacts_response_200_item_fields_type_0_type_1 import (
+            GetIntegrationIntegrationAudienceContactsResponse200ItemFieldsType0Type1,
+        )
+        from ..models.get_integration_integration_audience_contacts_response_200_item_raw_type_0_type_1 import (
+            GetIntegrationIntegrationAudienceContactsResponse200ItemRawType0Type1,
+        )
+        from ..models.get_integration_integration_audience_contacts_response_200_item_tags_type_0_type_1 import (
+            GetIntegrationIntegrationAudienceContactsResponse200ItemTagsType0Type1,
+        )
+
+        id = self.id
+
+        customer_id = self.customer_id
+
+        ecosystem_id = self.ecosystem_id
+
+        owner_kind = self.owner_kind
+
+        owner_id = self.owner_id
+
+        connection_id = self.connection_id
+
+        provider = self.provider
+
+        audience_id = self.audience_id
+
+        external_id = self.external_id
+
+        email = self.email
+
+        status = self.status
+
+        first_name: None | str
+        first_name = self.first_name
+
+        last_name: None | str
+        last_name = self.last_name
+
+        tags: None | bool | dict[str, Any] | float | list[Any] | str
+        if isinstance(
+            self.tags, GetIntegrationIntegrationAudienceContactsResponse200ItemTagsType0Type1
+        ):
+            tags = self.tags.to_dict()
+        elif isinstance(self.tags, list):
+            tags = self.tags
+
+        else:
+            tags = self.tags
+
+        fields: None | bool | dict[str, Any] | float | list[Any] | str
+        if isinstance(
+            self.fields, GetIntegrationIntegrationAudienceContactsResponse200ItemFieldsType0Type1
+        ):
+            fields = self.fields.to_dict()
+        elif isinstance(self.fields, list):
+            fields = self.fields
+
+        else:
+            fields = self.fields
+
+        subscribed_at: None | str
+        subscribed_at = self.subscribed_at
+
+        raw: None | bool | dict[str, Any] | float | list[Any] | str
+        if isinstance(
+            self.raw, GetIntegrationIntegrationAudienceContactsResponse200ItemRawType0Type1
+        ):
+            raw = self.raw.to_dict()
+        elif isinstance(self.raw, list):
+            raw = self.raw
+
+        else:
+            raw = self.raw
+
+        is_deleted = self.is_deleted
+
+        deleted_at: None | str
+        deleted_at = self.deleted_at
+
+        created_at = self.created_at
+
+        updated_at = self.updated_at
+
+        sync_version = self.sync_version
+
+        sync_stamped_at: None | str
+        sync_stamped_at = self.sync_stamped_at
+
+        sync_txid = self.sync_txid
+
+        field_dict: dict[str, Any] = {}
+
+        field_dict.update(
+            {
+                "id": id,
+                "customerId": customer_id,
+                "ecosystemId": ecosystem_id,
+                "ownerKind": owner_kind,
+                "ownerId": owner_id,
+                "connectionId": connection_id,
+                "provider": provider,
+                "audienceId": audience_id,
+                "externalId": external_id,
+                "email": email,
+                "status": status,
+                "firstName": first_name,
+                "lastName": last_name,
+                "tags": tags,
+                "fields": fields,
+                "subscribedAt": subscribed_at,
+                "raw": raw,
+                "isDeleted": is_deleted,
+                "deletedAt": deleted_at,
+                "createdAt": created_at,
+                "updatedAt": updated_at,
+                "syncVersion": sync_version,
+                "syncStampedAt": sync_stamped_at,
+                "syncTxid": sync_txid,
+            }
+        )
+
+        return field_dict
+
+    @classmethod
+    def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
+        from ..models.get_integration_integration_audience_contacts_response_200_item_fields_type_0_type_1 import (
+            GetIntegrationIntegrationAudienceContactsResponse200ItemFieldsType0Type1,
+        )
+        from ..models.get_integration_integration_audience_contacts_response_200_item_raw_type_0_type_1 import (
+            GetIntegrationIntegrationAudienceContactsResponse200ItemRawType0Type1,
+        )
+        from ..models.get_integration_integration_audience_contacts_response_200_item_tags_type_0_type_1 import (
+            GetIntegrationIntegrationAudienceContactsResponse200ItemTagsType0Type1,
+        )
+
+        d = dict(src_dict)
+        id = d.pop("id")
+
+        customer_id = d.pop("customerId")
+
+        ecosystem_id = d.pop("ecosystemId")
+
+        owner_kind = d.pop("ownerKind")
+
+        owner_id = d.pop("ownerId")
+
+        connection_id = d.pop("connectionId")
+
+        provider = d.pop("provider")
+
+        audience_id = d.pop("audienceId")
+
+        external_id = d.pop("externalId")
+
+        email = d.pop("email")
+
+        status = d.pop("status")
+
+        def _parse_first_name(data: object) -> None | str:
+            if data is None:
+                return data
+            return cast(None | str, data)
+
+        first_name = _parse_first_name(d.pop("firstName"))
+
+        def _parse_last_name(data: object) -> None | str:
+            if data is None:
+                return data
+            return cast(None | str, data)
+
+        last_name = _parse_last_name(d.pop("lastName"))
+
+        def _parse_tags(
+            data: object,
+        ) -> Union[
+            "GetIntegrationIntegrationAudienceContactsResponse200ItemTagsType0Type1",
+            None,
+            bool,
+            float,
+            list[Any],
+            str,
+        ]:
+            if data is None:
+                return data
+            try:
+                if not isinstance(data, dict):
+                    raise TypeError()
+                tags_type_0_type_1 = GetIntegrationIntegrationAudienceContactsResponse200ItemTagsType0Type1.from_dict(
+                    data
+                )
+
+                return tags_type_0_type_1
+            except:  # noqa: E722
+                pass
+            try:
+                if not isinstance(data, list):
+                    raise TypeError()
+                tags_type_0_type_2 = cast(list[Any], data)
+
+                return tags_type_0_type_2
+            except:  # noqa: E722
+                pass
+            return cast(
+                Union[
+                    "GetIntegrationIntegrationAudienceContactsResponse200ItemTagsType0Type1",
+                    None,
+                    bool,
+                    float,
+                    list[Any],
+                    str,
+                ],
+                data,
+            )
+
+        tags = _parse_tags(d.pop("tags"))
+
+        def _parse_fields(
+            data: object,
+        ) -> Union[
+            "GetIntegrationIntegrationAudienceContactsResponse200ItemFieldsType0Type1",
+            None,
+            bool,
+            float,
+            list[Any],
+            str,
+        ]:
+            if data is None:
+                return data
+            try:
+                if not isinstance(data, dict):
+                    raise TypeError()
+                fields_type_0_type_1 = GetIntegrationIntegrationAudienceContactsResponse200ItemFieldsType0Type1.from_dict(
+                    data
+                )
+
+                return fields_type_0_type_1
+            except:  # noqa: E722
+                pass
+            try:
+                if not isinstance(data, list):
+                    raise TypeError()
+                fields_type_0_type_2 = cast(list[Any], data)
+
+                return fields_type_0_type_2
+            except:  # noqa: E722
+                pass
+            return cast(
+                Union[
+                    "GetIntegrationIntegrationAudienceContactsResponse200ItemFieldsType0Type1",
+                    None,
+                    bool,
+                    float,
+                    list[Any],
+                    str,
+                ],
+                data,
+            )
+
+        fields = _parse_fields(d.pop("fields"))
+
+        def _parse_subscribed_at(data: object) -> None | str:
+            if data is None:
+                return data
+            return cast(None | str, data)
+
+        subscribed_at = _parse_subscribed_at(d.pop("subscribedAt"))
+
+        def _parse_raw(
+            data: object,
+        ) -> Union[
+            "GetIntegrationIntegrationAudienceContactsResponse200ItemRawType0Type1",
+            None,
+            bool,
+            float,
+            list[Any],
+            str,
+        ]:
+            if data is None:
+                return data
+            try:
+                if not isinstance(data, dict):
+                    raise TypeError()
+                raw_type_0_type_1 = (
+                    GetIntegrationIntegrationAudienceContactsResponse200ItemRawType0Type1.from_dict(
+                        data
+                    )
+                )
+
+                return raw_type_0_type_1
+            except:  # noqa: E722
+                pass
+            try:
+                if not isinstance(data, list):
+                    raise TypeError()
+                raw_type_0_type_2 = cast(list[Any], data)
+
+                return raw_type_0_type_2
+            except:  # noqa: E722
+                pass
+            return cast(
+                Union[
+                    "GetIntegrationIntegrationAudienceContactsResponse200ItemRawType0Type1",
+                    None,
+                    bool,
+                    float,
+                    list[Any],
+                    str,
+                ],
+                data,
+            )
+
+        raw = _parse_raw(d.pop("raw"))
+
+        is_deleted = d.pop("isDeleted")
+
+        def _parse_deleted_at(data: object) -> None | str:
+            if data is None:
+                return data
+            return cast(None | str, data)
+
+        deleted_at = _parse_deleted_at(d.pop("deletedAt"))
+
+        created_at = d.pop("createdAt")
+
+        updated_at = d.pop("updatedAt")
+
+        sync_version = d.pop("syncVersion")
+
+        def _parse_sync_stamped_at(data: object) -> None | str:
+            if data is None:
+                return data
+            return cast(None | str, data)
+
+        sync_stamped_at = _parse_sync_stamped_at(d.pop("syncStampedAt"))
+
+        sync_txid = d.pop("syncTxid")
+
+        get_integration_integration_audience_contacts_response_200_item = cls(
+            id=id,
+            customer_id=customer_id,
+            ecosystem_id=ecosystem_id,
+            owner_kind=owner_kind,
+            owner_id=owner_id,
+            connection_id=connection_id,
+            provider=provider,
+            audience_id=audience_id,
+            external_id=external_id,
+            email=email,
+            status=status,
+            first_name=first_name,
+            last_name=last_name,
+            tags=tags,
+            fields=fields,
+            subscribed_at=subscribed_at,
+            raw=raw,
+            is_deleted=is_deleted,
+            deleted_at=deleted_at,
+            created_at=created_at,
+            updated_at=updated_at,
+            sync_version=sync_version,
+            sync_stamped_at=sync_stamped_at,
+            sync_txid=sync_txid,
+        )
+
+        return get_integration_integration_audience_contacts_response_200_item

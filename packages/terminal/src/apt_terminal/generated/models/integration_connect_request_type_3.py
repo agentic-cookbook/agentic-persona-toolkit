@@ -1,32 +1,24 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
-
 from ..models.integration_connect_request_type_3_type import IntegrationConnectRequestType3Type
-
-
-
-
-
 
 T = TypeVar("T", bound="IntegrationConnectRequestType3")
 
 
-
 @_attrs_define
 class IntegrationConnectRequestType3:
-    """ 
-        Attributes:
-            type_ (IntegrationConnectRequestType3Type):
-            provider_id (str):
-            service_type (str):
-            ecosystem_id (str): Target ecosystem id (the caller must manage it)
-            public_token (str):
-     """
+    """
+    Attributes:
+        type_ (IntegrationConnectRequestType3Type):
+        provider_id (str):
+        service_type (str):
+        ecosystem_id (str): Target ecosystem id (the caller must manage it)
+        public_token (str):
+    """
 
     type_: IntegrationConnectRequestType3Type
     provider_id: str
@@ -34,10 +26,6 @@ class IntegrationConnectRequestType3:
     ecosystem_id: str
     public_token: str
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         type_ = self.type_.value
@@ -50,28 +38,24 @@ class IntegrationConnectRequestType3:
 
         public_token = self.public_token
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "type": type_,
-            "providerId": provider_id,
-            "serviceType": service_type,
-            "ecosystemId": ecosystem_id,
-            "publicToken": public_token,
-        })
+        field_dict.update(
+            {
+                "type": type_,
+                "providerId": provider_id,
+                "serviceType": service_type,
+                "ecosystemId": ecosystem_id,
+                "publicToken": public_token,
+            }
+        )
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
         type_ = IntegrationConnectRequestType3Type(d.pop("type"))
-
-
-
 
         provider_id = d.pop("providerId")
 
@@ -88,7 +72,6 @@ class IntegrationConnectRequestType3:
             ecosystem_id=ecosystem_id,
             public_token=public_token,
         )
-
 
         integration_connect_request_type_3.additional_properties = d
         return integration_connect_request_type_3

@@ -1,37 +1,24 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
-
 from ..models.registry_persona_may_act_kinds_item import RegistryPersonaMayActKindsItem
-from typing import cast
-
-
-
-
-
 
 T = TypeVar("T", bound="RegistryPersonaMayAct")
 
 
-
 @_attrs_define
 class RegistryPersonaMayAct:
-    """ 
-        Attributes:
-            kinds (list[RegistryPersonaMayActKindsItem]): the subject kinds this persona may act for (always includes
-                'self')
-     """
+    """
+    Attributes:
+        kinds (list[RegistryPersonaMayActKindsItem]): the subject kinds this persona may act for (always includes
+            'self')
+    """
 
     kinds: list[RegistryPersonaMayActKindsItem]
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         kinds = []
@@ -39,36 +26,29 @@ class RegistryPersonaMayAct:
             kinds_item = kinds_item_data.value
             kinds.append(kinds_item)
 
-
-
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "kinds": kinds,
-        })
+        field_dict.update(
+            {
+                "kinds": kinds,
+            }
+        )
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
         kinds = []
         _kinds = d.pop("kinds")
-        for kinds_item_data in (_kinds):
+        for kinds_item_data in _kinds:
             kinds_item = RegistryPersonaMayActKindsItem(kinds_item_data)
 
-
-
             kinds.append(kinds_item)
-
 
         registry_persona_may_act = cls(
             kinds=kinds,
         )
-
 
         registry_persona_may_act.additional_properties = d
         return registry_persona_may_act

@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class PostPersonaMemoryRecallBodyMemoryType(str, Enum):
     FEEDBACK = "feedback"
     PROJECT = "project"

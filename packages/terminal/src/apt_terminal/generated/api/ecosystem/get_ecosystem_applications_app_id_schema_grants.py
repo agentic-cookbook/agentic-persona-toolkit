@@ -1,57 +1,45 @@
 from http import HTTPStatus
-from typing import Any, Optional, Union, cast
+from typing import Any
 
 import httpx
 
-from ...client import AuthenticatedClient, Client
-from ...types import Response, UNSET
 from ... import errors
-
+from ...client import AuthenticatedClient, Client
 from ...models.error import Error
-from ...models.get_ecosystem_applications_app_id_schema_grants_response_200 import GetEcosystemApplicationsAppIdSchemaGrantsResponse200
-from typing import cast
-
+from ...models.get_ecosystem_applications_app_id_schema_grants_response_200 import (
+    GetEcosystemApplicationsAppIdSchemaGrantsResponse200,
+)
+from ...types import Response
 
 
 def _get_kwargs(
     app_id: str,
-
 ) -> dict[str, Any]:
-    
-
-    
-
-    
-
     _kwargs: dict[str, Any] = {
         "method": "get",
-        "url": "/ecosystem/applications/{app_id}/schema-grants".format(app_id=app_id,),
+        "url": f"/ecosystem/applications/{app_id}/schema-grants",
     }
-
 
     return _kwargs
 
 
-
-def _parse_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Optional[Union[Error, GetEcosystemApplicationsAppIdSchemaGrantsResponse200]]:
+def _parse_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Error | GetEcosystemApplicationsAppIdSchemaGrantsResponse200 | None:
     if response.status_code == 200:
-        response_200 = GetEcosystemApplicationsAppIdSchemaGrantsResponse200.from_dict(response.json())
-
-
+        response_200 = GetEcosystemApplicationsAppIdSchemaGrantsResponse200.from_dict(
+            response.json()
+        )
 
         return response_200
 
     if response.status_code == 401:
         response_401 = Error.from_dict(response.json())
 
-
-
         return response_401
 
     if response.status_code == 404:
         response_404 = Error.from_dict(response.json())
-
-
 
         return response_404
 
@@ -61,7 +49,9 @@ def _parse_response(*, client: Union[AuthenticatedClient, Client], response: htt
         return None
 
 
-def _build_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Response[Union[Error, GetEcosystemApplicationsAppIdSchemaGrantsResponse200]]:
+def _build_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Response[Error | GetEcosystemApplicationsAppIdSchemaGrantsResponse200]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -74,9 +64,8 @@ def sync_detailed(
     app_id: str,
     *,
     client: AuthenticatedClient,
-
-) -> Response[Union[Error, GetEcosystemApplicationsAppIdSchemaGrantsResponse200]]:
-    """ Get an application’s schema permissions (per bucket + per table CRUD)
+) -> Response[Error | GetEcosystemApplicationsAppIdSchemaGrantsResponse200]:
+    """Get an application’s schema permissions (per bucket + per table CRUD)
 
     Args:
         app_id (str):
@@ -87,12 +76,10 @@ def sync_detailed(
 
     Returns:
         Response[Union[Error, GetEcosystemApplicationsAppIdSchemaGrantsResponse200]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         app_id=app_id,
-
     )
 
     response = client.get_httpx_client().request(
@@ -101,13 +88,13 @@ def sync_detailed(
 
     return _build_response(client=client, response=response)
 
+
 def sync(
     app_id: str,
     *,
     client: AuthenticatedClient,
-
-) -> Optional[Union[Error, GetEcosystemApplicationsAppIdSchemaGrantsResponse200]]:
-    """ Get an application’s schema permissions (per bucket + per table CRUD)
+) -> Error | GetEcosystemApplicationsAppIdSchemaGrantsResponse200 | None:
+    """Get an application’s schema permissions (per bucket + per table CRUD)
 
     Args:
         app_id (str):
@@ -118,22 +105,20 @@ def sync(
 
     Returns:
         Union[Error, GetEcosystemApplicationsAppIdSchemaGrantsResponse200]
-     """
-
+    """
 
     return sync_detailed(
         app_id=app_id,
-client=client,
-
+        client=client,
     ).parsed
+
 
 async def asyncio_detailed(
     app_id: str,
     *,
     client: AuthenticatedClient,
-
-) -> Response[Union[Error, GetEcosystemApplicationsAppIdSchemaGrantsResponse200]]:
-    """ Get an application’s schema permissions (per bucket + per table CRUD)
+) -> Response[Error | GetEcosystemApplicationsAppIdSchemaGrantsResponse200]:
+    """Get an application’s schema permissions (per bucket + per table CRUD)
 
     Args:
         app_id (str):
@@ -144,27 +129,23 @@ async def asyncio_detailed(
 
     Returns:
         Response[Union[Error, GetEcosystemApplicationsAppIdSchemaGrantsResponse200]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         app_id=app_id,
-
     )
 
-    response = await client.get_async_httpx_client().request(
-        **kwargs
-    )
+    response = await client.get_async_httpx_client().request(**kwargs)
 
     return _build_response(client=client, response=response)
+
 
 async def asyncio(
     app_id: str,
     *,
     client: AuthenticatedClient,
-
-) -> Optional[Union[Error, GetEcosystemApplicationsAppIdSchemaGrantsResponse200]]:
-    """ Get an application’s schema permissions (per bucket + per table CRUD)
+) -> Error | GetEcosystemApplicationsAppIdSchemaGrantsResponse200 | None:
+    """Get an application’s schema permissions (per bucket + per table CRUD)
 
     Args:
         app_id (str):
@@ -175,11 +156,11 @@ async def asyncio(
 
     Returns:
         Union[Error, GetEcosystemApplicationsAppIdSchemaGrantsResponse200]
-     """
+    """
 
-
-    return (await asyncio_detailed(
-        app_id=app_id,
-client=client,
-
-    )).parsed
+    return (
+        await asyncio_detailed(
+            app_id=app_id,
+            client=client,
+        )
+    ).parsed

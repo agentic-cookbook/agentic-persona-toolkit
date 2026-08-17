@@ -1,38 +1,28 @@
 from http import HTTPStatus
-from typing import Any, Optional, Union, cast
+from typing import Any, cast
 
 import httpx
 
-from ...client import AuthenticatedClient, Client
-from ...types import Response, UNSET
 from ... import errors
-
+from ...client import AuthenticatedClient, Client
 from ...models.problem_details import ProblemDetails
-from typing import cast
-
+from ...types import Response
 
 
 def _get_kwargs(
     provider_id: str,
-
 ) -> dict[str, Any]:
-    
-
-    
-
-    
-
     _kwargs: dict[str, Any] = {
         "method": "delete",
-        "url": "/integrations/admin/configs/{provider_id}".format(provider_id=provider_id,),
+        "url": f"/integrations/admin/configs/{provider_id}",
     }
-
 
     return _kwargs
 
 
-
-def _parse_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Optional[Union[Any, ProblemDetails]]:
+def _parse_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Any | ProblemDetails | None:
     if response.status_code == 204:
         response_204 = cast(Any, None)
         return response_204
@@ -40,21 +30,15 @@ def _parse_response(*, client: Union[AuthenticatedClient, Client], response: htt
     if response.status_code == 401:
         response_401 = ProblemDetails.from_dict(response.json())
 
-
-
         return response_401
 
     if response.status_code == 403:
         response_403 = ProblemDetails.from_dict(response.json())
 
-
-
         return response_403
 
     if response.status_code == 404:
         response_404 = ProblemDetails.from_dict(response.json())
-
-
 
         return response_404
 
@@ -64,7 +48,9 @@ def _parse_response(*, client: Union[AuthenticatedClient, Client], response: htt
         return None
 
 
-def _build_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Response[Union[Any, ProblemDetails]]:
+def _build_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Response[Any | ProblemDetails]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -77,9 +63,8 @@ def sync_detailed(
     provider_id: str,
     *,
     client: AuthenticatedClient,
-
-) -> Response[Union[Any, ProblemDetails]]:
-    """ Delete a provider global config (admin)
+) -> Response[Any | ProblemDetails]:
+    """Delete a provider global config (admin)
 
     Args:
         provider_id (str):
@@ -90,12 +75,10 @@ def sync_detailed(
 
     Returns:
         Response[Union[Any, ProblemDetails]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         provider_id=provider_id,
-
     )
 
     response = client.get_httpx_client().request(
@@ -104,13 +87,13 @@ def sync_detailed(
 
     return _build_response(client=client, response=response)
 
+
 def sync(
     provider_id: str,
     *,
     client: AuthenticatedClient,
-
-) -> Optional[Union[Any, ProblemDetails]]:
-    """ Delete a provider global config (admin)
+) -> Any | ProblemDetails | None:
+    """Delete a provider global config (admin)
 
     Args:
         provider_id (str):
@@ -121,22 +104,20 @@ def sync(
 
     Returns:
         Union[Any, ProblemDetails]
-     """
-
+    """
 
     return sync_detailed(
         provider_id=provider_id,
-client=client,
-
+        client=client,
     ).parsed
+
 
 async def asyncio_detailed(
     provider_id: str,
     *,
     client: AuthenticatedClient,
-
-) -> Response[Union[Any, ProblemDetails]]:
-    """ Delete a provider global config (admin)
+) -> Response[Any | ProblemDetails]:
+    """Delete a provider global config (admin)
 
     Args:
         provider_id (str):
@@ -147,27 +128,23 @@ async def asyncio_detailed(
 
     Returns:
         Response[Union[Any, ProblemDetails]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         provider_id=provider_id,
-
     )
 
-    response = await client.get_async_httpx_client().request(
-        **kwargs
-    )
+    response = await client.get_async_httpx_client().request(**kwargs)
 
     return _build_response(client=client, response=response)
+
 
 async def asyncio(
     provider_id: str,
     *,
     client: AuthenticatedClient,
-
-) -> Optional[Union[Any, ProblemDetails]]:
-    """ Delete a provider global config (admin)
+) -> Any | ProblemDetails | None:
+    """Delete a provider global config (admin)
 
     Args:
         provider_id (str):
@@ -178,11 +155,11 @@ async def asyncio(
 
     Returns:
         Union[Any, ProblemDetails]
-     """
+    """
 
-
-    return (await asyncio_detailed(
-        provider_id=provider_id,
-client=client,
-
-    )).parsed
+    return (
+        await asyncio_detailed(
+            provider_id=provider_id,
+            client=client,
+        )
+    ).parsed

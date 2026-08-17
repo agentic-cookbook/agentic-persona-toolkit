@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class MarkdownDocumentStage(str, Enum):
     DRAFT = "draft"
     FINAL = "final"

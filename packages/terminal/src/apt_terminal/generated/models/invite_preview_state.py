@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class InvitePreviewState(str, Enum):
     ACCEPTED = "accepted"
     EXPIRED = "expired"

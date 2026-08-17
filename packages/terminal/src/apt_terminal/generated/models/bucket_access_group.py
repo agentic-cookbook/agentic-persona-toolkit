@@ -1,41 +1,32 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import TYPE_CHECKING, Any, TypeVar, Union, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 from ..types import UNSET, Unset
 
-from ..types import UNSET, Unset
-from typing import cast
-from typing import cast, Union
-from typing import Union
-
 if TYPE_CHECKING:
-  from ..models.bucket_access_group_metadata_type_0 import BucketAccessGroupMetadataType0
-
-
-
+    from ..models.bucket_access_group_metadata_type_0 import BucketAccessGroupMetadataType0
 
 
 T = TypeVar("T", bound="BucketAccessGroup")
 
 
-
 @_attrs_define
 class BucketAccessGroup:
-    """ 
-        Attributes:
-            id (str):
-            ecosystem_id (str): owning ecosystem
-            bucket_id (str):
-            name (str):
-            description (str):
-            kind (str): 'everyone' (seeded) or 'custom'
-            created_at (str):
-            updated_at (str):
-            metadata (Union['BucketAccessGroupMetadataType0', None, Unset]):
-     """
+    """
+    Attributes:
+        id (str):
+        ecosystem_id (str): owning ecosystem
+        bucket_id (str):
+        name (str):
+        description (str):
+        kind (str): 'everyone' (seeded) or 'custom'
+        created_at (str):
+        updated_at (str):
+        metadata (Union['BucketAccessGroupMetadataType0', None, Unset]):
+    """
 
     id: str
     ecosystem_id: str
@@ -45,15 +36,12 @@ class BucketAccessGroup:
     kind: str
     created_at: str
     updated_at: str
-    metadata: Union['BucketAccessGroupMetadataType0', None, Unset] = UNSET
+    metadata: Union["BucketAccessGroupMetadataType0", None, Unset] = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         from ..models.bucket_access_group_metadata_type_0 import BucketAccessGroupMetadataType0
+
         id = self.id
 
         ecosystem_id = self.ecosystem_id
@@ -70,7 +58,7 @@ class BucketAccessGroup:
 
         updated_at = self.updated_at
 
-        metadata: Union[None, Unset, dict[str, Any]]
+        metadata: None | Unset | dict[str, Any]
         if isinstance(self.metadata, Unset):
             metadata = UNSET
         elif isinstance(self.metadata, BucketAccessGroupMetadataType0):
@@ -78,29 +66,29 @@ class BucketAccessGroup:
         else:
             metadata = self.metadata
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "id": id,
-            "ecosystemId": ecosystem_id,
-            "bucketId": bucket_id,
-            "name": name,
-            "description": description,
-            "kind": kind,
-            "createdAt": created_at,
-            "updatedAt": updated_at,
-        })
+        field_dict.update(
+            {
+                "id": id,
+                "ecosystemId": ecosystem_id,
+                "bucketId": bucket_id,
+                "name": name,
+                "description": description,
+                "kind": kind,
+                "createdAt": created_at,
+                "updatedAt": updated_at,
+            }
+        )
         if metadata is not UNSET:
             field_dict["metadata"] = metadata
 
         return field_dict
 
-
-
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.bucket_access_group_metadata_type_0 import BucketAccessGroupMetadataType0
+
         d = dict(src_dict)
         id = d.pop("id")
 
@@ -118,7 +106,7 @@ class BucketAccessGroup:
 
         updated_at = d.pop("updatedAt")
 
-        def _parse_metadata(data: object) -> Union['BucketAccessGroupMetadataType0', None, Unset]:
+        def _parse_metadata(data: object) -> Union["BucketAccessGroupMetadataType0", None, Unset]:
             if data is None:
                 return data
             if isinstance(data, Unset):
@@ -128,15 +116,12 @@ class BucketAccessGroup:
                     raise TypeError()
                 metadata_type_0 = BucketAccessGroupMetadataType0.from_dict(data)
 
-
-
                 return metadata_type_0
-            except: # noqa: E722
+            except:  # noqa: E722
                 pass
-            return cast(Union['BucketAccessGroupMetadataType0', None, Unset], data)
+            return cast(Union["BucketAccessGroupMetadataType0", None, Unset], data)
 
         metadata = _parse_metadata(d.pop("metadata", UNSET))
-
 
         bucket_access_group = cls(
             id=id,
@@ -149,7 +134,6 @@ class BucketAccessGroup:
             updated_at=updated_at,
             metadata=metadata,
         )
-
 
         bucket_access_group.additional_properties = d
         return bucket_access_group

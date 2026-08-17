@@ -1,76 +1,57 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import TYPE_CHECKING, Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
-
-from typing import cast
-
 if TYPE_CHECKING:
-  from ..models.integration_connection import IntegrationConnection
-
-
-
+    from ..models.integration_connection import IntegrationConnection
 
 
 T = TypeVar("T", bound="GetIntegrationsResponse200")
 
 
-
 @_attrs_define
 class GetIntegrationsResponse200:
-    """ 
-        Attributes:
-            connections (list['IntegrationConnection']):
-     """
+    """
+    Attributes:
+        connections (list['IntegrationConnection']):
+    """
 
-    connections: list['IntegrationConnection']
+    connections: list["IntegrationConnection"]
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
-
-
-
-
     def to_dict(self) -> dict[str, Any]:
-        from ..models.integration_connection import IntegrationConnection
         connections = []
         for connections_item_data in self.connections:
             connections_item = connections_item_data.to_dict()
             connections.append(connections_item)
 
-
-
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "connections": connections,
-        })
+        field_dict.update(
+            {
+                "connections": connections,
+            }
+        )
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.integration_connection import IntegrationConnection
+
         d = dict(src_dict)
         connections = []
         _connections = d.pop("connections")
-        for connections_item_data in (_connections):
+        for connections_item_data in _connections:
             connections_item = IntegrationConnection.from_dict(connections_item_data)
 
-
-
             connections.append(connections_item)
-
 
         get_integrations_response_200 = cls(
             connections=connections,
         )
-
 
         get_integrations_response_200.additional_properties = d
         return get_integrations_response_200

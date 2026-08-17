@@ -1,39 +1,29 @@
 from http import HTTPStatus
-from typing import Any, Optional, Union, cast
+from typing import Any
 
 import httpx
 
-from ...client import AuthenticatedClient, Client
-from ...types import Response, UNSET
 from ... import errors
-
+from ...client import AuthenticatedClient, Client
 from ...models.discussion_post import DiscussionPost
 from ...models.error import Error
 from ...models.post_discussion_topics_id_posts_body import PostDiscussionTopicsIdPostsBody
-from typing import cast
-
+from ...types import Response
 
 
 def _get_kwargs(
     id: str,
     *,
     body: PostDiscussionTopicsIdPostsBody,
-
 ) -> dict[str, Any]:
     headers: dict[str, Any] = {}
 
-
-    
-
-    
-
     _kwargs: dict[str, Any] = {
         "method": "post",
-        "url": "/discussion/topics/{id}/posts".format(id=id,),
+        "url": f"/discussion/topics/{id}/posts",
     }
 
     _kwargs["json"] = body.to_dict()
-
 
     headers["Content-Type"] = "application/json"
 
@@ -41,40 +31,31 @@ def _get_kwargs(
     return _kwargs
 
 
-
-def _parse_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Optional[Union[DiscussionPost, Error]]:
+def _parse_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> DiscussionPost | Error | None:
     if response.status_code == 201:
         response_201 = DiscussionPost.from_dict(response.json())
-
-
 
         return response_201
 
     if response.status_code == 400:
         response_400 = Error.from_dict(response.json())
 
-
-
         return response_400
 
     if response.status_code == 401:
         response_401 = Error.from_dict(response.json())
-
-
 
         return response_401
 
     if response.status_code == 404:
         response_404 = Error.from_dict(response.json())
 
-
-
         return response_404
 
     if response.status_code == 409:
         response_409 = Error.from_dict(response.json())
-
-
 
         return response_409
 
@@ -84,7 +65,9 @@ def _parse_response(*, client: Union[AuthenticatedClient, Client], response: htt
         return None
 
 
-def _build_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Response[Union[DiscussionPost, Error]]:
+def _build_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Response[DiscussionPost | Error]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -98,9 +81,8 @@ def sync_detailed(
     *,
     client: AuthenticatedClient,
     body: PostDiscussionTopicsIdPostsBody,
-
-) -> Response[Union[DiscussionPost, Error]]:
-    """ Reply to a topic (bumps the topic’s reply count + last activity)
+) -> Response[DiscussionPost | Error]:
+    """Reply to a topic (bumps the topic’s reply count + last activity)
 
     Args:
         id (str):
@@ -112,13 +94,11 @@ def sync_detailed(
 
     Returns:
         Response[Union[DiscussionPost, Error]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         id=id,
-body=body,
-
+        body=body,
     )
 
     response = client.get_httpx_client().request(
@@ -127,14 +107,14 @@ body=body,
 
     return _build_response(client=client, response=response)
 
+
 def sync(
     id: str,
     *,
     client: AuthenticatedClient,
     body: PostDiscussionTopicsIdPostsBody,
-
-) -> Optional[Union[DiscussionPost, Error]]:
-    """ Reply to a topic (bumps the topic’s reply count + last activity)
+) -> DiscussionPost | Error | None:
+    """Reply to a topic (bumps the topic’s reply count + last activity)
 
     Args:
         id (str):
@@ -146,24 +126,22 @@ def sync(
 
     Returns:
         Union[DiscussionPost, Error]
-     """
-
+    """
 
     return sync_detailed(
         id=id,
-client=client,
-body=body,
-
+        client=client,
+        body=body,
     ).parsed
+
 
 async def asyncio_detailed(
     id: str,
     *,
     client: AuthenticatedClient,
     body: PostDiscussionTopicsIdPostsBody,
-
-) -> Response[Union[DiscussionPost, Error]]:
-    """ Reply to a topic (bumps the topic’s reply count + last activity)
+) -> Response[DiscussionPost | Error]:
+    """Reply to a topic (bumps the topic’s reply count + last activity)
 
     Args:
         id (str):
@@ -175,29 +153,25 @@ async def asyncio_detailed(
 
     Returns:
         Response[Union[DiscussionPost, Error]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         id=id,
-body=body,
-
+        body=body,
     )
 
-    response = await client.get_async_httpx_client().request(
-        **kwargs
-    )
+    response = await client.get_async_httpx_client().request(**kwargs)
 
     return _build_response(client=client, response=response)
+
 
 async def asyncio(
     id: str,
     *,
     client: AuthenticatedClient,
     body: PostDiscussionTopicsIdPostsBody,
-
-) -> Optional[Union[DiscussionPost, Error]]:
-    """ Reply to a topic (bumps the topic’s reply count + last activity)
+) -> DiscussionPost | Error | None:
+    """Reply to a topic (bumps the topic’s reply count + last activity)
 
     Args:
         id (str):
@@ -209,12 +183,12 @@ async def asyncio(
 
     Returns:
         Union[DiscussionPost, Error]
-     """
+    """
 
-
-    return (await asyncio_detailed(
-        id=id,
-client=client,
-body=body,
-
-    )).parsed
+    return (
+        await asyncio_detailed(
+            id=id,
+            client=client,
+            body=body,
+        )
+    ).parsed

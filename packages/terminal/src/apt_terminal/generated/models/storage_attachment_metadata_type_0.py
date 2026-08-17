@@ -1,48 +1,28 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
-
-
-
-
-
-
-
 T = TypeVar("T", bound="StorageAttachmentMetadataType0")
-
 
 
 @_attrs_define
 class StorageAttachmentMetadataType0:
-    """ Caller-supplied JSON metadata (jsonb) — intentionally open.
-
-     """
+    """Caller-supplied JSON metadata (jsonb) — intentionally open."""
 
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
-
-
-
-
     def to_dict(self) -> dict[str, Any]:
-        
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
 
         return field_dict
 
-
-
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
-        storage_attachment_metadata_type_0 = cls(
-        )
-
+        storage_attachment_metadata_type_0 = cls()
 
         storage_attachment_metadata_type_0.additional_properties = d
         return storage_attachment_metadata_type_0

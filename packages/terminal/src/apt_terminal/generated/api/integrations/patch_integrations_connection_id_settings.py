@@ -1,39 +1,33 @@
 from http import HTTPStatus
-from typing import Any, Optional, Union, cast
+from typing import Any
 
 import httpx
 
-from ...client import AuthenticatedClient, Client
-from ...types import Response, UNSET
 from ... import errors
-
-from ...models.patch_integrations_connection_id_settings_body import PatchIntegrationsConnectionIdSettingsBody
-from ...models.patch_integrations_connection_id_settings_response_200 import PatchIntegrationsConnectionIdSettingsResponse200
+from ...client import AuthenticatedClient, Client
+from ...models.patch_integrations_connection_id_settings_body import (
+    PatchIntegrationsConnectionIdSettingsBody,
+)
+from ...models.patch_integrations_connection_id_settings_response_200 import (
+    PatchIntegrationsConnectionIdSettingsResponse200,
+)
 from ...models.problem_details import ProblemDetails
-from typing import cast
-
+from ...types import Response
 
 
 def _get_kwargs(
     connection_id: str,
     *,
     body: PatchIntegrationsConnectionIdSettingsBody,
-
 ) -> dict[str, Any]:
     headers: dict[str, Any] = {}
 
-
-    
-
-    
-
     _kwargs: dict[str, Any] = {
         "method": "patch",
-        "url": "/integrations/{connection_id}/settings".format(connection_id=connection_id,),
+        "url": f"/integrations/{connection_id}/settings",
     }
 
     _kwargs["json"] = body.to_dict()
-
 
     headers["Content-Type"] = "application/json"
 
@@ -41,40 +35,31 @@ def _get_kwargs(
     return _kwargs
 
 
-
-def _parse_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Optional[Union[PatchIntegrationsConnectionIdSettingsResponse200, ProblemDetails]]:
+def _parse_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> PatchIntegrationsConnectionIdSettingsResponse200 | ProblemDetails | None:
     if response.status_code == 200:
         response_200 = PatchIntegrationsConnectionIdSettingsResponse200.from_dict(response.json())
-
-
 
         return response_200
 
     if response.status_code == 400:
         response_400 = ProblemDetails.from_dict(response.json())
 
-
-
         return response_400
 
     if response.status_code == 401:
         response_401 = ProblemDetails.from_dict(response.json())
-
-
 
         return response_401
 
     if response.status_code == 403:
         response_403 = ProblemDetails.from_dict(response.json())
 
-
-
         return response_403
 
     if response.status_code == 404:
         response_404 = ProblemDetails.from_dict(response.json())
-
-
 
         return response_404
 
@@ -84,7 +69,9 @@ def _parse_response(*, client: Union[AuthenticatedClient, Client], response: htt
         return None
 
 
-def _build_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Response[Union[PatchIntegrationsConnectionIdSettingsResponse200, ProblemDetails]]:
+def _build_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Response[PatchIntegrationsConnectionIdSettingsResponse200 | ProblemDetails]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -98,9 +85,8 @@ def sync_detailed(
     *,
     client: AuthenticatedClient,
     body: PatchIntegrationsConnectionIdSettingsBody,
-
-) -> Response[Union[PatchIntegrationsConnectionIdSettingsResponse200, ProblemDetails]]:
-    """ Update per-connection sync settings
+) -> Response[PatchIntegrationsConnectionIdSettingsResponse200 | ProblemDetails]:
+    """Update per-connection sync settings
 
      Ecosystem-authorized, validated write of the caller-tunable sync settings the sync worker reads
     (e.g. gmailLabelIds / gmailWindowDays / redditSubreddits / redditKeywords). The owning ecosystem is
@@ -117,13 +103,11 @@ def sync_detailed(
 
     Returns:
         Response[Union[PatchIntegrationsConnectionIdSettingsResponse200, ProblemDetails]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         connection_id=connection_id,
-body=body,
-
+        body=body,
     )
 
     response = client.get_httpx_client().request(
@@ -132,14 +116,14 @@ body=body,
 
     return _build_response(client=client, response=response)
 
+
 def sync(
     connection_id: str,
     *,
     client: AuthenticatedClient,
     body: PatchIntegrationsConnectionIdSettingsBody,
-
-) -> Optional[Union[PatchIntegrationsConnectionIdSettingsResponse200, ProblemDetails]]:
-    """ Update per-connection sync settings
+) -> PatchIntegrationsConnectionIdSettingsResponse200 | ProblemDetails | None:
+    """Update per-connection sync settings
 
      Ecosystem-authorized, validated write of the caller-tunable sync settings the sync worker reads
     (e.g. gmailLabelIds / gmailWindowDays / redditSubreddits / redditKeywords). The owning ecosystem is
@@ -156,24 +140,22 @@ def sync(
 
     Returns:
         Union[PatchIntegrationsConnectionIdSettingsResponse200, ProblemDetails]
-     """
-
+    """
 
     return sync_detailed(
         connection_id=connection_id,
-client=client,
-body=body,
-
+        client=client,
+        body=body,
     ).parsed
+
 
 async def asyncio_detailed(
     connection_id: str,
     *,
     client: AuthenticatedClient,
     body: PatchIntegrationsConnectionIdSettingsBody,
-
-) -> Response[Union[PatchIntegrationsConnectionIdSettingsResponse200, ProblemDetails]]:
-    """ Update per-connection sync settings
+) -> Response[PatchIntegrationsConnectionIdSettingsResponse200 | ProblemDetails]:
+    """Update per-connection sync settings
 
      Ecosystem-authorized, validated write of the caller-tunable sync settings the sync worker reads
     (e.g. gmailLabelIds / gmailWindowDays / redditSubreddits / redditKeywords). The owning ecosystem is
@@ -190,29 +172,25 @@ async def asyncio_detailed(
 
     Returns:
         Response[Union[PatchIntegrationsConnectionIdSettingsResponse200, ProblemDetails]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         connection_id=connection_id,
-body=body,
-
+        body=body,
     )
 
-    response = await client.get_async_httpx_client().request(
-        **kwargs
-    )
+    response = await client.get_async_httpx_client().request(**kwargs)
 
     return _build_response(client=client, response=response)
+
 
 async def asyncio(
     connection_id: str,
     *,
     client: AuthenticatedClient,
     body: PatchIntegrationsConnectionIdSettingsBody,
-
-) -> Optional[Union[PatchIntegrationsConnectionIdSettingsResponse200, ProblemDetails]]:
-    """ Update per-connection sync settings
+) -> PatchIntegrationsConnectionIdSettingsResponse200 | ProblemDetails | None:
+    """Update per-connection sync settings
 
      Ecosystem-authorized, validated write of the caller-tunable sync settings the sync worker reads
     (e.g. gmailLabelIds / gmailWindowDays / redditSubreddits / redditKeywords). The owning ecosystem is
@@ -229,12 +207,12 @@ async def asyncio(
 
     Returns:
         Union[PatchIntegrationsConnectionIdSettingsResponse200, ProblemDetails]
-     """
+    """
 
-
-    return (await asyncio_detailed(
-        connection_id=connection_id,
-client=client,
-body=body,
-
-    )).parsed
+    return (
+        await asyncio_detailed(
+            connection_id=connection_id,
+            client=client,
+            body=body,
+        )
+    ).parsed

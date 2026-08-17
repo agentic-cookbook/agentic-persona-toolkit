@@ -1,0 +1,205 @@
+from collections.abc import Mapping
+from typing import TYPE_CHECKING, Any, TypeVar, Union, cast
+
+from attrs import define as _attrs_define
+
+from ..types import UNSET, Unset
+
+if TYPE_CHECKING:
+    from ..models.post_game_games_body_engine_config_type_1 import (
+        PostGameGamesBodyEngineConfigType1,
+    )
+
+
+T = TypeVar("T", bound="PostGameGamesBody")
+
+
+@_attrs_define
+class PostGameGamesBody:
+    """
+    Attributes:
+        slug (str):
+        name (str):
+        engine (str):
+        ecosystem_id (Union[Unset, str]):
+        description (Union[None, Unset, str]):
+        engine_config (Union['PostGameGamesBodyEngineConfigType1', None, Unset, bool, float, list[Any], str]):
+        character_names (Union[Unset, str]):
+        status (Union[Unset, str]):
+        event_log (Union[Unset, str]):
+        event_retention_days (Union[Unset, int]):
+        sync_txid (Union[Unset, int]):
+        id (Union[Unset, str]):
+    """
+
+    slug: str
+    name: str
+    engine: str
+    ecosystem_id: Unset | str = UNSET
+    description: None | Unset | str = UNSET
+    engine_config: Union[
+        "PostGameGamesBodyEngineConfigType1", None, Unset, bool, float, list[Any], str
+    ] = UNSET
+    character_names: Unset | str = UNSET
+    status: Unset | str = UNSET
+    event_log: Unset | str = UNSET
+    event_retention_days: Unset | int = UNSET
+    sync_txid: Unset | int = UNSET
+    id: Unset | str = UNSET
+
+    def to_dict(self) -> dict[str, Any]:
+        from ..models.post_game_games_body_engine_config_type_1 import (
+            PostGameGamesBodyEngineConfigType1,
+        )
+
+        slug = self.slug
+
+        name = self.name
+
+        engine = self.engine
+
+        ecosystem_id = self.ecosystem_id
+
+        description: None | Unset | str
+        if isinstance(self.description, Unset):
+            description = UNSET
+        else:
+            description = self.description
+
+        engine_config: None | Unset | bool | dict[str, Any] | float | list[Any] | str
+        if isinstance(self.engine_config, Unset):
+            engine_config = UNSET
+        elif isinstance(self.engine_config, PostGameGamesBodyEngineConfigType1):
+            engine_config = self.engine_config.to_dict()
+        elif isinstance(self.engine_config, list):
+            engine_config = self.engine_config
+
+        else:
+            engine_config = self.engine_config
+
+        character_names = self.character_names
+
+        status = self.status
+
+        event_log = self.event_log
+
+        event_retention_days = self.event_retention_days
+
+        sync_txid = self.sync_txid
+
+        id = self.id
+
+        field_dict: dict[str, Any] = {}
+
+        field_dict.update(
+            {
+                "slug": slug,
+                "name": name,
+                "engine": engine,
+            }
+        )
+        if ecosystem_id is not UNSET:
+            field_dict["ecosystemId"] = ecosystem_id
+        if description is not UNSET:
+            field_dict["description"] = description
+        if engine_config is not UNSET:
+            field_dict["engineConfig"] = engine_config
+        if character_names is not UNSET:
+            field_dict["characterNames"] = character_names
+        if status is not UNSET:
+            field_dict["status"] = status
+        if event_log is not UNSET:
+            field_dict["eventLog"] = event_log
+        if event_retention_days is not UNSET:
+            field_dict["eventRetentionDays"] = event_retention_days
+        if sync_txid is not UNSET:
+            field_dict["syncTxid"] = sync_txid
+        if id is not UNSET:
+            field_dict["id"] = id
+
+        return field_dict
+
+    @classmethod
+    def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
+        from ..models.post_game_games_body_engine_config_type_1 import (
+            PostGameGamesBodyEngineConfigType1,
+        )
+
+        d = dict(src_dict)
+        slug = d.pop("slug")
+
+        name = d.pop("name")
+
+        engine = d.pop("engine")
+
+        ecosystem_id = d.pop("ecosystemId", UNSET)
+
+        def _parse_description(data: object) -> None | Unset | str:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(None | Unset | str, data)
+
+        description = _parse_description(d.pop("description", UNSET))
+
+        def _parse_engine_config(
+            data: object,
+        ) -> Union["PostGameGamesBodyEngineConfigType1", None, Unset, bool, float, list[Any], str]:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            try:
+                if not isinstance(data, dict):
+                    raise TypeError()
+                engine_config_type_1 = PostGameGamesBodyEngineConfigType1.from_dict(data)
+
+                return engine_config_type_1
+            except:  # noqa: E722
+                pass
+            try:
+                if not isinstance(data, list):
+                    raise TypeError()
+                engine_config_type_2 = cast(list[Any], data)
+
+                return engine_config_type_2
+            except:  # noqa: E722
+                pass
+            return cast(
+                Union[
+                    "PostGameGamesBodyEngineConfigType1", None, Unset, bool, float, list[Any], str
+                ],
+                data,
+            )
+
+        engine_config = _parse_engine_config(d.pop("engineConfig", UNSET))
+
+        character_names = d.pop("characterNames", UNSET)
+
+        status = d.pop("status", UNSET)
+
+        event_log = d.pop("eventLog", UNSET)
+
+        event_retention_days = d.pop("eventRetentionDays", UNSET)
+
+        sync_txid = d.pop("syncTxid", UNSET)
+
+        id = d.pop("id", UNSET)
+
+        post_game_games_body = cls(
+            slug=slug,
+            name=name,
+            engine=engine,
+            ecosystem_id=ecosystem_id,
+            description=description,
+            engine_config=engine_config,
+            character_names=character_names,
+            status=status,
+            event_log=event_log,
+            event_retention_days=event_retention_days,
+            sync_txid=sync_txid,
+            id=id,
+        )
+
+        return post_game_games_body

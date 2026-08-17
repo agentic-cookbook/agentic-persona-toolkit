@@ -1,7 +1,9 @@
 from enum import Enum
 
+
 class ProviderTemplateProviderKind(str, Enum):
     ANTHROPIC = "anthropic"
+    EXTERNAL = "external"
     GEMINI = "gemini"
     OPENAI = "openai"
 

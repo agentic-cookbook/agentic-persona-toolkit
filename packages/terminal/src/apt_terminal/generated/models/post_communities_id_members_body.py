@@ -1,54 +1,41 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
-
 from ..models.post_communities_id_members_body_role import PostCommunitiesIdMembersBodyRole
-
-
-
-
-
 
 T = TypeVar("T", bound="PostCommunitiesIdMembersBody")
 
 
-
 @_attrs_define
 class PostCommunitiesIdMembersBody:
-    """ 
-        Attributes:
-            customer_id (str):
-            role (PostCommunitiesIdMembersBodyRole):
-     """
+    """
+    Attributes:
+        customer_id (str):
+        role (PostCommunitiesIdMembersBodyRole):
+    """
 
     customer_id: str
     role: PostCommunitiesIdMembersBodyRole
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         customer_id = self.customer_id
 
         role = self.role.value
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "customerId": customer_id,
-            "role": role,
-        })
+        field_dict.update(
+            {
+                "customerId": customer_id,
+                "role": role,
+            }
+        )
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -57,14 +44,10 @@ class PostCommunitiesIdMembersBody:
 
         role = PostCommunitiesIdMembersBodyRole(d.pop("role"))
 
-
-
-
         post_communities_id_members_body = cls(
             customer_id=customer_id,
             role=role,
         )
-
 
         post_communities_id_members_body.additional_properties = d
         return post_communities_id_members_body

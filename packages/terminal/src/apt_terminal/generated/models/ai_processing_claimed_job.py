@@ -1,55 +1,42 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import TYPE_CHECKING, Any, TypeVar
+from uuid import UUID
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
-
-from typing import cast
-from uuid import UUID
-
 if TYPE_CHECKING:
-  from ..models.ai_processing_claimed_job_payload import AiProcessingClaimedJobPayload
-
-
-
+    from ..models.ai_processing_claimed_job_payload import AiProcessingClaimedJobPayload
 
 
 T = TypeVar("T", bound="AiProcessingClaimedJob")
 
 
-
 @_attrs_define
 class AiProcessingClaimedJob:
-    """ 
-        Attributes:
-            id (UUID):
-            job_type (str): Discriminator for worker routing (e.g. categorize_and_tag)
-            target_kind (str): Namespace of the target entity (e.g. content.markdown)
-            target_id (str): UUID of the target entity
-            payload (AiProcessingClaimedJobPayload): Arbitrary job-specific input
-            claimed_at (str): Drizzle-read timestamp of when the job was claimed
-            lease_expires_at (str): Drizzle-read timestamp when the lease expires
-            lease_token (str): Opaque lease token required for heartbeat / complete / fail
-     """
+    """
+    Attributes:
+        id (UUID):
+        job_type (str): Discriminator for worker routing (e.g. categorize_and_tag)
+        target_kind (str): Namespace of the target entity (e.g. content.markdown)
+        target_id (str): UUID of the target entity
+        payload (AiProcessingClaimedJobPayload): Arbitrary job-specific input
+        claimed_at (str): Drizzle-read timestamp of when the job was claimed
+        lease_expires_at (str): Drizzle-read timestamp when the lease expires
+        lease_token (str): Opaque lease token required for heartbeat / complete / fail
+    """
 
     id: UUID
     job_type: str
     target_kind: str
     target_id: str
-    payload: 'AiProcessingClaimedJobPayload'
+    payload: "AiProcessingClaimedJobPayload"
     claimed_at: str
     lease_expires_at: str
     lease_token: str
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
-
-
-
-
     def to_dict(self) -> dict[str, Any]:
-        from ..models.ai_processing_claimed_job_payload import AiProcessingClaimedJobPayload
         id = str(self.id)
 
         job_type = self.job_type
@@ -66,32 +53,29 @@ class AiProcessingClaimedJob:
 
         lease_token = self.lease_token
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "id": id,
-            "jobType": job_type,
-            "targetKind": target_kind,
-            "targetId": target_id,
-            "payload": payload,
-            "claimedAt": claimed_at,
-            "leaseExpiresAt": lease_expires_at,
-            "leaseToken": lease_token,
-        })
+        field_dict.update(
+            {
+                "id": id,
+                "jobType": job_type,
+                "targetKind": target_kind,
+                "targetId": target_id,
+                "payload": payload,
+                "claimedAt": claimed_at,
+                "leaseExpiresAt": lease_expires_at,
+                "leaseToken": lease_token,
+            }
+        )
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.ai_processing_claimed_job_payload import AiProcessingClaimedJobPayload
+
         d = dict(src_dict)
         id = UUID(d.pop("id"))
-
-
-
 
         job_type = d.pop("jobType")
 
@@ -100,9 +84,6 @@ class AiProcessingClaimedJob:
         target_id = d.pop("targetId")
 
         payload = AiProcessingClaimedJobPayload.from_dict(d.pop("payload"))
-
-
-
 
         claimed_at = d.pop("claimedAt")
 
@@ -120,7 +101,6 @@ class AiProcessingClaimedJob:
             lease_expires_at=lease_expires_at,
             lease_token=lease_token,
         )
-
 
         ai_processing_claimed_job.additional_properties = d
         return ai_processing_claimed_job

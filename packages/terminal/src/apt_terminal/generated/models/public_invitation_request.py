@@ -1,46 +1,33 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 from ..types import UNSET, Unset
 
-from ..types import UNSET, Unset
-from typing import Union
-
-
-
-
-
-
 T = TypeVar("T", bound="PublicInvitationRequest")
-
 
 
 @_attrs_define
 class PublicInvitationRequest:
-    """ 
-        Attributes:
-            name (str):
-            email (Union[Unset, str]):
-            phone (Union[Unset, str]):
-            source (Union[Unset, str]):
-            note (Union[Unset, str]):
-            ecosystem (Union[Unset, str]): Target ecosystem address (rdid or uuid). Absent = the hub. Unknown/deleted → 404.
-     """
+    """
+    Attributes:
+        name (str):
+        email (Union[Unset, str]):
+        phone (Union[Unset, str]):
+        source (Union[Unset, str]):
+        note (Union[Unset, str]):
+        ecosystem (Union[Unset, str]): Target ecosystem address (rdid or uuid). Absent = the hub. Unknown/deleted → 404.
+    """
 
     name: str
-    email: Union[Unset, str] = UNSET
-    phone: Union[Unset, str] = UNSET
-    source: Union[Unset, str] = UNSET
-    note: Union[Unset, str] = UNSET
-    ecosystem: Union[Unset, str] = UNSET
+    email: Unset | str = UNSET
+    phone: Unset | str = UNSET
+    source: Unset | str = UNSET
+    note: Unset | str = UNSET
+    ecosystem: Unset | str = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         name = self.name
@@ -55,12 +42,13 @@ class PublicInvitationRequest:
 
         ecosystem = self.ecosystem
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "name": name,
-        })
+        field_dict.update(
+            {
+                "name": name,
+            }
+        )
         if email is not UNSET:
             field_dict["email"] = email
         if phone is not UNSET:
@@ -73,8 +61,6 @@ class PublicInvitationRequest:
             field_dict["ecosystem"] = ecosystem
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -99,7 +85,6 @@ class PublicInvitationRequest:
             note=note,
             ecosystem=ecosystem,
         )
-
 
         public_invitation_request.additional_properties = d
         return public_invitation_request

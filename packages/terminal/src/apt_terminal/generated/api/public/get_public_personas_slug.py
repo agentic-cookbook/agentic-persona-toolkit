@@ -1,50 +1,36 @@
 from http import HTTPStatus
-from typing import Any, Optional, Union, cast
+from typing import Any
 
 import httpx
 
-from ...client import AuthenticatedClient, Client
-from ...types import Response, UNSET
 from ... import errors
-
+from ...client import AuthenticatedClient, Client
 from ...models.error import Error
 from ...models.public_persona import PublicPersona
-from typing import cast
-
+from ...types import Response
 
 
 def _get_kwargs(
     slug: str,
-
 ) -> dict[str, Any]:
-    
-
-    
-
-    
-
     _kwargs: dict[str, Any] = {
         "method": "get",
-        "url": "/public/personas/{slug}".format(slug=slug,),
+        "url": f"/public/personas/{slug}",
     }
-
 
     return _kwargs
 
 
-
-def _parse_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Optional[Union[Error, PublicPersona]]:
+def _parse_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Error | PublicPersona | None:
     if response.status_code == 200:
         response_200 = PublicPersona.from_dict(response.json())
-
-
 
         return response_200
 
     if response.status_code == 404:
         response_404 = Error.from_dict(response.json())
-
-
 
         return response_404
 
@@ -54,7 +40,9 @@ def _parse_response(*, client: Union[AuthenticatedClient, Client], response: htt
         return None
 
 
-def _build_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Response[Union[Error, PublicPersona]]:
+def _build_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Response[Error | PublicPersona]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -66,10 +54,9 @@ def _build_response(*, client: Union[AuthenticatedClient, Client], response: htt
 def sync_detailed(
     slug: str,
     *,
-    client: Union[AuthenticatedClient, Client],
-
-) -> Response[Union[Error, PublicPersona]]:
-    """ Get a public persona by slug (oldest match)
+    client: AuthenticatedClient | Client,
+) -> Response[Error | PublicPersona]:
+    """Get a public persona by slug (oldest match)
 
     Args:
         slug (str):
@@ -80,12 +67,10 @@ def sync_detailed(
 
     Returns:
         Response[Union[Error, PublicPersona]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         slug=slug,
-
     )
 
     response = client.get_httpx_client().request(
@@ -94,13 +79,13 @@ def sync_detailed(
 
     return _build_response(client=client, response=response)
 
+
 def sync(
     slug: str,
     *,
-    client: Union[AuthenticatedClient, Client],
-
-) -> Optional[Union[Error, PublicPersona]]:
-    """ Get a public persona by slug (oldest match)
+    client: AuthenticatedClient | Client,
+) -> Error | PublicPersona | None:
+    """Get a public persona by slug (oldest match)
 
     Args:
         slug (str):
@@ -111,22 +96,20 @@ def sync(
 
     Returns:
         Union[Error, PublicPersona]
-     """
-
+    """
 
     return sync_detailed(
         slug=slug,
-client=client,
-
+        client=client,
     ).parsed
+
 
 async def asyncio_detailed(
     slug: str,
     *,
-    client: Union[AuthenticatedClient, Client],
-
-) -> Response[Union[Error, PublicPersona]]:
-    """ Get a public persona by slug (oldest match)
+    client: AuthenticatedClient | Client,
+) -> Response[Error | PublicPersona]:
+    """Get a public persona by slug (oldest match)
 
     Args:
         slug (str):
@@ -137,27 +120,23 @@ async def asyncio_detailed(
 
     Returns:
         Response[Union[Error, PublicPersona]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         slug=slug,
-
     )
 
-    response = await client.get_async_httpx_client().request(
-        **kwargs
-    )
+    response = await client.get_async_httpx_client().request(**kwargs)
 
     return _build_response(client=client, response=response)
+
 
 async def asyncio(
     slug: str,
     *,
-    client: Union[AuthenticatedClient, Client],
-
-) -> Optional[Union[Error, PublicPersona]]:
-    """ Get a public persona by slug (oldest match)
+    client: AuthenticatedClient | Client,
+) -> Error | PublicPersona | None:
+    """Get a public persona by slug (oldest match)
 
     Args:
         slug (str):
@@ -168,11 +147,11 @@ async def asyncio(
 
     Returns:
         Union[Error, PublicPersona]
-     """
+    """
 
-
-    return (await asyncio_detailed(
-        slug=slug,
-client=client,
-
-    )).parsed
+    return (
+        await asyncio_detailed(
+            slug=slug,
+            client=client,
+        )
+    ).parsed

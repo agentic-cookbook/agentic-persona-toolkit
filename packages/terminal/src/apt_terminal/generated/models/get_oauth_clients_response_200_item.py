@@ -1,50 +1,35 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 from ..types import UNSET, Unset
 
-from ..types import UNSET, Unset
-from typing import cast
-from typing import cast, Union
-from typing import Union
-
-
-
-
-
-
 T = TypeVar("T", bound="GetOauthClientsResponse200Item")
-
 
 
 @_attrs_define
 class GetOauthClientsResponse200Item:
-    """ 
-        Attributes:
-            id (str):
-            slug (str):
-            name (str):
-            allowed_return_origins (list[str]):
-            is_internal (bool):
-            default_ecosystem_id (Union[None, Unset, str]):
-            app_token_prefix (Union[None, Unset, str]):
-     """
+    """
+    Attributes:
+        id (str):
+        slug (str):
+        name (str):
+        allowed_return_origins (list[str]):
+        is_internal (bool):
+        default_ecosystem_id (Union[None, Unset, str]):
+        app_token_prefix (Union[None, Unset, str]):
+    """
 
     id: str
     slug: str
     name: str
     allowed_return_origins: list[str]
     is_internal: bool
-    default_ecosystem_id: Union[None, Unset, str] = UNSET
-    app_token_prefix: Union[None, Unset, str] = UNSET
+    default_ecosystem_id: None | Unset | str = UNSET
+    app_token_prefix: None | Unset | str = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         id = self.id
@@ -55,40 +40,37 @@ class GetOauthClientsResponse200Item:
 
         allowed_return_origins = self.allowed_return_origins
 
-
-
         is_internal = self.is_internal
 
-        default_ecosystem_id: Union[None, Unset, str]
+        default_ecosystem_id: None | Unset | str
         if isinstance(self.default_ecosystem_id, Unset):
             default_ecosystem_id = UNSET
         else:
             default_ecosystem_id = self.default_ecosystem_id
 
-        app_token_prefix: Union[None, Unset, str]
+        app_token_prefix: None | Unset | str
         if isinstance(self.app_token_prefix, Unset):
             app_token_prefix = UNSET
         else:
             app_token_prefix = self.app_token_prefix
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "id": id,
-            "slug": slug,
-            "name": name,
-            "allowedReturnOrigins": allowed_return_origins,
-            "isInternal": is_internal,
-        })
+        field_dict.update(
+            {
+                "id": id,
+                "slug": slug,
+                "name": name,
+                "allowedReturnOrigins": allowed_return_origins,
+                "isInternal": is_internal,
+            }
+        )
         if default_ecosystem_id is not UNSET:
             field_dict["defaultEcosystemId"] = default_ecosystem_id
         if app_token_prefix is not UNSET:
             field_dict["appTokenPrefix"] = app_token_prefix
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -101,28 +83,25 @@ class GetOauthClientsResponse200Item:
 
         allowed_return_origins = cast(list[str], d.pop("allowedReturnOrigins"))
 
-
         is_internal = d.pop("isInternal")
 
-        def _parse_default_ecosystem_id(data: object) -> Union[None, Unset, str]:
+        def _parse_default_ecosystem_id(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         default_ecosystem_id = _parse_default_ecosystem_id(d.pop("defaultEcosystemId", UNSET))
 
-
-        def _parse_app_token_prefix(data: object) -> Union[None, Unset, str]:
+        def _parse_app_token_prefix(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         app_token_prefix = _parse_app_token_prefix(d.pop("appTokenPrefix", UNSET))
-
 
         get_oauth_clients_response_200_item = cls(
             id=id,
@@ -133,7 +112,6 @@ class GetOauthClientsResponse200Item:
             default_ecosystem_id=default_ecosystem_id,
             app_token_prefix=app_token_prefix,
         )
-
 
         get_oauth_clients_response_200_item.additional_properties = d
         return get_oauth_clients_response_200_item

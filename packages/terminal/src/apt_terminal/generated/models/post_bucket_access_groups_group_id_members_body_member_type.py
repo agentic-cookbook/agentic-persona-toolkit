@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class PostBucketAccessGroupsGroupIdMembersBodyMemberType(str, Enum):
     APP = "app"
     ORGANIZATION = "organization"

@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class PostProjectProjectsIdFieldsBodyType(str, Enum):
     CHECKBOX = "checkbox"
     DATE = "date"

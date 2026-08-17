@@ -1,50 +1,59 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
+from ..models.work_item_assignee_kind_type_1 import WorkItemAssigneeKindType1
+from ..models.work_item_assignee_kind_type_2_type_1 import WorkItemAssigneeKindType2Type1
+from ..models.work_item_assignee_kind_type_3_type_1 import WorkItemAssigneeKindType3Type1
 from ..types import UNSET, Unset
-
-from ..models.work_item_assignee_kind import WorkItemAssigneeKind
-from ..types import UNSET, Unset
-from typing import cast
-from typing import cast, Union
-from typing import Union
-
-
-
-
-
 
 T = TypeVar("T", bound="WorkItem")
 
 
-
 @_attrs_define
 class WorkItem:
-    """ 
-        Attributes:
-            id (str):
-            ecosystem_id (str):
-            project_id (str):
-            title (str):
-            description (str):
-            status_id (str): the board column this card sits in
-            priority (int):
-            labels (list[str]):
-            position (int): board order within the project (ascending)
-            created_at (str):
-            updated_at (str):
-            is_deleted (bool):
-            assignee_kind (Union[Unset, WorkItemAssigneeKind]):
-            assignee_id (Union[None, Unset, str]):
-            start_date (Union[None, Unset, str]): date (YYYY-MM-DD)
-            due_date (Union[None, Unset, str]): date (YYYY-MM-DD)
-            parent_id (Union[None, Unset, str]): a parent work item in the same project
-            created_by (Union[None, Unset, str]):
-            deleted_at (Union[None, Unset, str]):
-     """
+    """
+    Attributes:
+        id (str):
+        ecosystem_id (str):
+        project_id (str):
+        title (str):
+        description (str):
+        status_id (str): the board column this card sits in
+        priority (int): rank, 0 (none) to 4 (urgent); higher is more urgent
+        labels (list[str]): the card's labels, from the owner's shared tag vocabulary (the same one research documents
+            draw on), in authored order
+        rank (str): board order within the project — an opaque key that sorts ascending by BYTE, so a client compares
+            two cards with `<` and never parses one. Set only by the server (a create appends; POST /project/work-
+            items/{id}/move reorders), so there is no way — and no need — to send one.
+        created_at (str):
+        updated_at (str):
+        is_deleted (bool):
+        assignee_kind (Union[None, Unset, WorkItemAssigneeKindType1, WorkItemAssigneeKindType2Type1,
+            WorkItemAssigneeKindType3Type1]):
+        assignee_id (Union[None, Unset, str]):
+        start_date (Union[None, Unset, str]): date (YYYY-MM-DD)
+        due_date (Union[None, Unset, str]): date (YYYY-MM-DD)
+        parent_id (Union[None, Unset, str]): a parent work item in the same project
+        iteration_id (Union[None, Unset, str]): the time-box this card is committed to; null is the BACKLOG — a real
+            state, not an absence. The iteration belongs to the project OWNER, not the project, so a workspace can run one
+            cycle across several boards.
+        milestone_id (Union[None, Unset, str]): the milestone this card counts toward; null = it counts toward none.
+            UNLIKE `iterationId` — which names a time-box the project's OWNER holds — this must be a milestone of the card's
+            OWN project (400 otherwise): a milestone is a point in one plan, and a card counts toward the plan of the board
+            it sits on.
+        estimate (Union[None, Unset, int]): the card's size, in whatever unit the project's `estimateScale` names. A
+            non-negative integer; null is UNESTIMATED, which is distinct from 0 (estimated as trivial).
+        triaged_at (Union[None, Unset, str]): when this card was ACCEPTED onto the board. null = it is sitting in the
+            triage inbox and the board’s list omits it (GET /project/projects/{id}/work-items?includeUntriaged=true shows it
+            anyway). Every card created without `triage: true` is accepted at creation, so a board that never used an intake
+            queue has none of these. Server-set: POST /project/work-items/{id}/triage stamps it once and nothing un-stamps
+            it.
+        created_by (Union[None, Unset, str]):
+        deleted_at (Union[None, Unset, str]):
+    """
 
     id: str
     ecosystem_id: str
@@ -54,22 +63,28 @@ class WorkItem:
     status_id: str
     priority: int
     labels: list[str]
-    position: int
+    rank: str
     created_at: str
     updated_at: str
     is_deleted: bool
-    assignee_kind: Union[Unset, WorkItemAssigneeKind] = UNSET
-    assignee_id: Union[None, Unset, str] = UNSET
-    start_date: Union[None, Unset, str] = UNSET
-    due_date: Union[None, Unset, str] = UNSET
-    parent_id: Union[None, Unset, str] = UNSET
-    created_by: Union[None, Unset, str] = UNSET
-    deleted_at: Union[None, Unset, str] = UNSET
+    assignee_kind: (
+        None
+        | Unset
+        | WorkItemAssigneeKindType1
+        | WorkItemAssigneeKindType2Type1
+        | WorkItemAssigneeKindType3Type1
+    ) = UNSET
+    assignee_id: None | Unset | str = UNSET
+    start_date: None | Unset | str = UNSET
+    due_date: None | Unset | str = UNSET
+    parent_id: None | Unset | str = UNSET
+    iteration_id: None | Unset | str = UNSET
+    milestone_id: None | Unset | str = UNSET
+    estimate: None | Unset | int = UNSET
+    triaged_at: None | Unset | str = UNSET
+    created_by: None | Unset | str = UNSET
+    deleted_at: None | Unset | str = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         id = self.id
@@ -88,9 +103,7 @@ class WorkItem:
 
         labels = self.labels
 
-
-
-        position = self.position
+        rank = self.rank
 
         created_at = self.created_at
 
@@ -98,64 +111,96 @@ class WorkItem:
 
         is_deleted = self.is_deleted
 
-        assignee_kind: Union[Unset, str] = UNSET
-        if not isinstance(self.assignee_kind, Unset):
+        assignee_kind: None | Unset | str
+        if isinstance(self.assignee_kind, Unset):
+            assignee_kind = UNSET
+        elif (
+            isinstance(self.assignee_kind, WorkItemAssigneeKindType1)
+            or isinstance(self.assignee_kind, WorkItemAssigneeKindType2Type1)
+            or isinstance(self.assignee_kind, WorkItemAssigneeKindType3Type1)
+        ):
             assignee_kind = self.assignee_kind.value
+        else:
+            assignee_kind = self.assignee_kind
 
-
-        assignee_id: Union[None, Unset, str]
+        assignee_id: None | Unset | str
         if isinstance(self.assignee_id, Unset):
             assignee_id = UNSET
         else:
             assignee_id = self.assignee_id
 
-        start_date: Union[None, Unset, str]
+        start_date: None | Unset | str
         if isinstance(self.start_date, Unset):
             start_date = UNSET
         else:
             start_date = self.start_date
 
-        due_date: Union[None, Unset, str]
+        due_date: None | Unset | str
         if isinstance(self.due_date, Unset):
             due_date = UNSET
         else:
             due_date = self.due_date
 
-        parent_id: Union[None, Unset, str]
+        parent_id: None | Unset | str
         if isinstance(self.parent_id, Unset):
             parent_id = UNSET
         else:
             parent_id = self.parent_id
 
-        created_by: Union[None, Unset, str]
+        iteration_id: None | Unset | str
+        if isinstance(self.iteration_id, Unset):
+            iteration_id = UNSET
+        else:
+            iteration_id = self.iteration_id
+
+        milestone_id: None | Unset | str
+        if isinstance(self.milestone_id, Unset):
+            milestone_id = UNSET
+        else:
+            milestone_id = self.milestone_id
+
+        estimate: None | Unset | int
+        if isinstance(self.estimate, Unset):
+            estimate = UNSET
+        else:
+            estimate = self.estimate
+
+        triaged_at: None | Unset | str
+        if isinstance(self.triaged_at, Unset):
+            triaged_at = UNSET
+        else:
+            triaged_at = self.triaged_at
+
+        created_by: None | Unset | str
         if isinstance(self.created_by, Unset):
             created_by = UNSET
         else:
             created_by = self.created_by
 
-        deleted_at: Union[None, Unset, str]
+        deleted_at: None | Unset | str
         if isinstance(self.deleted_at, Unset):
             deleted_at = UNSET
         else:
             deleted_at = self.deleted_at
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "id": id,
-            "ecosystemId": ecosystem_id,
-            "projectId": project_id,
-            "title": title,
-            "description": description,
-            "statusId": status_id,
-            "priority": priority,
-            "labels": labels,
-            "position": position,
-            "createdAt": created_at,
-            "updatedAt": updated_at,
-            "isDeleted": is_deleted,
-        })
+        field_dict.update(
+            {
+                "id": id,
+                "ecosystemId": ecosystem_id,
+                "projectId": project_id,
+                "title": title,
+                "description": description,
+                "statusId": status_id,
+                "priority": priority,
+                "labels": labels,
+                "rank": rank,
+                "createdAt": created_at,
+                "updatedAt": updated_at,
+                "isDeleted": is_deleted,
+            }
+        )
         if assignee_kind is not UNSET:
             field_dict["assigneeKind"] = assignee_kind
         if assignee_id is not UNSET:
@@ -166,14 +211,20 @@ class WorkItem:
             field_dict["dueDate"] = due_date
         if parent_id is not UNSET:
             field_dict["parentId"] = parent_id
+        if iteration_id is not UNSET:
+            field_dict["iterationId"] = iteration_id
+        if milestone_id is not UNSET:
+            field_dict["milestoneId"] = milestone_id
+        if estimate is not UNSET:
+            field_dict["estimate"] = estimate
+        if triaged_at is not UNSET:
+            field_dict["triagedAt"] = triaged_at
         if created_by is not UNSET:
             field_dict["createdBy"] = created_by
         if deleted_at is not UNSET:
             field_dict["deletedAt"] = deleted_at
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -194,8 +245,7 @@ class WorkItem:
 
         labels = cast(list[str], d.pop("labels"))
 
-
-        position = d.pop("position")
+        rank = d.pop("rank")
 
         created_at = d.pop("createdAt")
 
@@ -203,75 +253,143 @@ class WorkItem:
 
         is_deleted = d.pop("isDeleted")
 
-        _assignee_kind = d.pop("assigneeKind", UNSET)
-        assignee_kind: Union[Unset, WorkItemAssigneeKind]
-        if isinstance(_assignee_kind,  Unset):
-            assignee_kind = UNSET
-        else:
-            assignee_kind = WorkItemAssigneeKind(_assignee_kind)
-
-
-
-
-        def _parse_assignee_id(data: object) -> Union[None, Unset, str]:
+        def _parse_assignee_kind(
+            data: object,
+        ) -> (
+            None
+            | Unset
+            | WorkItemAssigneeKindType1
+            | WorkItemAssigneeKindType2Type1
+            | WorkItemAssigneeKindType3Type1
+        ):
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            try:
+                if not isinstance(data, str):
+                    raise TypeError()
+                assignee_kind_type_1 = WorkItemAssigneeKindType1(data)
+
+                return assignee_kind_type_1
+            except:  # noqa: E722
+                pass
+            try:
+                if not isinstance(data, str):
+                    raise TypeError()
+                assignee_kind_type_2_type_1 = WorkItemAssigneeKindType2Type1(data)
+
+                return assignee_kind_type_2_type_1
+            except:  # noqa: E722
+                pass
+            try:
+                if not isinstance(data, str):
+                    raise TypeError()
+                assignee_kind_type_3_type_1 = WorkItemAssigneeKindType3Type1(data)
+
+                return assignee_kind_type_3_type_1
+            except:  # noqa: E722
+                pass
+            return cast(
+                None
+                | Unset
+                | WorkItemAssigneeKindType1
+                | WorkItemAssigneeKindType2Type1
+                | WorkItemAssigneeKindType3Type1,
+                data,
+            )
+
+        assignee_kind = _parse_assignee_kind(d.pop("assigneeKind", UNSET))
+
+        def _parse_assignee_id(data: object) -> None | Unset | str:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(None | Unset | str, data)
 
         assignee_id = _parse_assignee_id(d.pop("assigneeId", UNSET))
 
-
-        def _parse_start_date(data: object) -> Union[None, Unset, str]:
+        def _parse_start_date(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         start_date = _parse_start_date(d.pop("startDate", UNSET))
 
-
-        def _parse_due_date(data: object) -> Union[None, Unset, str]:
+        def _parse_due_date(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         due_date = _parse_due_date(d.pop("dueDate", UNSET))
 
-
-        def _parse_parent_id(data: object) -> Union[None, Unset, str]:
+        def _parse_parent_id(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         parent_id = _parse_parent_id(d.pop("parentId", UNSET))
 
-
-        def _parse_created_by(data: object) -> Union[None, Unset, str]:
+        def _parse_iteration_id(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
+
+        iteration_id = _parse_iteration_id(d.pop("iterationId", UNSET))
+
+        def _parse_milestone_id(data: object) -> None | Unset | str:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(None | Unset | str, data)
+
+        milestone_id = _parse_milestone_id(d.pop("milestoneId", UNSET))
+
+        def _parse_estimate(data: object) -> None | Unset | int:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(None | Unset | int, data)
+
+        estimate = _parse_estimate(d.pop("estimate", UNSET))
+
+        def _parse_triaged_at(data: object) -> None | Unset | str:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(None | Unset | str, data)
+
+        triaged_at = _parse_triaged_at(d.pop("triagedAt", UNSET))
+
+        def _parse_created_by(data: object) -> None | Unset | str:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(None | Unset | str, data)
 
         created_by = _parse_created_by(d.pop("createdBy", UNSET))
 
-
-        def _parse_deleted_at(data: object) -> Union[None, Unset, str]:
+        def _parse_deleted_at(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         deleted_at = _parse_deleted_at(d.pop("deletedAt", UNSET))
-
 
         work_item = cls(
             id=id,
@@ -282,7 +400,7 @@ class WorkItem:
             status_id=status_id,
             priority=priority,
             labels=labels,
-            position=position,
+            rank=rank,
             created_at=created_at,
             updated_at=updated_at,
             is_deleted=is_deleted,
@@ -291,10 +409,13 @@ class WorkItem:
             start_date=start_date,
             due_date=due_date,
             parent_id=parent_id,
+            iteration_id=iteration_id,
+            milestone_id=milestone_id,
+            estimate=estimate,
+            triaged_at=triaged_at,
             created_by=created_by,
             deleted_at=deleted_at,
         )
-
 
         work_item.additional_properties = d
         return work_item

@@ -1,46 +1,33 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
-
 from ..models.work_item_field_value_type import WorkItemFieldValueType
 from ..types import UNSET, Unset
-from typing import Union
-
-
-
-
-
 
 T = TypeVar("T", bound="WorkItemFieldValue")
 
 
-
 @_attrs_define
 class WorkItemFieldValue:
-    """ 
-        Attributes:
-            field_id (str):
-            key (str):
-            label (str):
-            type_ (WorkItemFieldValueType):
-            value (Union[Unset, Any]): the field's stored value for this item (type matches the field's type); null when
-                unset
-     """
+    """
+    Attributes:
+        field_id (str):
+        key (str):
+        label (str):
+        type_ (WorkItemFieldValueType):
+        value (Union[Unset, Any]): the field's stored value for this item (type matches the field's type); null when
+            unset
+    """
 
     field_id: str
     key: str
     label: str
     type_: WorkItemFieldValueType
-    value: Union[Unset, Any] = UNSET
+    value: Unset | Any = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         field_id = self.field_id
@@ -53,21 +40,20 @@ class WorkItemFieldValue:
 
         value = self.value
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "fieldId": field_id,
-            "key": key,
-            "label": label,
-            "type": type_,
-        })
+        field_dict.update(
+            {
+                "fieldId": field_id,
+                "key": key,
+                "label": label,
+                "type": type_,
+            }
+        )
         if value is not UNSET:
             field_dict["value"] = value
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -80,9 +66,6 @@ class WorkItemFieldValue:
 
         type_ = WorkItemFieldValueType(d.pop("type"))
 
-
-
-
         value = d.pop("value", UNSET)
 
         work_item_field_value = cls(
@@ -92,7 +75,6 @@ class WorkItemFieldValue:
             type_=type_,
             value=value,
         )
-
 
         work_item_field_value.additional_properties = d
         return work_item_field_value

@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class IntegrationProviderAuthMethod(str, Enum):
     API_KEY = "api_key"
     APP_PASSWORD = "app_password"

@@ -1,41 +1,33 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
-from attrs import field as _attrs_field
 
 from ..types import UNSET, Unset
-
-
-
-
-
-
 
 T = TypeVar("T", bound="PostUsageUsageCountersBody")
 
 
-
 @_attrs_define
 class PostUsageUsageCountersBody:
-    """ 
-        Attributes:
-            scope (str):
-            principal_id (str):
-            period_start (str):
-            requests (int):
-            bytes_ (int):
-     """
+    """
+    Attributes:
+        scope (str):
+        principal_id (str):
+        period_start (str):
+        requests (int):
+        bytes_ (int):
+        tokens (Union[Unset, int]):
+        cost_micros (Union[Unset, int]):
+    """
 
     scope: str
     principal_id: str
     period_start: str
     requests: int
     bytes_: int
-
-
-
-
+    tokens: Unset | int = UNSET
+    cost_micros: Unset | int = UNSET
 
     def to_dict(self) -> dict[str, Any]:
         scope = self.scope
@@ -48,20 +40,27 @@ class PostUsageUsageCountersBody:
 
         bytes_ = self.bytes_
 
+        tokens = self.tokens
+
+        cost_micros = self.cost_micros
 
         field_dict: dict[str, Any] = {}
 
-        field_dict.update({
-            "scope": scope,
-            "principalId": principal_id,
-            "periodStart": period_start,
-            "requests": requests,
-            "bytes": bytes_,
-        })
+        field_dict.update(
+            {
+                "scope": scope,
+                "principalId": principal_id,
+                "periodStart": period_start,
+                "requests": requests,
+                "bytes": bytes_,
+            }
+        )
+        if tokens is not UNSET:
+            field_dict["tokens"] = tokens
+        if cost_micros is not UNSET:
+            field_dict["costMicros"] = cost_micros
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -76,13 +75,18 @@ class PostUsageUsageCountersBody:
 
         bytes_ = d.pop("bytes")
 
+        tokens = d.pop("tokens", UNSET)
+
+        cost_micros = d.pop("costMicros", UNSET)
+
         post_usage_usage_counters_body = cls(
             scope=scope,
             principal_id=principal_id,
             period_start=period_start,
             requests=requests,
             bytes_=bytes_,
+            tokens=tokens,
+            cost_micros=cost_micros,
         )
 
         return post_usage_usage_counters_body
-

@@ -1,47 +1,33 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
-
-from typing import cast, Union
-
-
-
-
-
-
 T = TypeVar("T", bound="AuthUserMethod")
-
 
 
 @_attrs_define
 class AuthUserMethod:
-    """ 
-        Attributes:
-            id (str):
-            user_id (str):
-            provider (str):
-            provider_id (Union[None, str]):
-            has_credential (bool):
-            created_at (str):
-            updated_at (str):
-     """
+    """
+    Attributes:
+        id (str):
+        user_id (str):
+        provider (str):
+        provider_id (Union[None, str]):
+        has_credential (bool):
+        created_at (str):
+        updated_at (str):
+    """
 
     id: str
     user_id: str
     provider: str
-    provider_id: Union[None, str]
+    provider_id: None | str
     has_credential: bool
     created_at: str
     updated_at: str
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         id = self.id
@@ -50,7 +36,7 @@ class AuthUserMethod:
 
         provider = self.provider
 
-        provider_id: Union[None, str]
+        provider_id: None | str
         provider_id = self.provider_id
 
         has_credential = self.has_credential
@@ -59,22 +45,21 @@ class AuthUserMethod:
 
         updated_at = self.updated_at
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "id": id,
-            "userId": user_id,
-            "provider": provider,
-            "providerId": provider_id,
-            "hasCredential": has_credential,
-            "createdAt": created_at,
-            "updatedAt": updated_at,
-        })
+        field_dict.update(
+            {
+                "id": id,
+                "userId": user_id,
+                "provider": provider,
+                "providerId": provider_id,
+                "hasCredential": has_credential,
+                "createdAt": created_at,
+                "updatedAt": updated_at,
+            }
+        )
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -85,13 +70,12 @@ class AuthUserMethod:
 
         provider = d.pop("provider")
 
-        def _parse_provider_id(data: object) -> Union[None, str]:
+        def _parse_provider_id(data: object) -> None | str:
             if data is None:
                 return data
-            return cast(Union[None, str], data)
+            return cast(None | str, data)
 
         provider_id = _parse_provider_id(d.pop("providerId"))
-
 
         has_credential = d.pop("hasCredential")
 
@@ -108,7 +92,6 @@ class AuthUserMethod:
             created_at=created_at,
             updated_at=updated_at,
         )
-
 
         auth_user_method.additional_properties = d
         return auth_user_method

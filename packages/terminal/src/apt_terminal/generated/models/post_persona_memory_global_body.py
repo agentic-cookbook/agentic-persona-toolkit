@@ -1,57 +1,45 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
-
-from ..models.post_persona_memory_global_body_memory_type import PostPersonaMemoryGlobalBodyMemoryType
+from ..models.post_persona_memory_global_body_memory_type import (
+    PostPersonaMemoryGlobalBodyMemoryType,
+)
 from ..models.post_persona_memory_global_body_source import PostPersonaMemoryGlobalBodySource
 from ..types import UNSET, Unset
-from typing import cast
-from typing import Union
-
-
-
-
-
 
 T = TypeVar("T", bound="PostPersonaMemoryGlobalBody")
 
 
-
 @_attrs_define
 class PostPersonaMemoryGlobalBody:
-    """ 
-        Attributes:
-            persona_id (str):
-            slug (str):
-            memory_type (PostPersonaMemoryGlobalBodyMemoryType):
-            description (str):
-            body (str):
-            subject_table (Union[Unset, str]):
-            subject_id (Union[Unset, str]):
-            source (Union[Unset, PostPersonaMemoryGlobalBodySource]):
-            confidence (Union[Unset, int]):
-            tags (Union[Unset, list[str]]):
-     """
+    """
+    Attributes:
+        persona_id (str):
+        slug (str):
+        memory_type (PostPersonaMemoryGlobalBodyMemoryType):
+        description (str):
+        body (str):
+        subject_table (Union[Unset, str]):
+        subject_id (Union[Unset, str]):
+        source (Union[Unset, PostPersonaMemoryGlobalBodySource]):
+        confidence (Union[Unset, int]):
+        tags (Union[Unset, list[str]]):
+    """
 
     persona_id: str
     slug: str
     memory_type: PostPersonaMemoryGlobalBodyMemoryType
     description: str
     body: str
-    subject_table: Union[Unset, str] = UNSET
-    subject_id: Union[Unset, str] = UNSET
-    source: Union[Unset, PostPersonaMemoryGlobalBodySource] = UNSET
-    confidence: Union[Unset, int] = UNSET
-    tags: Union[Unset, list[str]] = UNSET
+    subject_table: Unset | str = UNSET
+    subject_id: Unset | str = UNSET
+    source: Unset | PostPersonaMemoryGlobalBodySource = UNSET
+    confidence: Unset | int = UNSET
+    tags: Unset | list[str] = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         persona_id = self.persona_id
@@ -68,29 +56,27 @@ class PostPersonaMemoryGlobalBody:
 
         subject_id = self.subject_id
 
-        source: Union[Unset, str] = UNSET
+        source: Unset | str = UNSET
         if not isinstance(self.source, Unset):
             source = self.source.value
 
-
         confidence = self.confidence
 
-        tags: Union[Unset, list[str]] = UNSET
+        tags: Unset | list[str] = UNSET
         if not isinstance(self.tags, Unset):
             tags = self.tags
 
-
-
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "personaId": persona_id,
-            "slug": slug,
-            "memoryType": memory_type,
-            "description": description,
-            "body": body,
-        })
+        field_dict.update(
+            {
+                "personaId": persona_id,
+                "slug": slug,
+                "memoryType": memory_type,
+                "description": description,
+                "body": body,
+            }
+        )
         if subject_table is not UNSET:
             field_dict["subjectTable"] = subject_table
         if subject_id is not UNSET:
@@ -104,8 +90,6 @@ class PostPersonaMemoryGlobalBody:
 
         return field_dict
 
-
-
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
@@ -114,9 +98,6 @@ class PostPersonaMemoryGlobalBody:
         slug = d.pop("slug")
 
         memory_type = PostPersonaMemoryGlobalBodyMemoryType(d.pop("memoryType"))
-
-
-
 
         description = d.pop("description")
 
@@ -127,19 +108,15 @@ class PostPersonaMemoryGlobalBody:
         subject_id = d.pop("subjectId", UNSET)
 
         _source = d.pop("source", UNSET)
-        source: Union[Unset, PostPersonaMemoryGlobalBodySource]
-        if isinstance(_source,  Unset):
+        source: Unset | PostPersonaMemoryGlobalBodySource
+        if isinstance(_source, Unset):
             source = UNSET
         else:
             source = PostPersonaMemoryGlobalBodySource(_source)
 
-
-
-
         confidence = d.pop("confidence", UNSET)
 
         tags = cast(list[str], d.pop("tags", UNSET))
-
 
         post_persona_memory_global_body = cls(
             persona_id=persona_id,
@@ -153,7 +130,6 @@ class PostPersonaMemoryGlobalBody:
             confidence=confidence,
             tags=tags,
         )
-
 
         post_persona_memory_global_body.additional_properties = d
         return post_persona_memory_global_body

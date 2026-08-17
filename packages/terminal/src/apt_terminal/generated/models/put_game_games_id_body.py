@@ -1,0 +1,196 @@
+from collections.abc import Mapping
+from typing import TYPE_CHECKING, Any, TypeVar, Union, cast
+
+from attrs import define as _attrs_define
+
+from ..types import UNSET, Unset
+
+if TYPE_CHECKING:
+    from ..models.put_game_games_id_body_engine_config_type_1 import (
+        PutGameGamesIdBodyEngineConfigType1,
+    )
+
+
+T = TypeVar("T", bound="PutGameGamesIdBody")
+
+
+@_attrs_define
+class PutGameGamesIdBody:
+    """
+    Attributes:
+        ecosystem_id (Union[Unset, str]):
+        slug (Union[Unset, str]):
+        name (Union[Unset, str]):
+        description (Union[None, Unset, str]):
+        engine (Union[Unset, str]):
+        engine_config (Union['PutGameGamesIdBodyEngineConfigType1', None, Unset, bool, float, list[Any], str]):
+        character_names (Union[Unset, str]):
+        status (Union[Unset, str]):
+        event_log (Union[Unset, str]):
+        event_retention_days (Union[Unset, int]):
+        sync_txid (Union[Unset, int]):
+    """
+
+    ecosystem_id: Unset | str = UNSET
+    slug: Unset | str = UNSET
+    name: Unset | str = UNSET
+    description: None | Unset | str = UNSET
+    engine: Unset | str = UNSET
+    engine_config: Union[
+        "PutGameGamesIdBodyEngineConfigType1", None, Unset, bool, float, list[Any], str
+    ] = UNSET
+    character_names: Unset | str = UNSET
+    status: Unset | str = UNSET
+    event_log: Unset | str = UNSET
+    event_retention_days: Unset | int = UNSET
+    sync_txid: Unset | int = UNSET
+
+    def to_dict(self) -> dict[str, Any]:
+        from ..models.put_game_games_id_body_engine_config_type_1 import (
+            PutGameGamesIdBodyEngineConfigType1,
+        )
+
+        ecosystem_id = self.ecosystem_id
+
+        slug = self.slug
+
+        name = self.name
+
+        description: None | Unset | str
+        if isinstance(self.description, Unset):
+            description = UNSET
+        else:
+            description = self.description
+
+        engine = self.engine
+
+        engine_config: None | Unset | bool | dict[str, Any] | float | list[Any] | str
+        if isinstance(self.engine_config, Unset):
+            engine_config = UNSET
+        elif isinstance(self.engine_config, PutGameGamesIdBodyEngineConfigType1):
+            engine_config = self.engine_config.to_dict()
+        elif isinstance(self.engine_config, list):
+            engine_config = self.engine_config
+
+        else:
+            engine_config = self.engine_config
+
+        character_names = self.character_names
+
+        status = self.status
+
+        event_log = self.event_log
+
+        event_retention_days = self.event_retention_days
+
+        sync_txid = self.sync_txid
+
+        field_dict: dict[str, Any] = {}
+
+        field_dict.update({})
+        if ecosystem_id is not UNSET:
+            field_dict["ecosystemId"] = ecosystem_id
+        if slug is not UNSET:
+            field_dict["slug"] = slug
+        if name is not UNSET:
+            field_dict["name"] = name
+        if description is not UNSET:
+            field_dict["description"] = description
+        if engine is not UNSET:
+            field_dict["engine"] = engine
+        if engine_config is not UNSET:
+            field_dict["engineConfig"] = engine_config
+        if character_names is not UNSET:
+            field_dict["characterNames"] = character_names
+        if status is not UNSET:
+            field_dict["status"] = status
+        if event_log is not UNSET:
+            field_dict["eventLog"] = event_log
+        if event_retention_days is not UNSET:
+            field_dict["eventRetentionDays"] = event_retention_days
+        if sync_txid is not UNSET:
+            field_dict["syncTxid"] = sync_txid
+
+        return field_dict
+
+    @classmethod
+    def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
+        from ..models.put_game_games_id_body_engine_config_type_1 import (
+            PutGameGamesIdBodyEngineConfigType1,
+        )
+
+        d = dict(src_dict)
+        ecosystem_id = d.pop("ecosystemId", UNSET)
+
+        slug = d.pop("slug", UNSET)
+
+        name = d.pop("name", UNSET)
+
+        def _parse_description(data: object) -> None | Unset | str:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(None | Unset | str, data)
+
+        description = _parse_description(d.pop("description", UNSET))
+
+        engine = d.pop("engine", UNSET)
+
+        def _parse_engine_config(
+            data: object,
+        ) -> Union["PutGameGamesIdBodyEngineConfigType1", None, Unset, bool, float, list[Any], str]:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            try:
+                if not isinstance(data, dict):
+                    raise TypeError()
+                engine_config_type_1 = PutGameGamesIdBodyEngineConfigType1.from_dict(data)
+
+                return engine_config_type_1
+            except:  # noqa: E722
+                pass
+            try:
+                if not isinstance(data, list):
+                    raise TypeError()
+                engine_config_type_2 = cast(list[Any], data)
+
+                return engine_config_type_2
+            except:  # noqa: E722
+                pass
+            return cast(
+                Union[
+                    "PutGameGamesIdBodyEngineConfigType1", None, Unset, bool, float, list[Any], str
+                ],
+                data,
+            )
+
+        engine_config = _parse_engine_config(d.pop("engineConfig", UNSET))
+
+        character_names = d.pop("characterNames", UNSET)
+
+        status = d.pop("status", UNSET)
+
+        event_log = d.pop("eventLog", UNSET)
+
+        event_retention_days = d.pop("eventRetentionDays", UNSET)
+
+        sync_txid = d.pop("syncTxid", UNSET)
+
+        put_game_games_id_body = cls(
+            ecosystem_id=ecosystem_id,
+            slug=slug,
+            name=name,
+            description=description,
+            engine=engine,
+            engine_config=engine_config,
+            character_names=character_names,
+            status=status,
+            event_log=event_log,
+            event_retention_days=event_retention_days,
+            sync_txid=sync_txid,
+        )
+
+        return put_game_games_id_body

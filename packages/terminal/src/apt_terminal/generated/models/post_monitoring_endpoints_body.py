@@ -1,52 +1,37 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar, cast
 
 from attrs import define as _attrs_define
-from attrs import field as _attrs_field
 
 from ..types import UNSET, Unset
-
-from ..types import UNSET, Unset
-from typing import cast, Union
-from typing import Union
-
-
-
-
-
 
 T = TypeVar("T", bound="PostMonitoringEndpointsBody")
 
 
-
 @_attrs_define
 class PostMonitoringEndpointsBody:
-    """ 
-        Attributes:
-            site_id (str):
-            url (str):
-            kind (Union[Unset, str]):
-            expected_status (Union[Unset, int]):
-            expected_body_contains (Union[None, Unset, str]):
-            timeout_ms (Union[Unset, int]):
-            degraded_threshold_ms (Union[Unset, int]):
-            check_interval_seconds (Union[Unset, int]):
-            is_active (Union[Unset, bool]):
-     """
+    """
+    Attributes:
+        site_id (str):
+        url (str):
+        kind (Union[Unset, str]):
+        expected_status (Union[Unset, int]):
+        expected_body_contains (Union[None, Unset, str]):
+        timeout_ms (Union[Unset, int]):
+        degraded_threshold_ms (Union[Unset, int]):
+        check_interval_seconds (Union[Unset, int]):
+        is_active (Union[Unset, bool]):
+    """
 
     site_id: str
     url: str
-    kind: Union[Unset, str] = UNSET
-    expected_status: Union[Unset, int] = UNSET
-    expected_body_contains: Union[None, Unset, str] = UNSET
-    timeout_ms: Union[Unset, int] = UNSET
-    degraded_threshold_ms: Union[Unset, int] = UNSET
-    check_interval_seconds: Union[Unset, int] = UNSET
-    is_active: Union[Unset, bool] = UNSET
-
-
-
-
+    kind: Unset | str = UNSET
+    expected_status: Unset | int = UNSET
+    expected_body_contains: None | Unset | str = UNSET
+    timeout_ms: Unset | int = UNSET
+    degraded_threshold_ms: Unset | int = UNSET
+    check_interval_seconds: Unset | int = UNSET
+    is_active: Unset | bool = UNSET
 
     def to_dict(self) -> dict[str, Any]:
         site_id = self.site_id
@@ -57,7 +42,7 @@ class PostMonitoringEndpointsBody:
 
         expected_status = self.expected_status
 
-        expected_body_contains: Union[None, Unset, str]
+        expected_body_contains: None | Unset | str
         if isinstance(self.expected_body_contains, Unset):
             expected_body_contains = UNSET
         else:
@@ -71,13 +56,14 @@ class PostMonitoringEndpointsBody:
 
         is_active = self.is_active
 
-
         field_dict: dict[str, Any] = {}
 
-        field_dict.update({
-            "siteId": site_id,
-            "url": url,
-        })
+        field_dict.update(
+            {
+                "siteId": site_id,
+                "url": url,
+            }
+        )
         if kind is not UNSET:
             field_dict["kind"] = kind
         if expected_status is not UNSET:
@@ -95,8 +81,6 @@ class PostMonitoringEndpointsBody:
 
         return field_dict
 
-
-
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
@@ -108,15 +92,14 @@ class PostMonitoringEndpointsBody:
 
         expected_status = d.pop("expectedStatus", UNSET)
 
-        def _parse_expected_body_contains(data: object) -> Union[None, Unset, str]:
+        def _parse_expected_body_contains(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         expected_body_contains = _parse_expected_body_contains(d.pop("expectedBodyContains", UNSET))
-
 
         timeout_ms = d.pop("timeoutMs", UNSET)
 
@@ -139,4 +122,3 @@ class PostMonitoringEndpointsBody:
         )
 
         return post_monitoring_endpoints_body
-

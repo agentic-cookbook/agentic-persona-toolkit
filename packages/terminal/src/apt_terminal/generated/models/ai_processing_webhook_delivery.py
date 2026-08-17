@@ -1,72 +1,58 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import TYPE_CHECKING, Any, TypeVar, cast
+from uuid import UUID
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 from ..types import UNSET, Unset
 
-from ..types import UNSET, Unset
-from typing import cast
-from typing import cast, Union
-from typing import Union
-from uuid import UUID
-
 if TYPE_CHECKING:
-  from ..models.ai_processing_webhook_delivery_payload import AiProcessingWebhookDeliveryPayload
-
-
-
+    from ..models.ai_processing_webhook_delivery_payload import AiProcessingWebhookDeliveryPayload
 
 
 T = TypeVar("T", bound="AiProcessingWebhookDelivery")
 
 
-
 @_attrs_define
 class AiProcessingWebhookDelivery:
-    """ 
-        Attributes:
-            id (UUID):
-            ecosystem_id (str):
-            endpoint_id (UUID):
-            event_id (UUID):
-            event_type (str):
-            payload (AiProcessingWebhookDeliveryPayload):
-            status (str): pending | delivered | failed | dead
-            attempts (int):
-            max_attempts (int):
-            next_attempt_at (str):
-            created_at (str):
-            updated_at (str):
-            response_status (Union[None, Unset, int]):
-            last_error (Union[None, Unset, str]):
-            delivered_at (Union[None, Unset, str]):
-     """
+    """
+    Attributes:
+        id (UUID):
+        ecosystem_id (str):
+        endpoint_id (UUID):
+        event_id (UUID):
+        event_type (str):
+        payload (AiProcessingWebhookDeliveryPayload):
+        status (str): pending | delivered | failed | dead
+        attempts (int):
+        max_attempts (int):
+        next_attempt_at (str):
+        created_at (str):
+        updated_at (str):
+        response_status (Union[None, Unset, int]):
+        last_error (Union[None, Unset, str]):
+        delivered_at (Union[None, Unset, str]):
+    """
 
     id: UUID
     ecosystem_id: str
     endpoint_id: UUID
     event_id: UUID
     event_type: str
-    payload: 'AiProcessingWebhookDeliveryPayload'
+    payload: "AiProcessingWebhookDeliveryPayload"
     status: str
     attempts: int
     max_attempts: int
     next_attempt_at: str
     created_at: str
     updated_at: str
-    response_status: Union[None, Unset, int] = UNSET
-    last_error: Union[None, Unset, str] = UNSET
-    delivered_at: Union[None, Unset, str] = UNSET
+    response_status: None | Unset | int = UNSET
+    last_error: None | Unset | str = UNSET
+    delivered_at: None | Unset | str = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
-
-
-
-
     def to_dict(self) -> dict[str, Any]:
-        from ..models.ai_processing_webhook_delivery_payload import AiProcessingWebhookDeliveryPayload
         id = str(self.id)
 
         ecosystem_id = self.ecosystem_id
@@ -91,41 +77,42 @@ class AiProcessingWebhookDelivery:
 
         updated_at = self.updated_at
 
-        response_status: Union[None, Unset, int]
+        response_status: None | Unset | int
         if isinstance(self.response_status, Unset):
             response_status = UNSET
         else:
             response_status = self.response_status
 
-        last_error: Union[None, Unset, str]
+        last_error: None | Unset | str
         if isinstance(self.last_error, Unset):
             last_error = UNSET
         else:
             last_error = self.last_error
 
-        delivered_at: Union[None, Unset, str]
+        delivered_at: None | Unset | str
         if isinstance(self.delivered_at, Unset):
             delivered_at = UNSET
         else:
             delivered_at = self.delivered_at
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "id": id,
-            "ecosystemId": ecosystem_id,
-            "endpointId": endpoint_id,
-            "eventId": event_id,
-            "eventType": event_type,
-            "payload": payload,
-            "status": status,
-            "attempts": attempts,
-            "maxAttempts": max_attempts,
-            "nextAttemptAt": next_attempt_at,
-            "createdAt": created_at,
-            "updatedAt": updated_at,
-        })
+        field_dict.update(
+            {
+                "id": id,
+                "ecosystemId": ecosystem_id,
+                "endpointId": endpoint_id,
+                "eventId": event_id,
+                "eventType": event_type,
+                "payload": payload,
+                "status": status,
+                "attempts": attempts,
+                "maxAttempts": max_attempts,
+                "nextAttemptAt": next_attempt_at,
+                "createdAt": created_at,
+                "updatedAt": updated_at,
+            }
+        )
         if response_status is not UNSET:
             field_dict["responseStatus"] = response_status
         if last_error is not UNSET:
@@ -135,35 +122,24 @@ class AiProcessingWebhookDelivery:
 
         return field_dict
 
-
-
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.ai_processing_webhook_delivery_payload import AiProcessingWebhookDeliveryPayload
+        from ..models.ai_processing_webhook_delivery_payload import (
+            AiProcessingWebhookDeliveryPayload,
+        )
+
         d = dict(src_dict)
         id = UUID(d.pop("id"))
-
-
-
 
         ecosystem_id = d.pop("ecosystemId")
 
         endpoint_id = UUID(d.pop("endpointId"))
 
-
-
-
         event_id = UUID(d.pop("eventId"))
-
-
-
 
         event_type = d.pop("eventType")
 
         payload = AiProcessingWebhookDeliveryPayload.from_dict(d.pop("payload"))
-
-
-
 
         status = d.pop("status")
 
@@ -177,35 +153,32 @@ class AiProcessingWebhookDelivery:
 
         updated_at = d.pop("updatedAt")
 
-        def _parse_response_status(data: object) -> Union[None, Unset, int]:
+        def _parse_response_status(data: object) -> None | Unset | int:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, int], data)
+            return cast(None | Unset | int, data)
 
         response_status = _parse_response_status(d.pop("responseStatus", UNSET))
 
-
-        def _parse_last_error(data: object) -> Union[None, Unset, str]:
+        def _parse_last_error(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         last_error = _parse_last_error(d.pop("lastError", UNSET))
 
-
-        def _parse_delivered_at(data: object) -> Union[None, Unset, str]:
+        def _parse_delivered_at(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         delivered_at = _parse_delivered_at(d.pop("deliveredAt", UNSET))
-
 
         ai_processing_webhook_delivery = cls(
             id=id,
@@ -224,7 +197,6 @@ class AiProcessingWebhookDelivery:
             last_error=last_error,
             delivered_at=delivered_at,
         )
-
 
         ai_processing_webhook_delivery.additional_properties = d
         return ai_processing_webhook_delivery

@@ -1,49 +1,35 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
-
-
-
-
-
-
-
 T = TypeVar("T", bound="ChatErrorEvent")
-
 
 
 @_attrs_define
 class ChatErrorEvent:
-    """ error — the turn failed; the message explains why (HTTP stays 200)
+    """error — the turn failed; the message explains why (HTTP stays 200)
 
-        Attributes:
-            message (str):
-     """
+    Attributes:
+        message (str):
+    """
 
     message: str
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
-
-
-
-
     def to_dict(self) -> dict[str, Any]:
         message = self.message
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "message": message,
-        })
+        field_dict.update(
+            {
+                "message": message,
+            }
+        )
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -53,7 +39,6 @@ class ChatErrorEvent:
         chat_error_event = cls(
             message=message,
         )
-
 
         chat_error_event.additional_properties = d
         return chat_error_event

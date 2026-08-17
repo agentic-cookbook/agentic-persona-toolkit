@@ -1,12 +1,10 @@
 from http import HTTPStatus
-from typing import Any, Optional, Union, cast
+from typing import Any, Union
 
 import httpx
 
-from ...client import AuthenticatedClient, Client
-from ...types import Response, UNSET
 from ... import errors
-
+from ...client import AuthenticatedClient, Client
 from ...models.chat_done_event import ChatDoneEvent
 from ...models.chat_error_event import ChatErrorEvent
 from ...models.chat_send_message import ChatSendMessage
@@ -14,31 +12,22 @@ from ...models.chat_token_event import ChatTokenEvent
 from ...models.chat_tool_call_completed_event import ChatToolCallCompletedEvent
 from ...models.chat_tool_call_started_event import ChatToolCallStartedEvent
 from ...models.error import Error
-from typing import cast
-from typing import cast, Union
-
+from ...types import Response
 
 
 def _get_kwargs(
     id: str,
     *,
     body: ChatSendMessage,
-
 ) -> dict[str, Any]:
     headers: dict[str, Any] = {}
 
-
-    
-
-    
-
     _kwargs: dict[str, Any] = {
         "method": "post",
-        "url": "/chat/conversations/{id}/messages".format(id=id,),
+        "url": f"/chat/conversations/{id}/messages",
     }
 
     _kwargs["json"] = body.to_dict()
-
 
     headers["Content-Type"] = "application/json"
 
@@ -46,55 +35,71 @@ def _get_kwargs(
     return _kwargs
 
 
-
-def _parse_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Optional[Union[Error, Union['ChatDoneEvent', 'ChatErrorEvent', 'ChatTokenEvent', 'ChatToolCallCompletedEvent', 'ChatToolCallStartedEvent']]]:
+def _parse_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> (
+    Error
+    | Union[
+        "ChatDoneEvent",
+        "ChatErrorEvent",
+        "ChatTokenEvent",
+        "ChatToolCallCompletedEvent",
+        "ChatToolCallStartedEvent",
+    ]
+    | None
+):
     if response.status_code == 200:
-        def _parse_response_200(data: object) -> Union['ChatDoneEvent', 'ChatErrorEvent', 'ChatTokenEvent', 'ChatToolCallCompletedEvent', 'ChatToolCallStartedEvent']:
+
+        def _parse_response_200(
+            data: object,
+        ) -> Union[
+            "ChatDoneEvent",
+            "ChatErrorEvent",
+            "ChatTokenEvent",
+            "ChatToolCallCompletedEvent",
+            "ChatToolCallStartedEvent",
+        ]:
             try:
                 if not isinstance(data, dict):
                     raise TypeError()
-                componentsschemas_chat_stream_event_chat_token_event = ChatTokenEvent.from_dict(data)
-
-
+                componentsschemas_chat_stream_event_chat_token_event = ChatTokenEvent.from_dict(
+                    data
+                )
 
                 return componentsschemas_chat_stream_event_chat_token_event
-            except: # noqa: E722
+            except:  # noqa: E722
                 pass
             try:
                 if not isinstance(data, dict):
                     raise TypeError()
-                componentsschemas_chat_stream_event_chat_tool_call_started_event = ChatToolCallStartedEvent.from_dict(data)
-
-
+                componentsschemas_chat_stream_event_chat_tool_call_started_event = (
+                    ChatToolCallStartedEvent.from_dict(data)
+                )
 
                 return componentsschemas_chat_stream_event_chat_tool_call_started_event
-            except: # noqa: E722
+            except:  # noqa: E722
                 pass
             try:
                 if not isinstance(data, dict):
                     raise TypeError()
-                componentsschemas_chat_stream_event_chat_tool_call_completed_event = ChatToolCallCompletedEvent.from_dict(data)
-
-
+                componentsschemas_chat_stream_event_chat_tool_call_completed_event = (
+                    ChatToolCallCompletedEvent.from_dict(data)
+                )
 
                 return componentsschemas_chat_stream_event_chat_tool_call_completed_event
-            except: # noqa: E722
+            except:  # noqa: E722
                 pass
             try:
                 if not isinstance(data, dict):
                     raise TypeError()
                 componentsschemas_chat_stream_event_chat_done_event = ChatDoneEvent.from_dict(data)
 
-
-
                 return componentsschemas_chat_stream_event_chat_done_event
-            except: # noqa: E722
+            except:  # noqa: E722
                 pass
             if not isinstance(data, dict):
                 raise TypeError()
             componentsschemas_chat_stream_event_chat_error_event = ChatErrorEvent.from_dict(data)
-
-
 
             return componentsschemas_chat_stream_event_chat_error_event
 
@@ -105,14 +110,10 @@ def _parse_response(*, client: Union[AuthenticatedClient, Client], response: htt
     if response.status_code == 400:
         response_400 = Error.from_dict(response.json())
 
-
-
         return response_400
 
     if response.status_code == 401:
         response_401 = Error.from_dict(response.json())
-
-
 
         return response_401
 
@@ -122,7 +123,18 @@ def _parse_response(*, client: Union[AuthenticatedClient, Client], response: htt
         return None
 
 
-def _build_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Response[Union[Error, Union['ChatDoneEvent', 'ChatErrorEvent', 'ChatTokenEvent', 'ChatToolCallCompletedEvent', 'ChatToolCallStartedEvent']]]:
+def _build_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Response[
+    Error
+    | Union[
+        "ChatDoneEvent",
+        "ChatErrorEvent",
+        "ChatTokenEvent",
+        "ChatToolCallCompletedEvent",
+        "ChatToolCallStartedEvent",
+    ]
+]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -136,9 +148,17 @@ def sync_detailed(
     *,
     client: AuthenticatedClient,
     body: ChatSendMessage,
-
-) -> Response[Union[Error, Union['ChatDoneEvent', 'ChatErrorEvent', 'ChatTokenEvent', 'ChatToolCallCompletedEvent', 'ChatToolCallStartedEvent']]]:
-    """ Send a message and stream the assistant turn (SSE)
+) -> Response[
+    Error
+    | Union[
+        "ChatDoneEvent",
+        "ChatErrorEvent",
+        "ChatTokenEvent",
+        "ChatToolCallCompletedEvent",
+        "ChatToolCallStartedEvent",
+    ]
+]:
+    """Send a message and stream the assistant turn (SSE)
 
      Sends a user message and streams the assistant response as Server-Sent Events (`text/event-stream`).
     The stream emits an `open` event, then `token`, `tool_call_started`, `tool_call_completed`, and a
@@ -156,13 +176,11 @@ def sync_detailed(
 
     Returns:
         Response[Union[Error, Union['ChatDoneEvent', 'ChatErrorEvent', 'ChatTokenEvent', 'ChatToolCallCompletedEvent', 'ChatToolCallStartedEvent']]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         id=id,
-body=body,
-
+        body=body,
     )
 
     response = client.get_httpx_client().request(
@@ -171,14 +189,24 @@ body=body,
 
     return _build_response(client=client, response=response)
 
+
 def sync(
     id: str,
     *,
     client: AuthenticatedClient,
     body: ChatSendMessage,
-
-) -> Optional[Union[Error, Union['ChatDoneEvent', 'ChatErrorEvent', 'ChatTokenEvent', 'ChatToolCallCompletedEvent', 'ChatToolCallStartedEvent']]]:
-    """ Send a message and stream the assistant turn (SSE)
+) -> (
+    Error
+    | Union[
+        "ChatDoneEvent",
+        "ChatErrorEvent",
+        "ChatTokenEvent",
+        "ChatToolCallCompletedEvent",
+        "ChatToolCallStartedEvent",
+    ]
+    | None
+):
+    """Send a message and stream the assistant turn (SSE)
 
      Sends a user message and streams the assistant response as Server-Sent Events (`text/event-stream`).
     The stream emits an `open` event, then `token`, `tool_call_started`, `tool_call_completed`, and a
@@ -196,24 +224,31 @@ def sync(
 
     Returns:
         Union[Error, Union['ChatDoneEvent', 'ChatErrorEvent', 'ChatTokenEvent', 'ChatToolCallCompletedEvent', 'ChatToolCallStartedEvent']]
-     """
-
+    """
 
     return sync_detailed(
         id=id,
-client=client,
-body=body,
-
+        client=client,
+        body=body,
     ).parsed
+
 
 async def asyncio_detailed(
     id: str,
     *,
     client: AuthenticatedClient,
     body: ChatSendMessage,
-
-) -> Response[Union[Error, Union['ChatDoneEvent', 'ChatErrorEvent', 'ChatTokenEvent', 'ChatToolCallCompletedEvent', 'ChatToolCallStartedEvent']]]:
-    """ Send a message and stream the assistant turn (SSE)
+) -> Response[
+    Error
+    | Union[
+        "ChatDoneEvent",
+        "ChatErrorEvent",
+        "ChatTokenEvent",
+        "ChatToolCallCompletedEvent",
+        "ChatToolCallStartedEvent",
+    ]
+]:
+    """Send a message and stream the assistant turn (SSE)
 
      Sends a user message and streams the assistant response as Server-Sent Events (`text/event-stream`).
     The stream emits an `open` event, then `token`, `tool_call_started`, `tool_call_completed`, and a
@@ -231,29 +266,35 @@ async def asyncio_detailed(
 
     Returns:
         Response[Union[Error, Union['ChatDoneEvent', 'ChatErrorEvent', 'ChatTokenEvent', 'ChatToolCallCompletedEvent', 'ChatToolCallStartedEvent']]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         id=id,
-body=body,
-
+        body=body,
     )
 
-    response = await client.get_async_httpx_client().request(
-        **kwargs
-    )
+    response = await client.get_async_httpx_client().request(**kwargs)
 
     return _build_response(client=client, response=response)
+
 
 async def asyncio(
     id: str,
     *,
     client: AuthenticatedClient,
     body: ChatSendMessage,
-
-) -> Optional[Union[Error, Union['ChatDoneEvent', 'ChatErrorEvent', 'ChatTokenEvent', 'ChatToolCallCompletedEvent', 'ChatToolCallStartedEvent']]]:
-    """ Send a message and stream the assistant turn (SSE)
+) -> (
+    Error
+    | Union[
+        "ChatDoneEvent",
+        "ChatErrorEvent",
+        "ChatTokenEvent",
+        "ChatToolCallCompletedEvent",
+        "ChatToolCallStartedEvent",
+    ]
+    | None
+):
+    """Send a message and stream the assistant turn (SSE)
 
      Sends a user message and streams the assistant response as Server-Sent Events (`text/event-stream`).
     The stream emits an `open` event, then `token`, `tool_call_started`, `tool_call_completed`, and a
@@ -271,12 +312,12 @@ async def asyncio(
 
     Returns:
         Union[Error, Union['ChatDoneEvent', 'ChatErrorEvent', 'ChatTokenEvent', 'ChatToolCallCompletedEvent', 'ChatToolCallStartedEvent']]
-     """
+    """
 
-
-    return (await asyncio_detailed(
-        id=id,
-client=client,
-body=body,
-
-    )).parsed
+    return (
+        await asyncio_detailed(
+            id=id,
+            client=client,
+            body=body,
+        )
+    ).parsed

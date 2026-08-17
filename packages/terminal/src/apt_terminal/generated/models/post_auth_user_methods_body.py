@@ -1,76 +1,61 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 from ..types import UNSET, Unset
 
-from ..types import UNSET, Unset
-from typing import cast, Union
-from typing import Union
-
-
-
-
-
-
 T = TypeVar("T", bound="PostAuthUserMethodsBody")
-
 
 
 @_attrs_define
 class PostAuthUserMethodsBody:
-    """ 
-        Attributes:
-            user_id (str):
-            provider (str):
-            provider_id (Union[None, Unset, str]):
-            credential (Union[None, Unset, str]):
-     """
+    """
+    Attributes:
+        user_id (str):
+        provider (str):
+        provider_id (Union[None, Unset, str]):
+        credential (Union[None, Unset, str]):
+    """
 
     user_id: str
     provider: str
-    provider_id: Union[None, Unset, str] = UNSET
-    credential: Union[None, Unset, str] = UNSET
+    provider_id: None | Unset | str = UNSET
+    credential: None | Unset | str = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         user_id = self.user_id
 
         provider = self.provider
 
-        provider_id: Union[None, Unset, str]
+        provider_id: None | Unset | str
         if isinstance(self.provider_id, Unset):
             provider_id = UNSET
         else:
             provider_id = self.provider_id
 
-        credential: Union[None, Unset, str]
+        credential: None | Unset | str
         if isinstance(self.credential, Unset):
             credential = UNSET
         else:
             credential = self.credential
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "userId": user_id,
-            "provider": provider,
-        })
+        field_dict.update(
+            {
+                "userId": user_id,
+                "provider": provider,
+            }
+        )
         if provider_id is not UNSET:
             field_dict["providerId"] = provider_id
         if credential is not UNSET:
             field_dict["credential"] = credential
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -79,25 +64,23 @@ class PostAuthUserMethodsBody:
 
         provider = d.pop("provider")
 
-        def _parse_provider_id(data: object) -> Union[None, Unset, str]:
+        def _parse_provider_id(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         provider_id = _parse_provider_id(d.pop("providerId", UNSET))
 
-
-        def _parse_credential(data: object) -> Union[None, Unset, str]:
+        def _parse_credential(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         credential = _parse_credential(d.pop("credential", UNSET))
-
 
         post_auth_user_methods_body = cls(
             user_id=user_id,
@@ -105,7 +88,6 @@ class PostAuthUserMethodsBody:
             provider_id=provider_id,
             credential=credential,
         )
-
 
         post_auth_user_methods_body.additional_properties = d
         return post_auth_user_methods_body

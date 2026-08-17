@@ -1,48 +1,34 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
-
-
-
-
-
-
-
 T = TypeVar("T", bound="PostFriendsRequestsBody")
-
 
 
 @_attrs_define
 class PostFriendsRequestsBody:
-    """ 
-        Attributes:
-            user_id (str): The customer id of the user to befriend
-     """
+    """
+    Attributes:
+        user_id (str): The customer id of the user to befriend
+    """
 
     user_id: str
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
-
-
-
-
     def to_dict(self) -> dict[str, Any]:
         user_id = self.user_id
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "userId": user_id,
-        })
+        field_dict.update(
+            {
+                "userId": user_id,
+            }
+        )
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -52,7 +38,6 @@ class PostFriendsRequestsBody:
         post_friends_requests_body = cls(
             user_id=user_id,
         )
-
 
         post_friends_requests_body.additional_properties = d
         return post_friends_requests_body

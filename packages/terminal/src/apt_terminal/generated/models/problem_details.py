@@ -1,44 +1,31 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 from ..types import UNSET, Unset
 
-from ..types import UNSET, Unset
-from typing import Union
-
-
-
-
-
-
 T = TypeVar("T", bound="ProblemDetails")
-
 
 
 @_attrs_define
 class ProblemDetails:
-    """ 
-        Attributes:
-            title (str): Short, human-readable summary of the problem type
-            status (int): HTTP status code, duplicated in the body
-            type_ (Union[Unset, str]): URI identifying the problem type; 'about:blank' when unspecified
-            detail (Union[Unset, str]): Explanation specific to this occurrence
-            instance (Union[Unset, str]): URI reference for this occurrence (the request path)
-     """
+    """
+    Attributes:
+        title (str): Short, human-readable summary of the problem type
+        status (int): HTTP status code, duplicated in the body
+        type_ (Union[Unset, str]): URI identifying the problem type; 'about:blank' when unspecified
+        detail (Union[Unset, str]): Explanation specific to this occurrence
+        instance (Union[Unset, str]): URI reference for this occurrence (the request path)
+    """
 
     title: str
     status: int
-    type_: Union[Unset, str] = UNSET
-    detail: Union[Unset, str] = UNSET
-    instance: Union[Unset, str] = UNSET
+    type_: Unset | str = UNSET
+    detail: Unset | str = UNSET
+    instance: Unset | str = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         title = self.title
@@ -51,13 +38,14 @@ class ProblemDetails:
 
         instance = self.instance
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "title": title,
-            "status": status,
-        })
+        field_dict.update(
+            {
+                "title": title,
+                "status": status,
+            }
+        )
         if type_ is not UNSET:
             field_dict["type"] = type_
         if detail is not UNSET:
@@ -66,8 +54,6 @@ class ProblemDetails:
             field_dict["instance"] = instance
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -89,7 +75,6 @@ class ProblemDetails:
             detail=detail,
             instance=instance,
         )
-
 
         problem_details.additional_properties = d
         return problem_details

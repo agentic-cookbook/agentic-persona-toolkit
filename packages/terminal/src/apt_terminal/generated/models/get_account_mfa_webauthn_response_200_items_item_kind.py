@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class GetAccountMfaWebauthnResponse200ItemsItemKind(str, Enum):
     PASSKEY = "passkey"
     SECURITY_KEY = "security_key"

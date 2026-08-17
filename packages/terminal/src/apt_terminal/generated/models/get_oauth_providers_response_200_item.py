@@ -1,43 +1,38 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import TYPE_CHECKING, Any, TypeVar, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
+from ..models.get_oauth_providers_response_200_item_auth_type import (
+    GetOauthProvidersResponse200ItemAuthType,
+)
 from ..types import UNSET, Unset
-
-from ..models.get_oauth_providers_response_200_item_auth_type import GetOauthProvidersResponse200ItemAuthType
-from ..types import UNSET, Unset
-from typing import cast
-from typing import cast, Union
-from typing import Union
 
 if TYPE_CHECKING:
-  from ..models.get_oauth_providers_response_200_item_identity_mapping import GetOauthProvidersResponse200ItemIdentityMapping
-
-
-
+    from ..models.get_oauth_providers_response_200_item_identity_mapping import (
+        GetOauthProvidersResponse200ItemIdentityMapping,
+    )
 
 
 T = TypeVar("T", bound="GetOauthProvidersResponse200Item")
 
 
-
 @_attrs_define
 class GetOauthProvidersResponse200Item:
-    """ 
-        Attributes:
-            id (str):
-            slug (str):
-            name (str):
-            auth_type (GetOauthProvidersResponse200ItemAuthType):
-            client_id (str):
-            scopes (list[str]):
-            identity_mapping (GetOauthProvidersResponse200ItemIdentityMapping):
-            authorize_url (Union[None, Unset, str]):
-            token_url (Union[None, Unset, str]):
-            userinfo_url (Union[None, Unset, str]):
-     """
+    """
+    Attributes:
+        id (str):
+        slug (str):
+        name (str):
+        auth_type (GetOauthProvidersResponse200ItemAuthType):
+        client_id (str):
+        scopes (list[str]):
+        identity_mapping (GetOauthProvidersResponse200ItemIdentityMapping):
+        authorize_url (Union[None, Unset, str]):
+        token_url (Union[None, Unset, str]):
+        userinfo_url (Union[None, Unset, str]):
+    """
 
     id: str
     slug: str
@@ -45,18 +40,13 @@ class GetOauthProvidersResponse200Item:
     auth_type: GetOauthProvidersResponse200ItemAuthType
     client_id: str
     scopes: list[str]
-    identity_mapping: 'GetOauthProvidersResponse200ItemIdentityMapping'
-    authorize_url: Union[None, Unset, str] = UNSET
-    token_url: Union[None, Unset, str] = UNSET
-    userinfo_url: Union[None, Unset, str] = UNSET
+    identity_mapping: "GetOauthProvidersResponse200ItemIdentityMapping"
+    authorize_url: None | Unset | str = UNSET
+    token_url: None | Unset | str = UNSET
+    userinfo_url: None | Unset | str = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
-
-
-
-
     def to_dict(self) -> dict[str, Any]:
-        from ..models.get_oauth_providers_response_200_item_identity_mapping import GetOauthProvidersResponse200ItemIdentityMapping
         id = self.id
 
         slug = self.slug
@@ -69,40 +59,39 @@ class GetOauthProvidersResponse200Item:
 
         scopes = self.scopes
 
-
-
         identity_mapping = self.identity_mapping.to_dict()
 
-        authorize_url: Union[None, Unset, str]
+        authorize_url: None | Unset | str
         if isinstance(self.authorize_url, Unset):
             authorize_url = UNSET
         else:
             authorize_url = self.authorize_url
 
-        token_url: Union[None, Unset, str]
+        token_url: None | Unset | str
         if isinstance(self.token_url, Unset):
             token_url = UNSET
         else:
             token_url = self.token_url
 
-        userinfo_url: Union[None, Unset, str]
+        userinfo_url: None | Unset | str
         if isinstance(self.userinfo_url, Unset):
             userinfo_url = UNSET
         else:
             userinfo_url = self.userinfo_url
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "id": id,
-            "slug": slug,
-            "name": name,
-            "authType": auth_type,
-            "clientId": client_id,
-            "scopes": scopes,
-            "identityMapping": identity_mapping,
-        })
+        field_dict.update(
+            {
+                "id": id,
+                "slug": slug,
+                "name": name,
+                "authType": auth_type,
+                "clientId": client_id,
+                "scopes": scopes,
+                "identityMapping": identity_mapping,
+            }
+        )
         if authorize_url is not UNSET:
             field_dict["authorizeUrl"] = authorize_url
         if token_url is not UNSET:
@@ -112,11 +101,12 @@ class GetOauthProvidersResponse200Item:
 
         return field_dict
 
-
-
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.get_oauth_providers_response_200_item_identity_mapping import GetOauthProvidersResponse200ItemIdentityMapping
+        from ..models.get_oauth_providers_response_200_item_identity_mapping import (
+            GetOauthProvidersResponse200ItemIdentityMapping,
+        )
+
         d = dict(src_dict)
         id = d.pop("id")
 
@@ -126,48 +116,40 @@ class GetOauthProvidersResponse200Item:
 
         auth_type = GetOauthProvidersResponse200ItemAuthType(d.pop("authType"))
 
-
-
-
         client_id = d.pop("clientId")
 
         scopes = cast(list[str], d.pop("scopes"))
 
+        identity_mapping = GetOauthProvidersResponse200ItemIdentityMapping.from_dict(
+            d.pop("identityMapping")
+        )
 
-        identity_mapping = GetOauthProvidersResponse200ItemIdentityMapping.from_dict(d.pop("identityMapping"))
-
-
-
-
-        def _parse_authorize_url(data: object) -> Union[None, Unset, str]:
+        def _parse_authorize_url(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         authorize_url = _parse_authorize_url(d.pop("authorizeUrl", UNSET))
 
-
-        def _parse_token_url(data: object) -> Union[None, Unset, str]:
+        def _parse_token_url(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         token_url = _parse_token_url(d.pop("tokenUrl", UNSET))
 
-
-        def _parse_userinfo_url(data: object) -> Union[None, Unset, str]:
+        def _parse_userinfo_url(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         userinfo_url = _parse_userinfo_url(d.pop("userinfoUrl", UNSET))
-
 
         get_oauth_providers_response_200_item = cls(
             id=id,
@@ -181,7 +163,6 @@ class GetOauthProvidersResponse200Item:
             token_url=token_url,
             userinfo_url=userinfo_url,
         )
-
 
         get_oauth_providers_response_200_item.additional_properties = d
         return get_oauth_providers_response_200_item

@@ -1,39 +1,26 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
-
-
-
-
-
-
-
 T = TypeVar("T", bound="PutMeCommunicationSettingsBody")
-
 
 
 @_attrs_define
 class PutMeCommunicationSettingsBody:
-    """ 
-        Attributes:
-            dm_audience_mask (int): AUDIENCE bitmask of who may DM the user (0 = nobody; default PUBLIC|HUB = 3)
-            presence_audience_mask (int): AUDIENCE bitmask of who may see the user presence (0 = nobody; default PUBLIC|HUB
-                = 3)
-            appear_offline (bool): When true, presence is hidden from EVERYONE regardless of the mask
-     """
+    """
+    Attributes:
+        dm_audience_mask (int): AUDIENCE bitmask of who may DM the user (0 = nobody; default PUBLIC|HUB = 3)
+        presence_audience_mask (int): AUDIENCE bitmask of who may see the user presence (0 = nobody; default PUBLIC|HUB
+            = 3)
+        appear_offline (bool): When true, presence is hidden from EVERYONE regardless of the mask
+    """
 
     dm_audience_mask: int
     presence_audience_mask: int
     appear_offline: bool
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         dm_audience_mask = self.dm_audience_mask
@@ -42,18 +29,17 @@ class PutMeCommunicationSettingsBody:
 
         appear_offline = self.appear_offline
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "dmAudienceMask": dm_audience_mask,
-            "presenceAudienceMask": presence_audience_mask,
-            "appearOffline": appear_offline,
-        })
+        field_dict.update(
+            {
+                "dmAudienceMask": dm_audience_mask,
+                "presenceAudienceMask": presence_audience_mask,
+                "appearOffline": appear_offline,
+            }
+        )
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -69,7 +55,6 @@ class PutMeCommunicationSettingsBody:
             presence_audience_mask=presence_audience_mask,
             appear_offline=appear_offline,
         )
-
 
         put_me_communication_settings_body.additional_properties = d
         return put_me_communication_settings_body

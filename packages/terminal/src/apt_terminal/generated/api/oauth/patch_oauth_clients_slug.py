@@ -1,39 +1,29 @@
 from http import HTTPStatus
-from typing import Any, Optional, Union, cast
+from typing import Any
 
 import httpx
 
-from ...client import AuthenticatedClient, Client
-from ...types import Response, UNSET
 from ... import errors
-
+from ...client import AuthenticatedClient, Client
 from ...models.error import Error
 from ...models.patch_oauth_clients_slug_body import PatchOauthClientsSlugBody
 from ...models.patch_oauth_clients_slug_response_200 import PatchOauthClientsSlugResponse200
-from typing import cast
-
+from ...types import Response
 
 
 def _get_kwargs(
     slug: str,
     *,
     body: PatchOauthClientsSlugBody,
-
 ) -> dict[str, Any]:
     headers: dict[str, Any] = {}
 
-
-    
-
-    
-
     _kwargs: dict[str, Any] = {
         "method": "patch",
-        "url": "/oauth/clients/{slug}".format(slug=slug,),
+        "url": f"/oauth/clients/{slug}",
     }
 
     _kwargs["json"] = body.to_dict()
-
 
     headers["Content-Type"] = "application/json"
 
@@ -41,33 +31,26 @@ def _get_kwargs(
     return _kwargs
 
 
-
-def _parse_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Optional[Union[Error, PatchOauthClientsSlugResponse200]]:
+def _parse_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Error | PatchOauthClientsSlugResponse200 | None:
     if response.status_code == 200:
         response_200 = PatchOauthClientsSlugResponse200.from_dict(response.json())
-
-
 
         return response_200
 
     if response.status_code == 401:
         response_401 = Error.from_dict(response.json())
 
-
-
         return response_401
 
     if response.status_code == 404:
         response_404 = Error.from_dict(response.json())
 
-
-
         return response_404
 
     if response.status_code == 409:
         response_409 = Error.from_dict(response.json())
-
-
 
         return response_409
 
@@ -77,7 +60,9 @@ def _parse_response(*, client: Union[AuthenticatedClient, Client], response: htt
         return None
 
 
-def _build_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Response[Union[Error, PatchOauthClientsSlugResponse200]]:
+def _build_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Response[Error | PatchOauthClientsSlugResponse200]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -91,9 +76,8 @@ def sync_detailed(
     *,
     client: AuthenticatedClient,
     body: PatchOauthClientsSlugBody,
-
-) -> Response[Union[Error, PatchOauthClientsSlugResponse200]]:
-    """ Update a client (admin)
+) -> Response[Error | PatchOauthClientsSlugResponse200]:
+    """Update a client (admin)
 
     Args:
         slug (str):
@@ -105,13 +89,11 @@ def sync_detailed(
 
     Returns:
         Response[Union[Error, PatchOauthClientsSlugResponse200]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         slug=slug,
-body=body,
-
+        body=body,
     )
 
     response = client.get_httpx_client().request(
@@ -120,14 +102,14 @@ body=body,
 
     return _build_response(client=client, response=response)
 
+
 def sync(
     slug: str,
     *,
     client: AuthenticatedClient,
     body: PatchOauthClientsSlugBody,
-
-) -> Optional[Union[Error, PatchOauthClientsSlugResponse200]]:
-    """ Update a client (admin)
+) -> Error | PatchOauthClientsSlugResponse200 | None:
+    """Update a client (admin)
 
     Args:
         slug (str):
@@ -139,24 +121,22 @@ def sync(
 
     Returns:
         Union[Error, PatchOauthClientsSlugResponse200]
-     """
-
+    """
 
     return sync_detailed(
         slug=slug,
-client=client,
-body=body,
-
+        client=client,
+        body=body,
     ).parsed
+
 
 async def asyncio_detailed(
     slug: str,
     *,
     client: AuthenticatedClient,
     body: PatchOauthClientsSlugBody,
-
-) -> Response[Union[Error, PatchOauthClientsSlugResponse200]]:
-    """ Update a client (admin)
+) -> Response[Error | PatchOauthClientsSlugResponse200]:
+    """Update a client (admin)
 
     Args:
         slug (str):
@@ -168,29 +148,25 @@ async def asyncio_detailed(
 
     Returns:
         Response[Union[Error, PatchOauthClientsSlugResponse200]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         slug=slug,
-body=body,
-
+        body=body,
     )
 
-    response = await client.get_async_httpx_client().request(
-        **kwargs
-    )
+    response = await client.get_async_httpx_client().request(**kwargs)
 
     return _build_response(client=client, response=response)
+
 
 async def asyncio(
     slug: str,
     *,
     client: AuthenticatedClient,
     body: PatchOauthClientsSlugBody,
-
-) -> Optional[Union[Error, PatchOauthClientsSlugResponse200]]:
-    """ Update a client (admin)
+) -> Error | PatchOauthClientsSlugResponse200 | None:
+    """Update a client (admin)
 
     Args:
         slug (str):
@@ -202,12 +178,12 @@ async def asyncio(
 
     Returns:
         Union[Error, PatchOauthClientsSlugResponse200]
-     """
+    """
 
-
-    return (await asyncio_detailed(
-        slug=slug,
-client=client,
-body=body,
-
-    )).parsed
+    return (
+        await asyncio_detailed(
+            slug=slug,
+            client=client,
+            body=body,
+        )
+    ).parsed

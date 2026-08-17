@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class IntegrationActionResultStatus(str, Enum):
     ERROR = "error"
     OK = "ok"

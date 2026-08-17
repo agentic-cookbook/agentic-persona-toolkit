@@ -1,74 +1,57 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import TYPE_CHECKING, Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
-
-from typing import cast
-
 if TYPE_CHECKING:
-  from ..models.friendship import Friendship
-
-
-
+    from ..models.friendship import Friendship
 
 
 T = TypeVar("T", bound="FriendEntry")
 
 
-
 @_attrs_define
 class FriendEntry:
-    """ 
-        Attributes:
-            friend_id (str):
-            friendship (Friendship):
-     """
+    """
+    Attributes:
+        friend_id (str):
+        friendship (Friendship):
+    """
 
     friend_id: str
-    friendship: 'Friendship'
+    friendship: "Friendship"
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
-
-
-
-
     def to_dict(self) -> dict[str, Any]:
-        from ..models.friendship import Friendship
         friend_id = self.friend_id
 
         friendship = self.friendship.to_dict()
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "friendId": friend_id,
-            "friendship": friendship,
-        })
+        field_dict.update(
+            {
+                "friendId": friend_id,
+                "friendship": friendship,
+            }
+        )
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.friendship import Friendship
+
         d = dict(src_dict)
         friend_id = d.pop("friendId")
 
         friendship = Friendship.from_dict(d.pop("friendship"))
 
-
-
-
         friend_entry = cls(
             friend_id=friend_id,
             friendship=friendship,
         )
-
 
         friend_entry.additional_properties = d
         return friend_entry

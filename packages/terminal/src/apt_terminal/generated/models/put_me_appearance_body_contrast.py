@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class PutMeAppearanceBodyContrast(str, Enum):
     DEFAULT = "default"
     EXTRA_HIGH = "extra-high"

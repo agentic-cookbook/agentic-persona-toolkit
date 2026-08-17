@@ -1,38 +1,25 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
-
-
-
-
-
-
-
 T = TypeVar("T", bound="GetSystemDebugEnvResponse200EntriesItem")
-
 
 
 @_attrs_define
 class GetSystemDebugEnvResponse200EntriesItem:
-    """ 
-        Attributes:
-            name (str):
-            value (str): Masked when secret
-            secret (bool):
-     """
+    """
+    Attributes:
+        name (str):
+        value (str): Masked when secret
+        secret (bool):
+    """
 
     name: str
     value: str
     secret: bool
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         name = self.name
@@ -41,18 +28,17 @@ class GetSystemDebugEnvResponse200EntriesItem:
 
         secret = self.secret
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "name": name,
-            "value": value,
-            "secret": secret,
-        })
+        field_dict.update(
+            {
+                "name": name,
+                "value": value,
+                "secret": secret,
+            }
+        )
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -68,7 +54,6 @@ class GetSystemDebugEnvResponse200EntriesItem:
             value=value,
             secret=secret,
         )
-
 
         get_system_debug_env_response_200_entries_item.additional_properties = d
         return get_system_debug_env_response_200_entries_item

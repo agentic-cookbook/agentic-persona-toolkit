@@ -1,43 +1,33 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
-
 from ..models.team_member_member_kind import TeamMemberMemberKind
 from ..types import UNSET, Unset
-from typing import cast, Union
-from typing import Union
-
-
-
-
-
 
 T = TypeVar("T", bound="TeamMember")
 
 
-
 @_attrs_define
 class TeamMember:
-    """ 
-        Attributes:
-            id (str):
-            team_id (str):
-            member_kind (TeamMemberMemberKind): which principal userId names — 'customer' (customer.customers) or 'persona'
-                (persona.personas). Present on every response: GET list rows, the add-persona 201, and the by-email add 201
-                (always a customer).
-            user_id (str): the member principal id — a customer id, or a persona id when memberKind is 'persona'
-            role (str):
-            added_at (str):
-            email (Union[None, Unset, str]): the member's email (resolved; null for a persona member or a foreign customer)
-            display_name (Union[None, Unset, str]):
-            persona_slug (Union[None, Unset, str]): the persona's slug when memberKind is 'persona' (null for a customer
-                member)
-            persona_name (Union[None, Unset, str]):
-     """
+    """
+    Attributes:
+        id (str):
+        team_id (str):
+        member_kind (TeamMemberMemberKind): which principal userId names — 'customer' (customer.customers) or 'persona'
+            (persona.personas). Present on every response: GET list rows, the add-persona 201, and the by-email add 201
+            (always a customer).
+        user_id (str): the member principal id — a customer id, or a persona id when memberKind is 'persona'
+        role (str):
+        added_at (str):
+        email (Union[None, Unset, str]): the member's email (resolved; null for a persona member or a foreign customer)
+        display_name (Union[None, Unset, str]):
+        persona_slug (Union[None, Unset, str]): the persona's slug when memberKind is 'persona' (null for a customer
+            member)
+        persona_name (Union[None, Unset, str]):
+    """
 
     id: str
     team_id: str
@@ -45,15 +35,11 @@ class TeamMember:
     user_id: str
     role: str
     added_at: str
-    email: Union[None, Unset, str] = UNSET
-    display_name: Union[None, Unset, str] = UNSET
-    persona_slug: Union[None, Unset, str] = UNSET
-    persona_name: Union[None, Unset, str] = UNSET
+    email: None | Unset | str = UNSET
+    display_name: None | Unset | str = UNSET
+    persona_slug: None | Unset | str = UNSET
+    persona_name: None | Unset | str = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         id = self.id
@@ -68,41 +54,42 @@ class TeamMember:
 
         added_at = self.added_at
 
-        email: Union[None, Unset, str]
+        email: None | Unset | str
         if isinstance(self.email, Unset):
             email = UNSET
         else:
             email = self.email
 
-        display_name: Union[None, Unset, str]
+        display_name: None | Unset | str
         if isinstance(self.display_name, Unset):
             display_name = UNSET
         else:
             display_name = self.display_name
 
-        persona_slug: Union[None, Unset, str]
+        persona_slug: None | Unset | str
         if isinstance(self.persona_slug, Unset):
             persona_slug = UNSET
         else:
             persona_slug = self.persona_slug
 
-        persona_name: Union[None, Unset, str]
+        persona_name: None | Unset | str
         if isinstance(self.persona_name, Unset):
             persona_name = UNSET
         else:
             persona_name = self.persona_name
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "id": id,
-            "teamId": team_id,
-            "memberKind": member_kind,
-            "userId": user_id,
-            "role": role,
-            "addedAt": added_at,
-        })
+        field_dict.update(
+            {
+                "id": id,
+                "teamId": team_id,
+                "memberKind": member_kind,
+                "userId": user_id,
+                "role": role,
+                "addedAt": added_at,
+            }
+        )
         if email is not UNSET:
             field_dict["email"] = email
         if display_name is not UNSET:
@@ -114,8 +101,6 @@ class TeamMember:
 
         return field_dict
 
-
-
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
@@ -125,54 +110,47 @@ class TeamMember:
 
         member_kind = TeamMemberMemberKind(d.pop("memberKind"))
 
-
-
-
         user_id = d.pop("userId")
 
         role = d.pop("role")
 
         added_at = d.pop("addedAt")
 
-        def _parse_email(data: object) -> Union[None, Unset, str]:
+        def _parse_email(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         email = _parse_email(d.pop("email", UNSET))
 
-
-        def _parse_display_name(data: object) -> Union[None, Unset, str]:
+        def _parse_display_name(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         display_name = _parse_display_name(d.pop("displayName", UNSET))
 
-
-        def _parse_persona_slug(data: object) -> Union[None, Unset, str]:
+        def _parse_persona_slug(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         persona_slug = _parse_persona_slug(d.pop("personaSlug", UNSET))
 
-
-        def _parse_persona_name(data: object) -> Union[None, Unset, str]:
+        def _parse_persona_name(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         persona_name = _parse_persona_name(d.pop("personaName", UNSET))
-
 
         team_member = cls(
             id=id,
@@ -186,7 +164,6 @@ class TeamMember:
             persona_slug=persona_slug,
             persona_name=persona_name,
         )
-
 
         team_member.additional_properties = d
         return team_member

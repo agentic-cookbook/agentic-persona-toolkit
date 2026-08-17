@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class PostProjectProjectsIdArtifactsBodyDirection(str, Enum):
     INGESTED = "ingested"
     PRODUCED = "produced"

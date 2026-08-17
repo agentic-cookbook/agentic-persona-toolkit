@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class PrivacyGrantTargetTable(str, Enum):
     ADDRESSES = "addresses"
     AVATAR = "avatar"

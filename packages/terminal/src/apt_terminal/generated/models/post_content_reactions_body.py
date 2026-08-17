@@ -1,38 +1,25 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
-
-
-
-
-
-
-
 T = TypeVar("T", bound="PostContentReactionsBody")
-
 
 
 @_attrs_define
 class PostContentReactionsBody:
-    """ 
-        Attributes:
-            target_kind (str):
-            target_id (str):
-            emoji (str):
-     """
+    """
+    Attributes:
+        target_kind (str):
+        target_id (str):
+        emoji (str):
+    """
 
     target_kind: str
     target_id: str
     emoji: str
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         target_kind = self.target_kind
@@ -41,18 +28,17 @@ class PostContentReactionsBody:
 
         emoji = self.emoji
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "targetKind": target_kind,
-            "targetId": target_id,
-            "emoji": emoji,
-        })
+        field_dict.update(
+            {
+                "targetKind": target_kind,
+                "targetId": target_id,
+                "emoji": emoji,
+            }
+        )
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -68,7 +54,6 @@ class PostContentReactionsBody:
             target_id=target_id,
             emoji=emoji,
         )
-
 
         post_content_reactions_body.additional_properties = d
         return post_content_reactions_body

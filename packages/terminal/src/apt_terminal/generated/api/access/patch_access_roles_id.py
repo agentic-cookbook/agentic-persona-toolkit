@@ -1,17 +1,14 @@
 from http import HTTPStatus
-from typing import Any, Optional, Union, cast
+from typing import Any
 
 import httpx
 
-from ...client import AuthenticatedClient, Client
-from ...types import Response, UNSET
 from ... import errors
-
+from ...client import AuthenticatedClient, Client
 from ...models.access_role_envelope import AccessRoleEnvelope
 from ...models.error import Error
 from ...models.patch_access_roles_id_body import PatchAccessRolesIdBody
-from typing import cast
-
+from ...types import UNSET, Response
 
 
 def _get_kwargs(
@@ -19,29 +16,22 @@ def _get_kwargs(
     *,
     body: PatchAccessRolesIdBody,
     workspace: str,
-
 ) -> dict[str, Any]:
     headers: dict[str, Any] = {}
-
-
-    
 
     params: dict[str, Any] = {}
 
     params["workspace"] = workspace
 
-
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
-
 
     _kwargs: dict[str, Any] = {
         "method": "patch",
-        "url": "/access/roles/{id}".format(id=id,),
+        "url": f"/access/roles/{id}",
         "params": params,
     }
 
     _kwargs["json"] = body.to_dict()
-
 
     headers["Content-Type"] = "application/json"
 
@@ -49,47 +39,36 @@ def _get_kwargs(
     return _kwargs
 
 
-
-def _parse_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Optional[Union[AccessRoleEnvelope, Error]]:
+def _parse_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> AccessRoleEnvelope | Error | None:
     if response.status_code == 200:
         response_200 = AccessRoleEnvelope.from_dict(response.json())
-
-
 
         return response_200
 
     if response.status_code == 400:
         response_400 = Error.from_dict(response.json())
 
-
-
         return response_400
 
     if response.status_code == 401:
         response_401 = Error.from_dict(response.json())
-
-
 
         return response_401
 
     if response.status_code == 403:
         response_403 = Error.from_dict(response.json())
 
-
-
         return response_403
 
     if response.status_code == 404:
         response_404 = Error.from_dict(response.json())
 
-
-
         return response_404
 
     if response.status_code == 409:
         response_409 = Error.from_dict(response.json())
-
-
 
         return response_409
 
@@ -99,7 +78,9 @@ def _parse_response(*, client: Union[AuthenticatedClient, Client], response: htt
         return None
 
 
-def _build_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Response[Union[AccessRoleEnvelope, Error]]:
+def _build_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Response[AccessRoleEnvelope | Error]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -114,9 +95,8 @@ def sync_detailed(
     client: AuthenticatedClient,
     body: PatchAccessRolesIdBody,
     workspace: str,
-
-) -> Response[Union[AccessRoleEnvelope, Error]]:
-    """ Edit a role (name/description/default/grants; the system admin role is immutable)
+) -> Response[AccessRoleEnvelope | Error]:
+    """Edit a role (name/description/default/grants; the system admin role is immutable)
 
     Args:
         id (str):
@@ -129,14 +109,12 @@ def sync_detailed(
 
     Returns:
         Response[Union[AccessRoleEnvelope, Error]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         id=id,
-body=body,
-workspace=workspace,
-
+        body=body,
+        workspace=workspace,
     )
 
     response = client.get_httpx_client().request(
@@ -145,15 +123,15 @@ workspace=workspace,
 
     return _build_response(client=client, response=response)
 
+
 def sync(
     id: str,
     *,
     client: AuthenticatedClient,
     body: PatchAccessRolesIdBody,
     workspace: str,
-
-) -> Optional[Union[AccessRoleEnvelope, Error]]:
-    """ Edit a role (name/description/default/grants; the system admin role is immutable)
+) -> AccessRoleEnvelope | Error | None:
+    """Edit a role (name/description/default/grants; the system admin role is immutable)
 
     Args:
         id (str):
@@ -166,16 +144,15 @@ def sync(
 
     Returns:
         Union[AccessRoleEnvelope, Error]
-     """
-
+    """
 
     return sync_detailed(
         id=id,
-client=client,
-body=body,
-workspace=workspace,
-
+        client=client,
+        body=body,
+        workspace=workspace,
     ).parsed
+
 
 async def asyncio_detailed(
     id: str,
@@ -183,9 +160,8 @@ async def asyncio_detailed(
     client: AuthenticatedClient,
     body: PatchAccessRolesIdBody,
     workspace: str,
-
-) -> Response[Union[AccessRoleEnvelope, Error]]:
-    """ Edit a role (name/description/default/grants; the system admin role is immutable)
+) -> Response[AccessRoleEnvelope | Error]:
+    """Edit a role (name/description/default/grants; the system admin role is immutable)
 
     Args:
         id (str):
@@ -198,21 +174,18 @@ async def asyncio_detailed(
 
     Returns:
         Response[Union[AccessRoleEnvelope, Error]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         id=id,
-body=body,
-workspace=workspace,
-
+        body=body,
+        workspace=workspace,
     )
 
-    response = await client.get_async_httpx_client().request(
-        **kwargs
-    )
+    response = await client.get_async_httpx_client().request(**kwargs)
 
     return _build_response(client=client, response=response)
+
 
 async def asyncio(
     id: str,
@@ -220,9 +193,8 @@ async def asyncio(
     client: AuthenticatedClient,
     body: PatchAccessRolesIdBody,
     workspace: str,
-
-) -> Optional[Union[AccessRoleEnvelope, Error]]:
-    """ Edit a role (name/description/default/grants; the system admin role is immutable)
+) -> AccessRoleEnvelope | Error | None:
+    """Edit a role (name/description/default/grants; the system admin role is immutable)
 
     Args:
         id (str):
@@ -235,13 +207,13 @@ async def asyncio(
 
     Returns:
         Union[AccessRoleEnvelope, Error]
-     """
+    """
 
-
-    return (await asyncio_detailed(
-        id=id,
-client=client,
-body=body,
-workspace=workspace,
-
-    )).parsed
+    return (
+        await asyncio_detailed(
+            id=id,
+            client=client,
+            body=body,
+            workspace=workspace,
+        )
+    ).parsed

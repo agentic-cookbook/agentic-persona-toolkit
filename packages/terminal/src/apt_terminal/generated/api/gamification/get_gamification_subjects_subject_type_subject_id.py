@@ -1,51 +1,37 @@
 from http import HTTPStatus
-from typing import Any, Optional, Union, cast
+from typing import Any
 
 import httpx
 
-from ...client import AuthenticatedClient, Client
-from ...types import Response, UNSET
 from ... import errors
-
+from ...client import AuthenticatedClient, Client
 from ...models.error import Error
 from ...models.gamification_summary import GamificationSummary
-from typing import cast
-
+from ...types import Response
 
 
 def _get_kwargs(
     subject_type: str,
     subject_id: str,
-
 ) -> dict[str, Any]:
-    
-
-    
-
-    
-
     _kwargs: dict[str, Any] = {
         "method": "get",
-        "url": "/gamification/subjects/{subject_type}/{subject_id}".format(subject_type=subject_type,subject_id=subject_id,),
+        "url": f"/gamification/subjects/{subject_type}/{subject_id}",
     }
-
 
     return _kwargs
 
 
-
-def _parse_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Optional[Union[Error, GamificationSummary]]:
+def _parse_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Error | GamificationSummary | None:
     if response.status_code == 200:
         response_200 = GamificationSummary.from_dict(response.json())
-
-
 
         return response_200
 
     if response.status_code == 401:
         response_401 = Error.from_dict(response.json())
-
-
 
         return response_401
 
@@ -55,7 +41,9 @@ def _parse_response(*, client: Union[AuthenticatedClient, Client], response: htt
         return None
 
 
-def _build_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Response[Union[Error, GamificationSummary]]:
+def _build_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Response[Error | GamificationSummary]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -69,9 +57,8 @@ def sync_detailed(
     subject_id: str,
     *,
     client: AuthenticatedClient,
-
-) -> Response[Union[Error, GamificationSummary]]:
-    """ A subject’s gamification summary (points, level, badges, opt-out)
+) -> Response[Error | GamificationSummary]:
+    """A subject’s gamification summary (points, level, badges, opt-out)
 
     Args:
         subject_type (str):
@@ -83,13 +70,11 @@ def sync_detailed(
 
     Returns:
         Response[Union[Error, GamificationSummary]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         subject_type=subject_type,
-subject_id=subject_id,
-
+        subject_id=subject_id,
     )
 
     response = client.get_httpx_client().request(
@@ -98,14 +83,14 @@ subject_id=subject_id,
 
     return _build_response(client=client, response=response)
 
+
 def sync(
     subject_type: str,
     subject_id: str,
     *,
     client: AuthenticatedClient,
-
-) -> Optional[Union[Error, GamificationSummary]]:
-    """ A subject’s gamification summary (points, level, badges, opt-out)
+) -> Error | GamificationSummary | None:
+    """A subject’s gamification summary (points, level, badges, opt-out)
 
     Args:
         subject_type (str):
@@ -117,24 +102,22 @@ def sync(
 
     Returns:
         Union[Error, GamificationSummary]
-     """
-
+    """
 
     return sync_detailed(
         subject_type=subject_type,
-subject_id=subject_id,
-client=client,
-
+        subject_id=subject_id,
+        client=client,
     ).parsed
+
 
 async def asyncio_detailed(
     subject_type: str,
     subject_id: str,
     *,
     client: AuthenticatedClient,
-
-) -> Response[Union[Error, GamificationSummary]]:
-    """ A subject’s gamification summary (points, level, badges, opt-out)
+) -> Response[Error | GamificationSummary]:
+    """A subject’s gamification summary (points, level, badges, opt-out)
 
     Args:
         subject_type (str):
@@ -146,29 +129,25 @@ async def asyncio_detailed(
 
     Returns:
         Response[Union[Error, GamificationSummary]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         subject_type=subject_type,
-subject_id=subject_id,
-
+        subject_id=subject_id,
     )
 
-    response = await client.get_async_httpx_client().request(
-        **kwargs
-    )
+    response = await client.get_async_httpx_client().request(**kwargs)
 
     return _build_response(client=client, response=response)
+
 
 async def asyncio(
     subject_type: str,
     subject_id: str,
     *,
     client: AuthenticatedClient,
-
-) -> Optional[Union[Error, GamificationSummary]]:
-    """ A subject’s gamification summary (points, level, badges, opt-out)
+) -> Error | GamificationSummary | None:
+    """A subject’s gamification summary (points, level, badges, opt-out)
 
     Args:
         subject_type (str):
@@ -180,12 +159,12 @@ async def asyncio(
 
     Returns:
         Union[Error, GamificationSummary]
-     """
+    """
 
-
-    return (await asyncio_detailed(
-        subject_type=subject_type,
-subject_id=subject_id,
-client=client,
-
-    )).parsed
+    return (
+        await asyncio_detailed(
+            subject_type=subject_type,
+            subject_id=subject_id,
+            client=client,
+        )
+    ).parsed

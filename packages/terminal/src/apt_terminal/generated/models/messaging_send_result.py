@@ -1,41 +1,28 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
-
 from ..models.messaging_send_result_status import MessagingSendResultStatus
 from ..types import UNSET, Unset
-from typing import Union
-
-
-
-
-
 
 T = TypeVar("T", bound="MessagingSendResult")
 
 
-
 @_attrs_define
 class MessagingSendResult:
-    """ 
-        Attributes:
-            status (MessagingSendResultStatus):
-            provider_id (Union[Unset, str]): Provider message id (on success)
-            error (Union[Unset, str]): Failure reason (on failure)
-     """
+    """
+    Attributes:
+        status (MessagingSendResultStatus):
+        provider_id (Union[Unset, str]): Provider message id (on success)
+        error (Union[Unset, str]): Failure reason (on failure)
+    """
 
     status: MessagingSendResultStatus
-    provider_id: Union[Unset, str] = UNSET
-    error: Union[Unset, str] = UNSET
+    provider_id: Unset | str = UNSET
+    error: Unset | str = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         status = self.status.value
@@ -44,12 +31,13 @@ class MessagingSendResult:
 
         error = self.error
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "status": status,
-        })
+        field_dict.update(
+            {
+                "status": status,
+            }
+        )
         if provider_id is not UNSET:
             field_dict["providerId"] = provider_id
         if error is not UNSET:
@@ -57,15 +45,10 @@ class MessagingSendResult:
 
         return field_dict
 
-
-
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
         status = MessagingSendResultStatus(d.pop("status"))
-
-
-
 
         provider_id = d.pop("providerId", UNSET)
 
@@ -76,7 +59,6 @@ class MessagingSendResult:
             provider_id=provider_id,
             error=error,
         )
-
 
         messaging_send_result.additional_properties = d
         return messaging_send_result

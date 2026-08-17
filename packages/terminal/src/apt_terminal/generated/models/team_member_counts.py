@@ -1,76 +1,57 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import TYPE_CHECKING, Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
-
-from typing import cast
-
 if TYPE_CHECKING:
-  from ..models.team_member_counts_counts_item import TeamMemberCountsCountsItem
-
-
-
+    from ..models.team_member_counts_counts_item import TeamMemberCountsCountsItem
 
 
 T = TypeVar("T", bound="TeamMemberCounts")
 
 
-
 @_attrs_define
 class TeamMemberCounts:
-    """ 
-        Attributes:
-            counts (list['TeamMemberCountsCountsItem']):
-     """
+    """
+    Attributes:
+        counts (list['TeamMemberCountsCountsItem']):
+    """
 
-    counts: list['TeamMemberCountsCountsItem']
+    counts: list["TeamMemberCountsCountsItem"]
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
-
-
-
-
     def to_dict(self) -> dict[str, Any]:
-        from ..models.team_member_counts_counts_item import TeamMemberCountsCountsItem
         counts = []
         for counts_item_data in self.counts:
             counts_item = counts_item_data.to_dict()
             counts.append(counts_item)
 
-
-
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "counts": counts,
-        })
+        field_dict.update(
+            {
+                "counts": counts,
+            }
+        )
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.team_member_counts_counts_item import TeamMemberCountsCountsItem
+
         d = dict(src_dict)
         counts = []
         _counts = d.pop("counts")
-        for counts_item_data in (_counts):
+        for counts_item_data in _counts:
             counts_item = TeamMemberCountsCountsItem.from_dict(counts_item_data)
 
-
-
             counts.append(counts_item)
-
 
         team_member_counts = cls(
             counts=counts,
         )
-
 
         team_member_counts.additional_properties = d
         return team_member_counts

@@ -1,43 +1,30 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 from ..types import UNSET, Unset
 
-from ..types import UNSET, Unset
-from typing import Union
-
-
-
-
-
-
 T = TypeVar("T", bound="PostProjectProjectsBody")
-
 
 
 @_attrs_define
 class PostProjectProjectsBody:
-    """ 
-        Attributes:
-            name (str):
-            description (Union[Unset, str]):
-            color (Union[Unset, str]):
-            ecosystem_id (Union[Unset, str]): the owning ecosystem; defaulted to the caller ecosystem when omitted. A non-
-                admin passing a foreign owner is rejected by RLS.
-     """
+    """
+    Attributes:
+        name (str):
+        description (Union[Unset, str]):
+        color (Union[Unset, str]):
+        ecosystem_id (Union[Unset, str]): the owning ecosystem; defaulted to the caller ecosystem when omitted. A non-
+            admin passing a foreign owner is rejected by RLS.
+    """
 
     name: str
-    description: Union[Unset, str] = UNSET
-    color: Union[Unset, str] = UNSET
-    ecosystem_id: Union[Unset, str] = UNSET
+    description: Unset | str = UNSET
+    color: Unset | str = UNSET
+    ecosystem_id: Unset | str = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         name = self.name
@@ -48,12 +35,13 @@ class PostProjectProjectsBody:
 
         ecosystem_id = self.ecosystem_id
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "name": name,
-        })
+        field_dict.update(
+            {
+                "name": name,
+            }
+        )
         if description is not UNSET:
             field_dict["description"] = description
         if color is not UNSET:
@@ -62,8 +50,6 @@ class PostProjectProjectsBody:
             field_dict["ecosystemId"] = ecosystem_id
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -82,7 +68,6 @@ class PostProjectProjectsBody:
             color=color,
             ecosystem_id=ecosystem_id,
         )
-
 
         post_project_projects_body.additional_properties = d
         return post_project_projects_body

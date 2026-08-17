@@ -1,43 +1,32 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
+from ..models.post_persona_memory_recall_body_memory_type import (
+    PostPersonaMemoryRecallBodyMemoryType,
+)
 from ..types import UNSET, Unset
-
-from ..models.post_persona_memory_recall_body_memory_type import PostPersonaMemoryRecallBodyMemoryType
-from ..types import UNSET, Unset
-from typing import Union
-
-
-
-
-
 
 T = TypeVar("T", bound="PostPersonaMemoryRecallBody")
 
 
-
 @_attrs_define
 class PostPersonaMemoryRecallBody:
-    """ 
-        Attributes:
-            persona_id (str):
-            query (str):
-            limit (Union[Unset, int]):
-            memory_type (Union[Unset, PostPersonaMemoryRecallBodyMemoryType]):
-     """
+    """
+    Attributes:
+        persona_id (str):
+        query (str):
+        limit (Union[Unset, int]):
+        memory_type (Union[Unset, PostPersonaMemoryRecallBodyMemoryType]):
+    """
 
     persona_id: str
     query: str
-    limit: Union[Unset, int] = UNSET
-    memory_type: Union[Unset, PostPersonaMemoryRecallBodyMemoryType] = UNSET
+    limit: Unset | int = UNSET
+    memory_type: Unset | PostPersonaMemoryRecallBodyMemoryType = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         persona_id = self.persona_id
@@ -46,26 +35,24 @@ class PostPersonaMemoryRecallBody:
 
         limit = self.limit
 
-        memory_type: Union[Unset, str] = UNSET
+        memory_type: Unset | str = UNSET
         if not isinstance(self.memory_type, Unset):
             memory_type = self.memory_type.value
 
-
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "personaId": persona_id,
-            "query": query,
-        })
+        field_dict.update(
+            {
+                "personaId": persona_id,
+                "query": query,
+            }
+        )
         if limit is not UNSET:
             field_dict["limit"] = limit
         if memory_type is not UNSET:
             field_dict["memoryType"] = memory_type
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -77,14 +64,11 @@ class PostPersonaMemoryRecallBody:
         limit = d.pop("limit", UNSET)
 
         _memory_type = d.pop("memoryType", UNSET)
-        memory_type: Union[Unset, PostPersonaMemoryRecallBodyMemoryType]
-        if isinstance(_memory_type,  Unset):
+        memory_type: Unset | PostPersonaMemoryRecallBodyMemoryType
+        if isinstance(_memory_type, Unset):
             memory_type = UNSET
         else:
             memory_type = PostPersonaMemoryRecallBodyMemoryType(_memory_type)
-
-
-
 
         post_persona_memory_recall_body = cls(
             persona_id=persona_id,
@@ -92,7 +76,6 @@ class PostPersonaMemoryRecallBody:
             limit=limit,
             memory_type=memory_type,
         )
-
 
         post_persona_memory_recall_body.additional_properties = d
         return post_persona_memory_recall_body

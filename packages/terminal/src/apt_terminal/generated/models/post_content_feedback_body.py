@@ -1,58 +1,43 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
-from attrs import field as _attrs_field
 
 from ..types import UNSET, Unset
-
-from ..types import UNSET, Unset
-from typing import cast, Union
-from typing import Union
-
-
-
-
-
 
 T = TypeVar("T", bound="PostContentFeedbackBody")
 
 
-
 @_attrs_define
 class PostContentFeedbackBody:
-    """ 
-        Attributes:
-            user_email (str):
-            category (str):
-            subject (str):
-            body (str):
-            platform (str):
-            deleted_at (Union[None, Unset, str]):
-            ecosystem_id (Union[Unset, str]):
-            app_version (Union[Unset, str]):
-            os_version (Union[Unset, str]):
-            device_info (Union[Unset, str]):
-            status (Union[Unset, str]):
-            admin_notes (Union[Unset, str]):
-     """
+    """
+    Attributes:
+        user_email (str):
+        category (str):
+        subject (str):
+        body (str):
+        platform (str):
+        ecosystem_id (Union[Unset, str]):
+        app_version (Union[Unset, str]):
+        os_version (Union[Unset, str]):
+        device_info (Union[Unset, str]):
+        status (Union[Unset, str]):
+        admin_notes (Union[Unset, str]):
+        sync_txid (Union[Unset, int]):
+    """
 
     user_email: str
     category: str
     subject: str
     body: str
     platform: str
-    deleted_at: Union[None, Unset, str] = UNSET
-    ecosystem_id: Union[Unset, str] = UNSET
-    app_version: Union[Unset, str] = UNSET
-    os_version: Union[Unset, str] = UNSET
-    device_info: Union[Unset, str] = UNSET
-    status: Union[Unset, str] = UNSET
-    admin_notes: Union[Unset, str] = UNSET
-
-
-
-
+    ecosystem_id: Unset | str = UNSET
+    app_version: Unset | str = UNSET
+    os_version: Unset | str = UNSET
+    device_info: Unset | str = UNSET
+    status: Unset | str = UNSET
+    admin_notes: Unset | str = UNSET
+    sync_txid: Unset | int = UNSET
 
     def to_dict(self) -> dict[str, Any]:
         user_email = self.user_email
@@ -64,12 +49,6 @@ class PostContentFeedbackBody:
         body = self.body
 
         platform = self.platform
-
-        deleted_at: Union[None, Unset, str]
-        if isinstance(self.deleted_at, Unset):
-            deleted_at = UNSET
-        else:
-            deleted_at = self.deleted_at
 
         ecosystem_id = self.ecosystem_id
 
@@ -83,18 +62,19 @@ class PostContentFeedbackBody:
 
         admin_notes = self.admin_notes
 
+        sync_txid = self.sync_txid
 
         field_dict: dict[str, Any] = {}
 
-        field_dict.update({
-            "userEmail": user_email,
-            "category": category,
-            "subject": subject,
-            "body": body,
-            "platform": platform,
-        })
-        if deleted_at is not UNSET:
-            field_dict["deletedAt"] = deleted_at
+        field_dict.update(
+            {
+                "userEmail": user_email,
+                "category": category,
+                "subject": subject,
+                "body": body,
+                "platform": platform,
+            }
+        )
         if ecosystem_id is not UNSET:
             field_dict["ecosystemId"] = ecosystem_id
         if app_version is not UNSET:
@@ -107,10 +87,10 @@ class PostContentFeedbackBody:
             field_dict["status"] = status
         if admin_notes is not UNSET:
             field_dict["adminNotes"] = admin_notes
+        if sync_txid is not UNSET:
+            field_dict["syncTxid"] = sync_txid
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -125,16 +105,6 @@ class PostContentFeedbackBody:
 
         platform = d.pop("platform")
 
-        def _parse_deleted_at(data: object) -> Union[None, Unset, str]:
-            if data is None:
-                return data
-            if isinstance(data, Unset):
-                return data
-            return cast(Union[None, Unset, str], data)
-
-        deleted_at = _parse_deleted_at(d.pop("deletedAt", UNSET))
-
-
         ecosystem_id = d.pop("ecosystemId", UNSET)
 
         app_version = d.pop("appVersion", UNSET)
@@ -147,20 +117,21 @@ class PostContentFeedbackBody:
 
         admin_notes = d.pop("adminNotes", UNSET)
 
+        sync_txid = d.pop("syncTxid", UNSET)
+
         post_content_feedback_body = cls(
             user_email=user_email,
             category=category,
             subject=subject,
             body=body,
             platform=platform,
-            deleted_at=deleted_at,
             ecosystem_id=ecosystem_id,
             app_version=app_version,
             os_version=os_version,
             device_info=device_info,
             status=status,
             admin_notes=admin_notes,
+            sync_txid=sync_txid,
         )
 
         return post_content_feedback_body
-

@@ -1,54 +1,40 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
-
-
-
-
-
-
-
 T = TypeVar("T", bound="ChatToolCallStartedEvent")
-
 
 
 @_attrs_define
 class ChatToolCallStartedEvent:
-    """ tool_call_started — the model invoked a tool
+    """tool_call_started — the model invoked a tool
 
-        Attributes:
-            name (str):
-            arguments (str): JSON-encoded tool arguments
-     """
+    Attributes:
+        name (str):
+        arguments (str): JSON-encoded tool arguments
+    """
 
     name: str
     arguments: str
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         name = self.name
 
         arguments = self.arguments
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "name": name,
-            "arguments": arguments,
-        })
+        field_dict.update(
+            {
+                "name": name,
+                "arguments": arguments,
+            }
+        )
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -61,7 +47,6 @@ class ChatToolCallStartedEvent:
             name=name,
             arguments=arguments,
         )
-
 
         chat_tool_call_started_event.additional_properties = d
         return chat_tool_call_started_event

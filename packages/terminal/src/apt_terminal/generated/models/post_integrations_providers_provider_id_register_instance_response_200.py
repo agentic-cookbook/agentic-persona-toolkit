@@ -1,38 +1,25 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
-
-
-
-
-
-
-
 T = TypeVar("T", bound="PostIntegrationsProvidersProviderIdRegisterInstanceResponse200")
-
 
 
 @_attrs_define
 class PostIntegrationsProvidersProviderIdRegisterInstanceResponse200:
-    """ 
-        Attributes:
-            state (str):
-            authorize_url (str):
-            client_id (str):
-     """
+    """
+    Attributes:
+        state (str):
+        authorize_url (str):
+        client_id (str):
+    """
 
     state: str
     authorize_url: str
     client_id: str
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         state = self.state
@@ -41,18 +28,17 @@ class PostIntegrationsProvidersProviderIdRegisterInstanceResponse200:
 
         client_id = self.client_id
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "state": state,
-            "authorizeUrl": authorize_url,
-            "clientId": client_id,
-        })
+        field_dict.update(
+            {
+                "state": state,
+                "authorizeUrl": authorize_url,
+                "clientId": client_id,
+            }
+        )
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -68,7 +54,6 @@ class PostIntegrationsProvidersProviderIdRegisterInstanceResponse200:
             authorize_url=authorize_url,
             client_id=client_id,
         )
-
 
         post_integrations_providers_provider_id_register_instance_response_200.additional_properties = d
         return post_integrations_providers_provider_id_register_instance_response_200

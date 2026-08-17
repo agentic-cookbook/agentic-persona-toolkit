@@ -1,39 +1,29 @@
 from http import HTTPStatus
-from typing import Any, Optional, Union, cast
+from typing import Any, cast
 
 import httpx
 
-from ...client import AuthenticatedClient, Client
-from ...types import Response, UNSET
 from ... import errors
-
+from ...client import AuthenticatedClient, Client
 from ...models.error import Error
-from typing import cast
-
+from ...types import Response
 
 
 def _get_kwargs(
     scope: str,
     principal_id: str,
-
 ) -> dict[str, Any]:
-    
-
-    
-
-    
-
     _kwargs: dict[str, Any] = {
         "method": "delete",
-        "url": "/usage/principal-tiers/{scope}/{principal_id}".format(scope=scope,principal_id=principal_id,),
+        "url": f"/usage/principal-tiers/{scope}/{principal_id}",
     }
-
 
     return _kwargs
 
 
-
-def _parse_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Optional[Union[Any, Error]]:
+def _parse_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Any | Error | None:
     if response.status_code == 204:
         response_204 = cast(Any, None)
         return response_204
@@ -41,14 +31,10 @@ def _parse_response(*, client: Union[AuthenticatedClient, Client], response: htt
     if response.status_code == 401:
         response_401 = Error.from_dict(response.json())
 
-
-
         return response_401
 
     if response.status_code == 404:
         response_404 = Error.from_dict(response.json())
-
-
 
         return response_404
 
@@ -58,7 +44,9 @@ def _parse_response(*, client: Union[AuthenticatedClient, Client], response: htt
         return None
 
 
-def _build_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Response[Union[Any, Error]]:
+def _build_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Response[Any | Error]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -72,9 +60,8 @@ def sync_detailed(
     principal_id: str,
     *,
     client: AuthenticatedClient,
-
-) -> Response[Union[Any, Error]]:
-    """ Delete principal_tiers
+) -> Response[Any | Error]:
+    """Delete principal_tiers
 
     Args:
         scope (str):
@@ -86,13 +73,11 @@ def sync_detailed(
 
     Returns:
         Response[Union[Any, Error]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         scope=scope,
-principal_id=principal_id,
-
+        principal_id=principal_id,
     )
 
     response = client.get_httpx_client().request(
@@ -101,14 +86,14 @@ principal_id=principal_id,
 
     return _build_response(client=client, response=response)
 
+
 def sync(
     scope: str,
     principal_id: str,
     *,
     client: AuthenticatedClient,
-
-) -> Optional[Union[Any, Error]]:
-    """ Delete principal_tiers
+) -> Any | Error | None:
+    """Delete principal_tiers
 
     Args:
         scope (str):
@@ -120,24 +105,22 @@ def sync(
 
     Returns:
         Union[Any, Error]
-     """
-
+    """
 
     return sync_detailed(
         scope=scope,
-principal_id=principal_id,
-client=client,
-
+        principal_id=principal_id,
+        client=client,
     ).parsed
+
 
 async def asyncio_detailed(
     scope: str,
     principal_id: str,
     *,
     client: AuthenticatedClient,
-
-) -> Response[Union[Any, Error]]:
-    """ Delete principal_tiers
+) -> Response[Any | Error]:
+    """Delete principal_tiers
 
     Args:
         scope (str):
@@ -149,29 +132,25 @@ async def asyncio_detailed(
 
     Returns:
         Response[Union[Any, Error]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         scope=scope,
-principal_id=principal_id,
-
+        principal_id=principal_id,
     )
 
-    response = await client.get_async_httpx_client().request(
-        **kwargs
-    )
+    response = await client.get_async_httpx_client().request(**kwargs)
 
     return _build_response(client=client, response=response)
+
 
 async def asyncio(
     scope: str,
     principal_id: str,
     *,
     client: AuthenticatedClient,
-
-) -> Optional[Union[Any, Error]]:
-    """ Delete principal_tiers
+) -> Any | Error | None:
+    """Delete principal_tiers
 
     Args:
         scope (str):
@@ -183,12 +162,12 @@ async def asyncio(
 
     Returns:
         Union[Any, Error]
-     """
+    """
 
-
-    return (await asyncio_detailed(
-        scope=scope,
-principal_id=principal_id,
-client=client,
-
-    )).parsed
+    return (
+        await asyncio_detailed(
+            scope=scope,
+            principal_id=principal_id,
+            client=client,
+        )
+    ).parsed

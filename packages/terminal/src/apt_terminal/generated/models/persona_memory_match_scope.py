@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class PersonaMemoryMatchScope(str, Enum):
     PERSONA = "persona"
     USER = "user"

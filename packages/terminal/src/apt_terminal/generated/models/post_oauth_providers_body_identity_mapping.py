@@ -1,51 +1,37 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 from ..types import UNSET, Unset
 
-from ..types import UNSET, Unset
-from typing import cast
-from typing import Union
-
-
-
-
-
-
 T = TypeVar("T", bound="PostOauthProvidersBodyIdentityMapping")
-
 
 
 @_attrs_define
 class PostOauthProvidersBodyIdentityMapping:
-    """ 
-        Attributes:
-            subject_field (str):
-            email_field (str):
-            name_field (str):
-            avatar_field (str):
-            verification_url (Union[Unset, str]):
-            require_email_verified (Union[Unset, bool]):
-            allowed_audiences (Union[Unset, list[str]]):
-            secondary_email_url (Union[Unset, str]):
-     """
+    """
+    Attributes:
+        subject_field (str):
+        email_field (str):
+        name_field (str):
+        avatar_field (str):
+        verification_url (Union[Unset, str]):
+        require_email_verified (Union[Unset, bool]):
+        allowed_audiences (Union[Unset, list[str]]):
+        secondary_email_url (Union[Unset, str]):
+    """
 
     subject_field: str
     email_field: str
     name_field: str
     avatar_field: str
-    verification_url: Union[Unset, str] = UNSET
-    require_email_verified: Union[Unset, bool] = UNSET
-    allowed_audiences: Union[Unset, list[str]] = UNSET
-    secondary_email_url: Union[Unset, str] = UNSET
+    verification_url: Unset | str = UNSET
+    require_email_verified: Unset | bool = UNSET
+    allowed_audiences: Unset | list[str] = UNSET
+    secondary_email_url: Unset | str = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         subject_field = self.subject_field
@@ -60,23 +46,22 @@ class PostOauthProvidersBodyIdentityMapping:
 
         require_email_verified = self.require_email_verified
 
-        allowed_audiences: Union[Unset, list[str]] = UNSET
+        allowed_audiences: Unset | list[str] = UNSET
         if not isinstance(self.allowed_audiences, Unset):
             allowed_audiences = self.allowed_audiences
 
-
-
         secondary_email_url = self.secondary_email_url
-
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "subjectField": subject_field,
-            "emailField": email_field,
-            "nameField": name_field,
-            "avatarField": avatar_field,
-        })
+        field_dict.update(
+            {
+                "subjectField": subject_field,
+                "emailField": email_field,
+                "nameField": name_field,
+                "avatarField": avatar_field,
+            }
+        )
         if verification_url is not UNSET:
             field_dict["verificationUrl"] = verification_url
         if require_email_verified is not UNSET:
@@ -87,8 +72,6 @@ class PostOauthProvidersBodyIdentityMapping:
             field_dict["secondaryEmailUrl"] = secondary_email_url
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -107,7 +90,6 @@ class PostOauthProvidersBodyIdentityMapping:
 
         allowed_audiences = cast(list[str], d.pop("allowedAudiences", UNSET))
 
-
         secondary_email_url = d.pop("secondaryEmailUrl", UNSET)
 
         post_oauth_providers_body_identity_mapping = cls(
@@ -120,7 +102,6 @@ class PostOauthProvidersBodyIdentityMapping:
             allowed_audiences=allowed_audiences,
             secondary_email_url=secondary_email_url,
         )
-
 
         post_oauth_providers_body_identity_mapping.additional_properties = d
         return post_oauth_providers_body_identity_mapping

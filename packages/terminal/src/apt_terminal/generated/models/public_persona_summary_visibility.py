@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class PublicPersonaSummaryVisibility(str, Enum):
     PUBLIC = "public"
 

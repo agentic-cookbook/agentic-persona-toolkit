@@ -1,76 +1,64 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import TYPE_CHECKING, Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 from ..types import UNSET, Unset
 
-from ..types import UNSET, Unset
-from typing import cast
-from typing import Union
-
 if TYPE_CHECKING:
-  from ..models.post_account_mfa_webauthn_register_verify_body_response import PostAccountMfaWebauthnRegisterVerifyBodyResponse
-
-
-
+    from ..models.post_account_mfa_webauthn_register_verify_body_response import (
+        PostAccountMfaWebauthnRegisterVerifyBodyResponse,
+    )
 
 
 T = TypeVar("T", bound="PostAccountMfaWebauthnRegisterVerifyBody")
 
 
-
 @_attrs_define
 class PostAccountMfaWebauthnRegisterVerifyBody:
-    """ 
-        Attributes:
-            token (str): Registration challenge token
-            response (PostAccountMfaWebauthnRegisterVerifyBodyResponse): RegistrationResponseJSON
-            name (Union[Unset, str]):
-     """
+    """
+    Attributes:
+        token (str): Registration challenge token
+        response (PostAccountMfaWebauthnRegisterVerifyBodyResponse): RegistrationResponseJSON
+        name (Union[Unset, str]):
+    """
 
     token: str
-    response: 'PostAccountMfaWebauthnRegisterVerifyBodyResponse'
-    name: Union[Unset, str] = UNSET
+    response: "PostAccountMfaWebauthnRegisterVerifyBodyResponse"
+    name: Unset | str = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
-
-
-
-
     def to_dict(self) -> dict[str, Any]:
-        from ..models.post_account_mfa_webauthn_register_verify_body_response import PostAccountMfaWebauthnRegisterVerifyBodyResponse
         token = self.token
 
         response = self.response.to_dict()
 
         name = self.name
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "token": token,
-            "response": response,
-        })
+        field_dict.update(
+            {
+                "token": token,
+                "response": response,
+            }
+        )
         if name is not UNSET:
             field_dict["name"] = name
 
         return field_dict
 
-
-
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.post_account_mfa_webauthn_register_verify_body_response import PostAccountMfaWebauthnRegisterVerifyBodyResponse
+        from ..models.post_account_mfa_webauthn_register_verify_body_response import (
+            PostAccountMfaWebauthnRegisterVerifyBodyResponse,
+        )
+
         d = dict(src_dict)
         token = d.pop("token")
 
         response = PostAccountMfaWebauthnRegisterVerifyBodyResponse.from_dict(d.pop("response"))
-
-
-
 
         name = d.pop("name", UNSET)
 
@@ -79,7 +67,6 @@ class PostAccountMfaWebauthnRegisterVerifyBody:
             response=response,
             name=name,
         )
-
 
         post_account_mfa_webauthn_register_verify_body.additional_properties = d
         return post_account_mfa_webauthn_register_verify_body

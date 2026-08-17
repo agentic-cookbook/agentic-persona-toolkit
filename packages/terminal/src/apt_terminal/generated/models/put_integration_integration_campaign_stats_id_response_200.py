@@ -1,0 +1,405 @@
+from collections.abc import Mapping
+from typing import TYPE_CHECKING, Any, TypeVar, Union, cast
+
+from attrs import define as _attrs_define
+
+if TYPE_CHECKING:
+    from ..models.put_integration_integration_campaign_stats_id_response_200_raw_type_0_type_1 import (
+        PutIntegrationIntegrationCampaignStatsIdResponse200RawType0Type1,
+    )
+
+
+T = TypeVar("T", bound="PutIntegrationIntegrationCampaignStatsIdResponse200")
+
+
+@_attrs_define
+class PutIntegrationIntegrationCampaignStatsIdResponse200:
+    """
+    Attributes:
+        id (str):
+        customer_id (str):
+        ecosystem_id (str):
+        owner_kind (str):
+        owner_id (str):
+        connection_id (str):
+        provider (str):
+        audience_id (str):
+        external_id (str):
+        name (Union[None, str]):
+        subject (Union[None, str]):
+        status (Union[None, str]):
+        sent_at (Union[None, str]):
+        recipients (Union[None, int]):
+        opens (Union[None, int]):
+        unique_opens (Union[None, int]):
+        clicks (Union[None, int]):
+        unique_clicks (Union[None, int]):
+        bounces (Union[None, int]):
+        unsubscribes (Union[None, int]):
+        raw (Union['PutIntegrationIntegrationCampaignStatsIdResponse200RawType0Type1', None, bool, float, list[Any],
+            str]):
+        is_deleted (bool):
+        deleted_at (Union[None, str]):
+        created_at (str):
+        updated_at (str):
+        sync_version (int):
+        sync_stamped_at (Union[None, str]):
+        sync_txid (int):
+    """
+
+    id: str
+    customer_id: str
+    ecosystem_id: str
+    owner_kind: str
+    owner_id: str
+    connection_id: str
+    provider: str
+    audience_id: str
+    external_id: str
+    name: None | str
+    subject: None | str
+    status: None | str
+    sent_at: None | str
+    recipients: None | int
+    opens: None | int
+    unique_opens: None | int
+    clicks: None | int
+    unique_clicks: None | int
+    bounces: None | int
+    unsubscribes: None | int
+    raw: Union[
+        "PutIntegrationIntegrationCampaignStatsIdResponse200RawType0Type1",
+        None,
+        bool,
+        float,
+        list[Any],
+        str,
+    ]
+    is_deleted: bool
+    deleted_at: None | str
+    created_at: str
+    updated_at: str
+    sync_version: int
+    sync_stamped_at: None | str
+    sync_txid: int
+
+    def to_dict(self) -> dict[str, Any]:
+        from ..models.put_integration_integration_campaign_stats_id_response_200_raw_type_0_type_1 import (
+            PutIntegrationIntegrationCampaignStatsIdResponse200RawType0Type1,
+        )
+
+        id = self.id
+
+        customer_id = self.customer_id
+
+        ecosystem_id = self.ecosystem_id
+
+        owner_kind = self.owner_kind
+
+        owner_id = self.owner_id
+
+        connection_id = self.connection_id
+
+        provider = self.provider
+
+        audience_id = self.audience_id
+
+        external_id = self.external_id
+
+        name: None | str
+        name = self.name
+
+        subject: None | str
+        subject = self.subject
+
+        status: None | str
+        status = self.status
+
+        sent_at: None | str
+        sent_at = self.sent_at
+
+        recipients: None | int
+        recipients = self.recipients
+
+        opens: None | int
+        opens = self.opens
+
+        unique_opens: None | int
+        unique_opens = self.unique_opens
+
+        clicks: None | int
+        clicks = self.clicks
+
+        unique_clicks: None | int
+        unique_clicks = self.unique_clicks
+
+        bounces: None | int
+        bounces = self.bounces
+
+        unsubscribes: None | int
+        unsubscribes = self.unsubscribes
+
+        raw: None | bool | dict[str, Any] | float | list[Any] | str
+        if isinstance(self.raw, PutIntegrationIntegrationCampaignStatsIdResponse200RawType0Type1):
+            raw = self.raw.to_dict()
+        elif isinstance(self.raw, list):
+            raw = self.raw
+
+        else:
+            raw = self.raw
+
+        is_deleted = self.is_deleted
+
+        deleted_at: None | str
+        deleted_at = self.deleted_at
+
+        created_at = self.created_at
+
+        updated_at = self.updated_at
+
+        sync_version = self.sync_version
+
+        sync_stamped_at: None | str
+        sync_stamped_at = self.sync_stamped_at
+
+        sync_txid = self.sync_txid
+
+        field_dict: dict[str, Any] = {}
+
+        field_dict.update(
+            {
+                "id": id,
+                "customerId": customer_id,
+                "ecosystemId": ecosystem_id,
+                "ownerKind": owner_kind,
+                "ownerId": owner_id,
+                "connectionId": connection_id,
+                "provider": provider,
+                "audienceId": audience_id,
+                "externalId": external_id,
+                "name": name,
+                "subject": subject,
+                "status": status,
+                "sentAt": sent_at,
+                "recipients": recipients,
+                "opens": opens,
+                "uniqueOpens": unique_opens,
+                "clicks": clicks,
+                "uniqueClicks": unique_clicks,
+                "bounces": bounces,
+                "unsubscribes": unsubscribes,
+                "raw": raw,
+                "isDeleted": is_deleted,
+                "deletedAt": deleted_at,
+                "createdAt": created_at,
+                "updatedAt": updated_at,
+                "syncVersion": sync_version,
+                "syncStampedAt": sync_stamped_at,
+                "syncTxid": sync_txid,
+            }
+        )
+
+        return field_dict
+
+    @classmethod
+    def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
+        from ..models.put_integration_integration_campaign_stats_id_response_200_raw_type_0_type_1 import (
+            PutIntegrationIntegrationCampaignStatsIdResponse200RawType0Type1,
+        )
+
+        d = dict(src_dict)
+        id = d.pop("id")
+
+        customer_id = d.pop("customerId")
+
+        ecosystem_id = d.pop("ecosystemId")
+
+        owner_kind = d.pop("ownerKind")
+
+        owner_id = d.pop("ownerId")
+
+        connection_id = d.pop("connectionId")
+
+        provider = d.pop("provider")
+
+        audience_id = d.pop("audienceId")
+
+        external_id = d.pop("externalId")
+
+        def _parse_name(data: object) -> None | str:
+            if data is None:
+                return data
+            return cast(None | str, data)
+
+        name = _parse_name(d.pop("name"))
+
+        def _parse_subject(data: object) -> None | str:
+            if data is None:
+                return data
+            return cast(None | str, data)
+
+        subject = _parse_subject(d.pop("subject"))
+
+        def _parse_status(data: object) -> None | str:
+            if data is None:
+                return data
+            return cast(None | str, data)
+
+        status = _parse_status(d.pop("status"))
+
+        def _parse_sent_at(data: object) -> None | str:
+            if data is None:
+                return data
+            return cast(None | str, data)
+
+        sent_at = _parse_sent_at(d.pop("sentAt"))
+
+        def _parse_recipients(data: object) -> None | int:
+            if data is None:
+                return data
+            return cast(None | int, data)
+
+        recipients = _parse_recipients(d.pop("recipients"))
+
+        def _parse_opens(data: object) -> None | int:
+            if data is None:
+                return data
+            return cast(None | int, data)
+
+        opens = _parse_opens(d.pop("opens"))
+
+        def _parse_unique_opens(data: object) -> None | int:
+            if data is None:
+                return data
+            return cast(None | int, data)
+
+        unique_opens = _parse_unique_opens(d.pop("uniqueOpens"))
+
+        def _parse_clicks(data: object) -> None | int:
+            if data is None:
+                return data
+            return cast(None | int, data)
+
+        clicks = _parse_clicks(d.pop("clicks"))
+
+        def _parse_unique_clicks(data: object) -> None | int:
+            if data is None:
+                return data
+            return cast(None | int, data)
+
+        unique_clicks = _parse_unique_clicks(d.pop("uniqueClicks"))
+
+        def _parse_bounces(data: object) -> None | int:
+            if data is None:
+                return data
+            return cast(None | int, data)
+
+        bounces = _parse_bounces(d.pop("bounces"))
+
+        def _parse_unsubscribes(data: object) -> None | int:
+            if data is None:
+                return data
+            return cast(None | int, data)
+
+        unsubscribes = _parse_unsubscribes(d.pop("unsubscribes"))
+
+        def _parse_raw(
+            data: object,
+        ) -> Union[
+            "PutIntegrationIntegrationCampaignStatsIdResponse200RawType0Type1",
+            None,
+            bool,
+            float,
+            list[Any],
+            str,
+        ]:
+            if data is None:
+                return data
+            try:
+                if not isinstance(data, dict):
+                    raise TypeError()
+                raw_type_0_type_1 = (
+                    PutIntegrationIntegrationCampaignStatsIdResponse200RawType0Type1.from_dict(data)
+                )
+
+                return raw_type_0_type_1
+            except:  # noqa: E722
+                pass
+            try:
+                if not isinstance(data, list):
+                    raise TypeError()
+                raw_type_0_type_2 = cast(list[Any], data)
+
+                return raw_type_0_type_2
+            except:  # noqa: E722
+                pass
+            return cast(
+                Union[
+                    "PutIntegrationIntegrationCampaignStatsIdResponse200RawType0Type1",
+                    None,
+                    bool,
+                    float,
+                    list[Any],
+                    str,
+                ],
+                data,
+            )
+
+        raw = _parse_raw(d.pop("raw"))
+
+        is_deleted = d.pop("isDeleted")
+
+        def _parse_deleted_at(data: object) -> None | str:
+            if data is None:
+                return data
+            return cast(None | str, data)
+
+        deleted_at = _parse_deleted_at(d.pop("deletedAt"))
+
+        created_at = d.pop("createdAt")
+
+        updated_at = d.pop("updatedAt")
+
+        sync_version = d.pop("syncVersion")
+
+        def _parse_sync_stamped_at(data: object) -> None | str:
+            if data is None:
+                return data
+            return cast(None | str, data)
+
+        sync_stamped_at = _parse_sync_stamped_at(d.pop("syncStampedAt"))
+
+        sync_txid = d.pop("syncTxid")
+
+        put_integration_integration_campaign_stats_id_response_200 = cls(
+            id=id,
+            customer_id=customer_id,
+            ecosystem_id=ecosystem_id,
+            owner_kind=owner_kind,
+            owner_id=owner_id,
+            connection_id=connection_id,
+            provider=provider,
+            audience_id=audience_id,
+            external_id=external_id,
+            name=name,
+            subject=subject,
+            status=status,
+            sent_at=sent_at,
+            recipients=recipients,
+            opens=opens,
+            unique_opens=unique_opens,
+            clicks=clicks,
+            unique_clicks=unique_clicks,
+            bounces=bounces,
+            unsubscribes=unsubscribes,
+            raw=raw,
+            is_deleted=is_deleted,
+            deleted_at=deleted_at,
+            created_at=created_at,
+            updated_at=updated_at,
+            sync_version=sync_version,
+            sync_stamped_at=sync_stamped_at,
+            sync_txid=sync_txid,
+        )
+
+        return put_integration_integration_campaign_stats_id_response_200

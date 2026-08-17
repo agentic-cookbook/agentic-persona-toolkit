@@ -1,33 +1,23 @@
 from http import HTTPStatus
-from typing import Any, Optional, Union, cast
+from typing import Any
 
 import httpx
 
-from ...client import AuthenticatedClient, Client
-from ...types import Response, UNSET
 from ... import errors
-
+from ...client import AuthenticatedClient, Client
 from ...models.public_user_search_hit import PublicUserSearchHit
-from typing import cast
-
+from ...types import UNSET, Response
 
 
 def _get_kwargs(
     *,
     q: str,
-
 ) -> dict[str, Any]:
-    
-
-    
-
     params: dict[str, Any] = {}
 
     params["q"] = q
 
-
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
-
 
     _kwargs: dict[str, Any] = {
         "method": "get",
@@ -35,19 +25,17 @@ def _get_kwargs(
         "params": params,
     }
 
-
     return _kwargs
 
 
-
-def _parse_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Optional[list['PublicUserSearchHit']]:
+def _parse_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> list["PublicUserSearchHit"] | None:
     if response.status_code == 200:
         response_200 = []
         _response_200 = response.json()
-        for response_200_item_data in (_response_200):
+        for response_200_item_data in _response_200:
             response_200_item = PublicUserSearchHit.from_dict(response_200_item_data)
-
-
 
             response_200.append(response_200_item)
 
@@ -59,7 +47,9 @@ def _parse_response(*, client: Union[AuthenticatedClient, Client], response: htt
         return None
 
 
-def _build_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Response[list['PublicUserSearchHit']]:
+def _build_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Response[list["PublicUserSearchHit"]]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -70,11 +60,10 @@ def _build_response(*, client: Union[AuthenticatedClient, Client], response: htt
 
 def sync_detailed(
     *,
-    client: Union[AuthenticatedClient, Client],
+    client: AuthenticatedClient | Client,
     q: str,
-
-) -> Response[list['PublicUserSearchHit']]:
-    """ Search public-profile users by slug or display name
+) -> Response[list["PublicUserSearchHit"]]:
+    """Search public-profile users by slug or display name
 
     Args:
         q (str):
@@ -85,12 +74,10 @@ def sync_detailed(
 
     Returns:
         Response[list['PublicUserSearchHit']]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         q=q,
-
     )
 
     response = client.get_httpx_client().request(
@@ -99,13 +86,13 @@ def sync_detailed(
 
     return _build_response(client=client, response=response)
 
+
 def sync(
     *,
-    client: Union[AuthenticatedClient, Client],
+    client: AuthenticatedClient | Client,
     q: str,
-
-) -> Optional[list['PublicUserSearchHit']]:
-    """ Search public-profile users by slug or display name
+) -> list["PublicUserSearchHit"] | None:
+    """Search public-profile users by slug or display name
 
     Args:
         q (str):
@@ -116,22 +103,20 @@ def sync(
 
     Returns:
         list['PublicUserSearchHit']
-     """
-
+    """
 
     return sync_detailed(
         client=client,
-q=q,
-
+        q=q,
     ).parsed
+
 
 async def asyncio_detailed(
     *,
-    client: Union[AuthenticatedClient, Client],
+    client: AuthenticatedClient | Client,
     q: str,
-
-) -> Response[list['PublicUserSearchHit']]:
-    """ Search public-profile users by slug or display name
+) -> Response[list["PublicUserSearchHit"]]:
+    """Search public-profile users by slug or display name
 
     Args:
         q (str):
@@ -142,27 +127,23 @@ async def asyncio_detailed(
 
     Returns:
         Response[list['PublicUserSearchHit']]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         q=q,
-
     )
 
-    response = await client.get_async_httpx_client().request(
-        **kwargs
-    )
+    response = await client.get_async_httpx_client().request(**kwargs)
 
     return _build_response(client=client, response=response)
 
+
 async def asyncio(
     *,
-    client: Union[AuthenticatedClient, Client],
+    client: AuthenticatedClient | Client,
     q: str,
-
-) -> Optional[list['PublicUserSearchHit']]:
-    """ Search public-profile users by slug or display name
+) -> list["PublicUserSearchHit"] | None:
+    """Search public-profile users by slug or display name
 
     Args:
         q (str):
@@ -173,11 +154,11 @@ async def asyncio(
 
     Returns:
         list['PublicUserSearchHit']
-     """
+    """
 
-
-    return (await asyncio_detailed(
-        client=client,
-q=q,
-
-    )).parsed
+    return (
+        await asyncio_detailed(
+            client=client,
+            q=q,
+        )
+    ).parsed

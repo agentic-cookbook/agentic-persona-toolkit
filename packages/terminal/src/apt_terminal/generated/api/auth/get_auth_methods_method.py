@@ -1,64 +1,46 @@
 from http import HTTPStatus
-from typing import Any, Optional, Union, cast
+from typing import Any
 
 import httpx
 
-from ...client import AuthenticatedClient, Client
-from ...types import Response, UNSET
 from ... import errors
-
+from ...client import AuthenticatedClient, Client
 from ...models.auth_method_setting import AuthMethodSetting
 from ...models.error import Error
-from typing import cast
-
+from ...types import Response
 
 
 def _get_kwargs(
     method: str,
-
 ) -> dict[str, Any]:
-    
-
-    
-
-    
-
     _kwargs: dict[str, Any] = {
         "method": "get",
-        "url": "/auth/methods/{method}".format(method=method,),
+        "url": f"/auth/methods/{method}",
     }
-
 
     return _kwargs
 
 
-
-def _parse_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Optional[Union[AuthMethodSetting, Error]]:
+def _parse_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> AuthMethodSetting | Error | None:
     if response.status_code == 200:
         response_200 = AuthMethodSetting.from_dict(response.json())
-
-
 
         return response_200
 
     if response.status_code == 401:
         response_401 = Error.from_dict(response.json())
 
-
-
         return response_401
 
     if response.status_code == 403:
         response_403 = Error.from_dict(response.json())
 
-
-
         return response_403
 
     if response.status_code == 404:
         response_404 = Error.from_dict(response.json())
-
-
 
         return response_404
 
@@ -68,7 +50,9 @@ def _parse_response(*, client: Union[AuthenticatedClient, Client], response: htt
         return None
 
 
-def _build_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Response[Union[AuthMethodSetting, Error]]:
+def _build_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Response[AuthMethodSetting | Error]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -81,9 +65,8 @@ def sync_detailed(
     method: str,
     *,
     client: AuthenticatedClient,
-
-) -> Response[Union[AuthMethodSetting, Error]]:
-    """ Get an auth method setting (admin)
+) -> Response[AuthMethodSetting | Error]:
+    """Get an auth method setting (admin)
 
     Args:
         method (str):
@@ -94,12 +77,10 @@ def sync_detailed(
 
     Returns:
         Response[Union[AuthMethodSetting, Error]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         method=method,
-
     )
 
     response = client.get_httpx_client().request(
@@ -108,13 +89,13 @@ def sync_detailed(
 
     return _build_response(client=client, response=response)
 
+
 def sync(
     method: str,
     *,
     client: AuthenticatedClient,
-
-) -> Optional[Union[AuthMethodSetting, Error]]:
-    """ Get an auth method setting (admin)
+) -> AuthMethodSetting | Error | None:
+    """Get an auth method setting (admin)
 
     Args:
         method (str):
@@ -125,22 +106,20 @@ def sync(
 
     Returns:
         Union[AuthMethodSetting, Error]
-     """
-
+    """
 
     return sync_detailed(
         method=method,
-client=client,
-
+        client=client,
     ).parsed
+
 
 async def asyncio_detailed(
     method: str,
     *,
     client: AuthenticatedClient,
-
-) -> Response[Union[AuthMethodSetting, Error]]:
-    """ Get an auth method setting (admin)
+) -> Response[AuthMethodSetting | Error]:
+    """Get an auth method setting (admin)
 
     Args:
         method (str):
@@ -151,27 +130,23 @@ async def asyncio_detailed(
 
     Returns:
         Response[Union[AuthMethodSetting, Error]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         method=method,
-
     )
 
-    response = await client.get_async_httpx_client().request(
-        **kwargs
-    )
+    response = await client.get_async_httpx_client().request(**kwargs)
 
     return _build_response(client=client, response=response)
+
 
 async def asyncio(
     method: str,
     *,
     client: AuthenticatedClient,
-
-) -> Optional[Union[AuthMethodSetting, Error]]:
-    """ Get an auth method setting (admin)
+) -> AuthMethodSetting | Error | None:
+    """Get an auth method setting (admin)
 
     Args:
         method (str):
@@ -182,11 +157,11 @@ async def asyncio(
 
     Returns:
         Union[AuthMethodSetting, Error]
-     """
+    """
 
-
-    return (await asyncio_detailed(
-        method=method,
-client=client,
-
-    )).parsed
+    return (
+        await asyncio_detailed(
+            method=method,
+            client=client,
+        )
+    ).parsed

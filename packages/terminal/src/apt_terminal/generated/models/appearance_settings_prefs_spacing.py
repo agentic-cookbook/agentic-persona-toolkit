@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class AppearanceSettingsPrefsSpacing(str, Enum):
     COMFORTABLE = "comfortable"
     COMPACT = "compact"

@@ -1,38 +1,28 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 from ..types import UNSET, Unset
 
-from ..types import UNSET, Unset
-from typing import cast, Union
-from typing import Union
-
-
-
-
-
-
 T = TypeVar("T", bound="RegistryAgentMcpServer")
-
 
 
 @_attrs_define
 class RegistryAgentMcpServer:
-    """ 
-        Attributes:
-            id (str):
-            slug (str): The `<server>` segment in `mcp.<server>.<tool>`
-            name (str):
-            url (str): The remote MCP server's http(s) endpoint URL
-            enabled (bool): Opt-in: a server contributes no tools until an operator enables it
-            has_auth_secret (bool): true iff a per-server bearer secret is stored; the secret itself is NEVER returned
-            created_at (str):
-            updated_at (str):
-            created_by (Union[None, Unset, str]): The admin who registered it (null for system rows)
-     """
+    """
+    Attributes:
+        id (str):
+        slug (str): The `<server>` segment in `mcp.<server>.<tool>`
+        name (str):
+        url (str): The remote MCP server's http(s) endpoint URL
+        enabled (bool): Opt-in: a server contributes no tools until an operator enables it
+        has_auth_secret (bool): true iff a per-server bearer secret is stored; the secret itself is NEVER returned
+        created_at (str):
+        updated_at (str):
+        created_by (Union[None, Unset, str]): The admin who registered it (null for system rows)
+    """
 
     id: str
     slug: str
@@ -42,12 +32,8 @@ class RegistryAgentMcpServer:
     has_auth_secret: bool
     created_at: str
     updated_at: str
-    created_by: Union[None, Unset, str] = UNSET
+    created_by: None | Unset | str = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         id = self.id
@@ -66,31 +52,30 @@ class RegistryAgentMcpServer:
 
         updated_at = self.updated_at
 
-        created_by: Union[None, Unset, str]
+        created_by: None | Unset | str
         if isinstance(self.created_by, Unset):
             created_by = UNSET
         else:
             created_by = self.created_by
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "id": id,
-            "slug": slug,
-            "name": name,
-            "url": url,
-            "enabled": enabled,
-            "hasAuthSecret": has_auth_secret,
-            "createdAt": created_at,
-            "updatedAt": updated_at,
-        })
+        field_dict.update(
+            {
+                "id": id,
+                "slug": slug,
+                "name": name,
+                "url": url,
+                "enabled": enabled,
+                "hasAuthSecret": has_auth_secret,
+                "createdAt": created_at,
+                "updatedAt": updated_at,
+            }
+        )
         if created_by is not UNSET:
             field_dict["createdBy"] = created_by
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -111,15 +96,14 @@ class RegistryAgentMcpServer:
 
         updated_at = d.pop("updatedAt")
 
-        def _parse_created_by(data: object) -> Union[None, Unset, str]:
+        def _parse_created_by(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         created_by = _parse_created_by(d.pop("createdBy", UNSET))
-
 
         registry_agent_mcp_server = cls(
             id=id,
@@ -132,7 +116,6 @@ class RegistryAgentMcpServer:
             updated_at=updated_at,
             created_by=created_by,
         )
-
 
         registry_agent_mcp_server.additional_properties = d
         return registry_agent_mcp_server

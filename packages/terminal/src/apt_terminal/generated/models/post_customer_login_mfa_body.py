@@ -1,39 +1,27 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
-
 from ..models.post_customer_login_mfa_body_method import PostCustomerLoginMfaBodyMethod
-
-
-
-
-
 
 T = TypeVar("T", bound="PostCustomerLoginMfaBody")
 
 
-
 @_attrs_define
 class PostCustomerLoginMfaBody:
-    """ 
-        Attributes:
-            token (str): MFA pending token
-            method (PostCustomerLoginMfaBodyMethod):
-            code (str):
-     """
+    """
+    Attributes:
+        token (str): MFA pending token
+        method (PostCustomerLoginMfaBodyMethod):
+        code (str):
+    """
 
     token: str
     method: PostCustomerLoginMfaBodyMethod
     code: str
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         token = self.token
@@ -42,18 +30,17 @@ class PostCustomerLoginMfaBody:
 
         code = self.code
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "token": token,
-            "method": method,
-            "code": code,
-        })
+        field_dict.update(
+            {
+                "token": token,
+                "method": method,
+                "code": code,
+            }
+        )
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -62,9 +49,6 @@ class PostCustomerLoginMfaBody:
 
         method = PostCustomerLoginMfaBodyMethod(d.pop("method"))
 
-
-
-
         code = d.pop("code")
 
         post_customer_login_mfa_body = cls(
@@ -72,7 +56,6 @@ class PostCustomerLoginMfaBody:
             method=method,
             code=code,
         )
-
 
         post_customer_login_mfa_body.additional_properties = d
         return post_customer_login_mfa_body

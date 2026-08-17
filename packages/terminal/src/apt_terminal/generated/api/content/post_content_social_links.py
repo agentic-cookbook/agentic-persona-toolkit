@@ -1,38 +1,36 @@
 from http import HTTPStatus
-from typing import Any, Optional, Union, cast
+from typing import Any
 
 import httpx
 
-from ...client import AuthenticatedClient, Client
-from ...types import Response, UNSET
 from ... import errors
-
+from ...client import AuthenticatedClient, Client
 from ...models.error import Error
 from ...models.post_content_social_links_body import PostContentSocialLinksBody
 from ...models.post_content_social_links_response_201 import PostContentSocialLinksResponse201
-from typing import cast
-
+from ...types import UNSET, Response, Unset
 
 
 def _get_kwargs(
     *,
     body: PostContentSocialLinksBody,
-
+    workspace: Unset | str = UNSET,
 ) -> dict[str, Any]:
     headers: dict[str, Any] = {}
 
+    params: dict[str, Any] = {}
 
-    
+    params["workspace"] = workspace
 
-    
+    params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 
     _kwargs: dict[str, Any] = {
         "method": "post",
         "url": "/content/social-links",
+        "params": params,
     }
 
     _kwargs["json"] = body.to_dict()
-
 
     headers["Content-Type"] = "application/json"
 
@@ -40,28 +38,33 @@ def _get_kwargs(
     return _kwargs
 
 
-
-def _parse_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Optional[Union[Error, PostContentSocialLinksResponse201]]:
+def _parse_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Error | PostContentSocialLinksResponse201 | None:
     if response.status_code == 201:
         response_201 = PostContentSocialLinksResponse201.from_dict(response.json())
-
-
 
         return response_201
 
     if response.status_code == 400:
         response_400 = Error.from_dict(response.json())
 
-
-
         return response_400
 
     if response.status_code == 401:
         response_401 = Error.from_dict(response.json())
 
-
-
         return response_401
+
+    if response.status_code == 403:
+        response_403 = Error.from_dict(response.json())
+
+        return response_403
+
+    if response.status_code == 404:
+        response_404 = Error.from_dict(response.json())
+
+        return response_404
 
     if client.raise_on_unexpected_status:
         raise errors.UnexpectedStatus(response.status_code, response.content)
@@ -69,7 +72,9 @@ def _parse_response(*, client: Union[AuthenticatedClient, Client], response: htt
         return None
 
 
-def _build_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Response[Union[Error, PostContentSocialLinksResponse201]]:
+def _build_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Response[Error | PostContentSocialLinksResponse201]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -82,11 +87,12 @@ def sync_detailed(
     *,
     client: AuthenticatedClient,
     body: PostContentSocialLinksBody,
-
-) -> Response[Union[Error, PostContentSocialLinksResponse201]]:
-    """ Create social_links
+    workspace: Unset | str = UNSET,
+) -> Response[Error | PostContentSocialLinksResponse201]:
+    """Create social_links
 
     Args:
+        workspace (Union[Unset, str]):
         body (PostContentSocialLinksBody):
 
     Raises:
@@ -95,12 +101,11 @@ def sync_detailed(
 
     Returns:
         Response[Union[Error, PostContentSocialLinksResponse201]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         body=body,
-
+        workspace=workspace,
     )
 
     response = client.get_httpx_client().request(
@@ -109,15 +114,17 @@ def sync_detailed(
 
     return _build_response(client=client, response=response)
 
+
 def sync(
     *,
     client: AuthenticatedClient,
     body: PostContentSocialLinksBody,
-
-) -> Optional[Union[Error, PostContentSocialLinksResponse201]]:
-    """ Create social_links
+    workspace: Unset | str = UNSET,
+) -> Error | PostContentSocialLinksResponse201 | None:
+    """Create social_links
 
     Args:
+        workspace (Union[Unset, str]):
         body (PostContentSocialLinksBody):
 
     Raises:
@@ -126,24 +133,25 @@ def sync(
 
     Returns:
         Union[Error, PostContentSocialLinksResponse201]
-     """
-
+    """
 
     return sync_detailed(
         client=client,
-body=body,
-
+        body=body,
+        workspace=workspace,
     ).parsed
+
 
 async def asyncio_detailed(
     *,
     client: AuthenticatedClient,
     body: PostContentSocialLinksBody,
-
-) -> Response[Union[Error, PostContentSocialLinksResponse201]]:
-    """ Create social_links
+    workspace: Unset | str = UNSET,
+) -> Response[Error | PostContentSocialLinksResponse201]:
+    """Create social_links
 
     Args:
+        workspace (Union[Unset, str]):
         body (PostContentSocialLinksBody):
 
     Raises:
@@ -152,29 +160,28 @@ async def asyncio_detailed(
 
     Returns:
         Response[Union[Error, PostContentSocialLinksResponse201]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         body=body,
-
+        workspace=workspace,
     )
 
-    response = await client.get_async_httpx_client().request(
-        **kwargs
-    )
+    response = await client.get_async_httpx_client().request(**kwargs)
 
     return _build_response(client=client, response=response)
+
 
 async def asyncio(
     *,
     client: AuthenticatedClient,
     body: PostContentSocialLinksBody,
-
-) -> Optional[Union[Error, PostContentSocialLinksResponse201]]:
-    """ Create social_links
+    workspace: Unset | str = UNSET,
+) -> Error | PostContentSocialLinksResponse201 | None:
+    """Create social_links
 
     Args:
+        workspace (Union[Unset, str]):
         body (PostContentSocialLinksBody):
 
     Raises:
@@ -183,11 +190,12 @@ async def asyncio(
 
     Returns:
         Union[Error, PostContentSocialLinksResponse201]
-     """
+    """
 
-
-    return (await asyncio_detailed(
-        client=client,
-body=body,
-
-    )).parsed
+    return (
+        await asyncio_detailed(
+            client=client,
+            body=body,
+            workspace=workspace,
+        )
+    ).parsed

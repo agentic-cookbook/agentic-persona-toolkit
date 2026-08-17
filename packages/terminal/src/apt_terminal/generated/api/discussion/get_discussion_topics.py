@@ -1,31 +1,21 @@
 from http import HTTPStatus
-from typing import Any, Optional, Union, cast
+from typing import Any
 
 import httpx
 
-from ...client import AuthenticatedClient, Client
-from ...types import Response, UNSET
 from ... import errors
-
+from ...client import AuthenticatedClient, Client
 from ...models.error import Error
 from ...models.get_discussion_topics_response_200 import GetDiscussionTopicsResponse200
-from ...types import UNSET, Unset
-from typing import cast
-from typing import Union
-
+from ...types import UNSET, Response, Unset
 
 
 def _get_kwargs(
     *,
-    page: Union[Unset, str] = UNSET,
-    page_size: Union[Unset, str] = UNSET,
-    community_id: Union[Unset, str] = UNSET,
-
+    page: Unset | str = UNSET,
+    page_size: Unset | str = UNSET,
+    community_id: Unset | str = UNSET,
 ) -> dict[str, Any]:
-    
-
-    
-
     params: dict[str, Any] = {}
 
     params["page"] = page
@@ -34,9 +24,7 @@ def _get_kwargs(
 
     params["communityId"] = community_id
 
-
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
-
 
     _kwargs: dict[str, Any] = {
         "method": "get",
@@ -44,23 +32,19 @@ def _get_kwargs(
         "params": params,
     }
 
-
     return _kwargs
 
 
-
-def _parse_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Optional[Union[Error, GetDiscussionTopicsResponse200]]:
+def _parse_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Error | GetDiscussionTopicsResponse200 | None:
     if response.status_code == 200:
         response_200 = GetDiscussionTopicsResponse200.from_dict(response.json())
-
-
 
         return response_200
 
     if response.status_code == 401:
         response_401 = Error.from_dict(response.json())
-
-
 
         return response_401
 
@@ -70,7 +54,9 @@ def _parse_response(*, client: Union[AuthenticatedClient, Client], response: htt
         return None
 
 
-def _build_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Response[Union[Error, GetDiscussionTopicsResponse200]]:
+def _build_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Response[Error | GetDiscussionTopicsResponse200]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -82,12 +68,11 @@ def _build_response(*, client: Union[AuthenticatedClient, Client], response: htt
 def sync_detailed(
     *,
     client: AuthenticatedClient,
-    page: Union[Unset, str] = UNSET,
-    page_size: Union[Unset, str] = UNSET,
-    community_id: Union[Unset, str] = UNSET,
-
-) -> Response[Union[Error, GetDiscussionTopicsResponse200]]:
-    """ List the ecosystem’s live discussion topics (most-recently-active first)
+    page: Unset | str = UNSET,
+    page_size: Unset | str = UNSET,
+    community_id: Unset | str = UNSET,
+) -> Response[Error | GetDiscussionTopicsResponse200]:
+    """List the ecosystem’s live discussion topics (most-recently-active first)
 
     Args:
         page (Union[Unset, str]):
@@ -100,14 +85,12 @@ def sync_detailed(
 
     Returns:
         Response[Union[Error, GetDiscussionTopicsResponse200]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         page=page,
-page_size=page_size,
-community_id=community_id,
-
+        page_size=page_size,
+        community_id=community_id,
     )
 
     response = client.get_httpx_client().request(
@@ -116,15 +99,15 @@ community_id=community_id,
 
     return _build_response(client=client, response=response)
 
+
 def sync(
     *,
     client: AuthenticatedClient,
-    page: Union[Unset, str] = UNSET,
-    page_size: Union[Unset, str] = UNSET,
-    community_id: Union[Unset, str] = UNSET,
-
-) -> Optional[Union[Error, GetDiscussionTopicsResponse200]]:
-    """ List the ecosystem’s live discussion topics (most-recently-active first)
+    page: Unset | str = UNSET,
+    page_size: Unset | str = UNSET,
+    community_id: Unset | str = UNSET,
+) -> Error | GetDiscussionTopicsResponse200 | None:
+    """List the ecosystem’s live discussion topics (most-recently-active first)
 
     Args:
         page (Union[Unset, str]):
@@ -137,26 +120,24 @@ def sync(
 
     Returns:
         Union[Error, GetDiscussionTopicsResponse200]
-     """
-
+    """
 
     return sync_detailed(
         client=client,
-page=page,
-page_size=page_size,
-community_id=community_id,
-
+        page=page,
+        page_size=page_size,
+        community_id=community_id,
     ).parsed
+
 
 async def asyncio_detailed(
     *,
     client: AuthenticatedClient,
-    page: Union[Unset, str] = UNSET,
-    page_size: Union[Unset, str] = UNSET,
-    community_id: Union[Unset, str] = UNSET,
-
-) -> Response[Union[Error, GetDiscussionTopicsResponse200]]:
-    """ List the ecosystem’s live discussion topics (most-recently-active first)
+    page: Unset | str = UNSET,
+    page_size: Unset | str = UNSET,
+    community_id: Unset | str = UNSET,
+) -> Response[Error | GetDiscussionTopicsResponse200]:
+    """List the ecosystem’s live discussion topics (most-recently-active first)
 
     Args:
         page (Union[Unset, str]):
@@ -169,31 +150,27 @@ async def asyncio_detailed(
 
     Returns:
         Response[Union[Error, GetDiscussionTopicsResponse200]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         page=page,
-page_size=page_size,
-community_id=community_id,
-
+        page_size=page_size,
+        community_id=community_id,
     )
 
-    response = await client.get_async_httpx_client().request(
-        **kwargs
-    )
+    response = await client.get_async_httpx_client().request(**kwargs)
 
     return _build_response(client=client, response=response)
+
 
 async def asyncio(
     *,
     client: AuthenticatedClient,
-    page: Union[Unset, str] = UNSET,
-    page_size: Union[Unset, str] = UNSET,
-    community_id: Union[Unset, str] = UNSET,
-
-) -> Optional[Union[Error, GetDiscussionTopicsResponse200]]:
-    """ List the ecosystem’s live discussion topics (most-recently-active first)
+    page: Unset | str = UNSET,
+    page_size: Unset | str = UNSET,
+    community_id: Unset | str = UNSET,
+) -> Error | GetDiscussionTopicsResponse200 | None:
+    """List the ecosystem’s live discussion topics (most-recently-active first)
 
     Args:
         page (Union[Unset, str]):
@@ -206,13 +183,13 @@ async def asyncio(
 
     Returns:
         Union[Error, GetDiscussionTopicsResponse200]
-     """
+    """
 
-
-    return (await asyncio_detailed(
-        client=client,
-page=page,
-page_size=page_size,
-community_id=community_id,
-
-    )).parsed
+    return (
+        await asyncio_detailed(
+            client=client,
+            page=page,
+            page_size=page_size,
+            community_id=community_id,
+        )
+    ).parsed

@@ -1,71 +1,53 @@
 from http import HTTPStatus
-from typing import Any, Optional, Union, cast
+from typing import Any
 
 import httpx
 
-from ...client import AuthenticatedClient, Client
-from ...types import Response, UNSET
 from ... import errors
-
-from ...models.post_integrations_connection_id_sync_response_202 import PostIntegrationsConnectionIdSyncResponse202
+from ...client import AuthenticatedClient, Client
+from ...models.post_integrations_connection_id_sync_response_202 import (
+    PostIntegrationsConnectionIdSyncResponse202,
+)
 from ...models.problem_details import ProblemDetails
-from typing import cast
-
+from ...types import Response
 
 
 def _get_kwargs(
     connection_id: str,
-
 ) -> dict[str, Any]:
-    
-
-    
-
-    
-
     _kwargs: dict[str, Any] = {
         "method": "post",
-        "url": "/integrations/{connection_id}/sync".format(connection_id=connection_id,),
+        "url": f"/integrations/{connection_id}/sync",
     }
-
 
     return _kwargs
 
 
-
-def _parse_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Optional[Union[PostIntegrationsConnectionIdSyncResponse202, ProblemDetails]]:
+def _parse_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> PostIntegrationsConnectionIdSyncResponse202 | ProblemDetails | None:
     if response.status_code == 202:
         response_202 = PostIntegrationsConnectionIdSyncResponse202.from_dict(response.json())
-
-
 
         return response_202
 
     if response.status_code == 401:
         response_401 = ProblemDetails.from_dict(response.json())
 
-
-
         return response_401
 
     if response.status_code == 403:
         response_403 = ProblemDetails.from_dict(response.json())
-
-
 
         return response_403
 
     if response.status_code == 404:
         response_404 = ProblemDetails.from_dict(response.json())
 
-
-
         return response_404
 
     if response.status_code == 503:
         response_503 = ProblemDetails.from_dict(response.json())
-
-
 
         return response_503
 
@@ -75,7 +57,9 @@ def _parse_response(*, client: Union[AuthenticatedClient, Client], response: htt
         return None
 
 
-def _build_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Response[Union[PostIntegrationsConnectionIdSyncResponse202, ProblemDetails]]:
+def _build_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Response[PostIntegrationsConnectionIdSyncResponse202 | ProblemDetails]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -88,9 +72,8 @@ def sync_detailed(
     connection_id: str,
     *,
     client: AuthenticatedClient,
-
-) -> Response[Union[PostIntegrationsConnectionIdSyncResponse202, ProblemDetails]]:
-    """ Trigger an immediate sync (sync now)
+) -> Response[PostIntegrationsConnectionIdSyncResponse202 | ProblemDetails]:
+    """Trigger an immediate sync (sync now)
 
      Runs the connection's worker once, independent of the background scheduler. The owning ecosystem is
     derived from the connection; the caller must manage it. 404 when absent/deleted; 403 when the caller
@@ -106,12 +89,10 @@ def sync_detailed(
 
     Returns:
         Response[Union[PostIntegrationsConnectionIdSyncResponse202, ProblemDetails]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         connection_id=connection_id,
-
     )
 
     response = client.get_httpx_client().request(
@@ -120,13 +101,13 @@ def sync_detailed(
 
     return _build_response(client=client, response=response)
 
+
 def sync(
     connection_id: str,
     *,
     client: AuthenticatedClient,
-
-) -> Optional[Union[PostIntegrationsConnectionIdSyncResponse202, ProblemDetails]]:
-    """ Trigger an immediate sync (sync now)
+) -> PostIntegrationsConnectionIdSyncResponse202 | ProblemDetails | None:
+    """Trigger an immediate sync (sync now)
 
      Runs the connection's worker once, independent of the background scheduler. The owning ecosystem is
     derived from the connection; the caller must manage it. 404 when absent/deleted; 403 when the caller
@@ -142,22 +123,20 @@ def sync(
 
     Returns:
         Union[PostIntegrationsConnectionIdSyncResponse202, ProblemDetails]
-     """
-
+    """
 
     return sync_detailed(
         connection_id=connection_id,
-client=client,
-
+        client=client,
     ).parsed
+
 
 async def asyncio_detailed(
     connection_id: str,
     *,
     client: AuthenticatedClient,
-
-) -> Response[Union[PostIntegrationsConnectionIdSyncResponse202, ProblemDetails]]:
-    """ Trigger an immediate sync (sync now)
+) -> Response[PostIntegrationsConnectionIdSyncResponse202 | ProblemDetails]:
+    """Trigger an immediate sync (sync now)
 
      Runs the connection's worker once, independent of the background scheduler. The owning ecosystem is
     derived from the connection; the caller must manage it. 404 when absent/deleted; 403 when the caller
@@ -173,27 +152,23 @@ async def asyncio_detailed(
 
     Returns:
         Response[Union[PostIntegrationsConnectionIdSyncResponse202, ProblemDetails]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         connection_id=connection_id,
-
     )
 
-    response = await client.get_async_httpx_client().request(
-        **kwargs
-    )
+    response = await client.get_async_httpx_client().request(**kwargs)
 
     return _build_response(client=client, response=response)
+
 
 async def asyncio(
     connection_id: str,
     *,
     client: AuthenticatedClient,
-
-) -> Optional[Union[PostIntegrationsConnectionIdSyncResponse202, ProblemDetails]]:
-    """ Trigger an immediate sync (sync now)
+) -> PostIntegrationsConnectionIdSyncResponse202 | ProblemDetails | None:
+    """Trigger an immediate sync (sync now)
 
      Runs the connection's worker once, independent of the background scheduler. The owning ecosystem is
     derived from the connection; the caller must manage it. 404 when absent/deleted; 403 when the caller
@@ -209,11 +184,11 @@ async def asyncio(
 
     Returns:
         Union[PostIntegrationsConnectionIdSyncResponse202, ProblemDetails]
-     """
+    """
 
-
-    return (await asyncio_detailed(
-        connection_id=connection_id,
-client=client,
-
-    )).parsed
+    return (
+        await asyncio_detailed(
+            connection_id=connection_id,
+            client=client,
+        )
+    ).parsed

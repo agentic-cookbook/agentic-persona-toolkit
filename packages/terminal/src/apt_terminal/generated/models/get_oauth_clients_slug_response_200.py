@@ -1,44 +1,34 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import TYPE_CHECKING, Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
-
-from typing import cast
-
 if TYPE_CHECKING:
-  from ..models.get_oauth_clients_slug_response_200_client import GetOauthClientsSlugResponse200Client
-  from ..models.get_oauth_clients_slug_response_200_providers_item import GetOauthClientsSlugResponse200ProvidersItem
-
-
-
+    from ..models.get_oauth_clients_slug_response_200_client import (
+        GetOauthClientsSlugResponse200Client,
+    )
+    from ..models.get_oauth_clients_slug_response_200_providers_item import (
+        GetOauthClientsSlugResponse200ProvidersItem,
+    )
 
 
 T = TypeVar("T", bound="GetOauthClientsSlugResponse200")
 
 
-
 @_attrs_define
 class GetOauthClientsSlugResponse200:
-    """ 
-        Attributes:
-            client (GetOauthClientsSlugResponse200Client):
-            providers (list['GetOauthClientsSlugResponse200ProvidersItem']):
-     """
+    """
+    Attributes:
+        client (GetOauthClientsSlugResponse200Client):
+        providers (list['GetOauthClientsSlugResponse200ProvidersItem']):
+    """
 
-    client: 'GetOauthClientsSlugResponse200Client'
-    providers: list['GetOauthClientsSlugResponse200ProvidersItem']
+    client: "GetOauthClientsSlugResponse200Client"
+    providers: list["GetOauthClientsSlugResponse200ProvidersItem"]
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
-
-
-
-
     def to_dict(self) -> dict[str, Any]:
-        from ..models.get_oauth_clients_slug_response_200_client import GetOauthClientsSlugResponse200Client
-        from ..models.get_oauth_clients_slug_response_200_providers_item import GetOauthClientsSlugResponse200ProvidersItem
         client = self.client.to_dict()
 
         providers = []
@@ -46,45 +36,42 @@ class GetOauthClientsSlugResponse200:
             providers_item = providers_item_data.to_dict()
             providers.append(providers_item)
 
-
-
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "client": client,
-            "providers": providers,
-        })
+        field_dict.update(
+            {
+                "client": client,
+                "providers": providers,
+            }
+        )
 
         return field_dict
 
-
-
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.get_oauth_clients_slug_response_200_client import GetOauthClientsSlugResponse200Client
-        from ..models.get_oauth_clients_slug_response_200_providers_item import GetOauthClientsSlugResponse200ProvidersItem
+        from ..models.get_oauth_clients_slug_response_200_client import (
+            GetOauthClientsSlugResponse200Client,
+        )
+        from ..models.get_oauth_clients_slug_response_200_providers_item import (
+            GetOauthClientsSlugResponse200ProvidersItem,
+        )
+
         d = dict(src_dict)
         client = GetOauthClientsSlugResponse200Client.from_dict(d.pop("client"))
 
-
-
-
         providers = []
         _providers = d.pop("providers")
-        for providers_item_data in (_providers):
-            providers_item = GetOauthClientsSlugResponse200ProvidersItem.from_dict(providers_item_data)
-
-
+        for providers_item_data in _providers:
+            providers_item = GetOauthClientsSlugResponse200ProvidersItem.from_dict(
+                providers_item_data
+            )
 
             providers.append(providers_item)
-
 
         get_oauth_clients_slug_response_200 = cls(
             client=client,
             providers=providers,
         )
-
 
         get_oauth_clients_slug_response_200.additional_properties = d
         return get_oauth_clients_slug_response_200

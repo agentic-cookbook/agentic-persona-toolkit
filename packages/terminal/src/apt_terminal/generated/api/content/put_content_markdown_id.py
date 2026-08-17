@@ -1,49 +1,37 @@
 from http import HTTPStatus
-from typing import Any, Optional, Union, cast
+from typing import Any
 
 import httpx
 
-from ...client import AuthenticatedClient, Client
-from ...types import Response, UNSET
 from ... import errors
-
+from ...client import AuthenticatedClient, Client
 from ...models.error import Error
 from ...models.markdown_document import MarkdownDocument
 from ...models.put_content_markdown_id_body import PutContentMarkdownIdBody
-from ...types import UNSET, Unset
-from typing import cast
-from typing import Union
-
+from ...types import UNSET, Response, Unset
 
 
 def _get_kwargs(
     id: str,
     *,
     body: PutContentMarkdownIdBody,
-    workspace: Union[Unset, str] = UNSET,
-
+    workspace: Unset | str = UNSET,
 ) -> dict[str, Any]:
     headers: dict[str, Any] = {}
-
-
-    
 
     params: dict[str, Any] = {}
 
     params["workspace"] = workspace
 
-
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
-
 
     _kwargs: dict[str, Any] = {
         "method": "put",
-        "url": "/content/markdown/{id}".format(id=id,),
+        "url": f"/content/markdown/{id}",
         "params": params,
     }
 
     _kwargs["json"] = body.to_dict()
-
 
     headers["Content-Type"] = "application/json"
 
@@ -51,33 +39,26 @@ def _get_kwargs(
     return _kwargs
 
 
-
-def _parse_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Optional[Union[Error, MarkdownDocument]]:
+def _parse_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Error | MarkdownDocument | None:
     if response.status_code == 200:
         response_200 = MarkdownDocument.from_dict(response.json())
-
-
 
         return response_200
 
     if response.status_code == 400:
         response_400 = Error.from_dict(response.json())
 
-
-
         return response_400
 
     if response.status_code == 401:
         response_401 = Error.from_dict(response.json())
 
-
-
         return response_401
 
     if response.status_code == 404:
         response_404 = Error.from_dict(response.json())
-
-
 
         return response_404
 
@@ -87,7 +68,9 @@ def _parse_response(*, client: Union[AuthenticatedClient, Client], response: htt
         return None
 
 
-def _build_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Response[Union[Error, MarkdownDocument]]:
+def _build_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Response[Error | MarkdownDocument]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -101,17 +84,17 @@ def sync_detailed(
     *,
     client: AuthenticatedClient,
     body: PutContentMarkdownIdBody,
-    workspace: Union[Unset, str] = UNSET,
-
-) -> Response[Union[Error, MarkdownDocument]]:
-    """ Update a document; any real change appends a full-state version
+    workspace: Unset | str = UNSET,
+) -> Response[Error | MarkdownDocument]:
+    """Update a document; a content change appends a full-state version
 
     Args:
         id (str):
         workspace (Union[Unset, str]):
-        body (PutContentMarkdownIdBody): At least one of content/title/category/tags. A content or
-            title change appends a full-state version (author attaches to it); a category/tags-only
-            change updates the head in place WITHOUT a new version; a no-op returns the doc unchanged.
+        body (PutContentMarkdownIdBody): At least one of content/category/tags. A content change
+            appends a full-state version (author attaches to it) and re-derives the title; a
+            category/tags-only change updates the head in place WITHOUT a new version; a no-op returns
+            the doc unchanged.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -119,14 +102,12 @@ def sync_detailed(
 
     Returns:
         Response[Union[Error, MarkdownDocument]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         id=id,
-body=body,
-workspace=workspace,
-
+        body=body,
+        workspace=workspace,
     )
 
     response = client.get_httpx_client().request(
@@ -135,22 +116,23 @@ workspace=workspace,
 
     return _build_response(client=client, response=response)
 
+
 def sync(
     id: str,
     *,
     client: AuthenticatedClient,
     body: PutContentMarkdownIdBody,
-    workspace: Union[Unset, str] = UNSET,
-
-) -> Optional[Union[Error, MarkdownDocument]]:
-    """ Update a document; any real change appends a full-state version
+    workspace: Unset | str = UNSET,
+) -> Error | MarkdownDocument | None:
+    """Update a document; a content change appends a full-state version
 
     Args:
         id (str):
         workspace (Union[Unset, str]):
-        body (PutContentMarkdownIdBody): At least one of content/title/category/tags. A content or
-            title change appends a full-state version (author attaches to it); a category/tags-only
-            change updates the head in place WITHOUT a new version; a no-op returns the doc unchanged.
+        body (PutContentMarkdownIdBody): At least one of content/category/tags. A content change
+            appends a full-state version (author attaches to it) and re-derives the title; a
+            category/tags-only change updates the head in place WITHOUT a new version; a no-op returns
+            the doc unchanged.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -158,33 +140,32 @@ def sync(
 
     Returns:
         Union[Error, MarkdownDocument]
-     """
-
+    """
 
     return sync_detailed(
         id=id,
-client=client,
-body=body,
-workspace=workspace,
-
+        client=client,
+        body=body,
+        workspace=workspace,
     ).parsed
+
 
 async def asyncio_detailed(
     id: str,
     *,
     client: AuthenticatedClient,
     body: PutContentMarkdownIdBody,
-    workspace: Union[Unset, str] = UNSET,
-
-) -> Response[Union[Error, MarkdownDocument]]:
-    """ Update a document; any real change appends a full-state version
+    workspace: Unset | str = UNSET,
+) -> Response[Error | MarkdownDocument]:
+    """Update a document; a content change appends a full-state version
 
     Args:
         id (str):
         workspace (Union[Unset, str]):
-        body (PutContentMarkdownIdBody): At least one of content/title/category/tags. A content or
-            title change appends a full-state version (author attaches to it); a category/tags-only
-            change updates the head in place WITHOUT a new version; a no-op returns the doc unchanged.
+        body (PutContentMarkdownIdBody): At least one of content/category/tags. A content change
+            appends a full-state version (author attaches to it) and re-derives the title; a
+            category/tags-only change updates the head in place WITHOUT a new version; a no-op returns
+            the doc unchanged.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -192,38 +173,35 @@ async def asyncio_detailed(
 
     Returns:
         Response[Union[Error, MarkdownDocument]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         id=id,
-body=body,
-workspace=workspace,
-
+        body=body,
+        workspace=workspace,
     )
 
-    response = await client.get_async_httpx_client().request(
-        **kwargs
-    )
+    response = await client.get_async_httpx_client().request(**kwargs)
 
     return _build_response(client=client, response=response)
+
 
 async def asyncio(
     id: str,
     *,
     client: AuthenticatedClient,
     body: PutContentMarkdownIdBody,
-    workspace: Union[Unset, str] = UNSET,
-
-) -> Optional[Union[Error, MarkdownDocument]]:
-    """ Update a document; any real change appends a full-state version
+    workspace: Unset | str = UNSET,
+) -> Error | MarkdownDocument | None:
+    """Update a document; a content change appends a full-state version
 
     Args:
         id (str):
         workspace (Union[Unset, str]):
-        body (PutContentMarkdownIdBody): At least one of content/title/category/tags. A content or
-            title change appends a full-state version (author attaches to it); a category/tags-only
-            change updates the head in place WITHOUT a new version; a no-op returns the doc unchanged.
+        body (PutContentMarkdownIdBody): At least one of content/category/tags. A content change
+            appends a full-state version (author attaches to it) and re-derives the title; a
+            category/tags-only change updates the head in place WITHOUT a new version; a no-op returns
+            the doc unchanged.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -231,13 +209,13 @@ async def asyncio(
 
     Returns:
         Union[Error, MarkdownDocument]
-     """
+    """
 
-
-    return (await asyncio_detailed(
-        id=id,
-client=client,
-body=body,
-workspace=workspace,
-
-    )).parsed
+    return (
+        await asyncio_detailed(
+            id=id,
+            client=client,
+            body=body,
+            workspace=workspace,
+        )
+    ).parsed

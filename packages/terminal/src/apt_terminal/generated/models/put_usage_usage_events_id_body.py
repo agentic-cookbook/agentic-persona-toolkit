@@ -1,59 +1,44 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar, cast
 
 from attrs import define as _attrs_define
-from attrs import field as _attrs_field
 
 from ..types import UNSET, Unset
-
-from ..types import UNSET, Unset
-from typing import cast, Union
-from typing import Union
-
-
-
-
-
 
 T = TypeVar("T", bound="PutUsageUsageEventsIdBody")
 
 
-
 @_attrs_define
 class PutUsageUsageEventsIdBody:
-    """ 
-        Attributes:
-            scope (Union[Unset, str]):
-            principal_id (Union[Unset, str]):
-            ecosystem_id (Union[None, Unset, str]):
-            route (Union[Unset, str]):
-            method (Union[Unset, str]):
-            status (Union[Unset, int]):
-            request_bytes (Union[Unset, int]):
-            response_bytes (Union[Unset, int]):
-            occurred_at (Union[Unset, str]):
-     """
+    """
+    Attributes:
+        scope (Union[Unset, str]):
+        principal_id (Union[Unset, str]):
+        ecosystem_id (Union[None, Unset, str]):
+        route (Union[Unset, str]):
+        method (Union[Unset, str]):
+        status (Union[Unset, int]):
+        request_bytes (Union[Unset, int]):
+        response_bytes (Union[Unset, int]):
+        occurred_at (Union[Unset, str]):
+    """
 
-    scope: Union[Unset, str] = UNSET
-    principal_id: Union[Unset, str] = UNSET
-    ecosystem_id: Union[None, Unset, str] = UNSET
-    route: Union[Unset, str] = UNSET
-    method: Union[Unset, str] = UNSET
-    status: Union[Unset, int] = UNSET
-    request_bytes: Union[Unset, int] = UNSET
-    response_bytes: Union[Unset, int] = UNSET
-    occurred_at: Union[Unset, str] = UNSET
-
-
-
-
+    scope: Unset | str = UNSET
+    principal_id: Unset | str = UNSET
+    ecosystem_id: None | Unset | str = UNSET
+    route: Unset | str = UNSET
+    method: Unset | str = UNSET
+    status: Unset | int = UNSET
+    request_bytes: Unset | int = UNSET
+    response_bytes: Unset | int = UNSET
+    occurred_at: Unset | str = UNSET
 
     def to_dict(self) -> dict[str, Any]:
         scope = self.scope
 
         principal_id = self.principal_id
 
-        ecosystem_id: Union[None, Unset, str]
+        ecosystem_id: None | Unset | str
         if isinstance(self.ecosystem_id, Unset):
             ecosystem_id = UNSET
         else:
@@ -71,11 +56,9 @@ class PutUsageUsageEventsIdBody:
 
         occurred_at = self.occurred_at
 
-
         field_dict: dict[str, Any] = {}
 
-        field_dict.update({
-        })
+        field_dict.update({})
         if scope is not UNSET:
             field_dict["scope"] = scope
         if principal_id is not UNSET:
@@ -97,8 +80,6 @@ class PutUsageUsageEventsIdBody:
 
         return field_dict
 
-
-
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
@@ -106,15 +87,14 @@ class PutUsageUsageEventsIdBody:
 
         principal_id = d.pop("principalId", UNSET)
 
-        def _parse_ecosystem_id(data: object) -> Union[None, Unset, str]:
+        def _parse_ecosystem_id(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         ecosystem_id = _parse_ecosystem_id(d.pop("ecosystemId", UNSET))
-
 
         route = d.pop("route", UNSET)
 
@@ -141,4 +121,3 @@ class PutUsageUsageEventsIdBody:
         )
 
         return put_usage_usage_events_id_body
-

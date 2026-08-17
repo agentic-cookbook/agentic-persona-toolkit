@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class PatchOauthProvidersSlugResponse200AuthType(str, Enum):
     OAUTH2_ACCESS_TOKEN = "oauth2_access_token"
     OAUTH2_CODE = "oauth2_code"

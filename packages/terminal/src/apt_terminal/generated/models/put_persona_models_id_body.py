@@ -1,68 +1,141 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import TYPE_CHECKING, Any, TypeVar, Union, cast
 
 from attrs import define as _attrs_define
-from attrs import field as _attrs_field
 
 from ..types import UNSET, Unset
 
-from ..types import UNSET, Unset
-from typing import Union
-
-
-
-
+if TYPE_CHECKING:
+    from ..models.put_persona_models_id_body_metadata_type_0_type_1 import (
+        PutPersonaModelsIdBodyMetadataType0Type1,
+    )
 
 
 T = TypeVar("T", bound="PutPersonaModelsIdBody")
 
 
-
 @_attrs_define
 class PutPersonaModelsIdBody:
-    """ 
-        Attributes:
-            template_id (Union[Unset, str]):
-            name (Union[Unset, str]):
-     """
+    """
+    Attributes:
+        template_id (Union[Unset, str]):
+        name (Union[Unset, str]):
+        description (Union[None, Unset, str]):
+        metadata (Union['PutPersonaModelsIdBodyMetadataType0Type1', None, Unset, bool, float, list[Any], str]):
+    """
 
-    template_id: Union[Unset, str] = UNSET
-    name: Union[Unset, str] = UNSET
-
-
-
-
+    template_id: Unset | str = UNSET
+    name: Unset | str = UNSET
+    description: None | Unset | str = UNSET
+    metadata: Union[
+        "PutPersonaModelsIdBodyMetadataType0Type1", None, Unset, bool, float, list[Any], str
+    ] = UNSET
 
     def to_dict(self) -> dict[str, Any]:
+        from ..models.put_persona_models_id_body_metadata_type_0_type_1 import (
+            PutPersonaModelsIdBodyMetadataType0Type1,
+        )
+
         template_id = self.template_id
 
         name = self.name
 
+        description: None | Unset | str
+        if isinstance(self.description, Unset):
+            description = UNSET
+        else:
+            description = self.description
+
+        metadata: None | Unset | bool | dict[str, Any] | float | list[Any] | str
+        if isinstance(self.metadata, Unset):
+            metadata = UNSET
+        elif isinstance(self.metadata, PutPersonaModelsIdBodyMetadataType0Type1):
+            metadata = self.metadata.to_dict()
+        elif isinstance(self.metadata, list):
+            metadata = self.metadata
+
+        else:
+            metadata = self.metadata
 
         field_dict: dict[str, Any] = {}
 
-        field_dict.update({
-        })
+        field_dict.update({})
         if template_id is not UNSET:
             field_dict["templateId"] = template_id
         if name is not UNSET:
             field_dict["name"] = name
+        if description is not UNSET:
+            field_dict["description"] = description
+        if metadata is not UNSET:
+            field_dict["metadata"] = metadata
 
         return field_dict
 
-
-
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
+        from ..models.put_persona_models_id_body_metadata_type_0_type_1 import (
+            PutPersonaModelsIdBodyMetadataType0Type1,
+        )
+
         d = dict(src_dict)
         template_id = d.pop("templateId", UNSET)
 
         name = d.pop("name", UNSET)
 
+        def _parse_description(data: object) -> None | Unset | str:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(None | Unset | str, data)
+
+        description = _parse_description(d.pop("description", UNSET))
+
+        def _parse_metadata(
+            data: object,
+        ) -> Union[
+            "PutPersonaModelsIdBodyMetadataType0Type1", None, Unset, bool, float, list[Any], str
+        ]:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            try:
+                if not isinstance(data, dict):
+                    raise TypeError()
+                metadata_type_0_type_1 = PutPersonaModelsIdBodyMetadataType0Type1.from_dict(data)
+
+                return metadata_type_0_type_1
+            except:  # noqa: E722
+                pass
+            try:
+                if not isinstance(data, list):
+                    raise TypeError()
+                metadata_type_0_type_2 = cast(list[Any], data)
+
+                return metadata_type_0_type_2
+            except:  # noqa: E722
+                pass
+            return cast(
+                Union[
+                    "PutPersonaModelsIdBodyMetadataType0Type1",
+                    None,
+                    Unset,
+                    bool,
+                    float,
+                    list[Any],
+                    str,
+                ],
+                data,
+            )
+
+        metadata = _parse_metadata(d.pop("metadata", UNSET))
+
         put_persona_models_id_body = cls(
             template_id=template_id,
             name=name,
+            description=description,
+            metadata=metadata,
         )
 
         return put_persona_models_id_body
-

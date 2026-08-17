@@ -1,57 +1,40 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 from ..types import UNSET, Unset
 
-from ..types import UNSET, Unset
-from typing import Union
-
-
-
-
-
-
 T = TypeVar("T", bound="PutSystemServerBagKeyBody")
-
 
 
 @_attrs_define
 class PutSystemServerBagKeyBody:
-    """ 
-        Attributes:
-            value (Union[Unset, Any]): Arbitrary JSON value
-            description (Union[Unset, str]):
-     """
+    """
+    Attributes:
+        value (Union[Unset, Any]): Arbitrary JSON value
+        description (Union[Unset, str]):
+    """
 
-    value: Union[Unset, Any] = UNSET
-    description: Union[Unset, str] = UNSET
+    value: Unset | Any = UNSET
+    description: Unset | str = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         value = self.value
 
         description = self.description
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-        })
+        field_dict.update({})
         if value is not UNSET:
             field_dict["value"] = value
         if description is not UNSET:
             field_dict["description"] = description
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -64,7 +47,6 @@ class PutSystemServerBagKeyBody:
             value=value,
             description=description,
         )
-
 
         put_system_server_bag_key_body.additional_properties = d
         return put_system_server_bag_key_body

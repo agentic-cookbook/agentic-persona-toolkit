@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class GetPublicCommunitiesIdTopicsSort(str, Enum):
     POPULAR = "popular"
     RECENT = "recent"

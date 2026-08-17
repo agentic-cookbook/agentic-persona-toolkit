@@ -1,17 +1,18 @@
 from http import HTTPStatus
-from typing import Any, Optional, Union, cast
+from typing import Any
 
 import httpx
 
-from ...client import AuthenticatedClient, Client
-from ...types import Response, UNSET
 from ... import errors
-
+from ...client import AuthenticatedClient, Client
 from ...models.error import Error
-from ...models.put_usage_usage_counters_scope_principal_id_period_start_body import PutUsageUsageCountersScopePrincipalIdPeriodStartBody
-from ...models.put_usage_usage_counters_scope_principal_id_period_start_response_200 import PutUsageUsageCountersScopePrincipalIdPeriodStartResponse200
-from typing import cast
-
+from ...models.put_usage_usage_counters_scope_principal_id_period_start_body import (
+    PutUsageUsageCountersScopePrincipalIdPeriodStartBody,
+)
+from ...models.put_usage_usage_counters_scope_principal_id_period_start_response_200 import (
+    PutUsageUsageCountersScopePrincipalIdPeriodStartResponse200,
+)
+from ...types import Response
 
 
 def _get_kwargs(
@@ -20,22 +21,15 @@ def _get_kwargs(
     period_start: str,
     *,
     body: PutUsageUsageCountersScopePrincipalIdPeriodStartBody,
-
 ) -> dict[str, Any]:
     headers: dict[str, Any] = {}
 
-
-    
-
-    
-
     _kwargs: dict[str, Any] = {
         "method": "put",
-        "url": "/usage/usage-counters/{scope}/{principal_id}/{period_start}".format(scope=scope,principal_id=principal_id,period_start=period_start,),
+        "url": f"/usage/usage-counters/{scope}/{principal_id}/{period_start}",
     }
 
     _kwargs["json"] = body.to_dict()
-
 
     headers["Content-Type"] = "application/json"
 
@@ -43,33 +37,28 @@ def _get_kwargs(
     return _kwargs
 
 
-
-def _parse_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Optional[Union[Error, PutUsageUsageCountersScopePrincipalIdPeriodStartResponse200]]:
+def _parse_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Error | PutUsageUsageCountersScopePrincipalIdPeriodStartResponse200 | None:
     if response.status_code == 200:
-        response_200 = PutUsageUsageCountersScopePrincipalIdPeriodStartResponse200.from_dict(response.json())
-
-
+        response_200 = PutUsageUsageCountersScopePrincipalIdPeriodStartResponse200.from_dict(
+            response.json()
+        )
 
         return response_200
 
     if response.status_code == 400:
         response_400 = Error.from_dict(response.json())
 
-
-
         return response_400
 
     if response.status_code == 401:
         response_401 = Error.from_dict(response.json())
 
-
-
         return response_401
 
     if response.status_code == 404:
         response_404 = Error.from_dict(response.json())
-
-
 
         return response_404
 
@@ -79,7 +68,9 @@ def _parse_response(*, client: Union[AuthenticatedClient, Client], response: htt
         return None
 
 
-def _build_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Response[Union[Error, PutUsageUsageCountersScopePrincipalIdPeriodStartResponse200]]:
+def _build_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Response[Error | PutUsageUsageCountersScopePrincipalIdPeriodStartResponse200]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -95,9 +86,8 @@ def sync_detailed(
     *,
     client: AuthenticatedClient,
     body: PutUsageUsageCountersScopePrincipalIdPeriodStartBody,
-
-) -> Response[Union[Error, PutUsageUsageCountersScopePrincipalIdPeriodStartResponse200]]:
-    """ Update usage_counters
+) -> Response[Error | PutUsageUsageCountersScopePrincipalIdPeriodStartResponse200]:
+    """Update usage_counters
 
     Args:
         scope (str):
@@ -111,15 +101,13 @@ def sync_detailed(
 
     Returns:
         Response[Union[Error, PutUsageUsageCountersScopePrincipalIdPeriodStartResponse200]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         scope=scope,
-principal_id=principal_id,
-period_start=period_start,
-body=body,
-
+        principal_id=principal_id,
+        period_start=period_start,
+        body=body,
     )
 
     response = client.get_httpx_client().request(
@@ -128,6 +116,7 @@ body=body,
 
     return _build_response(client=client, response=response)
 
+
 def sync(
     scope: str,
     principal_id: str,
@@ -135,9 +124,8 @@ def sync(
     *,
     client: AuthenticatedClient,
     body: PutUsageUsageCountersScopePrincipalIdPeriodStartBody,
-
-) -> Optional[Union[Error, PutUsageUsageCountersScopePrincipalIdPeriodStartResponse200]]:
-    """ Update usage_counters
+) -> Error | PutUsageUsageCountersScopePrincipalIdPeriodStartResponse200 | None:
+    """Update usage_counters
 
     Args:
         scope (str):
@@ -151,17 +139,16 @@ def sync(
 
     Returns:
         Union[Error, PutUsageUsageCountersScopePrincipalIdPeriodStartResponse200]
-     """
-
+    """
 
     return sync_detailed(
         scope=scope,
-principal_id=principal_id,
-period_start=period_start,
-client=client,
-body=body,
-
+        principal_id=principal_id,
+        period_start=period_start,
+        client=client,
+        body=body,
     ).parsed
+
 
 async def asyncio_detailed(
     scope: str,
@@ -170,9 +157,8 @@ async def asyncio_detailed(
     *,
     client: AuthenticatedClient,
     body: PutUsageUsageCountersScopePrincipalIdPeriodStartBody,
-
-) -> Response[Union[Error, PutUsageUsageCountersScopePrincipalIdPeriodStartResponse200]]:
-    """ Update usage_counters
+) -> Response[Error | PutUsageUsageCountersScopePrincipalIdPeriodStartResponse200]:
+    """Update usage_counters
 
     Args:
         scope (str):
@@ -186,22 +172,19 @@ async def asyncio_detailed(
 
     Returns:
         Response[Union[Error, PutUsageUsageCountersScopePrincipalIdPeriodStartResponse200]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         scope=scope,
-principal_id=principal_id,
-period_start=period_start,
-body=body,
-
+        principal_id=principal_id,
+        period_start=period_start,
+        body=body,
     )
 
-    response = await client.get_async_httpx_client().request(
-        **kwargs
-    )
+    response = await client.get_async_httpx_client().request(**kwargs)
 
     return _build_response(client=client, response=response)
+
 
 async def asyncio(
     scope: str,
@@ -210,9 +193,8 @@ async def asyncio(
     *,
     client: AuthenticatedClient,
     body: PutUsageUsageCountersScopePrincipalIdPeriodStartBody,
-
-) -> Optional[Union[Error, PutUsageUsageCountersScopePrincipalIdPeriodStartResponse200]]:
-    """ Update usage_counters
+) -> Error | PutUsageUsageCountersScopePrincipalIdPeriodStartResponse200 | None:
+    """Update usage_counters
 
     Args:
         scope (str):
@@ -226,14 +208,14 @@ async def asyncio(
 
     Returns:
         Union[Error, PutUsageUsageCountersScopePrincipalIdPeriodStartResponse200]
-     """
+    """
 
-
-    return (await asyncio_detailed(
-        scope=scope,
-principal_id=principal_id,
-period_start=period_start,
-client=client,
-body=body,
-
-    )).parsed
+    return (
+        await asyncio_detailed(
+            scope=scope,
+            principal_id=principal_id,
+            period_start=period_start,
+            client=client,
+            body=body,
+        )
+    ).parsed

@@ -1,32 +1,23 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
-
-
-
-
-
-
-
 T = TypeVar("T", bound="SearchDocumentResult")
-
 
 
 @_attrs_define
 class SearchDocumentResult:
-    """ 
-        Attributes:
-            block_id (str):
-            document_id (str):
-            block_type (str):
-            position (str):
-            snippet (str): Plain-text excerpt (ts_headline, no markup)
-            rank (float): ts_rank relevance score
-     """
+    """
+    Attributes:
+        block_id (str):
+        document_id (str):
+        block_type (str):
+        position (str):
+        snippet (str): Plain-text excerpt (ts_headline, no markup)
+        rank (float): ts_rank relevance score
+    """
 
     block_id: str
     document_id: str
@@ -35,10 +26,6 @@ class SearchDocumentResult:
     snippet: str
     rank: float
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         block_id = self.block_id
@@ -53,21 +40,20 @@ class SearchDocumentResult:
 
         rank = self.rank
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "blockId": block_id,
-            "documentId": document_id,
-            "blockType": block_type,
-            "position": position,
-            "snippet": snippet,
-            "rank": rank,
-        })
+        field_dict.update(
+            {
+                "blockId": block_id,
+                "documentId": document_id,
+                "blockType": block_type,
+                "position": position,
+                "snippet": snippet,
+                "rank": rank,
+            }
+        )
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -92,7 +78,6 @@ class SearchDocumentResult:
             snippet=snippet,
             rank=rank,
         )
-
 
         search_document_result.additional_properties = d
         return search_document_result

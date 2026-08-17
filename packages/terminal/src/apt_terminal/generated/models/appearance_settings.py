@@ -1,66 +1,49 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import TYPE_CHECKING, Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
-
-from typing import cast
-
 if TYPE_CHECKING:
-  from ..models.appearance_settings_prefs import AppearanceSettingsPrefs
-
-
-
+    from ..models.appearance_settings_prefs import AppearanceSettingsPrefs
 
 
 T = TypeVar("T", bound="AppearanceSettings")
 
 
-
 @_attrs_define
 class AppearanceSettings:
-    """ 
-        Attributes:
-            prefs (AppearanceSettingsPrefs): Empty object when the user has never saved a preference (client defaults apply)
-     """
+    """
+    Attributes:
+        prefs (AppearanceSettingsPrefs): Empty object when the user has never saved a preference (client defaults apply)
+    """
 
-    prefs: 'AppearanceSettingsPrefs'
+    prefs: "AppearanceSettingsPrefs"
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
-
-
-
-
     def to_dict(self) -> dict[str, Any]:
-        from ..models.appearance_settings_prefs import AppearanceSettingsPrefs
         prefs = self.prefs.to_dict()
-
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "prefs": prefs,
-        })
+        field_dict.update(
+            {
+                "prefs": prefs,
+            }
+        )
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.appearance_settings_prefs import AppearanceSettingsPrefs
+
         d = dict(src_dict)
         prefs = AppearanceSettingsPrefs.from_dict(d.pop("prefs"))
-
-
-
 
         appearance_settings = cls(
             prefs=prefs,
         )
-
 
         appearance_settings.additional_properties = d
         return appearance_settings

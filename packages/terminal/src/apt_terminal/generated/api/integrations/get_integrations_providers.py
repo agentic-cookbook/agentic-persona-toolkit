@@ -1,49 +1,34 @@
 from http import HTTPStatus
-from typing import Any, Optional, Union, cast
+from typing import Any
 
 import httpx
 
-from ...client import AuthenticatedClient, Client
-from ...types import Response, UNSET
 from ... import errors
-
+from ...client import AuthenticatedClient, Client
 from ...models.get_integrations_providers_response_200 import GetIntegrationsProvidersResponse200
 from ...models.problem_details import ProblemDetails
-from typing import cast
+from ...types import Response
 
 
-
-def _get_kwargs(
-    
-) -> dict[str, Any]:
-    
-
-    
-
-    
-
+def _get_kwargs() -> dict[str, Any]:
     _kwargs: dict[str, Any] = {
         "method": "get",
         "url": "/integrations/providers",
     }
 
-
     return _kwargs
 
 
-
-def _parse_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Optional[Union[GetIntegrationsProvidersResponse200, ProblemDetails]]:
+def _parse_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> GetIntegrationsProvidersResponse200 | ProblemDetails | None:
     if response.status_code == 200:
         response_200 = GetIntegrationsProvidersResponse200.from_dict(response.json())
-
-
 
         return response_200
 
     if response.status_code == 401:
         response_401 = ProblemDetails.from_dict(response.json())
-
-
 
         return response_401
 
@@ -53,7 +38,9 @@ def _parse_response(*, client: Union[AuthenticatedClient, Client], response: htt
         return None
 
 
-def _build_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Response[Union[GetIntegrationsProvidersResponse200, ProblemDetails]]:
+def _build_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Response[GetIntegrationsProvidersResponse200 | ProblemDetails]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -65,9 +52,8 @@ def _build_response(*, client: Union[AuthenticatedClient, Client], response: htt
 def sync_detailed(
     *,
     client: AuthenticatedClient,
-
-) -> Response[Union[GetIntegrationsProvidersResponse200, ProblemDetails]]:
-    """ List the provider catalog
+) -> Response[GetIntegrationsProvidersResponse200 | ProblemDetails]:
+    """List the provider catalog
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -75,12 +61,9 @@ def sync_detailed(
 
     Returns:
         Response[Union[GetIntegrationsProvidersResponse200, ProblemDetails]]
-     """
+    """
 
-
-    kwargs = _get_kwargs(
-        
-    )
+    kwargs = _get_kwargs()
 
     response = client.get_httpx_client().request(
         **kwargs,
@@ -88,12 +71,12 @@ def sync_detailed(
 
     return _build_response(client=client, response=response)
 
+
 def sync(
     *,
     client: AuthenticatedClient,
-
-) -> Optional[Union[GetIntegrationsProvidersResponse200, ProblemDetails]]:
-    """ List the provider catalog
+) -> GetIntegrationsProvidersResponse200 | ProblemDetails | None:
+    """List the provider catalog
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -101,20 +84,18 @@ def sync(
 
     Returns:
         Union[GetIntegrationsProvidersResponse200, ProblemDetails]
-     """
-
+    """
 
     return sync_detailed(
         client=client,
-
     ).parsed
+
 
 async def asyncio_detailed(
     *,
     client: AuthenticatedClient,
-
-) -> Response[Union[GetIntegrationsProvidersResponse200, ProblemDetails]]:
-    """ List the provider catalog
+) -> Response[GetIntegrationsProvidersResponse200 | ProblemDetails]:
+    """List the provider catalog
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -122,25 +103,20 @@ async def asyncio_detailed(
 
     Returns:
         Response[Union[GetIntegrationsProvidersResponse200, ProblemDetails]]
-     """
+    """
 
+    kwargs = _get_kwargs()
 
-    kwargs = _get_kwargs(
-        
-    )
-
-    response = await client.get_async_httpx_client().request(
-        **kwargs
-    )
+    response = await client.get_async_httpx_client().request(**kwargs)
 
     return _build_response(client=client, response=response)
+
 
 async def asyncio(
     *,
     client: AuthenticatedClient,
-
-) -> Optional[Union[GetIntegrationsProvidersResponse200, ProblemDetails]]:
-    """ List the provider catalog
+) -> GetIntegrationsProvidersResponse200 | ProblemDetails | None:
+    """List the provider catalog
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -148,10 +124,10 @@ async def asyncio(
 
     Returns:
         Union[GetIntegrationsProvidersResponse200, ProblemDetails]
-     """
+    """
 
-
-    return (await asyncio_detailed(
-        client=client,
-
-    )).parsed
+    return (
+        await asyncio_detailed(
+            client=client,
+        )
+    ).parsed

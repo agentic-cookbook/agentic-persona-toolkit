@@ -1,50 +1,36 @@
 from http import HTTPStatus
-from typing import Any, Optional, Union, cast
+from typing import Any
 
 import httpx
 
-from ...client import AuthenticatedClient, Client
-from ...types import Response, UNSET
 from ... import errors
-
+from ...client import AuthenticatedClient, Client
 from ...models.error import Error
 from ...models.get_auth_slug_available_slug_response_200 import GetAuthSlugAvailableSlugResponse200
-from typing import cast
-
+from ...types import Response
 
 
 def _get_kwargs(
     slug: str,
-
 ) -> dict[str, Any]:
-    
-
-    
-
-    
-
     _kwargs: dict[str, Any] = {
         "method": "get",
-        "url": "/auth/slug-available/{slug}".format(slug=slug,),
+        "url": f"/auth/slug-available/{slug}",
     }
-
 
     return _kwargs
 
 
-
-def _parse_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Optional[Union[Error, GetAuthSlugAvailableSlugResponse200]]:
+def _parse_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Error | GetAuthSlugAvailableSlugResponse200 | None:
     if response.status_code == 200:
         response_200 = GetAuthSlugAvailableSlugResponse200.from_dict(response.json())
-
-
 
         return response_200
 
     if response.status_code == 401:
         response_401 = Error.from_dict(response.json())
-
-
 
         return response_401
 
@@ -54,7 +40,9 @@ def _parse_response(*, client: Union[AuthenticatedClient, Client], response: htt
         return None
 
 
-def _build_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Response[Union[Error, GetAuthSlugAvailableSlugResponse200]]:
+def _build_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Response[Error | GetAuthSlugAvailableSlugResponse200]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -67,9 +55,8 @@ def sync_detailed(
     slug: str,
     *,
     client: AuthenticatedClient,
-
-) -> Response[Union[Error, GetAuthSlugAvailableSlugResponse200]]:
-    """ Check whether a login slug is available to the caller
+) -> Response[Error | GetAuthSlugAvailableSlugResponse200]:
+    """Check whether a login slug is available to the caller
 
     Args:
         slug (str):
@@ -80,12 +67,10 @@ def sync_detailed(
 
     Returns:
         Response[Union[Error, GetAuthSlugAvailableSlugResponse200]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         slug=slug,
-
     )
 
     response = client.get_httpx_client().request(
@@ -94,13 +79,13 @@ def sync_detailed(
 
     return _build_response(client=client, response=response)
 
+
 def sync(
     slug: str,
     *,
     client: AuthenticatedClient,
-
-) -> Optional[Union[Error, GetAuthSlugAvailableSlugResponse200]]:
-    """ Check whether a login slug is available to the caller
+) -> Error | GetAuthSlugAvailableSlugResponse200 | None:
+    """Check whether a login slug is available to the caller
 
     Args:
         slug (str):
@@ -111,22 +96,20 @@ def sync(
 
     Returns:
         Union[Error, GetAuthSlugAvailableSlugResponse200]
-     """
-
+    """
 
     return sync_detailed(
         slug=slug,
-client=client,
-
+        client=client,
     ).parsed
+
 
 async def asyncio_detailed(
     slug: str,
     *,
     client: AuthenticatedClient,
-
-) -> Response[Union[Error, GetAuthSlugAvailableSlugResponse200]]:
-    """ Check whether a login slug is available to the caller
+) -> Response[Error | GetAuthSlugAvailableSlugResponse200]:
+    """Check whether a login slug is available to the caller
 
     Args:
         slug (str):
@@ -137,27 +120,23 @@ async def asyncio_detailed(
 
     Returns:
         Response[Union[Error, GetAuthSlugAvailableSlugResponse200]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         slug=slug,
-
     )
 
-    response = await client.get_async_httpx_client().request(
-        **kwargs
-    )
+    response = await client.get_async_httpx_client().request(**kwargs)
 
     return _build_response(client=client, response=response)
+
 
 async def asyncio(
     slug: str,
     *,
     client: AuthenticatedClient,
-
-) -> Optional[Union[Error, GetAuthSlugAvailableSlugResponse200]]:
-    """ Check whether a login slug is available to the caller
+) -> Error | GetAuthSlugAvailableSlugResponse200 | None:
+    """Check whether a login slug is available to the caller
 
     Args:
         slug (str):
@@ -168,11 +147,11 @@ async def asyncio(
 
     Returns:
         Union[Error, GetAuthSlugAvailableSlugResponse200]
-     """
+    """
 
-
-    return (await asyncio_detailed(
-        slug=slug,
-client=client,
-
-    )).parsed
+    return (
+        await asyncio_detailed(
+            slug=slug,
+            client=client,
+        )
+    ).parsed

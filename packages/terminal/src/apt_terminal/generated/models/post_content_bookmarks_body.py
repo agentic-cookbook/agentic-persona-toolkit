@@ -1,40 +1,27 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 from ..types import UNSET, Unset
 
-from ..types import UNSET, Unset
-from typing import Union
-
-
-
-
-
-
 T = TypeVar("T", bound="PostContentBookmarksBody")
-
 
 
 @_attrs_define
 class PostContentBookmarksBody:
-    """ 
-        Attributes:
-            target_kind (str):
-            target_id (str):
-            notify (Union[Unset, bool]): Also subscribe to the target’s activity notifications (default false)
-     """
+    """
+    Attributes:
+        target_kind (str):
+        target_id (str):
+        notify (Union[Unset, bool]): Also subscribe to the target’s activity notifications (default false)
+    """
 
     target_kind: str
     target_id: str
-    notify: Union[Unset, bool] = UNSET
+    notify: Unset | bool = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         target_kind = self.target_kind
@@ -43,19 +30,18 @@ class PostContentBookmarksBody:
 
         notify = self.notify
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "targetKind": target_kind,
-            "targetId": target_id,
-        })
+        field_dict.update(
+            {
+                "targetKind": target_kind,
+                "targetId": target_id,
+            }
+        )
         if notify is not UNSET:
             field_dict["notify"] = notify
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -71,7 +57,6 @@ class PostContentBookmarksBody:
             target_id=target_id,
             notify=notify,
         )
-
 
         post_content_bookmarks_body.additional_properties = d
         return post_content_bookmarks_body

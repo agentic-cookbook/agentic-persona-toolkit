@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class InviteAcceptResultStatus(str, Enum):
     ACCEPTED = "accepted"
     VERIFICATION_REQUIRED = "verification_required"

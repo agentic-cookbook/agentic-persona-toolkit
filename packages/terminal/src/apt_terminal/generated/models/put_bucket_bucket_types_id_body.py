@@ -1,54 +1,49 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import TYPE_CHECKING, Any, TypeVar, Union, cast
 
 from attrs import define as _attrs_define
-from attrs import field as _attrs_field
 
 from ..types import UNSET, Unset
-
-from ..types import UNSET, Unset
-from typing import cast
-from typing import cast, Union
-from typing import Union
 
 if TYPE_CHECKING:
-  from ..models.put_bucket_bucket_types_id_body_metadata_type_0_type_1 import PutBucketBucketTypesIdBodyMetadataType0Type1
-
-
-
+    from ..models.put_bucket_bucket_types_id_body_metadata_type_0_type_1 import (
+        PutBucketBucketTypesIdBodyMetadataType0Type1,
+    )
 
 
 T = TypeVar("T", bound="PutBucketBucketTypesIdBody")
 
 
-
 @_attrs_define
 class PutBucketBucketTypesIdBody:
-    """ 
-        Attributes:
-            ecosystem_id (Union[Unset, str]):
-            bucket_id (Union[Unset, str]):
-            sql_table_name (Union[Unset, str]):
-            name (Union[Unset, str]):
-            description (Union[Unset, str]):
-            ref_mode (Union[Unset, str]):
-            metadata (Union['PutBucketBucketTypesIdBodyMetadataType0Type1', None, Unset, bool, float, list[Any], str]):
-     """
+    """
+    Attributes:
+        ecosystem_id (Union[Unset, str]):
+        bucket_id (Union[Unset, str]):
+        sql_table_name (Union[Unset, str]):
+        name (Union[Unset, str]):
+        description (Union[Unset, str]):
+        ref_mode (Union[Unset, str]):
+        metadata (Union['PutBucketBucketTypesIdBodyMetadataType0Type1', None, Unset, bool, float, list[Any], str]):
+        sync_txid (Union[Unset, int]):
+    """
 
-    ecosystem_id: Union[Unset, str] = UNSET
-    bucket_id: Union[Unset, str] = UNSET
-    sql_table_name: Union[Unset, str] = UNSET
-    name: Union[Unset, str] = UNSET
-    description: Union[Unset, str] = UNSET
-    ref_mode: Union[Unset, str] = UNSET
-    metadata: Union['PutBucketBucketTypesIdBodyMetadataType0Type1', None, Unset, bool, float, list[Any], str] = UNSET
-
-
-
-
+    ecosystem_id: Unset | str = UNSET
+    bucket_id: Unset | str = UNSET
+    sql_table_name: Unset | str = UNSET
+    name: Unset | str = UNSET
+    description: Unset | str = UNSET
+    ref_mode: Unset | str = UNSET
+    metadata: Union[
+        "PutBucketBucketTypesIdBodyMetadataType0Type1", None, Unset, bool, float, list[Any], str
+    ] = UNSET
+    sync_txid: Unset | int = UNSET
 
     def to_dict(self) -> dict[str, Any]:
-        from ..models.put_bucket_bucket_types_id_body_metadata_type_0_type_1 import PutBucketBucketTypesIdBodyMetadataType0Type1
+        from ..models.put_bucket_bucket_types_id_body_metadata_type_0_type_1 import (
+            PutBucketBucketTypesIdBodyMetadataType0Type1,
+        )
+
         ecosystem_id = self.ecosystem_id
 
         bucket_id = self.bucket_id
@@ -61,7 +56,7 @@ class PutBucketBucketTypesIdBody:
 
         ref_mode = self.ref_mode
 
-        metadata: Union[None, Unset, bool, dict[str, Any], float, list[Any], str]
+        metadata: None | Unset | bool | dict[str, Any] | float | list[Any] | str
         if isinstance(self.metadata, Unset):
             metadata = UNSET
         elif isinstance(self.metadata, PutBucketBucketTypesIdBodyMetadataType0Type1):
@@ -69,15 +64,14 @@ class PutBucketBucketTypesIdBody:
         elif isinstance(self.metadata, list):
             metadata = self.metadata
 
-
         else:
             metadata = self.metadata
 
+        sync_txid = self.sync_txid
 
         field_dict: dict[str, Any] = {}
 
-        field_dict.update({
-        })
+        field_dict.update({})
         if ecosystem_id is not UNSET:
             field_dict["ecosystemId"] = ecosystem_id
         if bucket_id is not UNSET:
@@ -92,14 +86,17 @@ class PutBucketBucketTypesIdBody:
             field_dict["refMode"] = ref_mode
         if metadata is not UNSET:
             field_dict["metadata"] = metadata
+        if sync_txid is not UNSET:
+            field_dict["syncTxid"] = sync_txid
 
         return field_dict
 
-
-
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.put_bucket_bucket_types_id_body_metadata_type_0_type_1 import PutBucketBucketTypesIdBodyMetadataType0Type1
+        from ..models.put_bucket_bucket_types_id_body_metadata_type_0_type_1 import (
+            PutBucketBucketTypesIdBodyMetadataType0Type1,
+        )
+
         d = dict(src_dict)
         ecosystem_id = d.pop("ecosystemId", UNSET)
 
@@ -113,7 +110,11 @@ class PutBucketBucketTypesIdBody:
 
         ref_mode = d.pop("refMode", UNSET)
 
-        def _parse_metadata(data: object) -> Union['PutBucketBucketTypesIdBodyMetadataType0Type1', None, Unset, bool, float, list[Any], str]:
+        def _parse_metadata(
+            data: object,
+        ) -> Union[
+            "PutBucketBucketTypesIdBodyMetadataType0Type1", None, Unset, bool, float, list[Any], str
+        ]:
             if data is None:
                 return data
             if isinstance(data, Unset):
@@ -121,12 +122,12 @@ class PutBucketBucketTypesIdBody:
             try:
                 if not isinstance(data, dict):
                     raise TypeError()
-                metadata_type_0_type_1 = PutBucketBucketTypesIdBodyMetadataType0Type1.from_dict(data)
-
-
+                metadata_type_0_type_1 = PutBucketBucketTypesIdBodyMetadataType0Type1.from_dict(
+                    data
+                )
 
                 return metadata_type_0_type_1
-            except: # noqa: E722
+            except:  # noqa: E722
                 pass
             try:
                 if not isinstance(data, list):
@@ -134,12 +135,24 @@ class PutBucketBucketTypesIdBody:
                 metadata_type_0_type_2 = cast(list[Any], data)
 
                 return metadata_type_0_type_2
-            except: # noqa: E722
+            except:  # noqa: E722
                 pass
-            return cast(Union['PutBucketBucketTypesIdBodyMetadataType0Type1', None, Unset, bool, float, list[Any], str], data)
+            return cast(
+                Union[
+                    "PutBucketBucketTypesIdBodyMetadataType0Type1",
+                    None,
+                    Unset,
+                    bool,
+                    float,
+                    list[Any],
+                    str,
+                ],
+                data,
+            )
 
         metadata = _parse_metadata(d.pop("metadata", UNSET))
 
+        sync_txid = d.pop("syncTxid", UNSET)
 
         put_bucket_bucket_types_id_body = cls(
             ecosystem_id=ecosystem_id,
@@ -149,7 +162,7 @@ class PutBucketBucketTypesIdBody:
             description=description,
             ref_mode=ref_mode,
             metadata=metadata,
+            sync_txid=sync_txid,
         )
 
         return put_bucket_bucket_types_id_body
-

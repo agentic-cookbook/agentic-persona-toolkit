@@ -1,45 +1,31 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
-from attrs import field as _attrs_field
 
 from ..types import UNSET, Unset
-
-from ..types import UNSET, Unset
-from typing import Union
-
-
-
-
-
 
 T = TypeVar("T", bound="PostEcosystemApplicationsBody")
 
 
-
 @_attrs_define
 class PostEcosystemApplicationsBody:
-    """ 
-        Attributes:
-            slug (str):
-            display_name (str):
-            consumer_kind (str):
-            ecosystem_id (Union[Unset, str]):
-            is_deleted (Union[Unset, bool]):
-            id (Union[Unset, str]):
-     """
+    """
+    Attributes:
+        slug (str):
+        display_name (str):
+        consumer_kind (str):
+        ecosystem_id (Union[Unset, str]):
+        sync_txid (Union[Unset, int]):
+        id (Union[Unset, str]):
+    """
 
     slug: str
     display_name: str
     consumer_kind: str
-    ecosystem_id: Union[Unset, str] = UNSET
-    is_deleted: Union[Unset, bool] = UNSET
-    id: Union[Unset, str] = UNSET
-
-
-
-
+    ecosystem_id: Unset | str = UNSET
+    sync_txid: Unset | int = UNSET
+    id: Unset | str = UNSET
 
     def to_dict(self) -> dict[str, Any]:
         slug = self.slug
@@ -50,28 +36,27 @@ class PostEcosystemApplicationsBody:
 
         ecosystem_id = self.ecosystem_id
 
-        is_deleted = self.is_deleted
+        sync_txid = self.sync_txid
 
         id = self.id
 
-
         field_dict: dict[str, Any] = {}
 
-        field_dict.update({
-            "slug": slug,
-            "displayName": display_name,
-            "consumerKind": consumer_kind,
-        })
+        field_dict.update(
+            {
+                "slug": slug,
+                "displayName": display_name,
+                "consumerKind": consumer_kind,
+            }
+        )
         if ecosystem_id is not UNSET:
             field_dict["ecosystemId"] = ecosystem_id
-        if is_deleted is not UNSET:
-            field_dict["isDeleted"] = is_deleted
+        if sync_txid is not UNSET:
+            field_dict["syncTxid"] = sync_txid
         if id is not UNSET:
             field_dict["id"] = id
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -84,7 +69,7 @@ class PostEcosystemApplicationsBody:
 
         ecosystem_id = d.pop("ecosystemId", UNSET)
 
-        is_deleted = d.pop("isDeleted", UNSET)
+        sync_txid = d.pop("syncTxid", UNSET)
 
         id = d.pop("id", UNSET)
 
@@ -93,9 +78,8 @@ class PostEcosystemApplicationsBody:
             display_name=display_name,
             consumer_kind=consumer_kind,
             ecosystem_id=ecosystem_id,
-            is_deleted=is_deleted,
+            sync_txid=sync_txid,
             id=id,
         )
 
         return post_ecosystem_applications_body
-

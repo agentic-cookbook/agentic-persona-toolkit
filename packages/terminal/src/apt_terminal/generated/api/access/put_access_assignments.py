@@ -1,37 +1,28 @@
 from http import HTTPStatus
-from typing import Any, Optional, Union, cast
+from typing import Any
 
 import httpx
 
-from ...client import AuthenticatedClient, Client
-from ...types import Response, UNSET
 from ... import errors
-
+from ...client import AuthenticatedClient, Client
 from ...models.access_assignment_envelope import AccessAssignmentEnvelope
 from ...models.error import Error
 from ...models.put_access_assignments_body import PutAccessAssignmentsBody
-from typing import cast
-
+from ...types import UNSET, Response
 
 
 def _get_kwargs(
     *,
     body: PutAccessAssignmentsBody,
     workspace: str,
-
 ) -> dict[str, Any]:
     headers: dict[str, Any] = {}
-
-
-    
 
     params: dict[str, Any] = {}
 
     params["workspace"] = workspace
 
-
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
-
 
     _kwargs: dict[str, Any] = {
         "method": "put",
@@ -41,54 +32,42 @@ def _get_kwargs(
 
     _kwargs["json"] = body.to_dict()
 
-
     headers["Content-Type"] = "application/json"
 
     _kwargs["headers"] = headers
     return _kwargs
 
 
-
-def _parse_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Optional[Union[AccessAssignmentEnvelope, Error]]:
+def _parse_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> AccessAssignmentEnvelope | Error | None:
     if response.status_code == 200:
         response_200 = AccessAssignmentEnvelope.from_dict(response.json())
-
-
 
         return response_200
 
     if response.status_code == 201:
         response_201 = AccessAssignmentEnvelope.from_dict(response.json())
 
-
-
         return response_201
 
     if response.status_code == 400:
         response_400 = Error.from_dict(response.json())
-
-
 
         return response_400
 
     if response.status_code == 401:
         response_401 = Error.from_dict(response.json())
 
-
-
         return response_401
 
     if response.status_code == 403:
         response_403 = Error.from_dict(response.json())
 
-
-
         return response_403
 
     if response.status_code == 404:
         response_404 = Error.from_dict(response.json())
-
-
 
         return response_404
 
@@ -98,7 +77,9 @@ def _parse_response(*, client: Union[AuthenticatedClient, Client], response: htt
         return None
 
 
-def _build_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Response[Union[AccessAssignmentEnvelope, Error]]:
+def _build_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Response[AccessAssignmentEnvelope | Error]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -112,9 +93,8 @@ def sync_detailed(
     client: AuthenticatedClient,
     body: PutAccessAssignmentsBody,
     workspace: str,
-
-) -> Response[Union[AccessAssignmentEnvelope, Error]]:
-    """ Grant (or replace) a role for a subject at a scope — requires M + no-escalation
+) -> Response[AccessAssignmentEnvelope | Error]:
+    """Grant (or replace) a role for a subject at a scope — requires M + no-escalation
 
     Args:
         workspace (str):
@@ -126,13 +106,11 @@ def sync_detailed(
 
     Returns:
         Response[Union[AccessAssignmentEnvelope, Error]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         body=body,
-workspace=workspace,
-
+        workspace=workspace,
     )
 
     response = client.get_httpx_client().request(
@@ -141,14 +119,14 @@ workspace=workspace,
 
     return _build_response(client=client, response=response)
 
+
 def sync(
     *,
     client: AuthenticatedClient,
     body: PutAccessAssignmentsBody,
     workspace: str,
-
-) -> Optional[Union[AccessAssignmentEnvelope, Error]]:
-    """ Grant (or replace) a role for a subject at a scope — requires M + no-escalation
+) -> AccessAssignmentEnvelope | Error | None:
+    """Grant (or replace) a role for a subject at a scope — requires M + no-escalation
 
     Args:
         workspace (str):
@@ -160,24 +138,22 @@ def sync(
 
     Returns:
         Union[AccessAssignmentEnvelope, Error]
-     """
-
+    """
 
     return sync_detailed(
         client=client,
-body=body,
-workspace=workspace,
-
+        body=body,
+        workspace=workspace,
     ).parsed
+
 
 async def asyncio_detailed(
     *,
     client: AuthenticatedClient,
     body: PutAccessAssignmentsBody,
     workspace: str,
-
-) -> Response[Union[AccessAssignmentEnvelope, Error]]:
-    """ Grant (or replace) a role for a subject at a scope — requires M + no-escalation
+) -> Response[AccessAssignmentEnvelope | Error]:
+    """Grant (or replace) a role for a subject at a scope — requires M + no-escalation
 
     Args:
         workspace (str):
@@ -189,29 +165,25 @@ async def asyncio_detailed(
 
     Returns:
         Response[Union[AccessAssignmentEnvelope, Error]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         body=body,
-workspace=workspace,
-
+        workspace=workspace,
     )
 
-    response = await client.get_async_httpx_client().request(
-        **kwargs
-    )
+    response = await client.get_async_httpx_client().request(**kwargs)
 
     return _build_response(client=client, response=response)
+
 
 async def asyncio(
     *,
     client: AuthenticatedClient,
     body: PutAccessAssignmentsBody,
     workspace: str,
-
-) -> Optional[Union[AccessAssignmentEnvelope, Error]]:
-    """ Grant (or replace) a role for a subject at a scope — requires M + no-escalation
+) -> AccessAssignmentEnvelope | Error | None:
+    """Grant (or replace) a role for a subject at a scope — requires M + no-escalation
 
     Args:
         workspace (str):
@@ -223,12 +195,12 @@ async def asyncio(
 
     Returns:
         Union[AccessAssignmentEnvelope, Error]
-     """
+    """
 
-
-    return (await asyncio_detailed(
-        client=client,
-body=body,
-workspace=workspace,
-
-    )).parsed
+    return (
+        await asyncio_detailed(
+            client=client,
+            body=body,
+            workspace=workspace,
+        )
+    ).parsed

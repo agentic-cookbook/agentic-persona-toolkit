@@ -1,32 +1,22 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
-from attrs import field as _attrs_field
-
-from ..types import UNSET, Unset
-
-
-
-
-
-
 
 T = TypeVar("T", bound="PutEcosystemEcosystemRegionsIdResponse200")
 
 
-
 @_attrs_define
 class PutEcosystemEcosystemRegionsIdResponse200:
-    """ 
-        Attributes:
-            id (str):
-            display_name (str):
-            postgres_host (str):
-            railway_service_id (str):
-            is_default_for_new_projects (bool):
-            created_at (str):
-     """
+    """
+    Attributes:
+        id (str):
+        display_name (str):
+        postgres_host (str):
+        railway_service_id (str):
+        is_default_for_new_projects (bool):
+        created_at (str):
+    """
 
     id: str
     display_name: str
@@ -34,10 +24,6 @@ class PutEcosystemEcosystemRegionsIdResponse200:
     railway_service_id: str
     is_default_for_new_projects: bool
     created_at: str
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         id = self.id
@@ -52,21 +38,20 @@ class PutEcosystemEcosystemRegionsIdResponse200:
 
         created_at = self.created_at
 
-
         field_dict: dict[str, Any] = {}
 
-        field_dict.update({
-            "id": id,
-            "displayName": display_name,
-            "postgresHost": postgres_host,
-            "railwayServiceId": railway_service_id,
-            "isDefaultForNewProjects": is_default_for_new_projects,
-            "createdAt": created_at,
-        })
+        field_dict.update(
+            {
+                "id": id,
+                "displayName": display_name,
+                "postgresHost": postgres_host,
+                "railwayServiceId": railway_service_id,
+                "isDefaultForNewProjects": is_default_for_new_projects,
+                "createdAt": created_at,
+            }
+        )
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -93,4 +78,3 @@ class PutEcosystemEcosystemRegionsIdResponse200:
         )
 
         return put_ecosystem_ecosystem_regions_id_response_200
-

@@ -1,48 +1,34 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
-
 from ..models.integration_action_result_status import IntegrationActionResultStatus
 from ..types import UNSET, Unset
-from typing import cast, Union
-from typing import Union
-
-
-
-
-
 
 T = TypeVar("T", bound="IntegrationActionResult")
 
 
-
 @_attrs_define
 class IntegrationActionResult:
-    """ 
-        Attributes:
-            ok (bool): true when status is ok
-            status (IntegrationActionResultStatus):
-            action_log_id (str): The integration_action_logs row id
-            external_id (Union[None, str]): Provider-side id produced, if any
-            deduped (bool): true when an Idempotency-Key replay returned a prior row
-            error (Union[Unset, str]): Failure message when status is error
-     """
+    """
+    Attributes:
+        ok (bool): true when status is ok
+        status (IntegrationActionResultStatus):
+        action_log_id (str): The integration_action_logs row id
+        external_id (Union[None, str]): Provider-side id produced, if any
+        deduped (bool): true when an Idempotency-Key replay returned a prior row
+        error (Union[Unset, str]): Failure message when status is error
+    """
 
     ok: bool
     status: IntegrationActionResultStatus
     action_log_id: str
-    external_id: Union[None, str]
+    external_id: None | str
     deduped: bool
-    error: Union[Unset, str] = UNSET
+    error: Unset | str = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         ok = self.ok
@@ -51,29 +37,28 @@ class IntegrationActionResult:
 
         action_log_id = self.action_log_id
 
-        external_id: Union[None, str]
+        external_id: None | str
         external_id = self.external_id
 
         deduped = self.deduped
 
         error = self.error
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "ok": ok,
-            "status": status,
-            "actionLogId": action_log_id,
-            "externalId": external_id,
-            "deduped": deduped,
-        })
+        field_dict.update(
+            {
+                "ok": ok,
+                "status": status,
+                "actionLogId": action_log_id,
+                "externalId": external_id,
+                "deduped": deduped,
+            }
+        )
         if error is not UNSET:
             field_dict["error"] = error
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -82,18 +67,14 @@ class IntegrationActionResult:
 
         status = IntegrationActionResultStatus(d.pop("status"))
 
-
-
-
         action_log_id = d.pop("actionLogId")
 
-        def _parse_external_id(data: object) -> Union[None, str]:
+        def _parse_external_id(data: object) -> None | str:
             if data is None:
                 return data
-            return cast(Union[None, str], data)
+            return cast(None | str, data)
 
         external_id = _parse_external_id(d.pop("externalId"))
-
 
         deduped = d.pop("deduped")
 
@@ -107,7 +88,6 @@ class IntegrationActionResult:
             deduped=deduped,
             error=error,
         )
-
 
         integration_action_result.additional_properties = d
         return integration_action_result

@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class AppearanceSettingsPrefsContrast(str, Enum):
     DEFAULT = "default"
     EXTRA_HIGH = "extra-high"

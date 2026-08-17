@@ -1,59 +1,47 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import TYPE_CHECKING, Any, TypeVar, Union, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 from ..types import UNSET, Unset
 
-from ..types import UNSET, Unset
-from typing import cast
-from typing import cast, Union
-from typing import Union
-
 if TYPE_CHECKING:
-  from ..models.patch_oauth_providers_slug_body_identity_mapping import PatchOauthProvidersSlugBodyIdentityMapping
-
-
-
+    from ..models.patch_oauth_providers_slug_body_identity_mapping import (
+        PatchOauthProvidersSlugBodyIdentityMapping,
+    )
 
 
 T = TypeVar("T", bound="PatchOauthProvidersSlugBody")
 
 
-
 @_attrs_define
 class PatchOauthProvidersSlugBody:
-    """ 
-        Attributes:
-            slug (Union[Unset, str]):
-            display_name (Union[Unset, str]):
-            client_id (Union[Unset, str]):
-            client_secret (Union[Unset, str]):
-            scopes (Union[Unset, list[str]]):
-            authorize_url (Union[None, Unset, str]):
-            token_url (Union[None, Unset, str]):
-            userinfo_url (Union[None, Unset, str]):
-            identity_mapping (Union[Unset, PatchOauthProvidersSlugBodyIdentityMapping]):
-     """
+    """
+    Attributes:
+        slug (Union[Unset, str]):
+        display_name (Union[Unset, str]):
+        client_id (Union[Unset, str]):
+        client_secret (Union[Unset, str]):
+        scopes (Union[Unset, list[str]]):
+        authorize_url (Union[None, Unset, str]):
+        token_url (Union[None, Unset, str]):
+        userinfo_url (Union[None, Unset, str]):
+        identity_mapping (Union[Unset, PatchOauthProvidersSlugBodyIdentityMapping]):
+    """
 
-    slug: Union[Unset, str] = UNSET
-    display_name: Union[Unset, str] = UNSET
-    client_id: Union[Unset, str] = UNSET
-    client_secret: Union[Unset, str] = UNSET
-    scopes: Union[Unset, list[str]] = UNSET
-    authorize_url: Union[None, Unset, str] = UNSET
-    token_url: Union[None, Unset, str] = UNSET
-    userinfo_url: Union[None, Unset, str] = UNSET
-    identity_mapping: Union[Unset, 'PatchOauthProvidersSlugBodyIdentityMapping'] = UNSET
+    slug: Unset | str = UNSET
+    display_name: Unset | str = UNSET
+    client_id: Unset | str = UNSET
+    client_secret: Unset | str = UNSET
+    scopes: Unset | list[str] = UNSET
+    authorize_url: None | Unset | str = UNSET
+    token_url: None | Unset | str = UNSET
+    userinfo_url: None | Unset | str = UNSET
+    identity_mapping: Union[Unset, "PatchOauthProvidersSlugBodyIdentityMapping"] = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
-
-
-
-
     def to_dict(self) -> dict[str, Any]:
-        from ..models.patch_oauth_providers_slug_body_identity_mapping import PatchOauthProvidersSlugBodyIdentityMapping
         slug = self.slug
 
         display_name = self.display_name
@@ -62,39 +50,35 @@ class PatchOauthProvidersSlugBody:
 
         client_secret = self.client_secret
 
-        scopes: Union[Unset, list[str]] = UNSET
+        scopes: Unset | list[str] = UNSET
         if not isinstance(self.scopes, Unset):
             scopes = self.scopes
 
-
-
-        authorize_url: Union[None, Unset, str]
+        authorize_url: None | Unset | str
         if isinstance(self.authorize_url, Unset):
             authorize_url = UNSET
         else:
             authorize_url = self.authorize_url
 
-        token_url: Union[None, Unset, str]
+        token_url: None | Unset | str
         if isinstance(self.token_url, Unset):
             token_url = UNSET
         else:
             token_url = self.token_url
 
-        userinfo_url: Union[None, Unset, str]
+        userinfo_url: None | Unset | str
         if isinstance(self.userinfo_url, Unset):
             userinfo_url = UNSET
         else:
             userinfo_url = self.userinfo_url
 
-        identity_mapping: Union[Unset, dict[str, Any]] = UNSET
+        identity_mapping: Unset | dict[str, Any] = UNSET
         if not isinstance(self.identity_mapping, Unset):
             identity_mapping = self.identity_mapping.to_dict()
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-        })
+        field_dict.update({})
         if slug is not UNSET:
             field_dict["slug"] = slug
         if display_name is not UNSET:
@@ -116,11 +100,12 @@ class PatchOauthProvidersSlugBody:
 
         return field_dict
 
-
-
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.patch_oauth_providers_slug_body_identity_mapping import PatchOauthProvidersSlugBodyIdentityMapping
+        from ..models.patch_oauth_providers_slug_body_identity_mapping import (
+            PatchOauthProvidersSlugBodyIdentityMapping,
+        )
+
         d = dict(src_dict)
         slug = d.pop("slug", UNSET)
 
@@ -132,46 +117,41 @@ class PatchOauthProvidersSlugBody:
 
         scopes = cast(list[str], d.pop("scopes", UNSET))
 
-
-        def _parse_authorize_url(data: object) -> Union[None, Unset, str]:
+        def _parse_authorize_url(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         authorize_url = _parse_authorize_url(d.pop("authorizeUrl", UNSET))
 
-
-        def _parse_token_url(data: object) -> Union[None, Unset, str]:
+        def _parse_token_url(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         token_url = _parse_token_url(d.pop("tokenUrl", UNSET))
 
-
-        def _parse_userinfo_url(data: object) -> Union[None, Unset, str]:
+        def _parse_userinfo_url(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         userinfo_url = _parse_userinfo_url(d.pop("userinfoUrl", UNSET))
 
-
         _identity_mapping = d.pop("identityMapping", UNSET)
-        identity_mapping: Union[Unset, PatchOauthProvidersSlugBodyIdentityMapping]
-        if isinstance(_identity_mapping,  Unset):
+        identity_mapping: Unset | PatchOauthProvidersSlugBodyIdentityMapping
+        if isinstance(_identity_mapping, Unset):
             identity_mapping = UNSET
         else:
-            identity_mapping = PatchOauthProvidersSlugBodyIdentityMapping.from_dict(_identity_mapping)
-
-
-
+            identity_mapping = PatchOauthProvidersSlugBodyIdentityMapping.from_dict(
+                _identity_mapping
+            )
 
         patch_oauth_providers_slug_body = cls(
             slug=slug,
@@ -184,7 +164,6 @@ class PatchOauthProvidersSlugBody:
             userinfo_url=userinfo_url,
             identity_mapping=identity_mapping,
         )
-
 
         patch_oauth_providers_slug_body.additional_properties = d
         return patch_oauth_providers_slug_body

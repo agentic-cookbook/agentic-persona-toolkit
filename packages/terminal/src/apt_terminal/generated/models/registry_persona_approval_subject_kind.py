@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class RegistryPersonaApprovalSubjectKind(str, Enum):
     ORG = "org"
     SELF = "self"

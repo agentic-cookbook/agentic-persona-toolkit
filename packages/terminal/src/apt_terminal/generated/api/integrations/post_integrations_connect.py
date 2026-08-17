@@ -1,12 +1,10 @@
 from http import HTTPStatus
-from typing import Any, Optional, Union, cast
+from typing import Any, Union
 
 import httpx
 
-from ...client import AuthenticatedClient, Client
-from ...types import Response, UNSET
 from ... import errors
-
+from ...client import AuthenticatedClient, Client
 from ...models.integration_connect_request_type_0 import IntegrationConnectRequestType0
 from ...models.integration_connect_request_type_1 import IntegrationConnectRequestType1
 from ...models.integration_connect_request_type_2 import IntegrationConnectRequestType2
@@ -14,22 +12,20 @@ from ...models.integration_connect_request_type_3 import IntegrationConnectReque
 from ...models.integration_connect_request_type_4 import IntegrationConnectRequestType4
 from ...models.integration_connection import IntegrationConnection
 from ...models.problem_details import ProblemDetails
-from typing import cast
-from typing import cast, Union
-
+from ...types import Response
 
 
 def _get_kwargs(
     *,
-    body: Union['IntegrationConnectRequestType0', 'IntegrationConnectRequestType1', 'IntegrationConnectRequestType2', 'IntegrationConnectRequestType3', 'IntegrationConnectRequestType4'],
-
+    body: Union[
+        "IntegrationConnectRequestType0",
+        "IntegrationConnectRequestType1",
+        "IntegrationConnectRequestType2",
+        "IntegrationConnectRequestType3",
+        "IntegrationConnectRequestType4",
+    ],
 ) -> dict[str, Any]:
     headers: dict[str, Any] = {}
-
-
-    
-
-    
 
     _kwargs: dict[str, Any] = {
         "method": "post",
@@ -37,18 +33,15 @@ def _get_kwargs(
     }
 
     _kwargs["json"]: dict[str, Any]
-    if isinstance(body, IntegrationConnectRequestType0):
-        _kwargs["json"] = body.to_dict()
-    elif isinstance(body, IntegrationConnectRequestType1):
-        _kwargs["json"] = body.to_dict()
-    elif isinstance(body, IntegrationConnectRequestType2):
-        _kwargs["json"] = body.to_dict()
-    elif isinstance(body, IntegrationConnectRequestType3):
+    if (
+        isinstance(body, IntegrationConnectRequestType0)
+        or isinstance(body, IntegrationConnectRequestType1)
+        or isinstance(body, IntegrationConnectRequestType2)
+        or isinstance(body, IntegrationConnectRequestType3)
+    ):
         _kwargs["json"] = body.to_dict()
     else:
         _kwargs["json"] = body.to_dict()
-
-
 
     headers["Content-Type"] = "application/json"
 
@@ -56,40 +49,31 @@ def _get_kwargs(
     return _kwargs
 
 
-
-def _parse_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Optional[Union[IntegrationConnection, ProblemDetails]]:
+def _parse_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> IntegrationConnection | ProblemDetails | None:
     if response.status_code == 200:
         response_200 = IntegrationConnection.from_dict(response.json())
-
-
 
         return response_200
 
     if response.status_code == 400:
         response_400 = ProblemDetails.from_dict(response.json())
 
-
-
         return response_400
 
     if response.status_code == 401:
         response_401 = ProblemDetails.from_dict(response.json())
-
-
 
         return response_401
 
     if response.status_code == 403:
         response_403 = ProblemDetails.from_dict(response.json())
 
-
-
         return response_403
 
     if response.status_code == 404:
         response_404 = ProblemDetails.from_dict(response.json())
-
-
 
         return response_404
 
@@ -99,7 +83,9 @@ def _parse_response(*, client: Union[AuthenticatedClient, Client], response: htt
         return None
 
 
-def _build_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Response[Union[IntegrationConnection, ProblemDetails]]:
+def _build_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Response[IntegrationConnection | ProblemDetails]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -111,10 +97,15 @@ def _build_response(*, client: Union[AuthenticatedClient, Client], response: htt
 def sync_detailed(
     *,
     client: AuthenticatedClient,
-    body: Union['IntegrationConnectRequestType0', 'IntegrationConnectRequestType1', 'IntegrationConnectRequestType2', 'IntegrationConnectRequestType3', 'IntegrationConnectRequestType4'],
-
-) -> Response[Union[IntegrationConnection, ProblemDetails]]:
-    """ Connect an integration (polymorphic by auth method)
+    body: Union[
+        "IntegrationConnectRequestType0",
+        "IntegrationConnectRequestType1",
+        "IntegrationConnectRequestType2",
+        "IntegrationConnectRequestType3",
+        "IntegrationConnectRequestType4",
+    ],
+) -> Response[IntegrationConnection | ProblemDetails]:
+    """Connect an integration (polymorphic by auth method)
 
      Finishes any auth method's connect flow and persists the connection under the target ecosystem
     `ecosystemId` the client names; the caller must manage it (404/403 otherwise). Returns the redacted
@@ -131,12 +122,10 @@ def sync_detailed(
 
     Returns:
         Response[Union[IntegrationConnection, ProblemDetails]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         body=body,
-
     )
 
     response = client.get_httpx_client().request(
@@ -145,13 +134,19 @@ def sync_detailed(
 
     return _build_response(client=client, response=response)
 
+
 def sync(
     *,
     client: AuthenticatedClient,
-    body: Union['IntegrationConnectRequestType0', 'IntegrationConnectRequestType1', 'IntegrationConnectRequestType2', 'IntegrationConnectRequestType3', 'IntegrationConnectRequestType4'],
-
-) -> Optional[Union[IntegrationConnection, ProblemDetails]]:
-    """ Connect an integration (polymorphic by auth method)
+    body: Union[
+        "IntegrationConnectRequestType0",
+        "IntegrationConnectRequestType1",
+        "IntegrationConnectRequestType2",
+        "IntegrationConnectRequestType3",
+        "IntegrationConnectRequestType4",
+    ],
+) -> IntegrationConnection | ProblemDetails | None:
+    """Connect an integration (polymorphic by auth method)
 
      Finishes any auth method's connect flow and persists the connection under the target ecosystem
     `ecosystemId` the client names; the caller must manage it (404/403 otherwise). Returns the redacted
@@ -168,22 +163,26 @@ def sync(
 
     Returns:
         Union[IntegrationConnection, ProblemDetails]
-     """
-
+    """
 
     return sync_detailed(
         client=client,
-body=body,
-
+        body=body,
     ).parsed
+
 
 async def asyncio_detailed(
     *,
     client: AuthenticatedClient,
-    body: Union['IntegrationConnectRequestType0', 'IntegrationConnectRequestType1', 'IntegrationConnectRequestType2', 'IntegrationConnectRequestType3', 'IntegrationConnectRequestType4'],
-
-) -> Response[Union[IntegrationConnection, ProblemDetails]]:
-    """ Connect an integration (polymorphic by auth method)
+    body: Union[
+        "IntegrationConnectRequestType0",
+        "IntegrationConnectRequestType1",
+        "IntegrationConnectRequestType2",
+        "IntegrationConnectRequestType3",
+        "IntegrationConnectRequestType4",
+    ],
+) -> Response[IntegrationConnection | ProblemDetails]:
+    """Connect an integration (polymorphic by auth method)
 
      Finishes any auth method's connect flow and persists the connection under the target ecosystem
     `ecosystemId` the client names; the caller must manage it (404/403 otherwise). Returns the redacted
@@ -200,27 +199,29 @@ async def asyncio_detailed(
 
     Returns:
         Response[Union[IntegrationConnection, ProblemDetails]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         body=body,
-
     )
 
-    response = await client.get_async_httpx_client().request(
-        **kwargs
-    )
+    response = await client.get_async_httpx_client().request(**kwargs)
 
     return _build_response(client=client, response=response)
+
 
 async def asyncio(
     *,
     client: AuthenticatedClient,
-    body: Union['IntegrationConnectRequestType0', 'IntegrationConnectRequestType1', 'IntegrationConnectRequestType2', 'IntegrationConnectRequestType3', 'IntegrationConnectRequestType4'],
-
-) -> Optional[Union[IntegrationConnection, ProblemDetails]]:
-    """ Connect an integration (polymorphic by auth method)
+    body: Union[
+        "IntegrationConnectRequestType0",
+        "IntegrationConnectRequestType1",
+        "IntegrationConnectRequestType2",
+        "IntegrationConnectRequestType3",
+        "IntegrationConnectRequestType4",
+    ],
+) -> IntegrationConnection | ProblemDetails | None:
+    """Connect an integration (polymorphic by auth method)
 
      Finishes any auth method's connect flow and persists the connection under the target ecosystem
     `ecosystemId` the client names; the caller must manage it (404/403 otherwise). Returns the redacted
@@ -237,11 +238,11 @@ async def asyncio(
 
     Returns:
         Union[IntegrationConnection, ProblemDetails]
-     """
+    """
 
-
-    return (await asyncio_detailed(
-        client=client,
-body=body,
-
-    )).parsed
+    return (
+        await asyncio_detailed(
+            client=client,
+            body=body,
+        )
+    ).parsed

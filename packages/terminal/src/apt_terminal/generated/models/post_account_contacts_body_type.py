@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class PostAccountContactsBodyType(str, Enum):
     EMAIL = "email"
     PHONE = "phone"

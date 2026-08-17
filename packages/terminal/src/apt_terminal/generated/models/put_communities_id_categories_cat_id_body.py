@@ -1,49 +1,36 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 from ..types import UNSET, Unset
 
-from ..types import UNSET, Unset
-from typing import Union
-
-
-
-
-
-
 T = TypeVar("T", bound="PutCommunitiesIdCategoriesCatIdBody")
-
 
 
 @_attrs_define
 class PutCommunitiesIdCategoriesCatIdBody:
-    """ 
-        Attributes:
-            slug (Union[Unset, str]):
-            name (Union[Unset, str]):
-            description (Union[Unset, str]):
-            color (Union[Unset, str]):
-            display_order (Union[Unset, int]):
-            is_public (Union[Unset, bool]):
-            is_archived (Union[Unset, bool]): true archives (the admin "delete") — hidden from every list, discussions
-                retained.
-     """
+    """
+    Attributes:
+        slug (Union[Unset, str]):
+        name (Union[Unset, str]):
+        description (Union[Unset, str]):
+        color (Union[Unset, str]):
+        display_order (Union[Unset, int]):
+        is_public (Union[Unset, bool]):
+        is_archived (Union[Unset, bool]): true archives (the admin "delete") — hidden from every list, discussions
+            retained.
+    """
 
-    slug: Union[Unset, str] = UNSET
-    name: Union[Unset, str] = UNSET
-    description: Union[Unset, str] = UNSET
-    color: Union[Unset, str] = UNSET
-    display_order: Union[Unset, int] = UNSET
-    is_public: Union[Unset, bool] = UNSET
-    is_archived: Union[Unset, bool] = UNSET
+    slug: Unset | str = UNSET
+    name: Unset | str = UNSET
+    description: Unset | str = UNSET
+    color: Unset | str = UNSET
+    display_order: Unset | int = UNSET
+    is_public: Unset | bool = UNSET
+    is_archived: Unset | bool = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         slug = self.slug
@@ -60,11 +47,9 @@ class PutCommunitiesIdCategoriesCatIdBody:
 
         is_archived = self.is_archived
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-        })
+        field_dict.update({})
         if slug is not UNSET:
             field_dict["slug"] = slug
         if name is not UNSET:
@@ -81,8 +66,6 @@ class PutCommunitiesIdCategoriesCatIdBody:
             field_dict["isArchived"] = is_archived
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -110,7 +93,6 @@ class PutCommunitiesIdCategoriesCatIdBody:
             is_public=is_public,
             is_archived=is_archived,
         )
-
 
         put_communities_id_categories_cat_id_body.additional_properties = d
         return put_communities_id_categories_cat_id_body

@@ -1,43 +1,29 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 from ..types import UNSET, Unset
 
-from ..types import UNSET, Unset
-from typing import cast, Union
-from typing import Union
-
-
-
-
-
-
 T = TypeVar("T", bound="GamificationLevel")
-
 
 
 @_attrs_define
 class GamificationLevel:
-    """ 
-        Attributes:
-            name (str):
-            min_points (int): Inclusive point floor for this rung
-            sort_order (int):
-            subject_type (Union[None, Unset, str]): NULL = applies to any subject kind
-     """
+    """
+    Attributes:
+        name (str):
+        min_points (int): Inclusive point floor for this rung
+        sort_order (int):
+        subject_type (Union[None, Unset, str]): NULL = applies to any subject kind
+    """
 
     name: str
     min_points: int
     sort_order: int
-    subject_type: Union[None, Unset, str] = UNSET
+    subject_type: None | Unset | str = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         name = self.name
@@ -46,26 +32,25 @@ class GamificationLevel:
 
         sort_order = self.sort_order
 
-        subject_type: Union[None, Unset, str]
+        subject_type: None | Unset | str
         if isinstance(self.subject_type, Unset):
             subject_type = UNSET
         else:
             subject_type = self.subject_type
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "name": name,
-            "minPoints": min_points,
-            "sortOrder": sort_order,
-        })
+        field_dict.update(
+            {
+                "name": name,
+                "minPoints": min_points,
+                "sortOrder": sort_order,
+            }
+        )
         if subject_type is not UNSET:
             field_dict["subjectType"] = subject_type
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -76,15 +61,14 @@ class GamificationLevel:
 
         sort_order = d.pop("sortOrder")
 
-        def _parse_subject_type(data: object) -> Union[None, Unset, str]:
+        def _parse_subject_type(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         subject_type = _parse_subject_type(d.pop("subjectType", UNSET))
-
 
         gamification_level = cls(
             name=name,
@@ -92,7 +76,6 @@ class GamificationLevel:
             sort_order=sort_order,
             subject_type=subject_type,
         )
-
 
         gamification_level.additional_properties = d
         return gamification_level

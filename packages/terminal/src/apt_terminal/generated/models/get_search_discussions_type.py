@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class GetSearchDiscussionsType(str, Enum):
     POSTS = "posts"
     TOPICS = "topics"

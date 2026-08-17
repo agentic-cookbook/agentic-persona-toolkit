@@ -1,66 +1,50 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import TYPE_CHECKING, Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
-
-from typing import cast
-
 if TYPE_CHECKING:
-  from ..models.storage_attachment import StorageAttachment
-
-
-
+    from ..models.storage_attachment import StorageAttachment
 
 
 T = TypeVar("T", bound="StorageDeduplicated")
 
 
-
 @_attrs_define
 class StorageDeduplicated:
-    """ 
-        Attributes:
-            attachment (StorageAttachment):
-            deduplicated (bool):
-     """
+    """
+    Attributes:
+        attachment (StorageAttachment):
+        deduplicated (bool):
+    """
 
-    attachment: 'StorageAttachment'
+    attachment: "StorageAttachment"
     deduplicated: bool
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
-
-
-
-
     def to_dict(self) -> dict[str, Any]:
-        from ..models.storage_attachment import StorageAttachment
         attachment = self.attachment.to_dict()
 
         deduplicated = self.deduplicated
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "attachment": attachment,
-            "deduplicated": deduplicated,
-        })
+        field_dict.update(
+            {
+                "attachment": attachment,
+                "deduplicated": deduplicated,
+            }
+        )
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.storage_attachment import StorageAttachment
+
         d = dict(src_dict)
         attachment = StorageAttachment.from_dict(d.pop("attachment"))
-
-
-
 
         deduplicated = d.pop("deduplicated")
 
@@ -68,7 +52,6 @@ class StorageDeduplicated:
             attachment=attachment,
             deduplicated=deduplicated,
         )
-
 
         storage_deduplicated.additional_properties = d
         return storage_deduplicated

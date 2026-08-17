@@ -1,48 +1,37 @@
 from http import HTTPStatus
-from typing import Any, Optional, Union, cast
+from typing import Any
 
 import httpx
 
-from ...client import AuthenticatedClient, Client
-from ...types import Response, UNSET
 from ... import errors
-
+from ...client import AuthenticatedClient, Client
 from ...models.error import Error
 from ...models.get_notifications_response_200 import GetNotificationsResponse200
 from ...models.get_notifications_status import GetNotificationsStatus
-from ...types import UNSET, Unset
-from typing import cast
-from typing import Union
-
+from ...types import UNSET, Response, Unset
 
 
 def _get_kwargs(
     *,
-    page: Union[Unset, str] = UNSET,
-    page_size: Union[Unset, str] = UNSET,
-    category: Union[Unset, list[str]] = UNSET,
-    status: Union[Unset, GetNotificationsStatus] = GetNotificationsStatus.INBOX,
-    read: Union[Unset, bool] = UNSET,
-
+    page: Unset | str = UNSET,
+    page_size: Unset | str = UNSET,
+    category: Unset | list[str] = UNSET,
+    status: Unset | GetNotificationsStatus = GetNotificationsStatus.INBOX,
+    read: Unset | bool = UNSET,
 ) -> dict[str, Any]:
-    
-
-    
-
     params: dict[str, Any] = {}
 
     params["page"] = page
 
     params["pageSize"] = page_size
 
-    json_category: Union[Unset, list[str]] = UNSET
+    json_category: Unset | list[str] = UNSET
     if not isinstance(category, Unset):
         json_category = category
 
-
     params["category"] = json_category
 
-    json_status: Union[Unset, str] = UNSET
+    json_status: Unset | str = UNSET
     if not isinstance(status, Unset):
         json_status = status.value
 
@@ -50,9 +39,7 @@ def _get_kwargs(
 
     params["read"] = read
 
-
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
-
 
     _kwargs: dict[str, Any] = {
         "method": "get",
@@ -60,23 +47,19 @@ def _get_kwargs(
         "params": params,
     }
 
-
     return _kwargs
 
 
-
-def _parse_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Optional[Union[Error, GetNotificationsResponse200]]:
+def _parse_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Error | GetNotificationsResponse200 | None:
     if response.status_code == 200:
         response_200 = GetNotificationsResponse200.from_dict(response.json())
-
-
 
         return response_200
 
     if response.status_code == 401:
         response_401 = Error.from_dict(response.json())
-
-
 
         return response_401
 
@@ -86,7 +69,9 @@ def _parse_response(*, client: Union[AuthenticatedClient, Client], response: htt
         return None
 
 
-def _build_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Response[Union[Error, GetNotificationsResponse200]]:
+def _build_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Response[Error | GetNotificationsResponse200]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -98,14 +83,13 @@ def _build_response(*, client: Union[AuthenticatedClient, Client], response: htt
 def sync_detailed(
     *,
     client: AuthenticatedClient,
-    page: Union[Unset, str] = UNSET,
-    page_size: Union[Unset, str] = UNSET,
-    category: Union[Unset, list[str]] = UNSET,
-    status: Union[Unset, GetNotificationsStatus] = GetNotificationsStatus.INBOX,
-    read: Union[Unset, bool] = UNSET,
-
-) -> Response[Union[Error, GetNotificationsResponse200]]:
-    """ List the caller's in-app notifications (paginated, filterable)
+    page: Unset | str = UNSET,
+    page_size: Unset | str = UNSET,
+    category: Unset | list[str] = UNSET,
+    status: Unset | GetNotificationsStatus = GetNotificationsStatus.INBOX,
+    read: Unset | bool = UNSET,
+) -> Response[Error | GetNotificationsResponse200]:
+    """List the caller's in-app notifications (paginated, filterable)
 
     Args:
         page (Union[Unset, str]):
@@ -120,16 +104,14 @@ def sync_detailed(
 
     Returns:
         Response[Union[Error, GetNotificationsResponse200]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         page=page,
-page_size=page_size,
-category=category,
-status=status,
-read=read,
-
+        page_size=page_size,
+        category=category,
+        status=status,
+        read=read,
     )
 
     response = client.get_httpx_client().request(
@@ -138,17 +120,17 @@ read=read,
 
     return _build_response(client=client, response=response)
 
+
 def sync(
     *,
     client: AuthenticatedClient,
-    page: Union[Unset, str] = UNSET,
-    page_size: Union[Unset, str] = UNSET,
-    category: Union[Unset, list[str]] = UNSET,
-    status: Union[Unset, GetNotificationsStatus] = GetNotificationsStatus.INBOX,
-    read: Union[Unset, bool] = UNSET,
-
-) -> Optional[Union[Error, GetNotificationsResponse200]]:
-    """ List the caller's in-app notifications (paginated, filterable)
+    page: Unset | str = UNSET,
+    page_size: Unset | str = UNSET,
+    category: Unset | list[str] = UNSET,
+    status: Unset | GetNotificationsStatus = GetNotificationsStatus.INBOX,
+    read: Unset | bool = UNSET,
+) -> Error | GetNotificationsResponse200 | None:
+    """List the caller's in-app notifications (paginated, filterable)
 
     Args:
         page (Union[Unset, str]):
@@ -163,30 +145,28 @@ def sync(
 
     Returns:
         Union[Error, GetNotificationsResponse200]
-     """
-
+    """
 
     return sync_detailed(
         client=client,
-page=page,
-page_size=page_size,
-category=category,
-status=status,
-read=read,
-
+        page=page,
+        page_size=page_size,
+        category=category,
+        status=status,
+        read=read,
     ).parsed
+
 
 async def asyncio_detailed(
     *,
     client: AuthenticatedClient,
-    page: Union[Unset, str] = UNSET,
-    page_size: Union[Unset, str] = UNSET,
-    category: Union[Unset, list[str]] = UNSET,
-    status: Union[Unset, GetNotificationsStatus] = GetNotificationsStatus.INBOX,
-    read: Union[Unset, bool] = UNSET,
-
-) -> Response[Union[Error, GetNotificationsResponse200]]:
-    """ List the caller's in-app notifications (paginated, filterable)
+    page: Unset | str = UNSET,
+    page_size: Unset | str = UNSET,
+    category: Unset | list[str] = UNSET,
+    status: Unset | GetNotificationsStatus = GetNotificationsStatus.INBOX,
+    read: Unset | bool = UNSET,
+) -> Response[Error | GetNotificationsResponse200]:
+    """List the caller's in-app notifications (paginated, filterable)
 
     Args:
         page (Union[Unset, str]):
@@ -201,35 +181,31 @@ async def asyncio_detailed(
 
     Returns:
         Response[Union[Error, GetNotificationsResponse200]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         page=page,
-page_size=page_size,
-category=category,
-status=status,
-read=read,
-
+        page_size=page_size,
+        category=category,
+        status=status,
+        read=read,
     )
 
-    response = await client.get_async_httpx_client().request(
-        **kwargs
-    )
+    response = await client.get_async_httpx_client().request(**kwargs)
 
     return _build_response(client=client, response=response)
+
 
 async def asyncio(
     *,
     client: AuthenticatedClient,
-    page: Union[Unset, str] = UNSET,
-    page_size: Union[Unset, str] = UNSET,
-    category: Union[Unset, list[str]] = UNSET,
-    status: Union[Unset, GetNotificationsStatus] = GetNotificationsStatus.INBOX,
-    read: Union[Unset, bool] = UNSET,
-
-) -> Optional[Union[Error, GetNotificationsResponse200]]:
-    """ List the caller's in-app notifications (paginated, filterable)
+    page: Unset | str = UNSET,
+    page_size: Unset | str = UNSET,
+    category: Unset | list[str] = UNSET,
+    status: Unset | GetNotificationsStatus = GetNotificationsStatus.INBOX,
+    read: Unset | bool = UNSET,
+) -> Error | GetNotificationsResponse200 | None:
+    """List the caller's in-app notifications (paginated, filterable)
 
     Args:
         page (Union[Unset, str]):
@@ -244,15 +220,15 @@ async def asyncio(
 
     Returns:
         Union[Error, GetNotificationsResponse200]
-     """
+    """
 
-
-    return (await asyncio_detailed(
-        client=client,
-page=page,
-page_size=page_size,
-category=category,
-status=status,
-read=read,
-
-    )).parsed
+    return (
+        await asyncio_detailed(
+            client=client,
+            page=page,
+            page_size=page_size,
+            category=category,
+            status=status,
+            read=read,
+        )
+    ).parsed

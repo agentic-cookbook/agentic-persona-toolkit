@@ -1,56 +1,42 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 from ..types import UNSET, Unset
 
-from ..types import UNSET, Unset
-from typing import Union
-
-
-
-
-
-
 T = TypeVar("T", bound="PostDiscussionTopicsIdPostsBody")
-
 
 
 @_attrs_define
 class PostDiscussionTopicsIdPostsBody:
-    """ 
-        Attributes:
-            body (str): Reply markdown; stored as a content.markdown body document.
-            parent_post_id (Union[Unset, str]): Id of the post this reply nests under (a flat reply when omitted).
-     """
+    """
+    Attributes:
+        body (str): Reply markdown; stored as a content.markdown body document.
+        parent_post_id (Union[Unset, str]): Id of the post this reply nests under (a flat reply when omitted).
+    """
 
     body: str
-    parent_post_id: Union[Unset, str] = UNSET
+    parent_post_id: Unset | str = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         body = self.body
 
         parent_post_id = self.parent_post_id
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "body": body,
-        })
+        field_dict.update(
+            {
+                "body": body,
+            }
+        )
         if parent_post_id is not UNSET:
             field_dict["parentPostId"] = parent_post_id
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -63,7 +49,6 @@ class PostDiscussionTopicsIdPostsBody:
             body=body,
             parent_post_id=parent_post_id,
         )
-
 
         post_discussion_topics_id_posts_body.additional_properties = d
         return post_discussion_topics_id_posts_body

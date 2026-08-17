@@ -1,76 +1,57 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import TYPE_CHECKING, Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
-
-from typing import cast
-
 if TYPE_CHECKING:
-  from ..models.bucket_access_group import BucketAccessGroup
-
-
-
+    from ..models.bucket_access_group import BucketAccessGroup
 
 
 T = TypeVar("T", bound="BucketAccessGroupList")
 
 
-
 @_attrs_define
 class BucketAccessGroupList:
-    """ 
-        Attributes:
-            access_groups (list['BucketAccessGroup']):
-     """
+    """
+    Attributes:
+        access_groups (list['BucketAccessGroup']):
+    """
 
-    access_groups: list['BucketAccessGroup']
+    access_groups: list["BucketAccessGroup"]
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
-
-
-
-
     def to_dict(self) -> dict[str, Any]:
-        from ..models.bucket_access_group import BucketAccessGroup
         access_groups = []
         for access_groups_item_data in self.access_groups:
             access_groups_item = access_groups_item_data.to_dict()
             access_groups.append(access_groups_item)
 
-
-
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "accessGroups": access_groups,
-        })
+        field_dict.update(
+            {
+                "accessGroups": access_groups,
+            }
+        )
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.bucket_access_group import BucketAccessGroup
+
         d = dict(src_dict)
         access_groups = []
         _access_groups = d.pop("accessGroups")
-        for access_groups_item_data in (_access_groups):
+        for access_groups_item_data in _access_groups:
             access_groups_item = BucketAccessGroup.from_dict(access_groups_item_data)
 
-
-
             access_groups.append(access_groups_item)
-
 
         bucket_access_group_list = cls(
             access_groups=access_groups,
         )
-
 
         bucket_access_group_list.additional_properties = d
         return bucket_access_group_list

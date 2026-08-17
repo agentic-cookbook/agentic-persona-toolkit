@@ -1,46 +1,32 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar, cast
+from uuid import UUID
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
-
-from typing import cast, Union
-from uuid import UUID
-
-
-
-
-
-
 T = TypeVar("T", bound="ChatConversation")
-
 
 
 @_attrs_define
 class ChatConversation:
-    """ 
-        Attributes:
-            id (UUID):
-            title (str):
-            model (str):
-            persona_slug (Union[None, str]):
-            created_at (str):
-            updated_at (str):
-     """
+    """
+    Attributes:
+        id (UUID):
+        title (str):
+        model (str):
+        persona_slug (Union[None, str]):
+        created_at (str):
+        updated_at (str):
+    """
 
     id: UUID
     title: str
     model: str
-    persona_slug: Union[None, str]
+    persona_slug: None | str
     created_at: str
     updated_at: str
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         id = str(self.id)
@@ -49,48 +35,43 @@ class ChatConversation:
 
         model = self.model
 
-        persona_slug: Union[None, str]
+        persona_slug: None | str
         persona_slug = self.persona_slug
 
         created_at = self.created_at
 
         updated_at = self.updated_at
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "id": id,
-            "title": title,
-            "model": model,
-            "personaSlug": persona_slug,
-            "createdAt": created_at,
-            "updatedAt": updated_at,
-        })
+        field_dict.update(
+            {
+                "id": id,
+                "title": title,
+                "model": model,
+                "personaSlug": persona_slug,
+                "createdAt": created_at,
+                "updatedAt": updated_at,
+            }
+        )
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
         id = UUID(d.pop("id"))
 
-
-
-
         title = d.pop("title")
 
         model = d.pop("model")
 
-        def _parse_persona_slug(data: object) -> Union[None, str]:
+        def _parse_persona_slug(data: object) -> None | str:
             if data is None:
                 return data
-            return cast(Union[None, str], data)
+            return cast(None | str, data)
 
         persona_slug = _parse_persona_slug(d.pop("personaSlug"))
-
 
         created_at = d.pop("createdAt")
 
@@ -104,7 +85,6 @@ class ChatConversation:
             created_at=created_at,
             updated_at=updated_at,
         )
-
 
         chat_conversation.additional_properties = d
         return chat_conversation

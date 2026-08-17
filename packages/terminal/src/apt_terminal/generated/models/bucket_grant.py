@@ -1,39 +1,29 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
-
 from ..models.bucket_grant_target_type import BucketGrantTargetType
 from ..types import UNSET, Unset
-from typing import cast, Union
-from typing import Union
-
-
-
-
-
 
 T = TypeVar("T", bound="BucketGrant")
 
 
-
 @_attrs_define
 class BucketGrant:
-    """ 
-        Attributes:
-            id (str):
-            ecosystem_id (str):
-            access_group_id (str):
-            target_type (BucketGrantTargetType):
-            target_id (str):
-            crud (str): comma-separated CRUD subset, e.g. 'C,R,U,D' or '' (none)
-            created_at (str):
-            updated_at (str):
-            granted_by (Union[None, Unset, str]):
-     """
+    """
+    Attributes:
+        id (str):
+        ecosystem_id (str):
+        access_group_id (str):
+        target_type (BucketGrantTargetType):
+        target_id (str):
+        crud (str): comma-separated CRUD subset, e.g. 'C,R,U,D' or '' (none)
+        created_at (str):
+        updated_at (str):
+        granted_by (Union[None, Unset, str]):
+    """
 
     id: str
     ecosystem_id: str
@@ -43,12 +33,8 @@ class BucketGrant:
     crud: str
     created_at: str
     updated_at: str
-    granted_by: Union[None, Unset, str] = UNSET
+    granted_by: None | Unset | str = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         id = self.id
@@ -67,31 +53,30 @@ class BucketGrant:
 
         updated_at = self.updated_at
 
-        granted_by: Union[None, Unset, str]
+        granted_by: None | Unset | str
         if isinstance(self.granted_by, Unset):
             granted_by = UNSET
         else:
             granted_by = self.granted_by
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "id": id,
-            "ecosystemId": ecosystem_id,
-            "accessGroupId": access_group_id,
-            "targetType": target_type,
-            "targetId": target_id,
-            "crud": crud,
-            "createdAt": created_at,
-            "updatedAt": updated_at,
-        })
+        field_dict.update(
+            {
+                "id": id,
+                "ecosystemId": ecosystem_id,
+                "accessGroupId": access_group_id,
+                "targetType": target_type,
+                "targetId": target_id,
+                "crud": crud,
+                "createdAt": created_at,
+                "updatedAt": updated_at,
+            }
+        )
         if granted_by is not UNSET:
             field_dict["grantedBy"] = granted_by
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -104,9 +89,6 @@ class BucketGrant:
 
         target_type = BucketGrantTargetType(d.pop("targetType"))
 
-
-
-
         target_id = d.pop("targetId")
 
         crud = d.pop("crud")
@@ -115,15 +97,14 @@ class BucketGrant:
 
         updated_at = d.pop("updatedAt")
 
-        def _parse_granted_by(data: object) -> Union[None, Unset, str]:
+        def _parse_granted_by(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         granted_by = _parse_granted_by(d.pop("grantedBy", UNSET))
-
 
         bucket_grant = cls(
             id=id,
@@ -136,7 +117,6 @@ class BucketGrant:
             updated_at=updated_at,
             granted_by=granted_by,
         )
-
 
         bucket_grant.additional_properties = d
         return bucket_grant

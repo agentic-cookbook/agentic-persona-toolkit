@@ -1,39 +1,27 @@
 from http import HTTPStatus
-from typing import Any, Optional, Union, cast
+from typing import Any
 
 import httpx
 
-from ...client import AuthenticatedClient, Client
-from ...types import Response, UNSET
 from ... import errors
-
+from ...client import AuthenticatedClient, Client
 from ...models.error import Error
 from ...models.get_search_documents_response_200 import GetSearchDocumentsResponse200
-from ...types import UNSET, Unset
-from typing import cast
-from typing import Union
-
+from ...types import UNSET, Response, Unset
 
 
 def _get_kwargs(
     *,
     q: str,
-    limit: Union[Unset, int] = 20,
-
+    limit: Unset | int = 20,
 ) -> dict[str, Any]:
-    
-
-    
-
     params: dict[str, Any] = {}
 
     params["q"] = q
 
     params["limit"] = limit
 
-
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
-
 
     _kwargs: dict[str, Any] = {
         "method": "get",
@@ -41,30 +29,24 @@ def _get_kwargs(
         "params": params,
     }
 
-
     return _kwargs
 
 
-
-def _parse_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Optional[Union[Error, GetSearchDocumentsResponse200]]:
+def _parse_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Error | GetSearchDocumentsResponse200 | None:
     if response.status_code == 200:
         response_200 = GetSearchDocumentsResponse200.from_dict(response.json())
-
-
 
         return response_200
 
     if response.status_code == 400:
         response_400 = Error.from_dict(response.json())
 
-
-
         return response_400
 
     if response.status_code == 401:
         response_401 = Error.from_dict(response.json())
-
-
 
         return response_401
 
@@ -74,7 +56,9 @@ def _parse_response(*, client: Union[AuthenticatedClient, Client], response: htt
         return None
 
 
-def _build_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Response[Union[Error, GetSearchDocumentsResponse200]]:
+def _build_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Response[Error | GetSearchDocumentsResponse200]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -87,10 +71,9 @@ def sync_detailed(
     *,
     client: AuthenticatedClient,
     q: str,
-    limit: Union[Unset, int] = 20,
-
-) -> Response[Union[Error, GetSearchDocumentsResponse200]]:
-    """ Full-text search the caller's document blocks
+    limit: Unset | int = 20,
+) -> Response[Error | GetSearchDocumentsResponse200]:
+    """Full-text search the caller's document blocks
 
     Args:
         q (str):
@@ -102,13 +85,11 @@ def sync_detailed(
 
     Returns:
         Response[Union[Error, GetSearchDocumentsResponse200]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         q=q,
-limit=limit,
-
+        limit=limit,
     )
 
     response = client.get_httpx_client().request(
@@ -117,14 +98,14 @@ limit=limit,
 
     return _build_response(client=client, response=response)
 
+
 def sync(
     *,
     client: AuthenticatedClient,
     q: str,
-    limit: Union[Unset, int] = 20,
-
-) -> Optional[Union[Error, GetSearchDocumentsResponse200]]:
-    """ Full-text search the caller's document blocks
+    limit: Unset | int = 20,
+) -> Error | GetSearchDocumentsResponse200 | None:
+    """Full-text search the caller's document blocks
 
     Args:
         q (str):
@@ -136,24 +117,22 @@ def sync(
 
     Returns:
         Union[Error, GetSearchDocumentsResponse200]
-     """
-
+    """
 
     return sync_detailed(
         client=client,
-q=q,
-limit=limit,
-
+        q=q,
+        limit=limit,
     ).parsed
+
 
 async def asyncio_detailed(
     *,
     client: AuthenticatedClient,
     q: str,
-    limit: Union[Unset, int] = 20,
-
-) -> Response[Union[Error, GetSearchDocumentsResponse200]]:
-    """ Full-text search the caller's document blocks
+    limit: Unset | int = 20,
+) -> Response[Error | GetSearchDocumentsResponse200]:
+    """Full-text search the caller's document blocks
 
     Args:
         q (str):
@@ -165,29 +144,25 @@ async def asyncio_detailed(
 
     Returns:
         Response[Union[Error, GetSearchDocumentsResponse200]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         q=q,
-limit=limit,
-
+        limit=limit,
     )
 
-    response = await client.get_async_httpx_client().request(
-        **kwargs
-    )
+    response = await client.get_async_httpx_client().request(**kwargs)
 
     return _build_response(client=client, response=response)
+
 
 async def asyncio(
     *,
     client: AuthenticatedClient,
     q: str,
-    limit: Union[Unset, int] = 20,
-
-) -> Optional[Union[Error, GetSearchDocumentsResponse200]]:
-    """ Full-text search the caller's document blocks
+    limit: Unset | int = 20,
+) -> Error | GetSearchDocumentsResponse200 | None:
+    """Full-text search the caller's document blocks
 
     Args:
         q (str):
@@ -199,12 +174,12 @@ async def asyncio(
 
     Returns:
         Union[Error, GetSearchDocumentsResponse200]
-     """
+    """
 
-
-    return (await asyncio_detailed(
-        client=client,
-q=q,
-limit=limit,
-
-    )).parsed
+    return (
+        await asyncio_detailed(
+            client=client,
+            q=q,
+            limit=limit,
+        )
+    ).parsed

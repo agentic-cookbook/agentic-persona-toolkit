@@ -1,60 +1,39 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar, cast
 
 from attrs import define as _attrs_define
-from attrs import field as _attrs_field
 
 from ..types import UNSET, Unset
-
-from ..types import UNSET, Unset
-from typing import cast, Union
-from typing import Union
-
-
-
-
-
 
 T = TypeVar("T", bound="PutPersonalJobsIdBody")
 
 
-
 @_attrs_define
 class PutPersonalJobsIdBody:
-    """ 
-        Attributes:
-            deleted_at (Union[None, Unset, str]):
-            ecosystem_id (Union[Unset, str]):
-            company (Union[Unset, str]):
-            role (Union[Unset, str]):
-            start_date (Union[Unset, str]):
-            end_date (Union[None, Unset, str]):
-            location (Union[Unset, str]):
-            description (Union[Unset, str]):
-            is_current (Union[Unset, bool]):
-     """
+    """
+    Attributes:
+        ecosystem_id (Union[Unset, str]):
+        company (Union[Unset, str]):
+        role (Union[Unset, str]):
+        start_date (Union[Unset, str]):
+        end_date (Union[None, Unset, str]):
+        location (Union[Unset, str]):
+        description (Union[Unset, str]):
+        is_current (Union[Unset, bool]):
+        sync_txid (Union[Unset, int]):
+    """
 
-    deleted_at: Union[None, Unset, str] = UNSET
-    ecosystem_id: Union[Unset, str] = UNSET
-    company: Union[Unset, str] = UNSET
-    role: Union[Unset, str] = UNSET
-    start_date: Union[Unset, str] = UNSET
-    end_date: Union[None, Unset, str] = UNSET
-    location: Union[Unset, str] = UNSET
-    description: Union[Unset, str] = UNSET
-    is_current: Union[Unset, bool] = UNSET
-
-
-
-
+    ecosystem_id: Unset | str = UNSET
+    company: Unset | str = UNSET
+    role: Unset | str = UNSET
+    start_date: Unset | str = UNSET
+    end_date: None | Unset | str = UNSET
+    location: Unset | str = UNSET
+    description: Unset | str = UNSET
+    is_current: Unset | bool = UNSET
+    sync_txid: Unset | int = UNSET
 
     def to_dict(self) -> dict[str, Any]:
-        deleted_at: Union[None, Unset, str]
-        if isinstance(self.deleted_at, Unset):
-            deleted_at = UNSET
-        else:
-            deleted_at = self.deleted_at
-
         ecosystem_id = self.ecosystem_id
 
         company = self.company
@@ -63,7 +42,7 @@ class PutPersonalJobsIdBody:
 
         start_date = self.start_date
 
-        end_date: Union[None, Unset, str]
+        end_date: None | Unset | str
         if isinstance(self.end_date, Unset):
             end_date = UNSET
         else:
@@ -75,13 +54,11 @@ class PutPersonalJobsIdBody:
 
         is_current = self.is_current
 
+        sync_txid = self.sync_txid
 
         field_dict: dict[str, Any] = {}
 
-        field_dict.update({
-        })
-        if deleted_at is not UNSET:
-            field_dict["deletedAt"] = deleted_at
+        field_dict.update({})
         if ecosystem_id is not UNSET:
             field_dict["ecosystemId"] = ecosystem_id
         if company is not UNSET:
@@ -98,24 +75,14 @@ class PutPersonalJobsIdBody:
             field_dict["description"] = description
         if is_current is not UNSET:
             field_dict["isCurrent"] = is_current
+        if sync_txid is not UNSET:
+            field_dict["syncTxid"] = sync_txid
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
-        def _parse_deleted_at(data: object) -> Union[None, Unset, str]:
-            if data is None:
-                return data
-            if isinstance(data, Unset):
-                return data
-            return cast(Union[None, Unset, str], data)
-
-        deleted_at = _parse_deleted_at(d.pop("deletedAt", UNSET))
-
-
         ecosystem_id = d.pop("ecosystemId", UNSET)
 
         company = d.pop("company", UNSET)
@@ -124,15 +91,14 @@ class PutPersonalJobsIdBody:
 
         start_date = d.pop("startDate", UNSET)
 
-        def _parse_end_date(data: object) -> Union[None, Unset, str]:
+        def _parse_end_date(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         end_date = _parse_end_date(d.pop("endDate", UNSET))
-
 
         location = d.pop("location", UNSET)
 
@@ -140,8 +106,9 @@ class PutPersonalJobsIdBody:
 
         is_current = d.pop("isCurrent", UNSET)
 
+        sync_txid = d.pop("syncTxid", UNSET)
+
         put_personal_jobs_id_body = cls(
-            deleted_at=deleted_at,
             ecosystem_id=ecosystem_id,
             company=company,
             role=role,
@@ -150,7 +117,7 @@ class PutPersonalJobsIdBody:
             location=location,
             description=description,
             is_current=is_current,
+            sync_txid=sync_txid,
         )
 
         return put_personal_jobs_id_body
-

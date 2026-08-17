@@ -1,39 +1,33 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
+from ..models.put_notifications_preferences_body_preferences_item_category import (
+    PutNotificationsPreferencesBodyPreferencesItemCategory,
+)
 from ..types import UNSET, Unset
-
-from ..models.put_notifications_preferences_body_preferences_item_category import PutNotificationsPreferencesBodyPreferencesItemCategory
-
-
-
-
-
 
 T = TypeVar("T", bound="PutNotificationsPreferencesBodyPreferencesItem")
 
 
-
 @_attrs_define
 class PutNotificationsPreferencesBodyPreferencesItem:
-    """ 
-        Attributes:
-            category (PutNotificationsPreferencesBodyPreferencesItemCategory):
-            email (bool):
-            sms (bool):
-     """
+    """
+    Attributes:
+        category (PutNotificationsPreferencesBodyPreferencesItemCategory):
+        email (bool):
+        sms (bool):
+        in_app (Union[Unset, bool]): In-app (inbox) delivery for this category. Omitted means true — the PUT replaces
+            the row wholesale, so a client that edits only email/sms must send back the value it read.
+    """
 
     category: PutNotificationsPreferencesBodyPreferencesItemCategory
     email: bool
     sms: bool
+    in_app: Unset | bool = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         category = self.category.value
@@ -42,37 +36,39 @@ class PutNotificationsPreferencesBodyPreferencesItem:
 
         sms = self.sms
 
+        in_app = self.in_app
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "category": category,
-            "email": email,
-            "sms": sms,
-        })
+        field_dict.update(
+            {
+                "category": category,
+                "email": email,
+                "sms": sms,
+            }
+        )
+        if in_app is not UNSET:
+            field_dict["inApp"] = in_app
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
         category = PutNotificationsPreferencesBodyPreferencesItemCategory(d.pop("category"))
 
-
-
-
         email = d.pop("email")
 
         sms = d.pop("sms")
+
+        in_app = d.pop("inApp", UNSET)
 
         put_notifications_preferences_body_preferences_item = cls(
             category=category,
             email=email,
             sms=sms,
+            in_app=in_app,
         )
-
 
         put_notifications_preferences_body_preferences_item.additional_properties = d
         return put_notifications_preferences_body_preferences_item

@@ -1,61 +1,46 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar, cast
 
 from attrs import define as _attrs_define
-from attrs import field as _attrs_field
-
-from ..types import UNSET, Unset
-
-from typing import cast, Union
-
-
-
-
-
 
 T = TypeVar("T", bound="GetSystemAuditEventsIdResponse200")
 
 
-
 @_attrs_define
 class GetSystemAuditEventsIdResponse200:
-    """ 
-        Attributes:
-            id (str):
-            ecosystem_id (Union[None, str]):
-            developer_id (Union[None, str]):
-            actor_user_id (Union[None, str]):
-            event_type (str):
-            payload (str):
-            ip_address (str):
-            user_agent (str):
-            created_at (str):
-     """
+    """
+    Attributes:
+        id (str):
+        ecosystem_id (Union[None, str]):
+        developer_id (Union[None, str]):
+        actor_user_id (Union[None, str]):
+        event_type (str):
+        payload (str):
+        ip_address (str):
+        user_agent (str):
+        created_at (str):
+    """
 
     id: str
-    ecosystem_id: Union[None, str]
-    developer_id: Union[None, str]
-    actor_user_id: Union[None, str]
+    ecosystem_id: None | str
+    developer_id: None | str
+    actor_user_id: None | str
     event_type: str
     payload: str
     ip_address: str
     user_agent: str
     created_at: str
 
-
-
-
-
     def to_dict(self) -> dict[str, Any]:
         id = self.id
 
-        ecosystem_id: Union[None, str]
+        ecosystem_id: None | str
         ecosystem_id = self.ecosystem_id
 
-        developer_id: Union[None, str]
+        developer_id: None | str
         developer_id = self.developer_id
 
-        actor_user_id: Union[None, str]
+        actor_user_id: None | str
         actor_user_id = self.actor_user_id
 
         event_type = self.event_type
@@ -68,53 +53,49 @@ class GetSystemAuditEventsIdResponse200:
 
         created_at = self.created_at
 
-
         field_dict: dict[str, Any] = {}
 
-        field_dict.update({
-            "id": id,
-            "ecosystemId": ecosystem_id,
-            "developerId": developer_id,
-            "actorUserId": actor_user_id,
-            "eventType": event_type,
-            "payload": payload,
-            "ipAddress": ip_address,
-            "userAgent": user_agent,
-            "createdAt": created_at,
-        })
+        field_dict.update(
+            {
+                "id": id,
+                "ecosystemId": ecosystem_id,
+                "developerId": developer_id,
+                "actorUserId": actor_user_id,
+                "eventType": event_type,
+                "payload": payload,
+                "ipAddress": ip_address,
+                "userAgent": user_agent,
+                "createdAt": created_at,
+            }
+        )
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
         id = d.pop("id")
 
-        def _parse_ecosystem_id(data: object) -> Union[None, str]:
+        def _parse_ecosystem_id(data: object) -> None | str:
             if data is None:
                 return data
-            return cast(Union[None, str], data)
+            return cast(None | str, data)
 
         ecosystem_id = _parse_ecosystem_id(d.pop("ecosystemId"))
 
-
-        def _parse_developer_id(data: object) -> Union[None, str]:
+        def _parse_developer_id(data: object) -> None | str:
             if data is None:
                 return data
-            return cast(Union[None, str], data)
+            return cast(None | str, data)
 
         developer_id = _parse_developer_id(d.pop("developerId"))
 
-
-        def _parse_actor_user_id(data: object) -> Union[None, str]:
+        def _parse_actor_user_id(data: object) -> None | str:
             if data is None:
                 return data
-            return cast(Union[None, str], data)
+            return cast(None | str, data)
 
         actor_user_id = _parse_actor_user_id(d.pop("actorUserId"))
-
 
         event_type = d.pop("eventType")
 
@@ -139,4 +120,3 @@ class GetSystemAuditEventsIdResponse200:
         )
 
         return get_system_audit_events_id_response_200
-

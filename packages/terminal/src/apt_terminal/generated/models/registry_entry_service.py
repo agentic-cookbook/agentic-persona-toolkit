@@ -1,0 +1,219 @@
+from collections.abc import Mapping
+from typing import Any, TypeVar, cast
+
+from attrs import define as _attrs_define
+from attrs import field as _attrs_field
+
+from ..models.registry_entry_service_delivery_mode import RegistryEntryServiceDeliveryMode
+from ..models.registry_entry_service_pricing_model import RegistryEntryServicePricingModel
+from ..types import UNSET, Unset
+
+T = TypeVar("T", bound="RegistryEntryService")
+
+
+@_attrs_define
+class RegistryEntryService:
+    """
+    Attributes:
+        id (str):
+        ecosystem_id (str):
+        entry_id (str):
+        title (str):
+        description (str):
+        pricing_model (RegistryEntryServicePricingModel):
+        currency (str):
+        unit (str):
+        delivery_mode (RegistryEntryServiceDeliveryMode):
+        sort_order (int):
+        created_at (str):
+        updated_at (str):
+        sync_version (int):
+        price_min (Union[None, Unset, int]):
+        price_max (Union[None, Unset, int]):
+        deleted_at (Union[None, Unset, str]):
+    """
+
+    id: str
+    ecosystem_id: str
+    entry_id: str
+    title: str
+    description: str
+    pricing_model: RegistryEntryServicePricingModel
+    currency: str
+    unit: str
+    delivery_mode: RegistryEntryServiceDeliveryMode
+    sort_order: int
+    created_at: str
+    updated_at: str
+    sync_version: int
+    price_min: None | Unset | int = UNSET
+    price_max: None | Unset | int = UNSET
+    deleted_at: None | Unset | str = UNSET
+    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
+
+    def to_dict(self) -> dict[str, Any]:
+        id = self.id
+
+        ecosystem_id = self.ecosystem_id
+
+        entry_id = self.entry_id
+
+        title = self.title
+
+        description = self.description
+
+        pricing_model = self.pricing_model.value
+
+        currency = self.currency
+
+        unit = self.unit
+
+        delivery_mode = self.delivery_mode.value
+
+        sort_order = self.sort_order
+
+        created_at = self.created_at
+
+        updated_at = self.updated_at
+
+        sync_version = self.sync_version
+
+        price_min: None | Unset | int
+        if isinstance(self.price_min, Unset):
+            price_min = UNSET
+        else:
+            price_min = self.price_min
+
+        price_max: None | Unset | int
+        if isinstance(self.price_max, Unset):
+            price_max = UNSET
+        else:
+            price_max = self.price_max
+
+        deleted_at: None | Unset | str
+        if isinstance(self.deleted_at, Unset):
+            deleted_at = UNSET
+        else:
+            deleted_at = self.deleted_at
+
+        field_dict: dict[str, Any] = {}
+        field_dict.update(self.additional_properties)
+        field_dict.update(
+            {
+                "id": id,
+                "ecosystemId": ecosystem_id,
+                "entryId": entry_id,
+                "title": title,
+                "description": description,
+                "pricingModel": pricing_model,
+                "currency": currency,
+                "unit": unit,
+                "deliveryMode": delivery_mode,
+                "sortOrder": sort_order,
+                "createdAt": created_at,
+                "updatedAt": updated_at,
+                "syncVersion": sync_version,
+            }
+        )
+        if price_min is not UNSET:
+            field_dict["priceMin"] = price_min
+        if price_max is not UNSET:
+            field_dict["priceMax"] = price_max
+        if deleted_at is not UNSET:
+            field_dict["deletedAt"] = deleted_at
+
+        return field_dict
+
+    @classmethod
+    def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
+        d = dict(src_dict)
+        id = d.pop("id")
+
+        ecosystem_id = d.pop("ecosystemId")
+
+        entry_id = d.pop("entryId")
+
+        title = d.pop("title")
+
+        description = d.pop("description")
+
+        pricing_model = RegistryEntryServicePricingModel(d.pop("pricingModel"))
+
+        currency = d.pop("currency")
+
+        unit = d.pop("unit")
+
+        delivery_mode = RegistryEntryServiceDeliveryMode(d.pop("deliveryMode"))
+
+        sort_order = d.pop("sortOrder")
+
+        created_at = d.pop("createdAt")
+
+        updated_at = d.pop("updatedAt")
+
+        sync_version = d.pop("syncVersion")
+
+        def _parse_price_min(data: object) -> None | Unset | int:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(None | Unset | int, data)
+
+        price_min = _parse_price_min(d.pop("priceMin", UNSET))
+
+        def _parse_price_max(data: object) -> None | Unset | int:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(None | Unset | int, data)
+
+        price_max = _parse_price_max(d.pop("priceMax", UNSET))
+
+        def _parse_deleted_at(data: object) -> None | Unset | str:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(None | Unset | str, data)
+
+        deleted_at = _parse_deleted_at(d.pop("deletedAt", UNSET))
+
+        registry_entry_service = cls(
+            id=id,
+            ecosystem_id=ecosystem_id,
+            entry_id=entry_id,
+            title=title,
+            description=description,
+            pricing_model=pricing_model,
+            currency=currency,
+            unit=unit,
+            delivery_mode=delivery_mode,
+            sort_order=sort_order,
+            created_at=created_at,
+            updated_at=updated_at,
+            sync_version=sync_version,
+            price_min=price_min,
+            price_max=price_max,
+            deleted_at=deleted_at,
+        )
+
+        registry_entry_service.additional_properties = d
+        return registry_entry_service
+
+    @property
+    def additional_keys(self) -> list[str]:
+        return list(self.additional_properties.keys())
+
+    def __getitem__(self, key: str) -> Any:
+        return self.additional_properties[key]
+
+    def __setitem__(self, key: str, value: Any) -> None:
+        self.additional_properties[key] = value
+
+    def __delitem__(self, key: str) -> None:
+        del self.additional_properties[key]
+
+    def __contains__(self, key: str) -> bool:
+        return key in self.additional_properties

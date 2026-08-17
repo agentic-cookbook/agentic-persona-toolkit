@@ -1,117 +1,99 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import TYPE_CHECKING, Any, TypeVar, Union, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 from ..types import UNSET, Unset
 
-from ..types import UNSET, Unset
-from typing import cast
-from typing import Union
-
 if TYPE_CHECKING:
-  from ..models.post_content_markdown_body_author import PostContentMarkdownBodyAuthor
-
-
-
+    from ..models.post_content_markdown_body_author import PostContentMarkdownBodyAuthor
 
 
 T = TypeVar("T", bound="PostContentMarkdownBody")
 
 
-
 @_attrs_define
 class PostContentMarkdownBody:
-    """ 
-        Attributes:
-            content (str): Full raw markdown (stored byte-exact).
-            title (Union[Unset, str]): Optional; derived from frontmatter/H1 if omitted.
-            category (Union[Unset, str]): Optional classification label.
-            tags (Union[Unset, list[str]]): Optional tag set (trimmed + de-duplicated server-side).
-            author (Union[Unset, PostContentMarkdownBodyAuthor]): Author of this revision; omit to attribute to the calling
-                customer. customer/user are pinned to the caller; other types are caller-asserted (unverified).
-     """
+    """
+    Attributes:
+        content (str): Full raw markdown (stored byte-exact). The title is derived from it — see the response `title`.
+        category (Union[Unset, str]): Optional classification label.
+        tags (Union[Unset, list[str]]): Optional tag set (trimmed + de-duplicated server-side).
+        author (Union[Unset, PostContentMarkdownBodyAuthor]): Author of this revision; omit to attribute to the calling
+            customer. customer/user are pinned to the caller; other types are caller-asserted (unverified).
+        note (Union[Unset, bool]): Send `true` to file the new document in the owner's `notes` storage bucket (mints its
+            content.notes marker). It stays an ordinary markdown document in every other respect — same versions, same
+            category/tags — and `?noted=true` is how you list them back.
+    """
 
     content: str
-    title: Union[Unset, str] = UNSET
-    category: Union[Unset, str] = UNSET
-    tags: Union[Unset, list[str]] = UNSET
-    author: Union[Unset, 'PostContentMarkdownBodyAuthor'] = UNSET
+    category: Unset | str = UNSET
+    tags: Unset | list[str] = UNSET
+    author: Union[Unset, "PostContentMarkdownBodyAuthor"] = UNSET
+    note: Unset | bool = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
-
-
-
-
     def to_dict(self) -> dict[str, Any]:
-        from ..models.post_content_markdown_body_author import PostContentMarkdownBodyAuthor
         content = self.content
-
-        title = self.title
 
         category = self.category
 
-        tags: Union[Unset, list[str]] = UNSET
+        tags: Unset | list[str] = UNSET
         if not isinstance(self.tags, Unset):
             tags = self.tags
 
-
-
-        author: Union[Unset, dict[str, Any]] = UNSET
+        author: Unset | dict[str, Any] = UNSET
         if not isinstance(self.author, Unset):
             author = self.author.to_dict()
 
+        note = self.note
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "content": content,
-        })
-        if title is not UNSET:
-            field_dict["title"] = title
+        field_dict.update(
+            {
+                "content": content,
+            }
+        )
         if category is not UNSET:
             field_dict["category"] = category
         if tags is not UNSET:
             field_dict["tags"] = tags
         if author is not UNSET:
             field_dict["author"] = author
+        if note is not UNSET:
+            field_dict["note"] = note
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.post_content_markdown_body_author import PostContentMarkdownBodyAuthor
+
         d = dict(src_dict)
         content = d.pop("content")
-
-        title = d.pop("title", UNSET)
 
         category = d.pop("category", UNSET)
 
         tags = cast(list[str], d.pop("tags", UNSET))
 
-
         _author = d.pop("author", UNSET)
-        author: Union[Unset, PostContentMarkdownBodyAuthor]
-        if isinstance(_author,  Unset):
+        author: Unset | PostContentMarkdownBodyAuthor
+        if isinstance(_author, Unset):
             author = UNSET
         else:
             author = PostContentMarkdownBodyAuthor.from_dict(_author)
 
-
-
+        note = d.pop("note", UNSET)
 
         post_content_markdown_body = cls(
             content=content,
-            title=title,
             category=category,
             tags=tags,
             author=author,
+            note=note,
         )
-
 
         post_content_markdown_body.additional_properties = d
         return post_content_markdown_body

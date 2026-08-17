@@ -1,49 +1,35 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
-
-
-
-
-
-
-
 T = TypeVar("T", bound="ChatTokenEvent")
-
 
 
 @_attrs_define
 class ChatTokenEvent:
-    """ token — a chunk of streamed assistant text
+    """token — a chunk of streamed assistant text
 
-        Attributes:
-            text (str):
-     """
+    Attributes:
+        text (str):
+    """
 
     text: str
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
-
-
-
-
     def to_dict(self) -> dict[str, Any]:
         text = self.text
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "text": text,
-        })
+        field_dict.update(
+            {
+                "text": text,
+            }
+        )
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -53,7 +39,6 @@ class ChatTokenEvent:
         chat_token_event = cls(
             text=text,
         )
-
 
         chat_token_event.additional_properties = d
         return chat_token_event

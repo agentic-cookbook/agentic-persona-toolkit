@@ -1,51 +1,44 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import TYPE_CHECKING, Any, TypeVar, Union, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
-
 from ..models.markdown_document_version_owner_kind import MarkdownDocumentVersionOwnerKind
 from ..types import UNSET, Unset
-from typing import cast
-from typing import cast, Union
-from typing import Union
 
 if TYPE_CHECKING:
-  from ..models.markdown_document_version_frontmatter_type_0 import MarkdownDocumentVersionFrontmatterType0
-
-
-
+    from ..models.markdown_document_version_frontmatter_type_0 import (
+        MarkdownDocumentVersionFrontmatterType0,
+    )
 
 
 T = TypeVar("T", bound="MarkdownDocumentVersion")
 
 
-
 @_attrs_define
 class MarkdownDocumentVersion:
-    """ 
-        Attributes:
-            id (str):
-            document_id (str):
-            customer_id (str): The revision WRITER.
-            ecosystem_id (str):
-            owner_kind (MarkdownDocumentVersionOwnerKind): Inherited from the head document at write.
-            owner_id (str): Inherited from the head document at write.
-            version (int):
-            title (str): Document title at this revision (full-state snapshot).
-            content (str):
-            content_hash (str):
-            size_bytes (int):
-            created_at (str):
-            is_deleted (bool):
-            deleted_at (Union[None, Unset, str]):
-            frontmatter (Union['MarkdownDocumentVersionFrontmatterType0', None, Unset]):
-            author_type (Union[None, Unset, str]):
-            author_id (Union[None, Unset, str]):
-            author_name (Union[None, Unset, str]):
-     """
+    """
+    Attributes:
+        id (str):
+        document_id (str):
+        customer_id (str): The revision WRITER.
+        ecosystem_id (str):
+        owner_kind (MarkdownDocumentVersionOwnerKind): Inherited from the head document at write.
+        owner_id (str): Inherited from the head document at write.
+        version (int):
+        title (str): Document title at this revision (full-state snapshot).
+        content (str):
+        content_hash (str):
+        size_bytes (int):
+        created_at (str):
+        is_deleted (bool):
+        deleted_at (Union[None, Unset, str]):
+        frontmatter (Union['MarkdownDocumentVersionFrontmatterType0', None, Unset]):
+        author_type (Union[None, Unset, str]):
+        author_id (Union[None, Unset, str]):
+        author_name (Union[None, Unset, str]):
+    """
 
     id: str
     document_id: str
@@ -60,19 +53,18 @@ class MarkdownDocumentVersion:
     size_bytes: int
     created_at: str
     is_deleted: bool
-    deleted_at: Union[None, Unset, str] = UNSET
-    frontmatter: Union['MarkdownDocumentVersionFrontmatterType0', None, Unset] = UNSET
-    author_type: Union[None, Unset, str] = UNSET
-    author_id: Union[None, Unset, str] = UNSET
-    author_name: Union[None, Unset, str] = UNSET
+    deleted_at: None | Unset | str = UNSET
+    frontmatter: Union["MarkdownDocumentVersionFrontmatterType0", None, Unset] = UNSET
+    author_type: None | Unset | str = UNSET
+    author_id: None | Unset | str = UNSET
+    author_name: None | Unset | str = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
-
-
-
-
     def to_dict(self) -> dict[str, Any]:
-        from ..models.markdown_document_version_frontmatter_type_0 import MarkdownDocumentVersionFrontmatterType0
+        from ..models.markdown_document_version_frontmatter_type_0 import (
+            MarkdownDocumentVersionFrontmatterType0,
+        )
+
         id = self.id
 
         document_id = self.document_id
@@ -99,13 +91,13 @@ class MarkdownDocumentVersion:
 
         is_deleted = self.is_deleted
 
-        deleted_at: Union[None, Unset, str]
+        deleted_at: None | Unset | str
         if isinstance(self.deleted_at, Unset):
             deleted_at = UNSET
         else:
             deleted_at = self.deleted_at
 
-        frontmatter: Union[None, Unset, dict[str, Any]]
+        frontmatter: None | Unset | dict[str, Any]
         if isinstance(self.frontmatter, Unset):
             frontmatter = UNSET
         elif isinstance(self.frontmatter, MarkdownDocumentVersionFrontmatterType0):
@@ -113,42 +105,43 @@ class MarkdownDocumentVersion:
         else:
             frontmatter = self.frontmatter
 
-        author_type: Union[None, Unset, str]
+        author_type: None | Unset | str
         if isinstance(self.author_type, Unset):
             author_type = UNSET
         else:
             author_type = self.author_type
 
-        author_id: Union[None, Unset, str]
+        author_id: None | Unset | str
         if isinstance(self.author_id, Unset):
             author_id = UNSET
         else:
             author_id = self.author_id
 
-        author_name: Union[None, Unset, str]
+        author_name: None | Unset | str
         if isinstance(self.author_name, Unset):
             author_name = UNSET
         else:
             author_name = self.author_name
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "id": id,
-            "documentId": document_id,
-            "customerId": customer_id,
-            "ecosystemId": ecosystem_id,
-            "ownerKind": owner_kind,
-            "ownerId": owner_id,
-            "version": version,
-            "title": title,
-            "content": content,
-            "contentHash": content_hash,
-            "sizeBytes": size_bytes,
-            "createdAt": created_at,
-            "isDeleted": is_deleted,
-        })
+        field_dict.update(
+            {
+                "id": id,
+                "documentId": document_id,
+                "customerId": customer_id,
+                "ecosystemId": ecosystem_id,
+                "ownerKind": owner_kind,
+                "ownerId": owner_id,
+                "version": version,
+                "title": title,
+                "content": content,
+                "contentHash": content_hash,
+                "sizeBytes": size_bytes,
+                "createdAt": created_at,
+                "isDeleted": is_deleted,
+            }
+        )
         if deleted_at is not UNSET:
             field_dict["deletedAt"] = deleted_at
         if frontmatter is not UNSET:
@@ -162,11 +155,12 @@ class MarkdownDocumentVersion:
 
         return field_dict
 
-
-
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.markdown_document_version_frontmatter_type_0 import MarkdownDocumentVersionFrontmatterType0
+        from ..models.markdown_document_version_frontmatter_type_0 import (
+            MarkdownDocumentVersionFrontmatterType0,
+        )
+
         d = dict(src_dict)
         id = d.pop("id")
 
@@ -177,9 +171,6 @@ class MarkdownDocumentVersion:
         ecosystem_id = d.pop("ecosystemId")
 
         owner_kind = MarkdownDocumentVersionOwnerKind(d.pop("ownerKind"))
-
-
-
 
         owner_id = d.pop("ownerId")
 
@@ -197,17 +188,18 @@ class MarkdownDocumentVersion:
 
         is_deleted = d.pop("isDeleted")
 
-        def _parse_deleted_at(data: object) -> Union[None, Unset, str]:
+        def _parse_deleted_at(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         deleted_at = _parse_deleted_at(d.pop("deletedAt", UNSET))
 
-
-        def _parse_frontmatter(data: object) -> Union['MarkdownDocumentVersionFrontmatterType0', None, Unset]:
+        def _parse_frontmatter(
+            data: object,
+        ) -> Union["MarkdownDocumentVersionFrontmatterType0", None, Unset]:
             if data is None:
                 return data
             if isinstance(data, Unset):
@@ -217,45 +209,39 @@ class MarkdownDocumentVersion:
                     raise TypeError()
                 frontmatter_type_0 = MarkdownDocumentVersionFrontmatterType0.from_dict(data)
 
-
-
                 return frontmatter_type_0
-            except: # noqa: E722
+            except:  # noqa: E722
                 pass
-            return cast(Union['MarkdownDocumentVersionFrontmatterType0', None, Unset], data)
+            return cast(Union["MarkdownDocumentVersionFrontmatterType0", None, Unset], data)
 
         frontmatter = _parse_frontmatter(d.pop("frontmatter", UNSET))
 
-
-        def _parse_author_type(data: object) -> Union[None, Unset, str]:
+        def _parse_author_type(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         author_type = _parse_author_type(d.pop("authorType", UNSET))
 
-
-        def _parse_author_id(data: object) -> Union[None, Unset, str]:
+        def _parse_author_id(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         author_id = _parse_author_id(d.pop("authorId", UNSET))
 
-
-        def _parse_author_name(data: object) -> Union[None, Unset, str]:
+        def _parse_author_name(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         author_name = _parse_author_name(d.pop("authorName", UNSET))
-
 
         markdown_document_version = cls(
             id=id,
@@ -277,7 +263,6 @@ class MarkdownDocumentVersion:
             author_id=author_id,
             author_name=author_name,
         )
-
 
         markdown_document_version.additional_properties = d
         return markdown_document_version

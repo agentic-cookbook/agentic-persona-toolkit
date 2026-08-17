@@ -1,40 +1,27 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 from ..types import UNSET, Unset
 
-from ..types import UNSET, Unset
-from typing import Union
-
-
-
-
-
-
 T = TypeVar("T", bound="PostCustomerRegisterBody")
-
 
 
 @_attrs_define
 class PostCustomerRegisterBody:
-    """ 
-        Attributes:
-            email (str):
-            password (str): Must be at least 8 characters.
-            display_name (Union[Unset, str]):
-     """
+    """
+    Attributes:
+        email (str):
+        password (str): Must be at least 8 characters.
+        display_name (Union[Unset, str]):
+    """
 
     email: str
     password: str
-    display_name: Union[Unset, str] = UNSET
+    display_name: Unset | str = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         email = self.email
@@ -43,19 +30,18 @@ class PostCustomerRegisterBody:
 
         display_name = self.display_name
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "email": email,
-            "password": password,
-        })
+        field_dict.update(
+            {
+                "email": email,
+                "password": password,
+            }
+        )
         if display_name is not UNSET:
             field_dict["displayName"] = display_name
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -71,7 +57,6 @@ class PostCustomerRegisterBody:
             password=password,
             display_name=display_name,
         )
-
 
         post_customer_register_body.additional_properties = d
         return post_customer_register_body

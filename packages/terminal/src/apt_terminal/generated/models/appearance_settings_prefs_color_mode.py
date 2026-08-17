@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class AppearanceSettingsPrefsColorMode(str, Enum):
     AUTO = "auto"
     DARK = "dark"

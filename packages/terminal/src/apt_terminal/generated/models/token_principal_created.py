@@ -1,33 +1,24 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
-
-
-
-
-
-
-
 T = TypeVar("T", bound="TokenPrincipalCreated")
-
 
 
 @_attrs_define
 class TokenPrincipalCreated:
-    """ 
-        Attributes:
-            id (str):
-            rdid (str): reverse-domain id, e.g. token.<owner-slug>.<name>
-            slug (str):
-            description (str):
-            prefix (str): Non-secret leading chars of the secret, for display
-            bucket_rdid (str): the token’s own isolated bucket, e.g. storage.<owner-slug>.<name>
-            token (str): the raw `adh_…` secret — shown once, never again
-     """
+    """
+    Attributes:
+        id (str):
+        rdid (str): reverse-domain id, e.g. token.<owner-slug>.<name>
+        slug (str):
+        description (str):
+        prefix (str): Non-secret leading chars of the secret, for display
+        bucket_rdid (str): the token’s own isolated bucket, e.g. storage.<owner-slug>.<name>
+        token (str): the raw `adh_…` secret — shown once, never again
+    """
 
     id: str
     rdid: str
@@ -37,10 +28,6 @@ class TokenPrincipalCreated:
     bucket_rdid: str
     token: str
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         id = self.id
@@ -57,22 +44,21 @@ class TokenPrincipalCreated:
 
         token = self.token
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "id": id,
-            "rdid": rdid,
-            "slug": slug,
-            "description": description,
-            "prefix": prefix,
-            "bucketRdid": bucket_rdid,
-            "token": token,
-        })
+        field_dict.update(
+            {
+                "id": id,
+                "rdid": rdid,
+                "slug": slug,
+                "description": description,
+                "prefix": prefix,
+                "bucketRdid": bucket_rdid,
+                "token": token,
+            }
+        )
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -100,7 +86,6 @@ class TokenPrincipalCreated:
             bucket_rdid=bucket_rdid,
             token=token,
         )
-
 
         token_principal_created.additional_properties = d
         return token_principal_created

@@ -1,34 +1,28 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar, cast
 
 from attrs import define as _attrs_define
-from attrs import field as _attrs_field
-
-from ..types import UNSET, Unset
-
-
-
-
-
-
 
 T = TypeVar("T", bound="PostEcosystemApplicationsResponse201")
 
 
-
 @_attrs_define
 class PostEcosystemApplicationsResponse201:
-    """ 
-        Attributes:
-            id (str):
-            ecosystem_id (str):
-            slug (str):
-            display_name (str):
-            consumer_kind (str):
-            created_at (str):
-            updated_at (str):
-            is_deleted (bool):
-     """
+    """
+    Attributes:
+        id (str):
+        ecosystem_id (str):
+        slug (str):
+        display_name (str):
+        consumer_kind (str):
+        created_at (str):
+        updated_at (str):
+        is_deleted (bool):
+        deleted_at (Union[None, str]):
+        sync_version (int):
+        sync_stamped_at (Union[None, str]):
+        sync_txid (int):
+    """
 
     id: str
     ecosystem_id: str
@@ -38,10 +32,10 @@ class PostEcosystemApplicationsResponse201:
     created_at: str
     updated_at: str
     is_deleted: bool
-
-
-
-
+    deleted_at: None | str
+    sync_version: int
+    sync_stamped_at: None | str
+    sync_txid: int
 
     def to_dict(self) -> dict[str, Any]:
         id = self.id
@@ -60,23 +54,36 @@ class PostEcosystemApplicationsResponse201:
 
         is_deleted = self.is_deleted
 
+        deleted_at: None | str
+        deleted_at = self.deleted_at
+
+        sync_version = self.sync_version
+
+        sync_stamped_at: None | str
+        sync_stamped_at = self.sync_stamped_at
+
+        sync_txid = self.sync_txid
 
         field_dict: dict[str, Any] = {}
 
-        field_dict.update({
-            "id": id,
-            "ecosystemId": ecosystem_id,
-            "slug": slug,
-            "displayName": display_name,
-            "consumerKind": consumer_kind,
-            "createdAt": created_at,
-            "updatedAt": updated_at,
-            "isDeleted": is_deleted,
-        })
+        field_dict.update(
+            {
+                "id": id,
+                "ecosystemId": ecosystem_id,
+                "slug": slug,
+                "displayName": display_name,
+                "consumerKind": consumer_kind,
+                "createdAt": created_at,
+                "updatedAt": updated_at,
+                "isDeleted": is_deleted,
+                "deletedAt": deleted_at,
+                "syncVersion": sync_version,
+                "syncStampedAt": sync_stamped_at,
+                "syncTxid": sync_txid,
+            }
+        )
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -97,6 +104,24 @@ class PostEcosystemApplicationsResponse201:
 
         is_deleted = d.pop("isDeleted")
 
+        def _parse_deleted_at(data: object) -> None | str:
+            if data is None:
+                return data
+            return cast(None | str, data)
+
+        deleted_at = _parse_deleted_at(d.pop("deletedAt"))
+
+        sync_version = d.pop("syncVersion")
+
+        def _parse_sync_stamped_at(data: object) -> None | str:
+            if data is None:
+                return data
+            return cast(None | str, data)
+
+        sync_stamped_at = _parse_sync_stamped_at(d.pop("syncStampedAt"))
+
+        sync_txid = d.pop("syncTxid")
+
         post_ecosystem_applications_response_201 = cls(
             id=id,
             ecosystem_id=ecosystem_id,
@@ -106,7 +131,10 @@ class PostEcosystemApplicationsResponse201:
             created_at=created_at,
             updated_at=updated_at,
             is_deleted=is_deleted,
+            deleted_at=deleted_at,
+            sync_version=sync_version,
+            sync_stamped_at=sync_stamped_at,
+            sync_txid=sync_txid,
         )
 
         return post_ecosystem_applications_response_201
-

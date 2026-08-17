@@ -1,43 +1,33 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
-from attrs import field as _attrs_field
 
 from ..types import UNSET, Unset
-
-from ..types import UNSET, Unset
-from typing import Union
-
-
-
-
-
 
 T = TypeVar("T", bound="PutUsageUsageCountersScopePrincipalIdPeriodStartBody")
 
 
-
 @_attrs_define
 class PutUsageUsageCountersScopePrincipalIdPeriodStartBody:
-    """ 
-        Attributes:
-            scope (Union[Unset, str]):
-            principal_id (Union[Unset, str]):
-            period_start (Union[Unset, str]):
-            requests (Union[Unset, int]):
-            bytes_ (Union[Unset, int]):
-     """
+    """
+    Attributes:
+        scope (Union[Unset, str]):
+        principal_id (Union[Unset, str]):
+        period_start (Union[Unset, str]):
+        requests (Union[Unset, int]):
+        bytes_ (Union[Unset, int]):
+        tokens (Union[Unset, int]):
+        cost_micros (Union[Unset, int]):
+    """
 
-    scope: Union[Unset, str] = UNSET
-    principal_id: Union[Unset, str] = UNSET
-    period_start: Union[Unset, str] = UNSET
-    requests: Union[Unset, int] = UNSET
-    bytes_: Union[Unset, int] = UNSET
-
-
-
-
+    scope: Unset | str = UNSET
+    principal_id: Unset | str = UNSET
+    period_start: Unset | str = UNSET
+    requests: Unset | int = UNSET
+    bytes_: Unset | int = UNSET
+    tokens: Unset | int = UNSET
+    cost_micros: Unset | int = UNSET
 
     def to_dict(self) -> dict[str, Any]:
         scope = self.scope
@@ -50,11 +40,13 @@ class PutUsageUsageCountersScopePrincipalIdPeriodStartBody:
 
         bytes_ = self.bytes_
 
+        tokens = self.tokens
+
+        cost_micros = self.cost_micros
 
         field_dict: dict[str, Any] = {}
 
-        field_dict.update({
-        })
+        field_dict.update({})
         if scope is not UNSET:
             field_dict["scope"] = scope
         if principal_id is not UNSET:
@@ -65,10 +57,12 @@ class PutUsageUsageCountersScopePrincipalIdPeriodStartBody:
             field_dict["requests"] = requests
         if bytes_ is not UNSET:
             field_dict["bytes"] = bytes_
+        if tokens is not UNSET:
+            field_dict["tokens"] = tokens
+        if cost_micros is not UNSET:
+            field_dict["costMicros"] = cost_micros
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -83,13 +77,18 @@ class PutUsageUsageCountersScopePrincipalIdPeriodStartBody:
 
         bytes_ = d.pop("bytes", UNSET)
 
+        tokens = d.pop("tokens", UNSET)
+
+        cost_micros = d.pop("costMicros", UNSET)
+
         put_usage_usage_counters_scope_principal_id_period_start_body = cls(
             scope=scope,
             principal_id=principal_id,
             period_start=period_start,
             requests=requests,
             bytes_=bytes_,
+            tokens=tokens,
+            cost_micros=cost_micros,
         )
 
         return put_usage_usage_counters_scope_principal_id_period_start_body
-

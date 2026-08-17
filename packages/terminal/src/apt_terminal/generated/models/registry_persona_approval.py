@@ -1,72 +1,61 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import TYPE_CHECKING, Any, TypeVar, Union, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
-
 from ..models.registry_persona_approval_status import RegistryPersonaApprovalStatus
 from ..models.registry_persona_approval_subject_kind import RegistryPersonaApprovalSubjectKind
 from ..types import UNSET, Unset
-from typing import cast
-from typing import cast, Union
-from typing import Union
 
 if TYPE_CHECKING:
-  from ..models.registry_persona_approval_result_type_0 import RegistryPersonaApprovalResultType0
-  from ..models.registry_persona_approval_args import RegistryPersonaApprovalArgs
-
-
-
+    from ..models.registry_persona_approval_args import RegistryPersonaApprovalArgs
+    from ..models.registry_persona_approval_result_type_0 import RegistryPersonaApprovalResultType0
 
 
 T = TypeVar("T", bound="RegistryPersonaApproval")
 
 
-
 @_attrs_define
 class RegistryPersonaApproval:
-    """ 
-        Attributes:
-            id (str):
-            persona_id (str):
-            subject_kind (RegistryPersonaApprovalSubjectKind):
-            subject_eco (str):
-            tool_name (str): curated tool name, or the gateway tool 'adh_request'
-            args (RegistryPersonaApprovalArgs): the frozen invocation payload
-            status (RegistryPersonaApprovalStatus):
-            created_at (str):
-            subject_id (Union[None, Unset, str]): null for self/eco-scoped subjects
-            requested_by (Union[None, Unset, str]):
-            decided_by (Union[None, Unset, str]): the human who decided (null until then)
-            decided_at (Union[None, Unset, str]):
-            result (Union['RegistryPersonaApprovalResultType0', None, Unset]): the outcome once an approved action runs
-                (null until then)
-     """
+    """
+    Attributes:
+        id (str):
+        persona_id (str):
+        subject_kind (RegistryPersonaApprovalSubjectKind):
+        subject_eco (str):
+        tool_name (str): curated tool name, or the gateway tool 'adh_request'
+        args (RegistryPersonaApprovalArgs): the frozen invocation payload
+        status (RegistryPersonaApprovalStatus):
+        created_at (str):
+        subject_id (Union[None, Unset, str]): null for self/eco-scoped subjects
+        requested_by (Union[None, Unset, str]):
+        decided_by (Union[None, Unset, str]): the human who decided (null until then)
+        decided_at (Union[None, Unset, str]):
+        result (Union['RegistryPersonaApprovalResultType0', None, Unset]): the outcome once an approved action runs
+            (null until then)
+    """
 
     id: str
     persona_id: str
     subject_kind: RegistryPersonaApprovalSubjectKind
     subject_eco: str
     tool_name: str
-    args: 'RegistryPersonaApprovalArgs'
+    args: "RegistryPersonaApprovalArgs"
     status: RegistryPersonaApprovalStatus
     created_at: str
-    subject_id: Union[None, Unset, str] = UNSET
-    requested_by: Union[None, Unset, str] = UNSET
-    decided_by: Union[None, Unset, str] = UNSET
-    decided_at: Union[None, Unset, str] = UNSET
-    result: Union['RegistryPersonaApprovalResultType0', None, Unset] = UNSET
+    subject_id: None | Unset | str = UNSET
+    requested_by: None | Unset | str = UNSET
+    decided_by: None | Unset | str = UNSET
+    decided_at: None | Unset | str = UNSET
+    result: Union["RegistryPersonaApprovalResultType0", None, Unset] = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
-
-
-
-
     def to_dict(self) -> dict[str, Any]:
-        from ..models.registry_persona_approval_result_type_0 import RegistryPersonaApprovalResultType0
-        from ..models.registry_persona_approval_args import RegistryPersonaApprovalArgs
+        from ..models.registry_persona_approval_result_type_0 import (
+            RegistryPersonaApprovalResultType0,
+        )
+
         id = self.id
 
         persona_id = self.persona_id
@@ -83,31 +72,31 @@ class RegistryPersonaApproval:
 
         created_at = self.created_at
 
-        subject_id: Union[None, Unset, str]
+        subject_id: None | Unset | str
         if isinstance(self.subject_id, Unset):
             subject_id = UNSET
         else:
             subject_id = self.subject_id
 
-        requested_by: Union[None, Unset, str]
+        requested_by: None | Unset | str
         if isinstance(self.requested_by, Unset):
             requested_by = UNSET
         else:
             requested_by = self.requested_by
 
-        decided_by: Union[None, Unset, str]
+        decided_by: None | Unset | str
         if isinstance(self.decided_by, Unset):
             decided_by = UNSET
         else:
             decided_by = self.decided_by
 
-        decided_at: Union[None, Unset, str]
+        decided_at: None | Unset | str
         if isinstance(self.decided_at, Unset):
             decided_at = UNSET
         else:
             decided_at = self.decided_at
 
-        result: Union[None, Unset, dict[str, Any]]
+        result: None | Unset | dict[str, Any]
         if isinstance(self.result, Unset):
             result = UNSET
         elif isinstance(self.result, RegistryPersonaApprovalResultType0):
@@ -115,19 +104,20 @@ class RegistryPersonaApproval:
         else:
             result = self.result
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "id": id,
-            "personaId": persona_id,
-            "subjectKind": subject_kind,
-            "subjectEco": subject_eco,
-            "toolName": tool_name,
-            "args": args,
-            "status": status,
-            "createdAt": created_at,
-        })
+        field_dict.update(
+            {
+                "id": id,
+                "personaId": persona_id,
+                "subjectKind": subject_kind,
+                "subjectEco": subject_eco,
+                "toolName": tool_name,
+                "args": args,
+                "status": status,
+                "createdAt": created_at,
+            }
+        )
         if subject_id is not UNSET:
             field_dict["subjectId"] = subject_id
         if requested_by is not UNSET:
@@ -141,12 +131,13 @@ class RegistryPersonaApproval:
 
         return field_dict
 
-
-
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.registry_persona_approval_result_type_0 import RegistryPersonaApprovalResultType0
         from ..models.registry_persona_approval_args import RegistryPersonaApprovalArgs
+        from ..models.registry_persona_approval_result_type_0 import (
+            RegistryPersonaApprovalResultType0,
+        )
+
         d = dict(src_dict)
         id = d.pop("id")
 
@@ -154,66 +145,53 @@ class RegistryPersonaApproval:
 
         subject_kind = RegistryPersonaApprovalSubjectKind(d.pop("subjectKind"))
 
-
-
-
         subject_eco = d.pop("subjectEco")
 
         tool_name = d.pop("toolName")
 
         args = RegistryPersonaApprovalArgs.from_dict(d.pop("args"))
 
-
-
-
         status = RegistryPersonaApprovalStatus(d.pop("status"))
-
-
-
 
         created_at = d.pop("createdAt")
 
-        def _parse_subject_id(data: object) -> Union[None, Unset, str]:
+        def _parse_subject_id(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         subject_id = _parse_subject_id(d.pop("subjectId", UNSET))
 
-
-        def _parse_requested_by(data: object) -> Union[None, Unset, str]:
+        def _parse_requested_by(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         requested_by = _parse_requested_by(d.pop("requestedBy", UNSET))
 
-
-        def _parse_decided_by(data: object) -> Union[None, Unset, str]:
+        def _parse_decided_by(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         decided_by = _parse_decided_by(d.pop("decidedBy", UNSET))
 
-
-        def _parse_decided_at(data: object) -> Union[None, Unset, str]:
+        def _parse_decided_at(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         decided_at = _parse_decided_at(d.pop("decidedAt", UNSET))
 
-
-        def _parse_result(data: object) -> Union['RegistryPersonaApprovalResultType0', None, Unset]:
+        def _parse_result(data: object) -> Union["RegistryPersonaApprovalResultType0", None, Unset]:
             if data is None:
                 return data
             if isinstance(data, Unset):
@@ -223,15 +201,12 @@ class RegistryPersonaApproval:
                     raise TypeError()
                 result_type_0 = RegistryPersonaApprovalResultType0.from_dict(data)
 
-
-
                 return result_type_0
-            except: # noqa: E722
+            except:  # noqa: E722
                 pass
-            return cast(Union['RegistryPersonaApprovalResultType0', None, Unset], data)
+            return cast(Union["RegistryPersonaApprovalResultType0", None, Unset], data)
 
         result = _parse_result(d.pop("result", UNSET))
-
 
         registry_persona_approval = cls(
             id=id,
@@ -248,7 +223,6 @@ class RegistryPersonaApproval:
             decided_at=decided_at,
             result=result,
         )
-
 
         registry_persona_approval.additional_properties = d
         return registry_persona_approval

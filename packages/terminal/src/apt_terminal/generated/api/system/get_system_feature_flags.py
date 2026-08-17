@@ -1,35 +1,31 @@
 from http import HTTPStatus
-from typing import Any, Optional, Union, cast
+from typing import Any
 
 import httpx
 
-from ...client import AuthenticatedClient, Client
-from ...types import Response, UNSET
 from ... import errors
-
+from ...client import AuthenticatedClient, Client
 from ...models.feature_flag import FeatureFlag
-from ...types import UNSET, Unset
-from typing import cast
-from typing import Union
-
+from ...models.get_system_feature_flags_scope import GetSystemFeatureFlagsScope
+from ...types import UNSET, Response, Unset
 
 
 def _get_kwargs(
     *,
-    key: Union[Unset, str] = UNSET,
-
+    scope: Unset | GetSystemFeatureFlagsScope = UNSET,
+    key: Unset | str = UNSET,
 ) -> dict[str, Any]:
-    
-
-    
-
     params: dict[str, Any] = {}
+
+    json_scope: Unset | str = UNSET
+    if not isinstance(scope, Unset):
+        json_scope = scope.value
+
+    params["scope"] = json_scope
 
     params["key"] = key
 
-
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
-
 
     _kwargs: dict[str, Any] = {
         "method": "get",
@@ -37,19 +33,17 @@ def _get_kwargs(
         "params": params,
     }
 
-
     return _kwargs
 
 
-
-def _parse_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Optional[list['FeatureFlag']]:
+def _parse_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> list["FeatureFlag"] | None:
     if response.status_code == 200:
         response_200 = []
         _response_200 = response.json()
-        for response_200_item_data in (_response_200):
+        for response_200_item_data in _response_200:
             response_200_item = FeatureFlag.from_dict(response_200_item_data)
-
-
 
             response_200.append(response_200_item)
 
@@ -61,7 +55,9 @@ def _parse_response(*, client: Union[AuthenticatedClient, Client], response: htt
         return None
 
 
-def _build_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Response[list['FeatureFlag']]:
+def _build_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Response[list["FeatureFlag"]]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -72,13 +68,14 @@ def _build_response(*, client: Union[AuthenticatedClient, Client], response: htt
 
 def sync_detailed(
     *,
-    client: Union[AuthenticatedClient, Client],
-    key: Union[Unset, str] = UNSET,
-
-) -> Response[list['FeatureFlag']]:
-    """ List feature flags (public; optional ?key= exact-match filter)
+    client: AuthenticatedClient | Client,
+    scope: Unset | GetSystemFeatureFlagsScope = UNSET,
+    key: Unset | str = UNSET,
+) -> Response[list["FeatureFlag"]]:
+    """List feature flags (public; optional ?scope=system and ?key= exact-match filter)
 
     Args:
+        scope (Union[Unset, GetSystemFeatureFlagsScope]):
         key (Union[Unset, str]):
 
     Raises:
@@ -87,12 +84,11 @@ def sync_detailed(
 
     Returns:
         Response[list['FeatureFlag']]
-     """
-
+    """
 
     kwargs = _get_kwargs(
+        scope=scope,
         key=key,
-
     )
 
     response = client.get_httpx_client().request(
@@ -101,15 +97,17 @@ def sync_detailed(
 
     return _build_response(client=client, response=response)
 
+
 def sync(
     *,
-    client: Union[AuthenticatedClient, Client],
-    key: Union[Unset, str] = UNSET,
-
-) -> Optional[list['FeatureFlag']]:
-    """ List feature flags (public; optional ?key= exact-match filter)
+    client: AuthenticatedClient | Client,
+    scope: Unset | GetSystemFeatureFlagsScope = UNSET,
+    key: Unset | str = UNSET,
+) -> list["FeatureFlag"] | None:
+    """List feature flags (public; optional ?scope=system and ?key= exact-match filter)
 
     Args:
+        scope (Union[Unset, GetSystemFeatureFlagsScope]):
         key (Union[Unset, str]):
 
     Raises:
@@ -118,24 +116,25 @@ def sync(
 
     Returns:
         list['FeatureFlag']
-     """
-
+    """
 
     return sync_detailed(
         client=client,
-key=key,
-
+        scope=scope,
+        key=key,
     ).parsed
+
 
 async def asyncio_detailed(
     *,
-    client: Union[AuthenticatedClient, Client],
-    key: Union[Unset, str] = UNSET,
-
-) -> Response[list['FeatureFlag']]:
-    """ List feature flags (public; optional ?key= exact-match filter)
+    client: AuthenticatedClient | Client,
+    scope: Unset | GetSystemFeatureFlagsScope = UNSET,
+    key: Unset | str = UNSET,
+) -> Response[list["FeatureFlag"]]:
+    """List feature flags (public; optional ?scope=system and ?key= exact-match filter)
 
     Args:
+        scope (Union[Unset, GetSystemFeatureFlagsScope]):
         key (Union[Unset, str]):
 
     Raises:
@@ -144,29 +143,28 @@ async def asyncio_detailed(
 
     Returns:
         Response[list['FeatureFlag']]
-     """
-
+    """
 
     kwargs = _get_kwargs(
+        scope=scope,
         key=key,
-
     )
 
-    response = await client.get_async_httpx_client().request(
-        **kwargs
-    )
+    response = await client.get_async_httpx_client().request(**kwargs)
 
     return _build_response(client=client, response=response)
 
+
 async def asyncio(
     *,
-    client: Union[AuthenticatedClient, Client],
-    key: Union[Unset, str] = UNSET,
-
-) -> Optional[list['FeatureFlag']]:
-    """ List feature flags (public; optional ?key= exact-match filter)
+    client: AuthenticatedClient | Client,
+    scope: Unset | GetSystemFeatureFlagsScope = UNSET,
+    key: Unset | str = UNSET,
+) -> list["FeatureFlag"] | None:
+    """List feature flags (public; optional ?scope=system and ?key= exact-match filter)
 
     Args:
+        scope (Union[Unset, GetSystemFeatureFlagsScope]):
         key (Union[Unset, str]):
 
     Raises:
@@ -175,11 +173,12 @@ async def asyncio(
 
     Returns:
         list['FeatureFlag']
-     """
+    """
 
-
-    return (await asyncio_detailed(
-        client=client,
-key=key,
-
-    )).parsed
+    return (
+        await asyncio_detailed(
+            client=client,
+            scope=scope,
+            key=key,
+        )
+    ).parsed

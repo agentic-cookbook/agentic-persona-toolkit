@@ -1,39 +1,29 @@
 from http import HTTPStatus
-from typing import Any, Optional, Union, cast
+from typing import Any
 
 import httpx
 
-from ...client import AuthenticatedClient, Client
-from ...types import Response, UNSET
 from ... import errors
-
+from ...client import AuthenticatedClient, Client
 from ...models.error import Error
 from ...models.put_usage_storage_user_id_body import PutUsageStorageUserIdBody
 from ...models.usage_storage_quota_row import UsageStorageQuotaRow
-from typing import cast
-
+from ...types import Response
 
 
 def _get_kwargs(
     user_id: str,
     *,
     body: PutUsageStorageUserIdBody,
-
 ) -> dict[str, Any]:
     headers: dict[str, Any] = {}
 
-
-    
-
-    
-
     _kwargs: dict[str, Any] = {
         "method": "put",
-        "url": "/usage/storage/{user_id}".format(user_id=user_id,),
+        "url": f"/usage/storage/{user_id}",
     }
 
     _kwargs["json"] = body.to_dict()
-
 
     headers["Content-Type"] = "application/json"
 
@@ -41,33 +31,26 @@ def _get_kwargs(
     return _kwargs
 
 
-
-def _parse_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Optional[Union[Error, UsageStorageQuotaRow]]:
+def _parse_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Error | UsageStorageQuotaRow | None:
     if response.status_code == 200:
         response_200 = UsageStorageQuotaRow.from_dict(response.json())
-
-
 
         return response_200
 
     if response.status_code == 400:
         response_400 = Error.from_dict(response.json())
 
-
-
         return response_400
 
     if response.status_code == 401:
         response_401 = Error.from_dict(response.json())
 
-
-
         return response_401
 
     if response.status_code == 403:
         response_403 = Error.from_dict(response.json())
-
-
 
         return response_403
 
@@ -77,7 +60,9 @@ def _parse_response(*, client: Union[AuthenticatedClient, Client], response: htt
         return None
 
 
-def _build_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Response[Union[Error, UsageStorageQuotaRow]]:
+def _build_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Response[Error | UsageStorageQuotaRow]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -91,9 +76,8 @@ def sync_detailed(
     *,
     client: AuthenticatedClient,
     body: PutUsageStorageUserIdBody,
-
-) -> Response[Union[Error, UsageStorageQuotaRow]]:
-    """ Set a user's storage quota override (admin)
+) -> Response[Error | UsageStorageQuotaRow]:
+    """Set a user's storage quota override (admin)
 
     Args:
         user_id (str):
@@ -105,13 +89,11 @@ def sync_detailed(
 
     Returns:
         Response[Union[Error, UsageStorageQuotaRow]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         user_id=user_id,
-body=body,
-
+        body=body,
     )
 
     response = client.get_httpx_client().request(
@@ -120,14 +102,14 @@ body=body,
 
     return _build_response(client=client, response=response)
 
+
 def sync(
     user_id: str,
     *,
     client: AuthenticatedClient,
     body: PutUsageStorageUserIdBody,
-
-) -> Optional[Union[Error, UsageStorageQuotaRow]]:
-    """ Set a user's storage quota override (admin)
+) -> Error | UsageStorageQuotaRow | None:
+    """Set a user's storage quota override (admin)
 
     Args:
         user_id (str):
@@ -139,24 +121,22 @@ def sync(
 
     Returns:
         Union[Error, UsageStorageQuotaRow]
-     """
-
+    """
 
     return sync_detailed(
         user_id=user_id,
-client=client,
-body=body,
-
+        client=client,
+        body=body,
     ).parsed
+
 
 async def asyncio_detailed(
     user_id: str,
     *,
     client: AuthenticatedClient,
     body: PutUsageStorageUserIdBody,
-
-) -> Response[Union[Error, UsageStorageQuotaRow]]:
-    """ Set a user's storage quota override (admin)
+) -> Response[Error | UsageStorageQuotaRow]:
+    """Set a user's storage quota override (admin)
 
     Args:
         user_id (str):
@@ -168,29 +148,25 @@ async def asyncio_detailed(
 
     Returns:
         Response[Union[Error, UsageStorageQuotaRow]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         user_id=user_id,
-body=body,
-
+        body=body,
     )
 
-    response = await client.get_async_httpx_client().request(
-        **kwargs
-    )
+    response = await client.get_async_httpx_client().request(**kwargs)
 
     return _build_response(client=client, response=response)
+
 
 async def asyncio(
     user_id: str,
     *,
     client: AuthenticatedClient,
     body: PutUsageStorageUserIdBody,
-
-) -> Optional[Union[Error, UsageStorageQuotaRow]]:
-    """ Set a user's storage quota override (admin)
+) -> Error | UsageStorageQuotaRow | None:
+    """Set a user's storage quota override (admin)
 
     Args:
         user_id (str):
@@ -202,12 +178,12 @@ async def asyncio(
 
     Returns:
         Union[Error, UsageStorageQuotaRow]
-     """
+    """
 
-
-    return (await asyncio_detailed(
-        user_id=user_id,
-client=client,
-body=body,
-
-    )).parsed
+    return (
+        await asyncio_detailed(
+            user_id=user_id,
+            client=client,
+            body=body,
+        )
+    ).parsed

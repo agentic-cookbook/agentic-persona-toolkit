@@ -1,76 +1,57 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import TYPE_CHECKING, Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
-
-from typing import cast
-
 if TYPE_CHECKING:
-  from ..models.workspace_member import WorkspaceMember
-
-
-
+    from ..models.workspace_member import WorkspaceMember
 
 
 T = TypeVar("T", bound="GetWorkspacesSlugMembersResponse200")
 
 
-
 @_attrs_define
 class GetWorkspacesSlugMembersResponse200:
-    """ 
-        Attributes:
-            members (list['WorkspaceMember']):
-     """
+    """
+    Attributes:
+        members (list['WorkspaceMember']):
+    """
 
-    members: list['WorkspaceMember']
+    members: list["WorkspaceMember"]
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
-
-
-
-
     def to_dict(self) -> dict[str, Any]:
-        from ..models.workspace_member import WorkspaceMember
         members = []
         for members_item_data in self.members:
             members_item = members_item_data.to_dict()
             members.append(members_item)
 
-
-
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "members": members,
-        })
+        field_dict.update(
+            {
+                "members": members,
+            }
+        )
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.workspace_member import WorkspaceMember
+
         d = dict(src_dict)
         members = []
         _members = d.pop("members")
-        for members_item_data in (_members):
+        for members_item_data in _members:
             members_item = WorkspaceMember.from_dict(members_item_data)
 
-
-
             members.append(members_item)
-
 
         get_workspaces_slug_members_response_200 = cls(
             members=members,
         )
-
 
         get_workspaces_slug_members_response_200.additional_properties = d
         return get_workspaces_slug_members_response_200

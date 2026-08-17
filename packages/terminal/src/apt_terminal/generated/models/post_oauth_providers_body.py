@@ -1,64 +1,52 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import TYPE_CHECKING, Any, TypeVar, Union, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
-
 from ..models.post_oauth_providers_body_auth_type import PostOauthProvidersBodyAuthType
 from ..types import UNSET, Unset
-from typing import cast
-from typing import cast, Union
-from typing import Union
 
 if TYPE_CHECKING:
-  from ..models.post_oauth_providers_body_identity_mapping import PostOauthProvidersBodyIdentityMapping
-
-
-
+    from ..models.post_oauth_providers_body_identity_mapping import (
+        PostOauthProvidersBodyIdentityMapping,
+    )
 
 
 T = TypeVar("T", bound="PostOauthProvidersBody")
 
 
-
 @_attrs_define
 class PostOauthProvidersBody:
-    """ 
-        Attributes:
-            client_id (str):
-            client_secret (str):
-            template_slug (Union[Unset, str]):
-            slug (Union[Unset, str]):
-            display_name (Union[Unset, str]):
-            scopes (Union[Unset, list[str]]):
-            authorize_url (Union[None, Unset, str]):
-            token_url (Union[None, Unset, str]):
-            userinfo_url (Union[None, Unset, str]):
-            auth_type (Union[Unset, PostOauthProvidersBodyAuthType]):
-            identity_mapping (Union[Unset, PostOauthProvidersBodyIdentityMapping]):
-     """
+    """
+    Attributes:
+        client_id (str):
+        client_secret (str):
+        template_slug (Union[Unset, str]):
+        slug (Union[Unset, str]):
+        display_name (Union[Unset, str]):
+        scopes (Union[Unset, list[str]]):
+        authorize_url (Union[None, Unset, str]):
+        token_url (Union[None, Unset, str]):
+        userinfo_url (Union[None, Unset, str]):
+        auth_type (Union[Unset, PostOauthProvidersBodyAuthType]):
+        identity_mapping (Union[Unset, PostOauthProvidersBodyIdentityMapping]):
+    """
 
     client_id: str
     client_secret: str
-    template_slug: Union[Unset, str] = UNSET
-    slug: Union[Unset, str] = UNSET
-    display_name: Union[Unset, str] = UNSET
-    scopes: Union[Unset, list[str]] = UNSET
-    authorize_url: Union[None, Unset, str] = UNSET
-    token_url: Union[None, Unset, str] = UNSET
-    userinfo_url: Union[None, Unset, str] = UNSET
-    auth_type: Union[Unset, PostOauthProvidersBodyAuthType] = UNSET
-    identity_mapping: Union[Unset, 'PostOauthProvidersBodyIdentityMapping'] = UNSET
+    template_slug: Unset | str = UNSET
+    slug: Unset | str = UNSET
+    display_name: Unset | str = UNSET
+    scopes: Unset | list[str] = UNSET
+    authorize_url: None | Unset | str = UNSET
+    token_url: None | Unset | str = UNSET
+    userinfo_url: None | Unset | str = UNSET
+    auth_type: Unset | PostOauthProvidersBodyAuthType = UNSET
+    identity_mapping: Union[Unset, "PostOauthProvidersBodyIdentityMapping"] = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
-
-
-
-
     def to_dict(self) -> dict[str, Any]:
-        from ..models.post_oauth_providers_body_identity_mapping import PostOauthProvidersBodyIdentityMapping
         client_id = self.client_id
 
         client_secret = self.client_secret
@@ -69,46 +57,44 @@ class PostOauthProvidersBody:
 
         display_name = self.display_name
 
-        scopes: Union[Unset, list[str]] = UNSET
+        scopes: Unset | list[str] = UNSET
         if not isinstance(self.scopes, Unset):
             scopes = self.scopes
 
-
-
-        authorize_url: Union[None, Unset, str]
+        authorize_url: None | Unset | str
         if isinstance(self.authorize_url, Unset):
             authorize_url = UNSET
         else:
             authorize_url = self.authorize_url
 
-        token_url: Union[None, Unset, str]
+        token_url: None | Unset | str
         if isinstance(self.token_url, Unset):
             token_url = UNSET
         else:
             token_url = self.token_url
 
-        userinfo_url: Union[None, Unset, str]
+        userinfo_url: None | Unset | str
         if isinstance(self.userinfo_url, Unset):
             userinfo_url = UNSET
         else:
             userinfo_url = self.userinfo_url
 
-        auth_type: Union[Unset, str] = UNSET
+        auth_type: Unset | str = UNSET
         if not isinstance(self.auth_type, Unset):
             auth_type = self.auth_type.value
 
-
-        identity_mapping: Union[Unset, dict[str, Any]] = UNSET
+        identity_mapping: Unset | dict[str, Any] = UNSET
         if not isinstance(self.identity_mapping, Unset):
             identity_mapping = self.identity_mapping.to_dict()
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "clientId": client_id,
-            "clientSecret": client_secret,
-        })
+        field_dict.update(
+            {
+                "clientId": client_id,
+                "clientSecret": client_secret,
+            }
+        )
         if template_slug is not UNSET:
             field_dict["templateSlug"] = template_slug
         if slug is not UNSET:
@@ -130,11 +116,12 @@ class PostOauthProvidersBody:
 
         return field_dict
 
-
-
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.post_oauth_providers_body_identity_mapping import PostOauthProvidersBodyIdentityMapping
+        from ..models.post_oauth_providers_body_identity_mapping import (
+            PostOauthProvidersBodyIdentityMapping,
+        )
+
         d = dict(src_dict)
         client_id = d.pop("clientId")
 
@@ -148,56 +135,46 @@ class PostOauthProvidersBody:
 
         scopes = cast(list[str], d.pop("scopes", UNSET))
 
-
-        def _parse_authorize_url(data: object) -> Union[None, Unset, str]:
+        def _parse_authorize_url(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         authorize_url = _parse_authorize_url(d.pop("authorizeUrl", UNSET))
 
-
-        def _parse_token_url(data: object) -> Union[None, Unset, str]:
+        def _parse_token_url(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         token_url = _parse_token_url(d.pop("tokenUrl", UNSET))
 
-
-        def _parse_userinfo_url(data: object) -> Union[None, Unset, str]:
+        def _parse_userinfo_url(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         userinfo_url = _parse_userinfo_url(d.pop("userinfoUrl", UNSET))
 
-
         _auth_type = d.pop("authType", UNSET)
-        auth_type: Union[Unset, PostOauthProvidersBodyAuthType]
-        if isinstance(_auth_type,  Unset):
+        auth_type: Unset | PostOauthProvidersBodyAuthType
+        if isinstance(_auth_type, Unset):
             auth_type = UNSET
         else:
             auth_type = PostOauthProvidersBodyAuthType(_auth_type)
 
-
-
-
         _identity_mapping = d.pop("identityMapping", UNSET)
-        identity_mapping: Union[Unset, PostOauthProvidersBodyIdentityMapping]
-        if isinstance(_identity_mapping,  Unset):
+        identity_mapping: Unset | PostOauthProvidersBodyIdentityMapping
+        if isinstance(_identity_mapping, Unset):
             identity_mapping = UNSET
         else:
             identity_mapping = PostOauthProvidersBodyIdentityMapping.from_dict(_identity_mapping)
-
-
-
 
         post_oauth_providers_body = cls(
             client_id=client_id,
@@ -212,7 +189,6 @@ class PostOauthProvidersBody:
             auth_type=auth_type,
             identity_mapping=identity_mapping,
         )
-
 
         post_oauth_providers_body.additional_properties = d
         return post_oauth_providers_body

@@ -1,38 +1,25 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
-
-
-
-
-
-
-
 T = TypeVar("T", bound="UsageStorageQuota")
-
 
 
 @_attrs_define
 class UsageStorageQuota:
-    """ 
-        Attributes:
-            quota_bytes (int): Per-user quota in bytes (override or 5 GB default)
-            usage_bytes (int): Live sum of ready, non-deleted attachment bytes
-            available_bytes (int): max(0, quotaBytes - usageBytes)
-     """
+    """
+    Attributes:
+        quota_bytes (int): Per-user quota in bytes (override or 5 GB default)
+        usage_bytes (int): Live sum of ready, non-deleted attachment bytes
+        available_bytes (int): max(0, quotaBytes - usageBytes)
+    """
 
     quota_bytes: int
     usage_bytes: int
     available_bytes: int
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         quota_bytes = self.quota_bytes
@@ -41,18 +28,17 @@ class UsageStorageQuota:
 
         available_bytes = self.available_bytes
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "quotaBytes": quota_bytes,
-            "usageBytes": usage_bytes,
-            "availableBytes": available_bytes,
-        })
+        field_dict.update(
+            {
+                "quotaBytes": quota_bytes,
+                "usageBytes": usage_bytes,
+                "availableBytes": available_bytes,
+            }
+        )
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -68,7 +54,6 @@ class UsageStorageQuota:
             usage_bytes=usage_bytes,
             available_bytes=available_bytes,
         )
-
 
         usage_storage_quota.additional_properties = d
         return usage_storage_quota

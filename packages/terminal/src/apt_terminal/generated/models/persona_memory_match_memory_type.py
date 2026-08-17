@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class PersonaMemoryMatchMemoryType(str, Enum):
     FEEDBACK = "feedback"
     PROJECT = "project"

@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class FriendshipStatus(str, Enum):
     ACCEPTED = "accepted"
     DECLINED = "declined"

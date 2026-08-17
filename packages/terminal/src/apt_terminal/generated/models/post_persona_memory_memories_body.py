@@ -1,70 +1,54 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
-
-from attrs import define as _attrs_define
-from attrs import field as _attrs_field
-
-from ..types import UNSET, Unset
-
-from ..types import UNSET, Unset
-from typing import cast
-from typing import cast, Union
-from typing import Union
+from typing import Any, TypeVar, cast
 from uuid import UUID
 
+from attrs import define as _attrs_define
 
-
-
-
+from ..types import UNSET, Unset
 
 T = TypeVar("T", bound="PostPersonaMemoryMemoriesBody")
 
 
-
 @_attrs_define
 class PostPersonaMemoryMemoriesBody:
-    """ 
-        Attributes:
-            persona_id (UUID):
-            slug (str):
-            memory_type (str):
-            description (str):
-            body (str):
-            ecosystem_id (Union[Unset, str]):
-            deleted_at (Union[None, Unset, str]):
-            scope (Union[Unset, str]):
-            subject_table (Union[None, Unset, str]):
-            subject_id (Union[None, Unset, str]):
-            status (Union[Unset, str]):
-            supersedes_id (Union[None, Unset, str]):
-            source (Union[Unset, str]):
-            confidence (Union[Unset, int]):
-            tags (Union[Unset, list[str]]):
-            valid_from (Union[None, Unset, str]):
-            valid_to (Union[None, Unset, str]):
-     """
+    """
+    Attributes:
+        persona_id (UUID):
+        slug (str):
+        memory_type (str):
+        description (str):
+        body (str):
+        ecosystem_id (Union[Unset, str]):
+        scope (Union[Unset, str]):
+        subject_table (Union[None, Unset, str]):
+        subject_id (Union[None, Unset, str]):
+        status (Union[Unset, str]):
+        supersedes_id (Union[None, Unset, str]):
+        source (Union[Unset, str]):
+        confidence (Union[Unset, int]):
+        tags (Union[Unset, list[str]]):
+        valid_from (Union[None, Unset, str]):
+        valid_to (Union[None, Unset, str]):
+        sync_txid (Union[Unset, int]):
+    """
 
     persona_id: UUID
     slug: str
     memory_type: str
     description: str
     body: str
-    ecosystem_id: Union[Unset, str] = UNSET
-    deleted_at: Union[None, Unset, str] = UNSET
-    scope: Union[Unset, str] = UNSET
-    subject_table: Union[None, Unset, str] = UNSET
-    subject_id: Union[None, Unset, str] = UNSET
-    status: Union[Unset, str] = UNSET
-    supersedes_id: Union[None, Unset, str] = UNSET
-    source: Union[Unset, str] = UNSET
-    confidence: Union[Unset, int] = UNSET
-    tags: Union[Unset, list[str]] = UNSET
-    valid_from: Union[None, Unset, str] = UNSET
-    valid_to: Union[None, Unset, str] = UNSET
-
-
-
-
+    ecosystem_id: Unset | str = UNSET
+    scope: Unset | str = UNSET
+    subject_table: None | Unset | str = UNSET
+    subject_id: None | Unset | str = UNSET
+    status: Unset | str = UNSET
+    supersedes_id: None | Unset | str = UNSET
+    source: Unset | str = UNSET
+    confidence: Unset | int = UNSET
+    tags: Unset | list[str] = UNSET
+    valid_from: None | Unset | str = UNSET
+    valid_to: None | Unset | str = UNSET
+    sync_txid: Unset | int = UNSET
 
     def to_dict(self) -> dict[str, Any]:
         persona_id = str(self.persona_id)
@@ -79,21 +63,15 @@ class PostPersonaMemoryMemoriesBody:
 
         ecosystem_id = self.ecosystem_id
 
-        deleted_at: Union[None, Unset, str]
-        if isinstance(self.deleted_at, Unset):
-            deleted_at = UNSET
-        else:
-            deleted_at = self.deleted_at
-
         scope = self.scope
 
-        subject_table: Union[None, Unset, str]
+        subject_table: None | Unset | str
         if isinstance(self.subject_table, Unset):
             subject_table = UNSET
         else:
             subject_table = self.subject_table
 
-        subject_id: Union[None, Unset, str]
+        subject_id: None | Unset | str
         if isinstance(self.subject_id, Unset):
             subject_id = UNSET
         else:
@@ -101,7 +79,7 @@ class PostPersonaMemoryMemoriesBody:
 
         status = self.status
 
-        supersedes_id: Union[None, Unset, str]
+        supersedes_id: None | Unset | str
         if isinstance(self.supersedes_id, Unset):
             supersedes_id = UNSET
         else:
@@ -111,38 +89,37 @@ class PostPersonaMemoryMemoriesBody:
 
         confidence = self.confidence
 
-        tags: Union[Unset, list[str]] = UNSET
+        tags: Unset | list[str] = UNSET
         if not isinstance(self.tags, Unset):
             tags = self.tags
 
-
-
-        valid_from: Union[None, Unset, str]
+        valid_from: None | Unset | str
         if isinstance(self.valid_from, Unset):
             valid_from = UNSET
         else:
             valid_from = self.valid_from
 
-        valid_to: Union[None, Unset, str]
+        valid_to: None | Unset | str
         if isinstance(self.valid_to, Unset):
             valid_to = UNSET
         else:
             valid_to = self.valid_to
 
+        sync_txid = self.sync_txid
 
         field_dict: dict[str, Any] = {}
 
-        field_dict.update({
-            "personaId": persona_id,
-            "slug": slug,
-            "memoryType": memory_type,
-            "description": description,
-            "body": body,
-        })
+        field_dict.update(
+            {
+                "personaId": persona_id,
+                "slug": slug,
+                "memoryType": memory_type,
+                "description": description,
+                "body": body,
+            }
+        )
         if ecosystem_id is not UNSET:
             field_dict["ecosystemId"] = ecosystem_id
-        if deleted_at is not UNSET:
-            field_dict["deletedAt"] = deleted_at
         if scope is not UNSET:
             field_dict["scope"] = scope
         if subject_table is not UNSET:
@@ -163,18 +140,15 @@ class PostPersonaMemoryMemoriesBody:
             field_dict["validFrom"] = valid_from
         if valid_to is not UNSET:
             field_dict["validTo"] = valid_to
+        if sync_txid is not UNSET:
+            field_dict["syncTxid"] = sync_txid
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
         persona_id = UUID(d.pop("personaId"))
-
-
-
 
         slug = d.pop("slug")
 
@@ -186,49 +160,36 @@ class PostPersonaMemoryMemoriesBody:
 
         ecosystem_id = d.pop("ecosystemId", UNSET)
 
-        def _parse_deleted_at(data: object) -> Union[None, Unset, str]:
-            if data is None:
-                return data
-            if isinstance(data, Unset):
-                return data
-            return cast(Union[None, Unset, str], data)
-
-        deleted_at = _parse_deleted_at(d.pop("deletedAt", UNSET))
-
-
         scope = d.pop("scope", UNSET)
 
-        def _parse_subject_table(data: object) -> Union[None, Unset, str]:
+        def _parse_subject_table(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         subject_table = _parse_subject_table(d.pop("subjectTable", UNSET))
 
-
-        def _parse_subject_id(data: object) -> Union[None, Unset, str]:
+        def _parse_subject_id(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         subject_id = _parse_subject_id(d.pop("subjectId", UNSET))
 
-
         status = d.pop("status", UNSET)
 
-        def _parse_supersedes_id(data: object) -> Union[None, Unset, str]:
+        def _parse_supersedes_id(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         supersedes_id = _parse_supersedes_id(d.pop("supersedesId", UNSET))
-
 
         source = d.pop("source", UNSET)
 
@@ -236,26 +197,25 @@ class PostPersonaMemoryMemoriesBody:
 
         tags = cast(list[str], d.pop("tags", UNSET))
 
-
-        def _parse_valid_from(data: object) -> Union[None, Unset, str]:
+        def _parse_valid_from(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         valid_from = _parse_valid_from(d.pop("validFrom", UNSET))
 
-
-        def _parse_valid_to(data: object) -> Union[None, Unset, str]:
+        def _parse_valid_to(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         valid_to = _parse_valid_to(d.pop("validTo", UNSET))
 
+        sync_txid = d.pop("syncTxid", UNSET)
 
         post_persona_memory_memories_body = cls(
             persona_id=persona_id,
@@ -264,7 +224,6 @@ class PostPersonaMemoryMemoriesBody:
             description=description,
             body=body,
             ecosystem_id=ecosystem_id,
-            deleted_at=deleted_at,
             scope=scope,
             subject_table=subject_table,
             subject_id=subject_id,
@@ -275,7 +234,7 @@ class PostPersonaMemoryMemoriesBody:
             tags=tags,
             valid_from=valid_from,
             valid_to=valid_to,
+            sync_txid=sync_txid,
         )
 
         return post_persona_memory_memories_body
-

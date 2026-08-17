@@ -1,44 +1,29 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar, cast
 
 from attrs import define as _attrs_define
-from attrs import field as _attrs_field
 
 from ..types import UNSET, Unset
-
-from ..types import UNSET, Unset
-from typing import cast, Union
-from typing import Union
-
-
-
-
-
 
 T = TypeVar("T", bound="PostMonitoringSitesBody")
 
 
-
 @_attrs_define
 class PostMonitoringSitesBody:
-    """ 
-        Attributes:
-            site_group_id (str):
-            name (str):
-            slug (str):
-            description (Union[None, Unset, str]):
-            display_order (Union[Unset, int]):
-     """
+    """
+    Attributes:
+        site_group_id (str):
+        name (str):
+        slug (str):
+        description (Union[None, Unset, str]):
+        display_order (Union[Unset, int]):
+    """
 
     site_group_id: str
     name: str
     slug: str
-    description: Union[None, Unset, str] = UNSET
-    display_order: Union[Unset, int] = UNSET
-
-
-
-
+    description: None | Unset | str = UNSET
+    display_order: Unset | int = UNSET
 
     def to_dict(self) -> dict[str, Any]:
         site_group_id = self.site_group_id
@@ -47,7 +32,7 @@ class PostMonitoringSitesBody:
 
         slug = self.slug
 
-        description: Union[None, Unset, str]
+        description: None | Unset | str
         if isinstance(self.description, Unset):
             description = UNSET
         else:
@@ -55,22 +40,21 @@ class PostMonitoringSitesBody:
 
         display_order = self.display_order
 
-
         field_dict: dict[str, Any] = {}
 
-        field_dict.update({
-            "siteGroupId": site_group_id,
-            "name": name,
-            "slug": slug,
-        })
+        field_dict.update(
+            {
+                "siteGroupId": site_group_id,
+                "name": name,
+                "slug": slug,
+            }
+        )
         if description is not UNSET:
             field_dict["description"] = description
         if display_order is not UNSET:
             field_dict["displayOrder"] = display_order
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -81,15 +65,14 @@ class PostMonitoringSitesBody:
 
         slug = d.pop("slug")
 
-        def _parse_description(data: object) -> Union[None, Unset, str]:
+        def _parse_description(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         description = _parse_description(d.pop("description", UNSET))
-
 
         display_order = d.pop("displayOrder", UNSET)
 
@@ -102,4 +85,3 @@ class PostMonitoringSitesBody:
         )
 
         return post_monitoring_sites_body
-

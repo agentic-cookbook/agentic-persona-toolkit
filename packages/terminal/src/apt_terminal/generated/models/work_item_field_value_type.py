@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class WorkItemFieldValueType(str, Enum):
     CHECKBOX = "checkbox"
     DATE = "date"

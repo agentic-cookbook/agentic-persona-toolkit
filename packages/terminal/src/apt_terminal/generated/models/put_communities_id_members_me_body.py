@@ -1,48 +1,34 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
-
-
-
-
-
-
-
 T = TypeVar("T", bound="PutCommunitiesIdMembersMeBody")
-
 
 
 @_attrs_define
 class PutCommunitiesIdMembersMeBody:
-    """ 
-        Attributes:
-            bio (str): One-line "what I’m building" intro for this community.
-     """
+    """
+    Attributes:
+        bio (str): One-line "what I’m building" intro for this community.
+    """
 
     bio: str
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
-
-
-
-
     def to_dict(self) -> dict[str, Any]:
         bio = self.bio
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "bio": bio,
-        })
+        field_dict.update(
+            {
+                "bio": bio,
+            }
+        )
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -52,7 +38,6 @@ class PutCommunitiesIdMembersMeBody:
         put_communities_id_members_me_body = cls(
             bio=bio,
         )
-
 
         put_communities_id_members_me_body.additional_properties = d
         return put_communities_id_members_me_body

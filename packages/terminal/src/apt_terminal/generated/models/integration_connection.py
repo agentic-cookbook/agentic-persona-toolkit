@@ -1,46 +1,39 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import TYPE_CHECKING, Any, TypeVar, Union, cast
+from uuid import UUID
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 from ..types import UNSET, Unset
 
-from ..types import UNSET, Unset
-from typing import cast
-from typing import cast, Union
-from typing import Union
-from uuid import UUID
-
 if TYPE_CHECKING:
-  from ..models.integration_connection_sync_settings_type_0 import IntegrationConnectionSyncSettingsType0
-
-
-
+    from ..models.integration_connection_sync_settings_type_0 import (
+        IntegrationConnectionSyncSettingsType0,
+    )
 
 
 T = TypeVar("T", bound="IntegrationConnection")
 
 
-
 @_attrs_define
 class IntegrationConnection:
-    """ 
-        Attributes:
-            id (UUID):
-            provider (str): Provider slug (e.g. google-calendar, github)
-            service_type (str): Service within the provider (e.g. calendar)
-            status (str): active | error | revoked | pending
-            display_name (str):
-            username (str):
-            external_account_id (str): Provider-side account id
-            created_at (str):
-            last_sync_at (Union[None, Unset, str]): Last successful sync (null = never)
-            last_error (Union[None, Unset, str]): Last recorded sync error
-            sync_settings (Union['IntegrationConnectionSyncSettingsType0', None, Unset]): Caller-tunable sync settings
-                (gmailLabelIds / redditSubreddits / …) — non-secret, returned so settings forms can prefill instead of blind-
-                overwriting.
-     """
+    """
+    Attributes:
+        id (UUID):
+        provider (str): Provider slug (e.g. google-calendar, github)
+        service_type (str): Service within the provider (e.g. calendar)
+        status (str): active | error | revoked | pending
+        display_name (str):
+        username (str):
+        external_account_id (str): Provider-side account id
+        created_at (str):
+        last_sync_at (Union[None, Unset, str]): Last successful sync (null = never)
+        last_error (Union[None, Unset, str]): Last recorded sync error
+        sync_settings (Union['IntegrationConnectionSyncSettingsType0', None, Unset]): Caller-tunable sync settings
+            (gmailLabelIds / redditSubreddits / …) — non-secret, returned so settings forms can prefill instead of blind-
+            overwriting.
+    """
 
     id: UUID
     provider: str
@@ -50,17 +43,16 @@ class IntegrationConnection:
     username: str
     external_account_id: str
     created_at: str
-    last_sync_at: Union[None, Unset, str] = UNSET
-    last_error: Union[None, Unset, str] = UNSET
-    sync_settings: Union['IntegrationConnectionSyncSettingsType0', None, Unset] = UNSET
+    last_sync_at: None | Unset | str = UNSET
+    last_error: None | Unset | str = UNSET
+    sync_settings: Union["IntegrationConnectionSyncSettingsType0", None, Unset] = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
-
-
-
-
     def to_dict(self) -> dict[str, Any]:
-        from ..models.integration_connection_sync_settings_type_0 import IntegrationConnectionSyncSettingsType0
+        from ..models.integration_connection_sync_settings_type_0 import (
+            IntegrationConnectionSyncSettingsType0,
+        )
+
         id = str(self.id)
 
         provider = self.provider
@@ -77,19 +69,19 @@ class IntegrationConnection:
 
         created_at = self.created_at
 
-        last_sync_at: Union[None, Unset, str]
+        last_sync_at: None | Unset | str
         if isinstance(self.last_sync_at, Unset):
             last_sync_at = UNSET
         else:
             last_sync_at = self.last_sync_at
 
-        last_error: Union[None, Unset, str]
+        last_error: None | Unset | str
         if isinstance(self.last_error, Unset):
             last_error = UNSET
         else:
             last_error = self.last_error
 
-        sync_settings: Union[None, Unset, dict[str, Any]]
+        sync_settings: None | Unset | dict[str, Any]
         if isinstance(self.sync_settings, Unset):
             sync_settings = UNSET
         elif isinstance(self.sync_settings, IntegrationConnectionSyncSettingsType0):
@@ -97,19 +89,20 @@ class IntegrationConnection:
         else:
             sync_settings = self.sync_settings
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "id": id,
-            "provider": provider,
-            "serviceType": service_type,
-            "status": status,
-            "displayName": display_name,
-            "username": username,
-            "externalAccountId": external_account_id,
-            "createdAt": created_at,
-        })
+        field_dict.update(
+            {
+                "id": id,
+                "provider": provider,
+                "serviceType": service_type,
+                "status": status,
+                "displayName": display_name,
+                "username": username,
+                "externalAccountId": external_account_id,
+                "createdAt": created_at,
+            }
+        )
         if last_sync_at is not UNSET:
             field_dict["lastSyncAt"] = last_sync_at
         if last_error is not UNSET:
@@ -119,16 +112,14 @@ class IntegrationConnection:
 
         return field_dict
 
-
-
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.integration_connection_sync_settings_type_0 import IntegrationConnectionSyncSettingsType0
+        from ..models.integration_connection_sync_settings_type_0 import (
+            IntegrationConnectionSyncSettingsType0,
+        )
+
         d = dict(src_dict)
         id = UUID(d.pop("id"))
-
-
-
 
         provider = d.pop("provider")
 
@@ -144,27 +135,27 @@ class IntegrationConnection:
 
         created_at = d.pop("createdAt")
 
-        def _parse_last_sync_at(data: object) -> Union[None, Unset, str]:
+        def _parse_last_sync_at(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         last_sync_at = _parse_last_sync_at(d.pop("lastSyncAt", UNSET))
 
-
-        def _parse_last_error(data: object) -> Union[None, Unset, str]:
+        def _parse_last_error(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         last_error = _parse_last_error(d.pop("lastError", UNSET))
 
-
-        def _parse_sync_settings(data: object) -> Union['IntegrationConnectionSyncSettingsType0', None, Unset]:
+        def _parse_sync_settings(
+            data: object,
+        ) -> Union["IntegrationConnectionSyncSettingsType0", None, Unset]:
             if data is None:
                 return data
             if isinstance(data, Unset):
@@ -174,15 +165,12 @@ class IntegrationConnection:
                     raise TypeError()
                 sync_settings_type_0 = IntegrationConnectionSyncSettingsType0.from_dict(data)
 
-
-
                 return sync_settings_type_0
-            except: # noqa: E722
+            except:  # noqa: E722
                 pass
-            return cast(Union['IntegrationConnectionSyncSettingsType0', None, Unset], data)
+            return cast(Union["IntegrationConnectionSyncSettingsType0", None, Unset], data)
 
         sync_settings = _parse_sync_settings(d.pop("syncSettings", UNSET))
-
 
         integration_connection = cls(
             id=id,
@@ -197,7 +185,6 @@ class IntegrationConnection:
             last_error=last_error,
             sync_settings=sync_settings,
         )
-
 
         integration_connection.additional_properties = d
         return integration_connection

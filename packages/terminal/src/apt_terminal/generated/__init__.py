@@ -1,5 +1,5 @@
+"""A client library for accessing ADH Backend"""
 
-""" A client library for accessing ADH Backend """
 from .client import AuthenticatedClient, Client
 
 __all__ = (

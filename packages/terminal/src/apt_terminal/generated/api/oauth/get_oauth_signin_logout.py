@@ -1,38 +1,26 @@
 from http import HTTPStatus
-from typing import Any, Optional, Union, cast
+from typing import Any, cast
 
 import httpx
 
-from ...client import AuthenticatedClient, Client
-from ...types import Response, UNSET
 from ... import errors
-
+from ...client import AuthenticatedClient, Client
 from ...models.error import Error
-from ...types import UNSET, Unset
-from typing import cast
-from typing import Union
-
+from ...types import UNSET, Response, Unset
 
 
 def _get_kwargs(
     *,
-    client_id: Union[Unset, str] = UNSET,
-    return_: Union[Unset, str] = UNSET,
-
+    client_id: Unset | str = UNSET,
+    return_: Unset | str = UNSET,
 ) -> dict[str, Any]:
-    
-
-    
-
     params: dict[str, Any] = {}
 
     params["clientId"] = client_id
 
     params["return"] = return_
 
-
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
-
 
     _kwargs: dict[str, Any] = {
         "method": "get",
@@ -40,12 +28,12 @@ def _get_kwargs(
         "params": params,
     }
 
-
     return _kwargs
 
 
-
-def _parse_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Optional[Union[Any, Error]]:
+def _parse_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Any | Error | None:
     if response.status_code == 204:
         response_204 = cast(Any, None)
         return response_204
@@ -57,8 +45,6 @@ def _parse_response(*, client: Union[AuthenticatedClient, Client], response: htt
     if response.status_code == 400:
         response_400 = Error.from_dict(response.json())
 
-
-
         return response_400
 
     if client.raise_on_unexpected_status:
@@ -67,7 +53,9 @@ def _parse_response(*, client: Union[AuthenticatedClient, Client], response: htt
         return None
 
 
-def _build_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Response[Union[Any, Error]]:
+def _build_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Response[Any | Error]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -78,12 +66,11 @@ def _build_response(*, client: Union[AuthenticatedClient, Client], response: htt
 
 def sync_detailed(
     *,
-    client: Union[AuthenticatedClient, Client],
-    client_id: Union[Unset, str] = UNSET,
-    return_: Union[Unset, str] = UNSET,
-
-) -> Response[Union[Any, Error]]:
-    """ Central single-logout (browser) — revoke + clear the SSO cookie, then 302 back
+    client: AuthenticatedClient | Client,
+    client_id: Unset | str = UNSET,
+    return_: Unset | str = UNSET,
+) -> Response[Any | Error]:
+    """Central single-logout (browser) — revoke + clear the SSO cookie, then 302 back
 
     Args:
         client_id (Union[Unset, str]):
@@ -95,13 +82,11 @@ def sync_detailed(
 
     Returns:
         Response[Union[Any, Error]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         client_id=client_id,
-return_=return_,
-
+        return_=return_,
     )
 
     response = client.get_httpx_client().request(
@@ -110,14 +95,14 @@ return_=return_,
 
     return _build_response(client=client, response=response)
 
+
 def sync(
     *,
-    client: Union[AuthenticatedClient, Client],
-    client_id: Union[Unset, str] = UNSET,
-    return_: Union[Unset, str] = UNSET,
-
-) -> Optional[Union[Any, Error]]:
-    """ Central single-logout (browser) — revoke + clear the SSO cookie, then 302 back
+    client: AuthenticatedClient | Client,
+    client_id: Unset | str = UNSET,
+    return_: Unset | str = UNSET,
+) -> Any | Error | None:
+    """Central single-logout (browser) — revoke + clear the SSO cookie, then 302 back
 
     Args:
         client_id (Union[Unset, str]):
@@ -129,24 +114,22 @@ def sync(
 
     Returns:
         Union[Any, Error]
-     """
-
+    """
 
     return sync_detailed(
         client=client,
-client_id=client_id,
-return_=return_,
-
+        client_id=client_id,
+        return_=return_,
     ).parsed
+
 
 async def asyncio_detailed(
     *,
-    client: Union[AuthenticatedClient, Client],
-    client_id: Union[Unset, str] = UNSET,
-    return_: Union[Unset, str] = UNSET,
-
-) -> Response[Union[Any, Error]]:
-    """ Central single-logout (browser) — revoke + clear the SSO cookie, then 302 back
+    client: AuthenticatedClient | Client,
+    client_id: Unset | str = UNSET,
+    return_: Unset | str = UNSET,
+) -> Response[Any | Error]:
+    """Central single-logout (browser) — revoke + clear the SSO cookie, then 302 back
 
     Args:
         client_id (Union[Unset, str]):
@@ -158,29 +141,25 @@ async def asyncio_detailed(
 
     Returns:
         Response[Union[Any, Error]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         client_id=client_id,
-return_=return_,
-
+        return_=return_,
     )
 
-    response = await client.get_async_httpx_client().request(
-        **kwargs
-    )
+    response = await client.get_async_httpx_client().request(**kwargs)
 
     return _build_response(client=client, response=response)
 
+
 async def asyncio(
     *,
-    client: Union[AuthenticatedClient, Client],
-    client_id: Union[Unset, str] = UNSET,
-    return_: Union[Unset, str] = UNSET,
-
-) -> Optional[Union[Any, Error]]:
-    """ Central single-logout (browser) — revoke + clear the SSO cookie, then 302 back
+    client: AuthenticatedClient | Client,
+    client_id: Unset | str = UNSET,
+    return_: Unset | str = UNSET,
+) -> Any | Error | None:
+    """Central single-logout (browser) — revoke + clear the SSO cookie, then 302 back
 
     Args:
         client_id (Union[Unset, str]):
@@ -192,12 +171,12 @@ async def asyncio(
 
     Returns:
         Union[Any, Error]
-     """
+    """
 
-
-    return (await asyncio_detailed(
-        client=client,
-client_id=client_id,
-return_=return_,
-
-    )).parsed
+    return (
+        await asyncio_detailed(
+            client=client,
+            client_id=client_id,
+            return_=return_,
+        )
+    ).parsed

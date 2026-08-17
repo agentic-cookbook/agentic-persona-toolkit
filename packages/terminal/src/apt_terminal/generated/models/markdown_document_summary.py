@@ -1,53 +1,53 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import TYPE_CHECKING, Any, TypeVar, Union, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
-
-from ..types import UNSET, Unset
 
 from ..models.markdown_document_summary_kind import MarkdownDocumentSummaryKind
 from ..models.markdown_document_summary_stage import MarkdownDocumentSummaryStage
 from ..models.markdown_document_summary_visibility import MarkdownDocumentSummaryVisibility
 from ..types import UNSET, Unset
-from typing import cast
-from typing import cast, Union
-from typing import Union
 
 if TYPE_CHECKING:
-  from ..models.markdown_document_summary_frontmatter_type_0 import MarkdownDocumentSummaryFrontmatterType0
-
-
-
+    from ..models.markdown_document_summary_frontmatter_type_0 import (
+        MarkdownDocumentSummaryFrontmatterType0,
+    )
 
 
 T = TypeVar("T", bound="MarkdownDocumentSummary")
 
 
-
 @_attrs_define
 class MarkdownDocumentSummary:
-    """ 
-        Attributes:
-            id (str):
-            title (str):
-            tags (list[str]):
-            visibility (MarkdownDocumentSummaryVisibility):
-            stage (MarkdownDocumentSummaryStage):
-            kind (MarkdownDocumentSummaryKind):
-            content_hash (str):
-            size_bytes (int):
-            current_version (int):
-            created_at (str):
-            updated_at (str):
-            frontmatter (Union['MarkdownDocumentSummaryFrontmatterType0', None, Unset]):
-            category (Union[None, Unset, str]):
-            public_route (Union[None, Unset, str]):
-            latest_version_id (Union[None, Unset, str]):
-     """
+    """
+    Attributes:
+        id (str):
+        title (str): Server-derived, read-only: the frontmatter `title` then `name`, else the first non-empty line of
+            the body (frontmatter and code fences ignored, leading markdown syntax stripped), else 'Untitled'. Capped at 500
+            characters.
+        excerpt (str): Server-derived, read-only preview: up to 4 body lines FOLLOWING the title line, newline-
+            separated, each capped at 160 characters and stripped of leading markdown syntax. Empty when the body holds
+            nothing past its title. Exists because this projection carries no `content` — it is what lets a list render a
+            preview without fetching every document whole.
+        tags (list[str]):
+        visibility (MarkdownDocumentSummaryVisibility):
+        stage (MarkdownDocumentSummaryStage):
+        kind (MarkdownDocumentSummaryKind):
+        content_hash (str):
+        size_bytes (int):
+        current_version (int):
+        created_at (str):
+        updated_at (str):
+        frontmatter (Union['MarkdownDocumentSummaryFrontmatterType0', None, Unset]):
+        category (Union[None, Unset, str]):
+        public_route (Union[None, Unset, str]):
+        latest_version_id (Union[None, Unset, str]):
+    """
 
     id: str
     title: str
+    excerpt: str
     tags: list[str]
     visibility: MarkdownDocumentSummaryVisibility
     stage: MarkdownDocumentSummaryStage
@@ -57,25 +57,24 @@ class MarkdownDocumentSummary:
     current_version: int
     created_at: str
     updated_at: str
-    frontmatter: Union['MarkdownDocumentSummaryFrontmatterType0', None, Unset] = UNSET
-    category: Union[None, Unset, str] = UNSET
-    public_route: Union[None, Unset, str] = UNSET
-    latest_version_id: Union[None, Unset, str] = UNSET
+    frontmatter: Union["MarkdownDocumentSummaryFrontmatterType0", None, Unset] = UNSET
+    category: None | Unset | str = UNSET
+    public_route: None | Unset | str = UNSET
+    latest_version_id: None | Unset | str = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
-
-
-
-
     def to_dict(self) -> dict[str, Any]:
-        from ..models.markdown_document_summary_frontmatter_type_0 import MarkdownDocumentSummaryFrontmatterType0
+        from ..models.markdown_document_summary_frontmatter_type_0 import (
+            MarkdownDocumentSummaryFrontmatterType0,
+        )
+
         id = self.id
 
         title = self.title
 
+        excerpt = self.excerpt
+
         tags = self.tags
-
-
 
         visibility = self.visibility.value
 
@@ -93,7 +92,7 @@ class MarkdownDocumentSummary:
 
         updated_at = self.updated_at
 
-        frontmatter: Union[None, Unset, dict[str, Any]]
+        frontmatter: None | Unset | dict[str, Any]
         if isinstance(self.frontmatter, Unset):
             frontmatter = UNSET
         elif isinstance(self.frontmatter, MarkdownDocumentSummaryFrontmatterType0):
@@ -101,40 +100,42 @@ class MarkdownDocumentSummary:
         else:
             frontmatter = self.frontmatter
 
-        category: Union[None, Unset, str]
+        category: None | Unset | str
         if isinstance(self.category, Unset):
             category = UNSET
         else:
             category = self.category
 
-        public_route: Union[None, Unset, str]
+        public_route: None | Unset | str
         if isinstance(self.public_route, Unset):
             public_route = UNSET
         else:
             public_route = self.public_route
 
-        latest_version_id: Union[None, Unset, str]
+        latest_version_id: None | Unset | str
         if isinstance(self.latest_version_id, Unset):
             latest_version_id = UNSET
         else:
             latest_version_id = self.latest_version_id
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "id": id,
-            "title": title,
-            "tags": tags,
-            "visibility": visibility,
-            "stage": stage,
-            "kind": kind,
-            "contentHash": content_hash,
-            "sizeBytes": size_bytes,
-            "currentVersion": current_version,
-            "createdAt": created_at,
-            "updatedAt": updated_at,
-        })
+        field_dict.update(
+            {
+                "id": id,
+                "title": title,
+                "excerpt": excerpt,
+                "tags": tags,
+                "visibility": visibility,
+                "stage": stage,
+                "kind": kind,
+                "contentHash": content_hash,
+                "sizeBytes": size_bytes,
+                "currentVersion": current_version,
+                "createdAt": created_at,
+                "updatedAt": updated_at,
+            }
+        )
         if frontmatter is not UNSET:
             field_dict["frontmatter"] = frontmatter
         if category is not UNSET:
@@ -146,33 +147,26 @@ class MarkdownDocumentSummary:
 
         return field_dict
 
-
-
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.markdown_document_summary_frontmatter_type_0 import MarkdownDocumentSummaryFrontmatterType0
+        from ..models.markdown_document_summary_frontmatter_type_0 import (
+            MarkdownDocumentSummaryFrontmatterType0,
+        )
+
         d = dict(src_dict)
         id = d.pop("id")
 
         title = d.pop("title")
 
-        tags = cast(list[str], d.pop("tags"))
+        excerpt = d.pop("excerpt")
 
+        tags = cast(list[str], d.pop("tags"))
 
         visibility = MarkdownDocumentSummaryVisibility(d.pop("visibility"))
 
-
-
-
         stage = MarkdownDocumentSummaryStage(d.pop("stage"))
 
-
-
-
         kind = MarkdownDocumentSummaryKind(d.pop("kind"))
-
-
-
 
         content_hash = d.pop("contentHash")
 
@@ -184,7 +178,9 @@ class MarkdownDocumentSummary:
 
         updated_at = d.pop("updatedAt")
 
-        def _parse_frontmatter(data: object) -> Union['MarkdownDocumentSummaryFrontmatterType0', None, Unset]:
+        def _parse_frontmatter(
+            data: object,
+        ) -> Union["MarkdownDocumentSummaryFrontmatterType0", None, Unset]:
             if data is None:
                 return data
             if isinstance(data, Unset):
@@ -194,49 +190,44 @@ class MarkdownDocumentSummary:
                     raise TypeError()
                 frontmatter_type_0 = MarkdownDocumentSummaryFrontmatterType0.from_dict(data)
 
-
-
                 return frontmatter_type_0
-            except: # noqa: E722
+            except:  # noqa: E722
                 pass
-            return cast(Union['MarkdownDocumentSummaryFrontmatterType0', None, Unset], data)
+            return cast(Union["MarkdownDocumentSummaryFrontmatterType0", None, Unset], data)
 
         frontmatter = _parse_frontmatter(d.pop("frontmatter", UNSET))
 
-
-        def _parse_category(data: object) -> Union[None, Unset, str]:
+        def _parse_category(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         category = _parse_category(d.pop("category", UNSET))
 
-
-        def _parse_public_route(data: object) -> Union[None, Unset, str]:
+        def _parse_public_route(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         public_route = _parse_public_route(d.pop("publicRoute", UNSET))
 
-
-        def _parse_latest_version_id(data: object) -> Union[None, Unset, str]:
+        def _parse_latest_version_id(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         latest_version_id = _parse_latest_version_id(d.pop("latestVersionId", UNSET))
-
 
         markdown_document_summary = cls(
             id=id,
             title=title,
+            excerpt=excerpt,
             tags=tags,
             visibility=visibility,
             stage=stage,
@@ -251,7 +242,6 @@ class MarkdownDocumentSummary:
             public_route=public_route,
             latest_version_id=latest_version_id,
         )
-
 
         markdown_document_summary.additional_properties = d
         return markdown_document_summary

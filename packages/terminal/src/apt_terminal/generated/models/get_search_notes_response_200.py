@@ -1,76 +1,58 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import TYPE_CHECKING, Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
-
-from typing import cast
-
 if TYPE_CHECKING:
-  from ..models.search_note_result import SearchNoteResult
-
-
-
+    from ..models.search_note_result import SearchNoteResult
 
 
 T = TypeVar("T", bound="GetSearchNotesResponse200")
 
 
-
 @_attrs_define
 class GetSearchNotesResponse200:
-    """ 
-        Attributes:
-            results (list['SearchNoteResult']):
-            limit (int):
-     """
+    """
+    Attributes:
+        results (list['SearchNoteResult']):
+        limit (int):
+    """
 
-    results: list['SearchNoteResult']
+    results: list["SearchNoteResult"]
     limit: int
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
-
-
-
-
     def to_dict(self) -> dict[str, Any]:
-        from ..models.search_note_result import SearchNoteResult
         results = []
         for results_item_data in self.results:
             results_item = results_item_data.to_dict()
             results.append(results_item)
 
-
-
         limit = self.limit
-
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "results": results,
-            "limit": limit,
-        })
+        field_dict.update(
+            {
+                "results": results,
+                "limit": limit,
+            }
+        )
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.search_note_result import SearchNoteResult
+
         d = dict(src_dict)
         results = []
         _results = d.pop("results")
-        for results_item_data in (_results):
+        for results_item_data in _results:
             results_item = SearchNoteResult.from_dict(results_item_data)
 
-
-
             results.append(results_item)
-
 
         limit = d.pop("limit")
 
@@ -78,7 +60,6 @@ class GetSearchNotesResponse200:
             results=results,
             limit=limit,
         )
-
 
         get_search_notes_response_200.additional_properties = d
         return get_search_notes_response_200

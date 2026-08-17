@@ -1,129 +1,263 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import TYPE_CHECKING, Any, TypeVar, Union, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
+from ..models.post_persona_provider_templates_body_modalities_type_0_item import (
+    PostPersonaProviderTemplatesBodyModalitiesType0Item,
+)
+from ..models.post_persona_provider_templates_body_provider_kind import (
+    PostPersonaProviderTemplatesBodyProviderKind,
+)
 from ..types import UNSET, Unset
 
-from ..models.post_persona_provider_templates_body_provider_kind import PostPersonaProviderTemplatesBodyProviderKind
-from ..types import UNSET, Unset
-from typing import cast
-from typing import cast, Union
-from typing import Union
-
-
-
-
+if TYPE_CHECKING:
+    from ..models.provider_connection_spec_type_0 import ProviderConnectionSpecType0
+    from ..models.template_available_via_type_0 import TemplateAvailableViaType0
+    from ..models.template_sync_keys_type_0 import TemplateSyncKeysType0
 
 
 T = TypeVar("T", bound="PostPersonaProviderTemplatesBody")
 
 
-
 @_attrs_define
 class PostPersonaProviderTemplatesBody:
-    """ 
-        Attributes:
-            provider_kind (PostPersonaProviderTemplatesBodyProviderKind):
-            name (str):
-            base_url (str):
-            documentation_url (Union[None, Unset, str]):
-            status_url (Union[None, Unset, str]):
-            models (Union[Unset, list[str]]): Model names. On create: the initial model list. On update: the FULL desired
-                set (matching rows kept, missing inserted, absent deleted); omit to leave models unchanged.
-     """
+    """
+    Attributes:
+        provider_kind (PostPersonaProviderTemplatesBodyProviderKind):
+        name (str):
+        base_url (str):
+        documentation_url (Union[None, Unset, str]):
+        status_url (Union[None, Unset, str]):
+        connection_spec (Union['ProviderConnectionSpecType0', None, Unset]):
+        sync_keys (Union['TemplateSyncKeysType0', None, Unset]): Operator-only upstream sync mapping — never present on
+            public reads.
+        available_via (Union['TemplateAvailableViaType0', None, Unset]): Set ⇒ informational template: no first-party
+            API; connect via the named templates.
+        modalities (Union[None, Unset, list[PostPersonaProviderTemplatesBodyModalitiesType0Item]]):
+        models (Union[Unset, list[str]]): Model names. On create: the initial model list. On update: the FULL desired
+            set (matching rows kept, missing inserted, absent deleted); omit to leave models unchanged.
+    """
 
     provider_kind: PostPersonaProviderTemplatesBodyProviderKind
     name: str
     base_url: str
-    documentation_url: Union[None, Unset, str] = UNSET
-    status_url: Union[None, Unset, str] = UNSET
-    models: Union[Unset, list[str]] = UNSET
+    documentation_url: None | Unset | str = UNSET
+    status_url: None | Unset | str = UNSET
+    connection_spec: Union["ProviderConnectionSpecType0", None, Unset] = UNSET
+    sync_keys: Union["TemplateSyncKeysType0", None, Unset] = UNSET
+    available_via: Union["TemplateAvailableViaType0", None, Unset] = UNSET
+    modalities: None | Unset | list[PostPersonaProviderTemplatesBodyModalitiesType0Item] = UNSET
+    models: Unset | list[str] = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
-
-
-
-
     def to_dict(self) -> dict[str, Any]:
+        from ..models.provider_connection_spec_type_0 import ProviderConnectionSpecType0
+        from ..models.template_available_via_type_0 import TemplateAvailableViaType0
+        from ..models.template_sync_keys_type_0 import TemplateSyncKeysType0
+
         provider_kind = self.provider_kind.value
 
         name = self.name
 
         base_url = self.base_url
 
-        documentation_url: Union[None, Unset, str]
+        documentation_url: None | Unset | str
         if isinstance(self.documentation_url, Unset):
             documentation_url = UNSET
         else:
             documentation_url = self.documentation_url
 
-        status_url: Union[None, Unset, str]
+        status_url: None | Unset | str
         if isinstance(self.status_url, Unset):
             status_url = UNSET
         else:
             status_url = self.status_url
 
-        models: Union[Unset, list[str]] = UNSET
+        connection_spec: None | Unset | dict[str, Any]
+        if isinstance(self.connection_spec, Unset):
+            connection_spec = UNSET
+        elif isinstance(self.connection_spec, ProviderConnectionSpecType0):
+            connection_spec = self.connection_spec.to_dict()
+        else:
+            connection_spec = self.connection_spec
+
+        sync_keys: None | Unset | dict[str, Any]
+        if isinstance(self.sync_keys, Unset):
+            sync_keys = UNSET
+        elif isinstance(self.sync_keys, TemplateSyncKeysType0):
+            sync_keys = self.sync_keys.to_dict()
+        else:
+            sync_keys = self.sync_keys
+
+        available_via: None | Unset | dict[str, Any]
+        if isinstance(self.available_via, Unset):
+            available_via = UNSET
+        elif isinstance(self.available_via, TemplateAvailableViaType0):
+            available_via = self.available_via.to_dict()
+        else:
+            available_via = self.available_via
+
+        modalities: None | Unset | list[str]
+        if isinstance(self.modalities, Unset):
+            modalities = UNSET
+        elif isinstance(self.modalities, list):
+            modalities = []
+            for modalities_type_0_item_data in self.modalities:
+                modalities_type_0_item = modalities_type_0_item_data.value
+                modalities.append(modalities_type_0_item)
+
+        else:
+            modalities = self.modalities
+
+        models: Unset | list[str] = UNSET
         if not isinstance(self.models, Unset):
             models = self.models
 
-
-
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "providerKind": provider_kind,
-            "name": name,
-            "baseUrl": base_url,
-        })
+        field_dict.update(
+            {
+                "providerKind": provider_kind,
+                "name": name,
+                "baseUrl": base_url,
+            }
+        )
         if documentation_url is not UNSET:
             field_dict["documentationUrl"] = documentation_url
         if status_url is not UNSET:
             field_dict["statusUrl"] = status_url
+        if connection_spec is not UNSET:
+            field_dict["connectionSpec"] = connection_spec
+        if sync_keys is not UNSET:
+            field_dict["syncKeys"] = sync_keys
+        if available_via is not UNSET:
+            field_dict["availableVia"] = available_via
+        if modalities is not UNSET:
+            field_dict["modalities"] = modalities
         if models is not UNSET:
             field_dict["models"] = models
 
         return field_dict
 
-
-
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
+        from ..models.provider_connection_spec_type_0 import ProviderConnectionSpecType0
+        from ..models.template_available_via_type_0 import TemplateAvailableViaType0
+        from ..models.template_sync_keys_type_0 import TemplateSyncKeysType0
+
         d = dict(src_dict)
         provider_kind = PostPersonaProviderTemplatesBodyProviderKind(d.pop("providerKind"))
-
-
-
 
         name = d.pop("name")
 
         base_url = d.pop("baseUrl")
 
-        def _parse_documentation_url(data: object) -> Union[None, Unset, str]:
+        def _parse_documentation_url(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         documentation_url = _parse_documentation_url(d.pop("documentationUrl", UNSET))
 
-
-        def _parse_status_url(data: object) -> Union[None, Unset, str]:
+        def _parse_status_url(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         status_url = _parse_status_url(d.pop("statusUrl", UNSET))
 
+        def _parse_connection_spec(
+            data: object,
+        ) -> Union["ProviderConnectionSpecType0", None, Unset]:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            try:
+                if not isinstance(data, dict):
+                    raise TypeError()
+                componentsschemas_provider_connection_spec_type_0 = (
+                    ProviderConnectionSpecType0.from_dict(data)
+                )
+
+                return componentsschemas_provider_connection_spec_type_0
+            except:  # noqa: E722
+                pass
+            return cast(Union["ProviderConnectionSpecType0", None, Unset], data)
+
+        connection_spec = _parse_connection_spec(d.pop("connectionSpec", UNSET))
+
+        def _parse_sync_keys(data: object) -> Union["TemplateSyncKeysType0", None, Unset]:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            try:
+                if not isinstance(data, dict):
+                    raise TypeError()
+                componentsschemas_template_sync_keys_type_0 = TemplateSyncKeysType0.from_dict(data)
+
+                return componentsschemas_template_sync_keys_type_0
+            except:  # noqa: E722
+                pass
+            return cast(Union["TemplateSyncKeysType0", None, Unset], data)
+
+        sync_keys = _parse_sync_keys(d.pop("syncKeys", UNSET))
+
+        def _parse_available_via(data: object) -> Union["TemplateAvailableViaType0", None, Unset]:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            try:
+                if not isinstance(data, dict):
+                    raise TypeError()
+                componentsschemas_template_available_via_type_0 = (
+                    TemplateAvailableViaType0.from_dict(data)
+                )
+
+                return componentsschemas_template_available_via_type_0
+            except:  # noqa: E722
+                pass
+            return cast(Union["TemplateAvailableViaType0", None, Unset], data)
+
+        available_via = _parse_available_via(d.pop("availableVia", UNSET))
+
+        def _parse_modalities(
+            data: object,
+        ) -> None | Unset | list[PostPersonaProviderTemplatesBodyModalitiesType0Item]:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            try:
+                if not isinstance(data, list):
+                    raise TypeError()
+                modalities_type_0 = []
+                _modalities_type_0 = data
+                for modalities_type_0_item_data in _modalities_type_0:
+                    modalities_type_0_item = PostPersonaProviderTemplatesBodyModalitiesType0Item(
+                        modalities_type_0_item_data
+                    )
+
+                    modalities_type_0.append(modalities_type_0_item)
+
+                return modalities_type_0
+            except:  # noqa: E722
+                pass
+            return cast(
+                None | Unset | list[PostPersonaProviderTemplatesBodyModalitiesType0Item], data
+            )
+
+        modalities = _parse_modalities(d.pop("modalities", UNSET))
 
         models = cast(list[str], d.pop("models", UNSET))
-
 
         post_persona_provider_templates_body = cls(
             provider_kind=provider_kind,
@@ -131,9 +265,12 @@ class PostPersonaProviderTemplatesBody:
             base_url=base_url,
             documentation_url=documentation_url,
             status_url=status_url,
+            connection_spec=connection_spec,
+            sync_keys=sync_keys,
+            available_via=available_via,
+            modalities=modalities,
             models=models,
         )
-
 
         post_persona_provider_templates_body.additional_properties = d
         return post_persona_provider_templates_body

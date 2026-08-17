@@ -1,45 +1,32 @@
 from http import HTTPStatus
-from typing import Any, Optional, Union, cast
+from typing import Any
 
 import httpx
 
-from ...client import AuthenticatedClient, Client
-from ...types import Response, UNSET
 from ... import errors
-
+from ...client import AuthenticatedClient, Client
 from ...models.error import Error
 from ...models.storage_attachment import StorageAttachment
-from typing import cast
+from ...types import Response
 
 
-
-def _get_kwargs(
-    
-) -> dict[str, Any]:
-    
-
-    
-
-    
-
+def _get_kwargs() -> dict[str, Any]:
     _kwargs: dict[str, Any] = {
         "method": "get",
         "url": "/storage/uploads",
     }
 
-
     return _kwargs
 
 
-
-def _parse_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Optional[Union[Error, list['StorageAttachment']]]:
+def _parse_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Error | list["StorageAttachment"] | None:
     if response.status_code == 200:
         response_200 = []
         _response_200 = response.json()
-        for response_200_item_data in (_response_200):
+        for response_200_item_data in _response_200:
             response_200_item = StorageAttachment.from_dict(response_200_item_data)
-
-
 
             response_200.append(response_200_item)
 
@@ -47,8 +34,6 @@ def _parse_response(*, client: Union[AuthenticatedClient, Client], response: htt
 
     if response.status_code == 401:
         response_401 = Error.from_dict(response.json())
-
-
 
         return response_401
 
@@ -58,7 +43,9 @@ def _parse_response(*, client: Union[AuthenticatedClient, Client], response: htt
         return None
 
 
-def _build_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Response[Union[Error, list['StorageAttachment']]]:
+def _build_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Response[Error | list["StorageAttachment"]]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -70,9 +57,8 @@ def _build_response(*, client: Union[AuthenticatedClient, Client], response: htt
 def sync_detailed(
     *,
     client: AuthenticatedClient,
-
-) -> Response[Union[Error, list['StorageAttachment']]]:
-    """ List the caller's attachments (newest first)
+) -> Response[Error | list["StorageAttachment"]]:
+    """List the caller's attachments (newest first)
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -80,12 +66,9 @@ def sync_detailed(
 
     Returns:
         Response[Union[Error, list['StorageAttachment']]]
-     """
+    """
 
-
-    kwargs = _get_kwargs(
-        
-    )
+    kwargs = _get_kwargs()
 
     response = client.get_httpx_client().request(
         **kwargs,
@@ -93,12 +76,12 @@ def sync_detailed(
 
     return _build_response(client=client, response=response)
 
+
 def sync(
     *,
     client: AuthenticatedClient,
-
-) -> Optional[Union[Error, list['StorageAttachment']]]:
-    """ List the caller's attachments (newest first)
+) -> Error | list["StorageAttachment"] | None:
+    """List the caller's attachments (newest first)
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -106,20 +89,18 @@ def sync(
 
     Returns:
         Union[Error, list['StorageAttachment']]
-     """
-
+    """
 
     return sync_detailed(
         client=client,
-
     ).parsed
+
 
 async def asyncio_detailed(
     *,
     client: AuthenticatedClient,
-
-) -> Response[Union[Error, list['StorageAttachment']]]:
-    """ List the caller's attachments (newest first)
+) -> Response[Error | list["StorageAttachment"]]:
+    """List the caller's attachments (newest first)
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -127,25 +108,20 @@ async def asyncio_detailed(
 
     Returns:
         Response[Union[Error, list['StorageAttachment']]]
-     """
+    """
 
+    kwargs = _get_kwargs()
 
-    kwargs = _get_kwargs(
-        
-    )
-
-    response = await client.get_async_httpx_client().request(
-        **kwargs
-    )
+    response = await client.get_async_httpx_client().request(**kwargs)
 
     return _build_response(client=client, response=response)
+
 
 async def asyncio(
     *,
     client: AuthenticatedClient,
-
-) -> Optional[Union[Error, list['StorageAttachment']]]:
-    """ List the caller's attachments (newest first)
+) -> Error | list["StorageAttachment"] | None:
+    """List the caller's attachments (newest first)
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -153,10 +129,10 @@ async def asyncio(
 
     Returns:
         Union[Error, list['StorageAttachment']]
-     """
+    """
 
-
-    return (await asyncio_detailed(
-        client=client,
-
-    )).parsed
+    return (
+        await asyncio_detailed(
+            client=client,
+        )
+    ).parsed

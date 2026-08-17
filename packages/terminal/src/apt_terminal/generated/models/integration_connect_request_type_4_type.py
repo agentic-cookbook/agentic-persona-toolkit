@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class IntegrationConnectRequestType4Type(str, Enum):
     OAUTH_INSTANCE = "oauth_instance"
 

@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class RegistryPersonaApprovalStatus(str, Enum):
     APPROVED = "approved"
     PENDING = "pending"

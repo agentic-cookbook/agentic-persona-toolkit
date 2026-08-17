@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class GetNotificationsStatus(str, Enum):
     ARCHIVED = "archived"
     INBOX = "inbox"

@@ -1,36 +1,26 @@
 from http import HTTPStatus
-from typing import Any, Optional, Union, cast
+from typing import Any, cast
 
 import httpx
 
-from ...client import AuthenticatedClient, Client
-from ...types import Response, UNSET
 from ... import errors
-
+from ...client import AuthenticatedClient, Client
 from ...models.error import Error
-from typing import cast
-
+from ...types import UNSET, Response
 
 
 def _get_kwargs(
     *,
     code: str,
     state: str,
-
 ) -> dict[str, Any]:
-    
-
-    
-
     params: dict[str, Any] = {}
 
     params["code"] = code
 
     params["state"] = state
 
-
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
-
 
     _kwargs: dict[str, Any] = {
         "method": "get",
@@ -38,20 +28,18 @@ def _get_kwargs(
         "params": params,
     }
 
-
     return _kwargs
 
 
-
-def _parse_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Optional[Union[Any, Error]]:
+def _parse_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Any | Error | None:
     if response.status_code == 302:
         response_302 = cast(Any, None)
         return response_302
 
     if response.status_code == 400:
         response_400 = Error.from_dict(response.json())
-
-
 
         return response_400
 
@@ -61,7 +49,9 @@ def _parse_response(*, client: Union[AuthenticatedClient, Client], response: htt
         return None
 
 
-def _build_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Response[Union[Any, Error]]:
+def _build_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Response[Any | Error]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -72,12 +62,11 @@ def _build_response(*, client: Union[AuthenticatedClient, Client], response: htt
 
 def sync_detailed(
     *,
-    client: Union[AuthenticatedClient, Client],
+    client: AuthenticatedClient | Client,
     code: str,
     state: str,
-
-) -> Response[Union[Any, Error]]:
-    """ Provider redirect target → 302 back with a single-use exchange code
+) -> Response[Any | Error]:
+    """Provider redirect target → 302 back with a single-use exchange code
 
     Args:
         code (str):
@@ -89,13 +78,11 @@ def sync_detailed(
 
     Returns:
         Response[Union[Any, Error]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         code=code,
-state=state,
-
+        state=state,
     )
 
     response = client.get_httpx_client().request(
@@ -104,14 +91,14 @@ state=state,
 
     return _build_response(client=client, response=response)
 
+
 def sync(
     *,
-    client: Union[AuthenticatedClient, Client],
+    client: AuthenticatedClient | Client,
     code: str,
     state: str,
-
-) -> Optional[Union[Any, Error]]:
-    """ Provider redirect target → 302 back with a single-use exchange code
+) -> Any | Error | None:
+    """Provider redirect target → 302 back with a single-use exchange code
 
     Args:
         code (str):
@@ -123,24 +110,22 @@ def sync(
 
     Returns:
         Union[Any, Error]
-     """
-
+    """
 
     return sync_detailed(
         client=client,
-code=code,
-state=state,
-
+        code=code,
+        state=state,
     ).parsed
+
 
 async def asyncio_detailed(
     *,
-    client: Union[AuthenticatedClient, Client],
+    client: AuthenticatedClient | Client,
     code: str,
     state: str,
-
-) -> Response[Union[Any, Error]]:
-    """ Provider redirect target → 302 back with a single-use exchange code
+) -> Response[Any | Error]:
+    """Provider redirect target → 302 back with a single-use exchange code
 
     Args:
         code (str):
@@ -152,29 +137,25 @@ async def asyncio_detailed(
 
     Returns:
         Response[Union[Any, Error]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         code=code,
-state=state,
-
+        state=state,
     )
 
-    response = await client.get_async_httpx_client().request(
-        **kwargs
-    )
+    response = await client.get_async_httpx_client().request(**kwargs)
 
     return _build_response(client=client, response=response)
 
+
 async def asyncio(
     *,
-    client: Union[AuthenticatedClient, Client],
+    client: AuthenticatedClient | Client,
     code: str,
     state: str,
-
-) -> Optional[Union[Any, Error]]:
-    """ Provider redirect target → 302 back with a single-use exchange code
+) -> Any | Error | None:
+    """Provider redirect target → 302 back with a single-use exchange code
 
     Args:
         code (str):
@@ -186,12 +167,12 @@ async def asyncio(
 
     Returns:
         Union[Any, Error]
-     """
+    """
 
-
-    return (await asyncio_detailed(
-        client=client,
-code=code,
-state=state,
-
-    )).parsed
+    return (
+        await asyncio_detailed(
+            client=client,
+            code=code,
+            state=state,
+        )
+    ).parsed

@@ -1,39 +1,31 @@
 from http import HTTPStatus
-from typing import Any, Optional, Union, cast
+from typing import Any
 
 import httpx
 
-from ...client import AuthenticatedClient, Client
-from ...types import Response, UNSET
 from ... import errors
-
+from ...client import AuthenticatedClient, Client
 from ...models.bucket_grant import BucketGrant
 from ...models.error import Error
-from ...models.put_bucket_access_groups_group_id_grants_body import PutBucketAccessGroupsGroupIdGrantsBody
-from typing import cast
-
+from ...models.put_bucket_access_groups_group_id_grants_body import (
+    PutBucketAccessGroupsGroupIdGrantsBody,
+)
+from ...types import Response
 
 
 def _get_kwargs(
     group_id: str,
     *,
     body: PutBucketAccessGroupsGroupIdGrantsBody,
-
 ) -> dict[str, Any]:
     headers: dict[str, Any] = {}
 
-
-    
-
-    
-
     _kwargs: dict[str, Any] = {
         "method": "put",
-        "url": "/bucket/access-groups/{group_id}/grants".format(group_id=group_id,),
+        "url": f"/bucket/access-groups/{group_id}/grants",
     }
 
     _kwargs["json"] = body.to_dict()
-
 
     headers["Content-Type"] = "application/json"
 
@@ -41,33 +33,26 @@ def _get_kwargs(
     return _kwargs
 
 
-
-def _parse_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Optional[Union[BucketGrant, Error]]:
+def _parse_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> BucketGrant | Error | None:
     if response.status_code == 200:
         response_200 = BucketGrant.from_dict(response.json())
-
-
 
         return response_200
 
     if response.status_code == 400:
         response_400 = Error.from_dict(response.json())
 
-
-
         return response_400
 
     if response.status_code == 401:
         response_401 = Error.from_dict(response.json())
 
-
-
         return response_401
 
     if response.status_code == 404:
         response_404 = Error.from_dict(response.json())
-
-
 
         return response_404
 
@@ -77,7 +62,9 @@ def _parse_response(*, client: Union[AuthenticatedClient, Client], response: htt
         return None
 
 
-def _build_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Response[Union[BucketGrant, Error]]:
+def _build_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Response[BucketGrant | Error]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -91,9 +78,8 @@ def sync_detailed(
     *,
     client: AuthenticatedClient,
     body: PutBucketAccessGroupsGroupIdGrantsBody,
-
-) -> Response[Union[BucketGrant, Error]]:
-    """ Upsert a grant (bucket / bucket_type / row : crud) for an access group
+) -> Response[BucketGrant | Error]:
+    """Upsert a grant (bucket / bucket_type / row : crud) for an access group
 
     Args:
         group_id (str):
@@ -105,13 +91,11 @@ def sync_detailed(
 
     Returns:
         Response[Union[BucketGrant, Error]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         group_id=group_id,
-body=body,
-
+        body=body,
     )
 
     response = client.get_httpx_client().request(
@@ -120,14 +104,14 @@ body=body,
 
     return _build_response(client=client, response=response)
 
+
 def sync(
     group_id: str,
     *,
     client: AuthenticatedClient,
     body: PutBucketAccessGroupsGroupIdGrantsBody,
-
-) -> Optional[Union[BucketGrant, Error]]:
-    """ Upsert a grant (bucket / bucket_type / row : crud) for an access group
+) -> BucketGrant | Error | None:
+    """Upsert a grant (bucket / bucket_type / row : crud) for an access group
 
     Args:
         group_id (str):
@@ -139,24 +123,22 @@ def sync(
 
     Returns:
         Union[BucketGrant, Error]
-     """
-
+    """
 
     return sync_detailed(
         group_id=group_id,
-client=client,
-body=body,
-
+        client=client,
+        body=body,
     ).parsed
+
 
 async def asyncio_detailed(
     group_id: str,
     *,
     client: AuthenticatedClient,
     body: PutBucketAccessGroupsGroupIdGrantsBody,
-
-) -> Response[Union[BucketGrant, Error]]:
-    """ Upsert a grant (bucket / bucket_type / row : crud) for an access group
+) -> Response[BucketGrant | Error]:
+    """Upsert a grant (bucket / bucket_type / row : crud) for an access group
 
     Args:
         group_id (str):
@@ -168,29 +150,25 @@ async def asyncio_detailed(
 
     Returns:
         Response[Union[BucketGrant, Error]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         group_id=group_id,
-body=body,
-
+        body=body,
     )
 
-    response = await client.get_async_httpx_client().request(
-        **kwargs
-    )
+    response = await client.get_async_httpx_client().request(**kwargs)
 
     return _build_response(client=client, response=response)
+
 
 async def asyncio(
     group_id: str,
     *,
     client: AuthenticatedClient,
     body: PutBucketAccessGroupsGroupIdGrantsBody,
-
-) -> Optional[Union[BucketGrant, Error]]:
-    """ Upsert a grant (bucket / bucket_type / row : crud) for an access group
+) -> BucketGrant | Error | None:
+    """Upsert a grant (bucket / bucket_type / row : crud) for an access group
 
     Args:
         group_id (str):
@@ -202,12 +180,12 @@ async def asyncio(
 
     Returns:
         Union[BucketGrant, Error]
-     """
+    """
 
-
-    return (await asyncio_detailed(
-        group_id=group_id,
-client=client,
-body=body,
-
-    )).parsed
+    return (
+        await asyncio_detailed(
+            group_id=group_id,
+            client=client,
+            body=body,
+        )
+    ).parsed

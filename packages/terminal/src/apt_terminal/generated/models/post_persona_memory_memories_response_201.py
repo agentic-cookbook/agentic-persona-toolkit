@@ -1,84 +1,74 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
-
-from attrs import define as _attrs_define
-from attrs import field as _attrs_field
-
-from ..types import UNSET, Unset
-
-from typing import cast
-from typing import cast, Union
+from typing import Any, TypeVar, cast
 from uuid import UUID
 
-
-
-
-
+from attrs import define as _attrs_define
 
 T = TypeVar("T", bound="PostPersonaMemoryMemoriesResponse201")
 
 
-
 @_attrs_define
 class PostPersonaMemoryMemoriesResponse201:
-    """ 
-        Attributes:
-            id (str):
-            ecosystem_id (str):
-            customer_id (str):
-            deleted_at (Union[None, str]):
-            persona_id (UUID):
-            scope (str):
-            slug (str):
-            memory_type (str):
-            description (str):
-            body (str):
-            subject_table (Union[None, str]):
-            subject_id (Union[None, str]):
-            status (str):
-            supersedes_id (Union[None, str]):
-            source (str):
-            confidence (int):
-            tags (list[str]):
-            valid_from (Union[None, str]):
-            valid_to (Union[None, str]):
-            recall_count (int):
-            last_recalled_at (Union[None, str]):
-            embedding (Union[None, list[float]]):
-            embedding_model (Union[None, str]):
-            created_at (str):
-            updated_at (str):
-     """
+    """
+    Attributes:
+        id (str):
+        ecosystem_id (str):
+        customer_id (str):
+        deleted_at (Union[None, str]):
+        persona_id (UUID):
+        scope (str):
+        slug (str):
+        memory_type (str):
+        description (str):
+        body (str):
+        subject_table (Union[None, str]):
+        subject_id (Union[None, str]):
+        status (str):
+        supersedes_id (Union[None, str]):
+        source (str):
+        confidence (int):
+        tags (list[str]):
+        valid_from (Union[None, str]):
+        valid_to (Union[None, str]):
+        recall_count (int):
+        last_recalled_at (Union[None, str]):
+        embedding (Union[None, list[float]]):
+        embedding_model (Union[None, str]):
+        created_at (str):
+        updated_at (str):
+        sync_version (int):
+        sync_stamped_at (Union[None, str]):
+        sync_txid (int):
+    """
 
     id: str
     ecosystem_id: str
     customer_id: str
-    deleted_at: Union[None, str]
+    deleted_at: None | str
     persona_id: UUID
     scope: str
     slug: str
     memory_type: str
     description: str
     body: str
-    subject_table: Union[None, str]
-    subject_id: Union[None, str]
+    subject_table: None | str
+    subject_id: None | str
     status: str
-    supersedes_id: Union[None, str]
+    supersedes_id: None | str
     source: str
     confidence: int
     tags: list[str]
-    valid_from: Union[None, str]
-    valid_to: Union[None, str]
+    valid_from: None | str
+    valid_to: None | str
     recall_count: int
-    last_recalled_at: Union[None, str]
-    embedding: Union[None, list[float]]
-    embedding_model: Union[None, str]
+    last_recalled_at: None | str
+    embedding: None | list[float]
+    embedding_model: None | str
     created_at: str
     updated_at: str
-
-
-
-
+    sync_version: int
+    sync_stamped_at: None | str
+    sync_txid: int
 
     def to_dict(self) -> dict[str, Any]:
         id = self.id
@@ -87,7 +77,7 @@ class PostPersonaMemoryMemoriesResponse201:
 
         customer_id = self.customer_id
 
-        deleted_at: Union[None, str]
+        deleted_at: None | str
         deleted_at = self.deleted_at
 
         persona_id = str(self.persona_id)
@@ -102,15 +92,15 @@ class PostPersonaMemoryMemoriesResponse201:
 
         body = self.body
 
-        subject_table: Union[None, str]
+        subject_table: None | str
         subject_table = self.subject_table
 
-        subject_id: Union[None, str]
+        subject_id: None | str
         subject_id = self.subject_id
 
         status = self.status
 
-        supersedes_id: Union[None, str]
+        supersedes_id: None | str
         supersedes_id = self.supersedes_id
 
         source = self.source
@@ -119,68 +109,74 @@ class PostPersonaMemoryMemoriesResponse201:
 
         tags = self.tags
 
-
-
-        valid_from: Union[None, str]
+        valid_from: None | str
         valid_from = self.valid_from
 
-        valid_to: Union[None, str]
+        valid_to: None | str
         valid_to = self.valid_to
 
         recall_count = self.recall_count
 
-        last_recalled_at: Union[None, str]
+        last_recalled_at: None | str
         last_recalled_at = self.last_recalled_at
 
-        embedding: Union[None, list[float]]
+        embedding: None | list[float]
         if isinstance(self.embedding, list):
             embedding = self.embedding
-
 
         else:
             embedding = self.embedding
 
-        embedding_model: Union[None, str]
+        embedding_model: None | str
         embedding_model = self.embedding_model
 
         created_at = self.created_at
 
         updated_at = self.updated_at
 
+        sync_version = self.sync_version
+
+        sync_stamped_at: None | str
+        sync_stamped_at = self.sync_stamped_at
+
+        sync_txid = self.sync_txid
 
         field_dict: dict[str, Any] = {}
 
-        field_dict.update({
-            "id": id,
-            "ecosystemId": ecosystem_id,
-            "customerId": customer_id,
-            "deletedAt": deleted_at,
-            "personaId": persona_id,
-            "scope": scope,
-            "slug": slug,
-            "memoryType": memory_type,
-            "description": description,
-            "body": body,
-            "subjectTable": subject_table,
-            "subjectId": subject_id,
-            "status": status,
-            "supersedesId": supersedes_id,
-            "source": source,
-            "confidence": confidence,
-            "tags": tags,
-            "validFrom": valid_from,
-            "validTo": valid_to,
-            "recallCount": recall_count,
-            "lastRecalledAt": last_recalled_at,
-            "embedding": embedding,
-            "embeddingModel": embedding_model,
-            "createdAt": created_at,
-            "updatedAt": updated_at,
-        })
+        field_dict.update(
+            {
+                "id": id,
+                "ecosystemId": ecosystem_id,
+                "customerId": customer_id,
+                "deletedAt": deleted_at,
+                "personaId": persona_id,
+                "scope": scope,
+                "slug": slug,
+                "memoryType": memory_type,
+                "description": description,
+                "body": body,
+                "subjectTable": subject_table,
+                "subjectId": subject_id,
+                "status": status,
+                "supersedesId": supersedes_id,
+                "source": source,
+                "confidence": confidence,
+                "tags": tags,
+                "validFrom": valid_from,
+                "validTo": valid_to,
+                "recallCount": recall_count,
+                "lastRecalledAt": last_recalled_at,
+                "embedding": embedding,
+                "embeddingModel": embedding_model,
+                "createdAt": created_at,
+                "updatedAt": updated_at,
+                "syncVersion": sync_version,
+                "syncStampedAt": sync_stamped_at,
+                "syncTxid": sync_txid,
+            }
+        )
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -191,18 +187,14 @@ class PostPersonaMemoryMemoriesResponse201:
 
         customer_id = d.pop("customerId")
 
-        def _parse_deleted_at(data: object) -> Union[None, str]:
+        def _parse_deleted_at(data: object) -> None | str:
             if data is None:
                 return data
-            return cast(Union[None, str], data)
+            return cast(None | str, data)
 
         deleted_at = _parse_deleted_at(d.pop("deletedAt"))
 
-
         persona_id = UUID(d.pop("personaId"))
-
-
-
 
         scope = d.pop("scope")
 
@@ -214,31 +206,28 @@ class PostPersonaMemoryMemoriesResponse201:
 
         body = d.pop("body")
 
-        def _parse_subject_table(data: object) -> Union[None, str]:
+        def _parse_subject_table(data: object) -> None | str:
             if data is None:
                 return data
-            return cast(Union[None, str], data)
+            return cast(None | str, data)
 
         subject_table = _parse_subject_table(d.pop("subjectTable"))
 
-
-        def _parse_subject_id(data: object) -> Union[None, str]:
+        def _parse_subject_id(data: object) -> None | str:
             if data is None:
                 return data
-            return cast(Union[None, str], data)
+            return cast(None | str, data)
 
         subject_id = _parse_subject_id(d.pop("subjectId"))
 
-
         status = d.pop("status")
 
-        def _parse_supersedes_id(data: object) -> Union[None, str]:
+        def _parse_supersedes_id(data: object) -> None | str:
             if data is None:
                 return data
-            return cast(Union[None, str], data)
+            return cast(None | str, data)
 
         supersedes_id = _parse_supersedes_id(d.pop("supersedesId"))
-
 
         source = d.pop("source")
 
@@ -246,34 +235,30 @@ class PostPersonaMemoryMemoriesResponse201:
 
         tags = cast(list[str], d.pop("tags"))
 
-
-        def _parse_valid_from(data: object) -> Union[None, str]:
+        def _parse_valid_from(data: object) -> None | str:
             if data is None:
                 return data
-            return cast(Union[None, str], data)
+            return cast(None | str, data)
 
         valid_from = _parse_valid_from(d.pop("validFrom"))
 
-
-        def _parse_valid_to(data: object) -> Union[None, str]:
+        def _parse_valid_to(data: object) -> None | str:
             if data is None:
                 return data
-            return cast(Union[None, str], data)
+            return cast(None | str, data)
 
         valid_to = _parse_valid_to(d.pop("validTo"))
 
-
         recall_count = d.pop("recallCount")
 
-        def _parse_last_recalled_at(data: object) -> Union[None, str]:
+        def _parse_last_recalled_at(data: object) -> None | str:
             if data is None:
                 return data
-            return cast(Union[None, str], data)
+            return cast(None | str, data)
 
         last_recalled_at = _parse_last_recalled_at(d.pop("lastRecalledAt"))
 
-
-        def _parse_embedding(data: object) -> Union[None, list[float]]:
+        def _parse_embedding(data: object) -> None | list[float]:
             if data is None:
                 return data
             try:
@@ -282,24 +267,33 @@ class PostPersonaMemoryMemoriesResponse201:
                 embedding_type_0 = cast(list[float], data)
 
                 return embedding_type_0
-            except: # noqa: E722
+            except:  # noqa: E722
                 pass
-            return cast(Union[None, list[float]], data)
+            return cast(None | list[float], data)
 
         embedding = _parse_embedding(d.pop("embedding"))
 
-
-        def _parse_embedding_model(data: object) -> Union[None, str]:
+        def _parse_embedding_model(data: object) -> None | str:
             if data is None:
                 return data
-            return cast(Union[None, str], data)
+            return cast(None | str, data)
 
         embedding_model = _parse_embedding_model(d.pop("embeddingModel"))
-
 
         created_at = d.pop("createdAt")
 
         updated_at = d.pop("updatedAt")
+
+        sync_version = d.pop("syncVersion")
+
+        def _parse_sync_stamped_at(data: object) -> None | str:
+            if data is None:
+                return data
+            return cast(None | str, data)
+
+        sync_stamped_at = _parse_sync_stamped_at(d.pop("syncStampedAt"))
+
+        sync_txid = d.pop("syncTxid")
 
         post_persona_memory_memories_response_201 = cls(
             id=id,
@@ -327,7 +321,9 @@ class PostPersonaMemoryMemoriesResponse201:
             embedding_model=embedding_model,
             created_at=created_at,
             updated_at=updated_at,
+            sync_version=sync_version,
+            sync_stamped_at=sync_stamped_at,
+            sync_txid=sync_txid,
         )
 
         return post_persona_memory_memories_response_201
-

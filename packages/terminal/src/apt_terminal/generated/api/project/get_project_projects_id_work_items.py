@@ -1,46 +1,50 @@
 from http import HTTPStatus
-from typing import Any, Optional, Union, cast
+from typing import Any
 
 import httpx
 
-from ...client import AuthenticatedClient, Client
-from ...types import Response, UNSET
 from ... import errors
-
+from ...client import AuthenticatedClient, Client
 from ...models.error import Error
+from ...models.get_project_projects_id_work_items_include_untriaged import (
+    GetProjectProjectsIdWorkItemsIncludeUntriaged,
+)
 from ...models.work_item import WorkItem
-from typing import cast
-
+from ...types import UNSET, Response, Unset
 
 
 def _get_kwargs(
     id: str,
-
+    *,
+    include_untriaged: Unset | GetProjectProjectsIdWorkItemsIncludeUntriaged = UNSET,
 ) -> dict[str, Any]:
-    
+    params: dict[str, Any] = {}
 
-    
+    json_include_untriaged: Unset | str = UNSET
+    if not isinstance(include_untriaged, Unset):
+        json_include_untriaged = include_untriaged.value
 
-    
+    params["includeUntriaged"] = json_include_untriaged
+
+    params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 
     _kwargs: dict[str, Any] = {
         "method": "get",
-        "url": "/project/projects/{id}/work-items".format(id=id,),
+        "url": f"/project/projects/{id}/work-items",
+        "params": params,
     }
-
 
     return _kwargs
 
 
-
-def _parse_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Optional[Union[Error, list['WorkItem']]]:
+def _parse_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Error | list["WorkItem"] | None:
     if response.status_code == 200:
         response_200 = []
         _response_200 = response.json()
-        for response_200_item_data in (_response_200):
+        for response_200_item_data in _response_200:
             response_200_item = WorkItem.from_dict(response_200_item_data)
-
-
 
             response_200.append(response_200_item)
 
@@ -49,14 +53,10 @@ def _parse_response(*, client: Union[AuthenticatedClient, Client], response: htt
     if response.status_code == 401:
         response_401 = Error.from_dict(response.json())
 
-
-
         return response_401
 
     if response.status_code == 404:
         response_404 = Error.from_dict(response.json())
-
-
 
         return response_404
 
@@ -66,7 +66,9 @@ def _parse_response(*, client: Union[AuthenticatedClient, Client], response: htt
         return None
 
 
-def _build_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Response[Union[Error, list['WorkItem']]]:
+def _build_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Response[Error | list["WorkItem"]]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -79,12 +81,17 @@ def sync_detailed(
     id: str,
     *,
     client: AuthenticatedClient,
+    include_untriaged: Unset | GetProjectProjectsIdWorkItemsIncludeUntriaged = UNSET,
+) -> Response[Error | list["WorkItem"]]:
+    """List a project's ACCEPTED work items (non-deleted, in board order)
 
-) -> Response[Union[Error, list['WorkItem']]]:
-    """ List a project's work items (non-deleted, by position)
+     Cards awaiting triage are omitted unless `includeUntriaged=true`. On a board that has never used an
+    intake queue this is every card, because a card created without `triage: true` is accepted at
+    creation.
 
     Args:
         id (str):
+        include_untriaged (Union[Unset, GetProjectProjectsIdWorkItemsIncludeUntriaged]):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -92,12 +99,11 @@ def sync_detailed(
 
     Returns:
         Response[Union[Error, list['WorkItem']]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         id=id,
-
+        include_untriaged=include_untriaged,
     )
 
     response = client.get_httpx_client().request(
@@ -106,16 +112,22 @@ def sync_detailed(
 
     return _build_response(client=client, response=response)
 
+
 def sync(
     id: str,
     *,
     client: AuthenticatedClient,
+    include_untriaged: Unset | GetProjectProjectsIdWorkItemsIncludeUntriaged = UNSET,
+) -> Error | list["WorkItem"] | None:
+    """List a project's ACCEPTED work items (non-deleted, in board order)
 
-) -> Optional[Union[Error, list['WorkItem']]]:
-    """ List a project's work items (non-deleted, by position)
+     Cards awaiting triage are omitted unless `includeUntriaged=true`. On a board that has never used an
+    intake queue this is every card, because a card created without `triage: true` is accepted at
+    creation.
 
     Args:
         id (str):
+        include_untriaged (Union[Unset, GetProjectProjectsIdWorkItemsIncludeUntriaged]):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -123,25 +135,30 @@ def sync(
 
     Returns:
         Union[Error, list['WorkItem']]
-     """
-
+    """
 
     return sync_detailed(
         id=id,
-client=client,
-
+        client=client,
+        include_untriaged=include_untriaged,
     ).parsed
+
 
 async def asyncio_detailed(
     id: str,
     *,
     client: AuthenticatedClient,
+    include_untriaged: Unset | GetProjectProjectsIdWorkItemsIncludeUntriaged = UNSET,
+) -> Response[Error | list["WorkItem"]]:
+    """List a project's ACCEPTED work items (non-deleted, in board order)
 
-) -> Response[Union[Error, list['WorkItem']]]:
-    """ List a project's work items (non-deleted, by position)
+     Cards awaiting triage are omitted unless `includeUntriaged=true`. On a board that has never used an
+    intake queue this is every card, because a card created without `triage: true` is accepted at
+    creation.
 
     Args:
         id (str):
+        include_untriaged (Union[Unset, GetProjectProjectsIdWorkItemsIncludeUntriaged]):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -149,30 +166,33 @@ async def asyncio_detailed(
 
     Returns:
         Response[Union[Error, list['WorkItem']]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         id=id,
-
+        include_untriaged=include_untriaged,
     )
 
-    response = await client.get_async_httpx_client().request(
-        **kwargs
-    )
+    response = await client.get_async_httpx_client().request(**kwargs)
 
     return _build_response(client=client, response=response)
+
 
 async def asyncio(
     id: str,
     *,
     client: AuthenticatedClient,
+    include_untriaged: Unset | GetProjectProjectsIdWorkItemsIncludeUntriaged = UNSET,
+) -> Error | list["WorkItem"] | None:
+    """List a project's ACCEPTED work items (non-deleted, in board order)
 
-) -> Optional[Union[Error, list['WorkItem']]]:
-    """ List a project's work items (non-deleted, by position)
+     Cards awaiting triage are omitted unless `includeUntriaged=true`. On a board that has never used an
+    intake queue this is every card, because a card created without `triage: true` is accepted at
+    creation.
 
     Args:
         id (str):
+        include_untriaged (Union[Unset, GetProjectProjectsIdWorkItemsIncludeUntriaged]):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -180,11 +200,12 @@ async def asyncio(
 
     Returns:
         Union[Error, list['WorkItem']]
-     """
+    """
 
-
-    return (await asyncio_detailed(
-        id=id,
-client=client,
-
-    )).parsed
+    return (
+        await asyncio_detailed(
+            id=id,
+            client=client,
+            include_untriaged=include_untriaged,
+        )
+    ).parsed

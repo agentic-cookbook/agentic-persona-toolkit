@@ -1,0 +1,225 @@
+from collections.abc import Mapping
+from typing import Any, TypeVar, cast
+
+from attrs import define as _attrs_define
+from attrs import field as _attrs_field
+
+from ..models.registry_owner_kind import RegistryOwnerKind
+from ..models.registry_submission_policy import RegistrySubmissionPolicy
+from ..models.registry_visibility import RegistryVisibility
+from ..types import UNSET, Unset
+
+T = TypeVar("T", bound="Registry")
+
+
+@_attrs_define
+class Registry:
+    """
+    Attributes:
+        id (str):
+        ecosystem_id (str):
+        owner_kind (RegistryOwnerKind):
+        owner_id (str):
+        slug (str): globally unique path segment on the registries site
+        name (str):
+        purpose (str): the one-line "what this registry is for"
+        description (str):
+        category_root (str): the industry half of <industry>.<service-type>
+        entry_term (str): what this registry calls an entry, e.g. "coach"
+        visibility (RegistryVisibility):
+        submission_policy (RegistrySubmissionPolicy):
+        services_enabled (bool):
+        created_at (str):
+        updated_at (str):
+        sync_version (int):
+        bound_site_id (Union[None, Unset, str]): a fleet SITE SLUG this registry is bound to; set by platform admin
+            only, never via this API
+        deleted_at (Union[None, Unset, str]):
+    """
+
+    id: str
+    ecosystem_id: str
+    owner_kind: RegistryOwnerKind
+    owner_id: str
+    slug: str
+    name: str
+    purpose: str
+    description: str
+    category_root: str
+    entry_term: str
+    visibility: RegistryVisibility
+    submission_policy: RegistrySubmissionPolicy
+    services_enabled: bool
+    created_at: str
+    updated_at: str
+    sync_version: int
+    bound_site_id: None | Unset | str = UNSET
+    deleted_at: None | Unset | str = UNSET
+    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
+
+    def to_dict(self) -> dict[str, Any]:
+        id = self.id
+
+        ecosystem_id = self.ecosystem_id
+
+        owner_kind = self.owner_kind.value
+
+        owner_id = self.owner_id
+
+        slug = self.slug
+
+        name = self.name
+
+        purpose = self.purpose
+
+        description = self.description
+
+        category_root = self.category_root
+
+        entry_term = self.entry_term
+
+        visibility = self.visibility.value
+
+        submission_policy = self.submission_policy.value
+
+        services_enabled = self.services_enabled
+
+        created_at = self.created_at
+
+        updated_at = self.updated_at
+
+        sync_version = self.sync_version
+
+        bound_site_id: None | Unset | str
+        if isinstance(self.bound_site_id, Unset):
+            bound_site_id = UNSET
+        else:
+            bound_site_id = self.bound_site_id
+
+        deleted_at: None | Unset | str
+        if isinstance(self.deleted_at, Unset):
+            deleted_at = UNSET
+        else:
+            deleted_at = self.deleted_at
+
+        field_dict: dict[str, Any] = {}
+        field_dict.update(self.additional_properties)
+        field_dict.update(
+            {
+                "id": id,
+                "ecosystemId": ecosystem_id,
+                "ownerKind": owner_kind,
+                "ownerId": owner_id,
+                "slug": slug,
+                "name": name,
+                "purpose": purpose,
+                "description": description,
+                "categoryRoot": category_root,
+                "entryTerm": entry_term,
+                "visibility": visibility,
+                "submissionPolicy": submission_policy,
+                "servicesEnabled": services_enabled,
+                "createdAt": created_at,
+                "updatedAt": updated_at,
+                "syncVersion": sync_version,
+            }
+        )
+        if bound_site_id is not UNSET:
+            field_dict["boundSiteId"] = bound_site_id
+        if deleted_at is not UNSET:
+            field_dict["deletedAt"] = deleted_at
+
+        return field_dict
+
+    @classmethod
+    def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
+        d = dict(src_dict)
+        id = d.pop("id")
+
+        ecosystem_id = d.pop("ecosystemId")
+
+        owner_kind = RegistryOwnerKind(d.pop("ownerKind"))
+
+        owner_id = d.pop("ownerId")
+
+        slug = d.pop("slug")
+
+        name = d.pop("name")
+
+        purpose = d.pop("purpose")
+
+        description = d.pop("description")
+
+        category_root = d.pop("categoryRoot")
+
+        entry_term = d.pop("entryTerm")
+
+        visibility = RegistryVisibility(d.pop("visibility"))
+
+        submission_policy = RegistrySubmissionPolicy(d.pop("submissionPolicy"))
+
+        services_enabled = d.pop("servicesEnabled")
+
+        created_at = d.pop("createdAt")
+
+        updated_at = d.pop("updatedAt")
+
+        sync_version = d.pop("syncVersion")
+
+        def _parse_bound_site_id(data: object) -> None | Unset | str:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(None | Unset | str, data)
+
+        bound_site_id = _parse_bound_site_id(d.pop("boundSiteId", UNSET))
+
+        def _parse_deleted_at(data: object) -> None | Unset | str:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(None | Unset | str, data)
+
+        deleted_at = _parse_deleted_at(d.pop("deletedAt", UNSET))
+
+        registry = cls(
+            id=id,
+            ecosystem_id=ecosystem_id,
+            owner_kind=owner_kind,
+            owner_id=owner_id,
+            slug=slug,
+            name=name,
+            purpose=purpose,
+            description=description,
+            category_root=category_root,
+            entry_term=entry_term,
+            visibility=visibility,
+            submission_policy=submission_policy,
+            services_enabled=services_enabled,
+            created_at=created_at,
+            updated_at=updated_at,
+            sync_version=sync_version,
+            bound_site_id=bound_site_id,
+            deleted_at=deleted_at,
+        )
+
+        registry.additional_properties = d
+        return registry
+
+    @property
+    def additional_keys(self) -> list[str]:
+        return list(self.additional_properties.keys())
+
+    def __getitem__(self, key: str) -> Any:
+        return self.additional_properties[key]
+
+    def __setitem__(self, key: str, value: Any) -> None:
+        self.additional_properties[key] = value
+
+    def __delitem__(self, key: str) -> None:
+        del self.additional_properties[key]
+
+    def __contains__(self, key: str) -> bool:
+        return key in self.additional_properties

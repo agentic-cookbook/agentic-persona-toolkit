@@ -1,31 +1,21 @@
 from http import HTTPStatus
-from typing import Any, Optional, Union, cast
+from typing import Any
 
 import httpx
 
-from ...client import AuthenticatedClient, Client
-from ...types import Response, UNSET
 from ... import errors
-
+from ...client import AuthenticatedClient, Client
 from ...models.access_assignment_list import AccessAssignmentList
 from ...models.error import Error
-from ...types import UNSET, Unset
-from typing import cast
-from typing import Union
-
+from ...types import UNSET, Response, Unset
 
 
 def _get_kwargs(
     *,
     workspace: str,
-    feature: Union[Unset, str] = UNSET,
-    item_id: Union[Unset, str] = UNSET,
-
+    feature: Unset | str = UNSET,
+    item_id: Unset | str = UNSET,
 ) -> dict[str, Any]:
-    
-
-    
-
     params: dict[str, Any] = {}
 
     params["workspace"] = workspace
@@ -34,9 +24,7 @@ def _get_kwargs(
 
     params["itemId"] = item_id
 
-
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
-
 
     _kwargs: dict[str, Any] = {
         "method": "get",
@@ -44,44 +32,34 @@ def _get_kwargs(
         "params": params,
     }
 
-
     return _kwargs
 
 
-
-def _parse_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Optional[Union[AccessAssignmentList, Error]]:
+def _parse_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> AccessAssignmentList | Error | None:
     if response.status_code == 200:
         response_200 = AccessAssignmentList.from_dict(response.json())
-
-
 
         return response_200
 
     if response.status_code == 400:
         response_400 = Error.from_dict(response.json())
 
-
-
         return response_400
 
     if response.status_code == 401:
         response_401 = Error.from_dict(response.json())
-
-
 
         return response_401
 
     if response.status_code == 403:
         response_403 = Error.from_dict(response.json())
 
-
-
         return response_403
 
     if response.status_code == 404:
         response_404 = Error.from_dict(response.json())
-
-
 
         return response_404
 
@@ -91,7 +69,9 @@ def _parse_response(*, client: Union[AuthenticatedClient, Client], response: htt
         return None
 
 
-def _build_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Response[Union[AccessAssignmentList, Error]]:
+def _build_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Response[AccessAssignmentList | Error]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -104,11 +84,10 @@ def sync_detailed(
     *,
     client: AuthenticatedClient,
     workspace: str,
-    feature: Union[Unset, str] = UNSET,
-    item_id: Union[Unset, str] = UNSET,
-
-) -> Response[Union[AccessAssignmentList, Error]]:
-    """ List assignments (workspace-wide for admins; per-item for M holders)
+    feature: Unset | str = UNSET,
+    item_id: Unset | str = UNSET,
+) -> Response[AccessAssignmentList | Error]:
+    """List assignments (workspace-wide for admins; per-item for M holders)
 
     Args:
         workspace (str):
@@ -121,14 +100,12 @@ def sync_detailed(
 
     Returns:
         Response[Union[AccessAssignmentList, Error]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         workspace=workspace,
-feature=feature,
-item_id=item_id,
-
+        feature=feature,
+        item_id=item_id,
     )
 
     response = client.get_httpx_client().request(
@@ -137,15 +114,15 @@ item_id=item_id,
 
     return _build_response(client=client, response=response)
 
+
 def sync(
     *,
     client: AuthenticatedClient,
     workspace: str,
-    feature: Union[Unset, str] = UNSET,
-    item_id: Union[Unset, str] = UNSET,
-
-) -> Optional[Union[AccessAssignmentList, Error]]:
-    """ List assignments (workspace-wide for admins; per-item for M holders)
+    feature: Unset | str = UNSET,
+    item_id: Unset | str = UNSET,
+) -> AccessAssignmentList | Error | None:
+    """List assignments (workspace-wide for admins; per-item for M holders)
 
     Args:
         workspace (str):
@@ -158,26 +135,24 @@ def sync(
 
     Returns:
         Union[AccessAssignmentList, Error]
-     """
-
+    """
 
     return sync_detailed(
         client=client,
-workspace=workspace,
-feature=feature,
-item_id=item_id,
-
+        workspace=workspace,
+        feature=feature,
+        item_id=item_id,
     ).parsed
+
 
 async def asyncio_detailed(
     *,
     client: AuthenticatedClient,
     workspace: str,
-    feature: Union[Unset, str] = UNSET,
-    item_id: Union[Unset, str] = UNSET,
-
-) -> Response[Union[AccessAssignmentList, Error]]:
-    """ List assignments (workspace-wide for admins; per-item for M holders)
+    feature: Unset | str = UNSET,
+    item_id: Unset | str = UNSET,
+) -> Response[AccessAssignmentList | Error]:
+    """List assignments (workspace-wide for admins; per-item for M holders)
 
     Args:
         workspace (str):
@@ -190,31 +165,27 @@ async def asyncio_detailed(
 
     Returns:
         Response[Union[AccessAssignmentList, Error]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         workspace=workspace,
-feature=feature,
-item_id=item_id,
-
+        feature=feature,
+        item_id=item_id,
     )
 
-    response = await client.get_async_httpx_client().request(
-        **kwargs
-    )
+    response = await client.get_async_httpx_client().request(**kwargs)
 
     return _build_response(client=client, response=response)
+
 
 async def asyncio(
     *,
     client: AuthenticatedClient,
     workspace: str,
-    feature: Union[Unset, str] = UNSET,
-    item_id: Union[Unset, str] = UNSET,
-
-) -> Optional[Union[AccessAssignmentList, Error]]:
-    """ List assignments (workspace-wide for admins; per-item for M holders)
+    feature: Unset | str = UNSET,
+    item_id: Unset | str = UNSET,
+) -> AccessAssignmentList | Error | None:
+    """List assignments (workspace-wide for admins; per-item for M holders)
 
     Args:
         workspace (str):
@@ -227,13 +198,13 @@ async def asyncio(
 
     Returns:
         Union[AccessAssignmentList, Error]
-     """
+    """
 
-
-    return (await asyncio_detailed(
-        client=client,
-workspace=workspace,
-feature=feature,
-item_id=item_id,
-
-    )).parsed
+    return (
+        await asyncio_detailed(
+            client=client,
+            workspace=workspace,
+            feature=feature,
+            item_id=item_id,
+        )
+    ).parsed

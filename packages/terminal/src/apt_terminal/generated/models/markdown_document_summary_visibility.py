@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class MarkdownDocumentSummaryVisibility(str, Enum):
     PRIVATE = "private"
     PUBLIC = "public"

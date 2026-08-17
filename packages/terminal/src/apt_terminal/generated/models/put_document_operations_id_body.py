@@ -1,69 +1,48 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar, cast
 
 from attrs import define as _attrs_define
-from attrs import field as _attrs_field
 
 from ..types import UNSET, Unset
-
-from ..types import UNSET, Unset
-from typing import cast, Union
-from typing import Union
-
-
-
-
-
 
 T = TypeVar("T", bound="PutDocumentOperationsIdBody")
 
 
-
 @_attrs_define
 class PutDocumentOperationsIdBody:
-    """ 
-        Attributes:
-            document_id (Union[Unset, str]):
-            block_id (Union[None, Unset, str]):
-            deleted_at (Union[None, Unset, str]):
-            ecosystem_id (Union[Unset, str]):
-            client_id (Union[Unset, str]):
-            client_seq (Union[Unset, int]):
-            op_type (Union[Unset, str]):
-            op_payload (Union[Unset, str]):
-            undo_group_id (Union[None, Unset, str]):
-            inverse_of_op_id (Union[None, Unset, str]):
-     """
+    """
+    Attributes:
+        document_id (Union[Unset, str]):
+        block_id (Union[None, Unset, str]):
+        ecosystem_id (Union[Unset, str]):
+        client_id (Union[Unset, str]):
+        client_seq (Union[Unset, int]):
+        op_type (Union[Unset, str]):
+        op_payload (Union[Unset, str]):
+        undo_group_id (Union[None, Unset, str]):
+        inverse_of_op_id (Union[None, Unset, str]):
+        sync_txid (Union[Unset, int]):
+    """
 
-    document_id: Union[Unset, str] = UNSET
-    block_id: Union[None, Unset, str] = UNSET
-    deleted_at: Union[None, Unset, str] = UNSET
-    ecosystem_id: Union[Unset, str] = UNSET
-    client_id: Union[Unset, str] = UNSET
-    client_seq: Union[Unset, int] = UNSET
-    op_type: Union[Unset, str] = UNSET
-    op_payload: Union[Unset, str] = UNSET
-    undo_group_id: Union[None, Unset, str] = UNSET
-    inverse_of_op_id: Union[None, Unset, str] = UNSET
-
-
-
-
+    document_id: Unset | str = UNSET
+    block_id: None | Unset | str = UNSET
+    ecosystem_id: Unset | str = UNSET
+    client_id: Unset | str = UNSET
+    client_seq: Unset | int = UNSET
+    op_type: Unset | str = UNSET
+    op_payload: Unset | str = UNSET
+    undo_group_id: None | Unset | str = UNSET
+    inverse_of_op_id: None | Unset | str = UNSET
+    sync_txid: Unset | int = UNSET
 
     def to_dict(self) -> dict[str, Any]:
         document_id = self.document_id
 
-        block_id: Union[None, Unset, str]
+        block_id: None | Unset | str
         if isinstance(self.block_id, Unset):
             block_id = UNSET
         else:
             block_id = self.block_id
-
-        deleted_at: Union[None, Unset, str]
-        if isinstance(self.deleted_at, Unset):
-            deleted_at = UNSET
-        else:
-            deleted_at = self.deleted_at
 
         ecosystem_id = self.ecosystem_id
 
@@ -75,29 +54,27 @@ class PutDocumentOperationsIdBody:
 
         op_payload = self.op_payload
 
-        undo_group_id: Union[None, Unset, str]
+        undo_group_id: None | Unset | str
         if isinstance(self.undo_group_id, Unset):
             undo_group_id = UNSET
         else:
             undo_group_id = self.undo_group_id
 
-        inverse_of_op_id: Union[None, Unset, str]
+        inverse_of_op_id: None | Unset | str
         if isinstance(self.inverse_of_op_id, Unset):
             inverse_of_op_id = UNSET
         else:
             inverse_of_op_id = self.inverse_of_op_id
 
+        sync_txid = self.sync_txid
 
         field_dict: dict[str, Any] = {}
 
-        field_dict.update({
-        })
+        field_dict.update({})
         if document_id is not UNSET:
             field_dict["documentId"] = document_id
         if block_id is not UNSET:
             field_dict["blockId"] = block_id
-        if deleted_at is not UNSET:
-            field_dict["deletedAt"] = deleted_at
         if ecosystem_id is not UNSET:
             field_dict["ecosystemId"] = ecosystem_id
         if client_id is not UNSET:
@@ -112,35 +89,24 @@ class PutDocumentOperationsIdBody:
             field_dict["undoGroupId"] = undo_group_id
         if inverse_of_op_id is not UNSET:
             field_dict["inverseOfOpId"] = inverse_of_op_id
+        if sync_txid is not UNSET:
+            field_dict["syncTxid"] = sync_txid
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
         document_id = d.pop("documentId", UNSET)
 
-        def _parse_block_id(data: object) -> Union[None, Unset, str]:
+        def _parse_block_id(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         block_id = _parse_block_id(d.pop("blockId", UNSET))
-
-
-        def _parse_deleted_at(data: object) -> Union[None, Unset, str]:
-            if data is None:
-                return data
-            if isinstance(data, Unset):
-                return data
-            return cast(Union[None, Unset, str], data)
-
-        deleted_at = _parse_deleted_at(d.pop("deletedAt", UNSET))
-
 
         ecosystem_id = d.pop("ecosystemId", UNSET)
 
@@ -152,30 +118,29 @@ class PutDocumentOperationsIdBody:
 
         op_payload = d.pop("opPayload", UNSET)
 
-        def _parse_undo_group_id(data: object) -> Union[None, Unset, str]:
+        def _parse_undo_group_id(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         undo_group_id = _parse_undo_group_id(d.pop("undoGroupId", UNSET))
 
-
-        def _parse_inverse_of_op_id(data: object) -> Union[None, Unset, str]:
+        def _parse_inverse_of_op_id(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         inverse_of_op_id = _parse_inverse_of_op_id(d.pop("inverseOfOpId", UNSET))
 
+        sync_txid = d.pop("syncTxid", UNSET)
 
         put_document_operations_id_body = cls(
             document_id=document_id,
             block_id=block_id,
-            deleted_at=deleted_at,
             ecosystem_id=ecosystem_id,
             client_id=client_id,
             client_seq=client_seq,
@@ -183,7 +148,7 @@ class PutDocumentOperationsIdBody:
             op_payload=op_payload,
             undo_group_id=undo_group_id,
             inverse_of_op_id=inverse_of_op_id,
+            sync_txid=sync_txid,
         )
 
         return put_document_operations_id_body
-

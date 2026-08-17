@@ -1,38 +1,28 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 from ..types import UNSET, Unset
 
-from ..types import UNSET, Unset
-from typing import cast, Union
-from typing import Union
-
-
-
-
-
-
 T = TypeVar("T", bound="MarkdownDocumentVersionSummary")
-
 
 
 @_attrs_define
 class MarkdownDocumentVersionSummary:
-    """ 
-        Attributes:
-            id (str):
-            version (int):
-            title (str):
-            content_hash (str):
-            size_bytes (int):
-            created_at (str):
-            author_type (Union[None, Unset, str]):
-            author_id (Union[None, Unset, str]):
-            author_name (Union[None, Unset, str]):
-     """
+    """
+    Attributes:
+        id (str):
+        version (int):
+        title (str):
+        content_hash (str):
+        size_bytes (int):
+        created_at (str):
+        author_type (Union[None, Unset, str]):
+        author_id (Union[None, Unset, str]):
+        author_name (Union[None, Unset, str]):
+    """
 
     id: str
     version: int
@@ -40,14 +30,10 @@ class MarkdownDocumentVersionSummary:
     content_hash: str
     size_bytes: int
     created_at: str
-    author_type: Union[None, Unset, str] = UNSET
-    author_id: Union[None, Unset, str] = UNSET
-    author_name: Union[None, Unset, str] = UNSET
+    author_type: None | Unset | str = UNSET
+    author_id: None | Unset | str = UNSET
+    author_name: None | Unset | str = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         id = self.id
@@ -62,35 +48,36 @@ class MarkdownDocumentVersionSummary:
 
         created_at = self.created_at
 
-        author_type: Union[None, Unset, str]
+        author_type: None | Unset | str
         if isinstance(self.author_type, Unset):
             author_type = UNSET
         else:
             author_type = self.author_type
 
-        author_id: Union[None, Unset, str]
+        author_id: None | Unset | str
         if isinstance(self.author_id, Unset):
             author_id = UNSET
         else:
             author_id = self.author_id
 
-        author_name: Union[None, Unset, str]
+        author_name: None | Unset | str
         if isinstance(self.author_name, Unset):
             author_name = UNSET
         else:
             author_name = self.author_name
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "id": id,
-            "version": version,
-            "title": title,
-            "contentHash": content_hash,
-            "sizeBytes": size_bytes,
-            "createdAt": created_at,
-        })
+        field_dict.update(
+            {
+                "id": id,
+                "version": version,
+                "title": title,
+                "contentHash": content_hash,
+                "sizeBytes": size_bytes,
+                "createdAt": created_at,
+            }
+        )
         if author_type is not UNSET:
             field_dict["authorType"] = author_type
         if author_id is not UNSET:
@@ -99,8 +86,6 @@ class MarkdownDocumentVersionSummary:
             field_dict["authorName"] = author_name
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -117,35 +102,32 @@ class MarkdownDocumentVersionSummary:
 
         created_at = d.pop("createdAt")
 
-        def _parse_author_type(data: object) -> Union[None, Unset, str]:
+        def _parse_author_type(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         author_type = _parse_author_type(d.pop("authorType", UNSET))
 
-
-        def _parse_author_id(data: object) -> Union[None, Unset, str]:
+        def _parse_author_id(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         author_id = _parse_author_id(d.pop("authorId", UNSET))
 
-
-        def _parse_author_name(data: object) -> Union[None, Unset, str]:
+        def _parse_author_name(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         author_name = _parse_author_name(d.pop("authorName", UNSET))
-
 
         markdown_document_version_summary = cls(
             id=id,
@@ -158,7 +140,6 @@ class MarkdownDocumentVersionSummary:
             author_id=author_id,
             author_name=author_name,
         )
-
 
         markdown_document_version_summary.additional_properties = d
         return markdown_document_version_summary

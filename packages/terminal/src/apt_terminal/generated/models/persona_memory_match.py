@@ -1,39 +1,30 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
-
 from ..models.persona_memory_match_memory_type import PersonaMemoryMatchMemoryType
 from ..models.persona_memory_match_scope import PersonaMemoryMatchScope
-from typing import cast
-
-
-
-
-
 
 T = TypeVar("T", bound="PersonaMemoryMatch")
 
 
-
 @_attrs_define
 class PersonaMemoryMatch:
-    """ 
-        Attributes:
-            id (str):
-            persona_id (str):
-            scope (PersonaMemoryMatchScope):
-            slug (str):
-            memory_type (PersonaMemoryMatchMemoryType):
-            description (str):
-            body (str):
-            confidence (int):
-            tags (list[str]):
-            similarity (float): Cosine similarity, negatives clamped to 0
-     """
+    """
+    Attributes:
+        id (str):
+        persona_id (str):
+        scope (PersonaMemoryMatchScope):
+        slug (str):
+        memory_type (PersonaMemoryMatchMemoryType):
+        description (str):
+        body (str):
+        confidence (int):
+        tags (list[str]):
+        similarity (float): Cosine similarity, negatives clamped to 0
+    """
 
     id: str
     persona_id: str
@@ -46,10 +37,6 @@ class PersonaMemoryMatch:
     tags: list[str]
     similarity: float
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         id = self.id
@@ -70,29 +57,26 @@ class PersonaMemoryMatch:
 
         tags = self.tags
 
-
-
         similarity = self.similarity
-
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "id": id,
-            "personaId": persona_id,
-            "scope": scope,
-            "slug": slug,
-            "memoryType": memory_type,
-            "description": description,
-            "body": body,
-            "confidence": confidence,
-            "tags": tags,
-            "similarity": similarity,
-        })
+        field_dict.update(
+            {
+                "id": id,
+                "personaId": persona_id,
+                "scope": scope,
+                "slug": slug,
+                "memoryType": memory_type,
+                "description": description,
+                "body": body,
+                "confidence": confidence,
+                "tags": tags,
+                "similarity": similarity,
+            }
+        )
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -103,15 +87,9 @@ class PersonaMemoryMatch:
 
         scope = PersonaMemoryMatchScope(d.pop("scope"))
 
-
-
-
         slug = d.pop("slug")
 
         memory_type = PersonaMemoryMatchMemoryType(d.pop("memoryType"))
-
-
-
 
         description = d.pop("description")
 
@@ -120,7 +98,6 @@ class PersonaMemoryMatch:
         confidence = d.pop("confidence")
 
         tags = cast(list[str], d.pop("tags"))
-
 
         similarity = d.pop("similarity")
 
@@ -136,7 +113,6 @@ class PersonaMemoryMatch:
             tags=tags,
             similarity=similarity,
         )
-
 
         persona_memory_match.additional_properties = d
         return persona_memory_match

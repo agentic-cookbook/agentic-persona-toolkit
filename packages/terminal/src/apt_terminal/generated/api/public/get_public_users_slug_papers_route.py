@@ -1,51 +1,37 @@
 from http import HTTPStatus
-from typing import Any, Optional, Union, cast
+from typing import Any
 
 import httpx
 
-from ...client import AuthenticatedClient, Client
-from ...types import Response, UNSET
 from ... import errors
-
+from ...client import AuthenticatedClient, Client
 from ...models.error import Error
 from ...models.public_paper import PublicPaper
-from typing import cast
-
+from ...types import Response
 
 
 def _get_kwargs(
     slug: str,
     route: str,
-
 ) -> dict[str, Any]:
-    
-
-    
-
-    
-
     _kwargs: dict[str, Any] = {
         "method": "get",
-        "url": "/public/users/{slug}/papers/{route}".format(slug=slug,route=route,),
+        "url": f"/public/users/{slug}/papers/{route}",
     }
-
 
     return _kwargs
 
 
-
-def _parse_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Optional[Union[Error, PublicPaper]]:
+def _parse_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Error | PublicPaper | None:
     if response.status_code == 200:
         response_200 = PublicPaper.from_dict(response.json())
-
-
 
         return response_200
 
     if response.status_code == 404:
         response_404 = Error.from_dict(response.json())
-
-
 
         return response_404
 
@@ -55,7 +41,9 @@ def _parse_response(*, client: Union[AuthenticatedClient, Client], response: htt
         return None
 
 
-def _build_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Response[Union[Error, PublicPaper]]:
+def _build_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Response[Error | PublicPaper]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -68,10 +56,9 @@ def sync_detailed(
     slug: str,
     route: str,
     *,
-    client: Union[AuthenticatedClient, Client],
-
-) -> Response[Union[Error, PublicPaper]]:
-    """ Get a published paper by (author slug, route)
+    client: AuthenticatedClient | Client,
+) -> Response[Error | PublicPaper]:
+    """Get a published paper by (author slug, route)
 
     Args:
         slug (str):
@@ -83,13 +70,11 @@ def sync_detailed(
 
     Returns:
         Response[Union[Error, PublicPaper]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         slug=slug,
-route=route,
-
+        route=route,
     )
 
     response = client.get_httpx_client().request(
@@ -98,14 +83,14 @@ route=route,
 
     return _build_response(client=client, response=response)
 
+
 def sync(
     slug: str,
     route: str,
     *,
-    client: Union[AuthenticatedClient, Client],
-
-) -> Optional[Union[Error, PublicPaper]]:
-    """ Get a published paper by (author slug, route)
+    client: AuthenticatedClient | Client,
+) -> Error | PublicPaper | None:
+    """Get a published paper by (author slug, route)
 
     Args:
         slug (str):
@@ -117,24 +102,22 @@ def sync(
 
     Returns:
         Union[Error, PublicPaper]
-     """
-
+    """
 
     return sync_detailed(
         slug=slug,
-route=route,
-client=client,
-
+        route=route,
+        client=client,
     ).parsed
+
 
 async def asyncio_detailed(
     slug: str,
     route: str,
     *,
-    client: Union[AuthenticatedClient, Client],
-
-) -> Response[Union[Error, PublicPaper]]:
-    """ Get a published paper by (author slug, route)
+    client: AuthenticatedClient | Client,
+) -> Response[Error | PublicPaper]:
+    """Get a published paper by (author slug, route)
 
     Args:
         slug (str):
@@ -146,29 +129,25 @@ async def asyncio_detailed(
 
     Returns:
         Response[Union[Error, PublicPaper]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         slug=slug,
-route=route,
-
+        route=route,
     )
 
-    response = await client.get_async_httpx_client().request(
-        **kwargs
-    )
+    response = await client.get_async_httpx_client().request(**kwargs)
 
     return _build_response(client=client, response=response)
+
 
 async def asyncio(
     slug: str,
     route: str,
     *,
-    client: Union[AuthenticatedClient, Client],
-
-) -> Optional[Union[Error, PublicPaper]]:
-    """ Get a published paper by (author slug, route)
+    client: AuthenticatedClient | Client,
+) -> Error | PublicPaper | None:
+    """Get a published paper by (author slug, route)
 
     Args:
         slug (str):
@@ -180,12 +159,12 @@ async def asyncio(
 
     Returns:
         Union[Error, PublicPaper]
-     """
+    """
 
-
-    return (await asyncio_detailed(
-        slug=slug,
-route=route,
-client=client,
-
-    )).parsed
+    return (
+        await asyncio_detailed(
+            slug=slug,
+            route=route,
+            client=client,
+        )
+    ).parsed

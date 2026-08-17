@@ -1,46 +1,33 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 from ..types import UNSET, Unset
 
-from ..types import UNSET, Unset
-from typing import Union
-
-
-
-
-
-
 T = TypeVar("T", bound="PostGamificationAwardBody")
-
 
 
 @_attrs_define
 class PostGamificationAwardBody:
-    """ 
-        Attributes:
-            subject_type (str):
-            subject_id (str):
-            amount (int):
-            reason (str):
-            source_type (Union[Unset, str]):
-            source_id (Union[Unset, str]):
-     """
+    """
+    Attributes:
+        subject_type (str):
+        subject_id (str):
+        amount (int):
+        reason (str):
+        source_type (Union[Unset, str]):
+        source_id (Union[Unset, str]):
+    """
 
     subject_type: str
     subject_id: str
     amount: int
     reason: str
-    source_type: Union[Unset, str] = UNSET
-    source_id: Union[Unset, str] = UNSET
+    source_type: Unset | str = UNSET
+    source_id: Unset | str = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         subject_type = self.subject_type
@@ -55,23 +42,22 @@ class PostGamificationAwardBody:
 
         source_id = self.source_id
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "subjectType": subject_type,
-            "subjectId": subject_id,
-            "amount": amount,
-            "reason": reason,
-        })
+        field_dict.update(
+            {
+                "subjectType": subject_type,
+                "subjectId": subject_id,
+                "amount": amount,
+                "reason": reason,
+            }
+        )
         if source_type is not UNSET:
             field_dict["sourceType"] = source_type
         if source_id is not UNSET:
             field_dict["sourceId"] = source_id
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -96,7 +82,6 @@ class PostGamificationAwardBody:
             source_type=source_type,
             source_id=source_id,
         )
-
 
         post_gamification_award_body.additional_properties = d
         return post_gamification_award_body

@@ -1,48 +1,34 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
-
-
-
-
-
-
-
 T = TypeVar("T", bound="StorageDownload")
-
 
 
 @_attrs_define
 class StorageDownload:
-    """ 
-        Attributes:
-            url (str): Presigned GET URL — download the bytes directly from R2.
-     """
+    """
+    Attributes:
+        url (str): Presigned GET URL — download the bytes directly from R2.
+    """
 
     url: str
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
-
-
-
-
     def to_dict(self) -> dict[str, Any]:
         url = self.url
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "url": url,
-        })
+        field_dict.update(
+            {
+                "url": url,
+            }
+        )
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -52,7 +38,6 @@ class StorageDownload:
         storage_download = cls(
             url=url,
         )
-
 
         storage_download.additional_properties = d
         return storage_download

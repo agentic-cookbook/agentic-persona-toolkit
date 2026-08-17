@@ -1,46 +1,31 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar, cast
 
 from attrs import define as _attrs_define
-from attrs import field as _attrs_field
 
 from ..types import UNSET, Unset
-
-from ..types import UNSET, Unset
-from typing import cast, Union
-from typing import Union
-
-
-
-
-
 
 T = TypeVar("T", bound="PutBillingSubscriptionsIdBody")
 
 
-
 @_attrs_define
 class PutBillingSubscriptionsIdBody:
-    """ 
-        Attributes:
-            ecosystem_id (Union[Unset, str]):
-            tier_id (Union[Unset, str]):
-            status (Union[Unset, str]):
-            source (Union[Unset, str]):
-            started_at (Union[Unset, str]):
-            expires_at (Union[None, Unset, str]):
-     """
+    """
+    Attributes:
+        ecosystem_id (Union[Unset, str]):
+        tier_id (Union[Unset, str]):
+        status (Union[Unset, str]):
+        source (Union[Unset, str]):
+        started_at (Union[Unset, str]):
+        expires_at (Union[None, Unset, str]):
+    """
 
-    ecosystem_id: Union[Unset, str] = UNSET
-    tier_id: Union[Unset, str] = UNSET
-    status: Union[Unset, str] = UNSET
-    source: Union[Unset, str] = UNSET
-    started_at: Union[Unset, str] = UNSET
-    expires_at: Union[None, Unset, str] = UNSET
-
-
-
-
+    ecosystem_id: Unset | str = UNSET
+    tier_id: Unset | str = UNSET
+    status: Unset | str = UNSET
+    source: Unset | str = UNSET
+    started_at: Unset | str = UNSET
+    expires_at: None | Unset | str = UNSET
 
     def to_dict(self) -> dict[str, Any]:
         ecosystem_id = self.ecosystem_id
@@ -53,17 +38,15 @@ class PutBillingSubscriptionsIdBody:
 
         started_at = self.started_at
 
-        expires_at: Union[None, Unset, str]
+        expires_at: None | Unset | str
         if isinstance(self.expires_at, Unset):
             expires_at = UNSET
         else:
             expires_at = self.expires_at
 
-
         field_dict: dict[str, Any] = {}
 
-        field_dict.update({
-        })
+        field_dict.update({})
         if ecosystem_id is not UNSET:
             field_dict["ecosystemId"] = ecosystem_id
         if tier_id is not UNSET:
@@ -79,8 +62,6 @@ class PutBillingSubscriptionsIdBody:
 
         return field_dict
 
-
-
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
@@ -94,15 +75,14 @@ class PutBillingSubscriptionsIdBody:
 
         started_at = d.pop("startedAt", UNSET)
 
-        def _parse_expires_at(data: object) -> Union[None, Unset, str]:
+        def _parse_expires_at(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         expires_at = _parse_expires_at(d.pop("expiresAt", UNSET))
-
 
         put_billing_subscriptions_id_body = cls(
             ecosystem_id=ecosystem_id,
@@ -114,4 +94,3 @@ class PutBillingSubscriptionsIdBody:
         )
 
         return put_billing_subscriptions_id_body
-

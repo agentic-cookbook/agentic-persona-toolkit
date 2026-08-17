@@ -1,35 +1,23 @@
 from http import HTTPStatus
-from typing import Any, Optional, Union, cast
+from typing import Any
 
 import httpx
 
-from ...client import AuthenticatedClient, Client
-from ...types import Response, UNSET
 from ... import errors
-
+from ...client import AuthenticatedClient, Client
 from ...models.server_bag import ServerBag
-from ...types import UNSET, Unset
-from typing import cast
-from typing import Union
-
+from ...types import UNSET, Response, Unset
 
 
 def _get_kwargs(
     *,
-    key: Union[Unset, str] = UNSET,
-
+    key: Unset | str = UNSET,
 ) -> dict[str, Any]:
-    
-
-    
-
     params: dict[str, Any] = {}
 
     params["key"] = key
 
-
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
-
 
     _kwargs: dict[str, Any] = {
         "method": "get",
@@ -37,19 +25,17 @@ def _get_kwargs(
         "params": params,
     }
 
-
     return _kwargs
 
 
-
-def _parse_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Optional[list['ServerBag']]:
+def _parse_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> list["ServerBag"] | None:
     if response.status_code == 200:
         response_200 = []
         _response_200 = response.json()
-        for response_200_item_data in (_response_200):
+        for response_200_item_data in _response_200:
             response_200_item = ServerBag.from_dict(response_200_item_data)
-
-
 
             response_200.append(response_200_item)
 
@@ -61,7 +47,9 @@ def _parse_response(*, client: Union[AuthenticatedClient, Client], response: htt
         return None
 
 
-def _build_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Response[list['ServerBag']]:
+def _build_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Response[list["ServerBag"]]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -72,11 +60,10 @@ def _build_response(*, client: Union[AuthenticatedClient, Client], response: htt
 
 def sync_detailed(
     *,
-    client: Union[AuthenticatedClient, Client],
-    key: Union[Unset, str] = UNSET,
-
-) -> Response[list['ServerBag']]:
-    """ List server-bag entries (public; optional ?key= exact-match filter)
+    client: AuthenticatedClient | Client,
+    key: Unset | str = UNSET,
+) -> Response[list["ServerBag"]]:
+    """List server-bag entries (public; optional ?key= exact-match filter)
 
     Args:
         key (Union[Unset, str]):
@@ -87,12 +74,10 @@ def sync_detailed(
 
     Returns:
         Response[list['ServerBag']]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         key=key,
-
     )
 
     response = client.get_httpx_client().request(
@@ -101,13 +86,13 @@ def sync_detailed(
 
     return _build_response(client=client, response=response)
 
+
 def sync(
     *,
-    client: Union[AuthenticatedClient, Client],
-    key: Union[Unset, str] = UNSET,
-
-) -> Optional[list['ServerBag']]:
-    """ List server-bag entries (public; optional ?key= exact-match filter)
+    client: AuthenticatedClient | Client,
+    key: Unset | str = UNSET,
+) -> list["ServerBag"] | None:
+    """List server-bag entries (public; optional ?key= exact-match filter)
 
     Args:
         key (Union[Unset, str]):
@@ -118,22 +103,20 @@ def sync(
 
     Returns:
         list['ServerBag']
-     """
-
+    """
 
     return sync_detailed(
         client=client,
-key=key,
-
+        key=key,
     ).parsed
+
 
 async def asyncio_detailed(
     *,
-    client: Union[AuthenticatedClient, Client],
-    key: Union[Unset, str] = UNSET,
-
-) -> Response[list['ServerBag']]:
-    """ List server-bag entries (public; optional ?key= exact-match filter)
+    client: AuthenticatedClient | Client,
+    key: Unset | str = UNSET,
+) -> Response[list["ServerBag"]]:
+    """List server-bag entries (public; optional ?key= exact-match filter)
 
     Args:
         key (Union[Unset, str]):
@@ -144,27 +127,23 @@ async def asyncio_detailed(
 
     Returns:
         Response[list['ServerBag']]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         key=key,
-
     )
 
-    response = await client.get_async_httpx_client().request(
-        **kwargs
-    )
+    response = await client.get_async_httpx_client().request(**kwargs)
 
     return _build_response(client=client, response=response)
 
+
 async def asyncio(
     *,
-    client: Union[AuthenticatedClient, Client],
-    key: Union[Unset, str] = UNSET,
-
-) -> Optional[list['ServerBag']]:
-    """ List server-bag entries (public; optional ?key= exact-match filter)
+    client: AuthenticatedClient | Client,
+    key: Unset | str = UNSET,
+) -> list["ServerBag"] | None:
+    """List server-bag entries (public; optional ?key= exact-match filter)
 
     Args:
         key (Union[Unset, str]):
@@ -175,11 +154,11 @@ async def asyncio(
 
     Returns:
         list['ServerBag']
-     """
+    """
 
-
-    return (await asyncio_detailed(
-        client=client,
-key=key,
-
-    )).parsed
+    return (
+        await asyncio_detailed(
+            client=client,
+            key=key,
+        )
+    ).parsed

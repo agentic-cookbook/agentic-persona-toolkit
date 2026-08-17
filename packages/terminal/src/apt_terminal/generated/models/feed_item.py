@@ -1,42 +1,32 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 from ..types import UNSET, Unset
 
-from ..types import UNSET, Unset
-from typing import cast, Union
-from typing import Union
-
-
-
-
-
-
 T = TypeVar("T", bound="FeedItem")
-
 
 
 @_attrs_define
 class FeedItem:
-    """ 
-        Attributes:
-            id (str):
-            customer_id (str):
-            ecosystem_id (str):
-            source (str):
-            entity_type (str):
-            action (str):
-            summary (str):
-            is_read (bool):
-            created_at (str):
-            deleted_at (Union[None, Unset, str]):
-            entity_id (Union[None, Unset, str]):
-            actor_id (Union[None, Unset, str]):
-            metadata (Union[None, Unset, str]):
-     """
+    """
+    Attributes:
+        id (str):
+        customer_id (str):
+        ecosystem_id (str):
+        source (str):
+        entity_type (str):
+        action (str):
+        summary (str):
+        is_read (bool):
+        created_at (str):
+        deleted_at (Union[None, Unset, str]):
+        entity_id (Union[None, Unset, str]):
+        actor_id (Union[None, Unset, str]):
+        metadata (Union[None, Unset, str]):
+    """
 
     id: str
     customer_id: str
@@ -47,15 +37,11 @@ class FeedItem:
     summary: str
     is_read: bool
     created_at: str
-    deleted_at: Union[None, Unset, str] = UNSET
-    entity_id: Union[None, Unset, str] = UNSET
-    actor_id: Union[None, Unset, str] = UNSET
-    metadata: Union[None, Unset, str] = UNSET
+    deleted_at: None | Unset | str = UNSET
+    entity_id: None | Unset | str = UNSET
+    actor_id: None | Unset | str = UNSET
+    metadata: None | Unset | str = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         id = self.id
@@ -76,44 +62,45 @@ class FeedItem:
 
         created_at = self.created_at
 
-        deleted_at: Union[None, Unset, str]
+        deleted_at: None | Unset | str
         if isinstance(self.deleted_at, Unset):
             deleted_at = UNSET
         else:
             deleted_at = self.deleted_at
 
-        entity_id: Union[None, Unset, str]
+        entity_id: None | Unset | str
         if isinstance(self.entity_id, Unset):
             entity_id = UNSET
         else:
             entity_id = self.entity_id
 
-        actor_id: Union[None, Unset, str]
+        actor_id: None | Unset | str
         if isinstance(self.actor_id, Unset):
             actor_id = UNSET
         else:
             actor_id = self.actor_id
 
-        metadata: Union[None, Unset, str]
+        metadata: None | Unset | str
         if isinstance(self.metadata, Unset):
             metadata = UNSET
         else:
             metadata = self.metadata
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "id": id,
-            "customerId": customer_id,
-            "ecosystemId": ecosystem_id,
-            "source": source,
-            "entityType": entity_type,
-            "action": action,
-            "summary": summary,
-            "isRead": is_read,
-            "createdAt": created_at,
-        })
+        field_dict.update(
+            {
+                "id": id,
+                "customerId": customer_id,
+                "ecosystemId": ecosystem_id,
+                "source": source,
+                "entityType": entity_type,
+                "action": action,
+                "summary": summary,
+                "isRead": is_read,
+                "createdAt": created_at,
+            }
+        )
         if deleted_at is not UNSET:
             field_dict["deletedAt"] = deleted_at
         if entity_id is not UNSET:
@@ -124,8 +111,6 @@ class FeedItem:
             field_dict["metadata"] = metadata
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -148,45 +133,41 @@ class FeedItem:
 
         created_at = d.pop("createdAt")
 
-        def _parse_deleted_at(data: object) -> Union[None, Unset, str]:
+        def _parse_deleted_at(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         deleted_at = _parse_deleted_at(d.pop("deletedAt", UNSET))
 
-
-        def _parse_entity_id(data: object) -> Union[None, Unset, str]:
+        def _parse_entity_id(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         entity_id = _parse_entity_id(d.pop("entityId", UNSET))
 
-
-        def _parse_actor_id(data: object) -> Union[None, Unset, str]:
+        def _parse_actor_id(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         actor_id = _parse_actor_id(d.pop("actorId", UNSET))
 
-
-        def _parse_metadata(data: object) -> Union[None, Unset, str]:
+        def _parse_metadata(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         metadata = _parse_metadata(d.pop("metadata", UNSET))
-
 
         feed_item = cls(
             id=id,
@@ -203,7 +184,6 @@ class FeedItem:
             actor_id=actor_id,
             metadata=metadata,
         )
-
 
         feed_item.additional_properties = d
         return feed_item

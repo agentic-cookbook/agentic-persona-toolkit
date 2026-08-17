@@ -1,51 +1,36 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 from ..types import UNSET, Unset
 
-from ..types import UNSET, Unset
-from typing import cast
-from typing import cast, Union
-from typing import Union
-
-
-
-
-
-
 T = TypeVar("T", bound="ApiToken")
-
 
 
 @_attrs_define
 class ApiToken:
-    """ 
-        Attributes:
-            id (str):
-            name (str):
-            prefix (str): Non-secret leading chars, for display
-            created_at (str):
-            expires_at (Union[None, str]):
-            last_used_at (Union[None, str]):
-            scope (Union[None, Unset, list[str]]): REST path prefixes this token may reach (e.g. ["/content/markdown"],
-                optional ":read" suffix, "*" = all). null = legacy curated-only.
-     """
+    """
+    Attributes:
+        id (str):
+        name (str):
+        prefix (str): Non-secret leading chars, for display
+        created_at (str):
+        expires_at (Union[None, str]):
+        last_used_at (Union[None, str]):
+        scope (Union[None, Unset, list[str]]): REST path prefixes this token may reach (e.g. ["/content/markdown"],
+            optional ":read" suffix, "*" = all). null = legacy curated-only.
+    """
 
     id: str
     name: str
     prefix: str
     created_at: str
-    expires_at: Union[None, str]
-    last_used_at: Union[None, str]
-    scope: Union[None, Unset, list[str]] = UNSET
+    expires_at: None | str
+    last_used_at: None | str
+    scope: None | Unset | list[str] = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         id = self.id
@@ -56,39 +41,37 @@ class ApiToken:
 
         created_at = self.created_at
 
-        expires_at: Union[None, str]
+        expires_at: None | str
         expires_at = self.expires_at
 
-        last_used_at: Union[None, str]
+        last_used_at: None | str
         last_used_at = self.last_used_at
 
-        scope: Union[None, Unset, list[str]]
+        scope: None | Unset | list[str]
         if isinstance(self.scope, Unset):
             scope = UNSET
         elif isinstance(self.scope, list):
             scope = self.scope
 
-
         else:
             scope = self.scope
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "id": id,
-            "name": name,
-            "prefix": prefix,
-            "createdAt": created_at,
-            "expiresAt": expires_at,
-            "lastUsedAt": last_used_at,
-        })
+        field_dict.update(
+            {
+                "id": id,
+                "name": name,
+                "prefix": prefix,
+                "createdAt": created_at,
+                "expiresAt": expires_at,
+                "lastUsedAt": last_used_at,
+            }
+        )
         if scope is not UNSET:
             field_dict["scope"] = scope
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -101,23 +84,21 @@ class ApiToken:
 
         created_at = d.pop("createdAt")
 
-        def _parse_expires_at(data: object) -> Union[None, str]:
+        def _parse_expires_at(data: object) -> None | str:
             if data is None:
                 return data
-            return cast(Union[None, str], data)
+            return cast(None | str, data)
 
         expires_at = _parse_expires_at(d.pop("expiresAt"))
 
-
-        def _parse_last_used_at(data: object) -> Union[None, str]:
+        def _parse_last_used_at(data: object) -> None | str:
             if data is None:
                 return data
-            return cast(Union[None, str], data)
+            return cast(None | str, data)
 
         last_used_at = _parse_last_used_at(d.pop("lastUsedAt"))
 
-
-        def _parse_scope(data: object) -> Union[None, Unset, list[str]]:
+        def _parse_scope(data: object) -> None | Unset | list[str]:
             if data is None:
                 return data
             if isinstance(data, Unset):
@@ -128,12 +109,11 @@ class ApiToken:
                 scope_type_0 = cast(list[str], data)
 
                 return scope_type_0
-            except: # noqa: E722
+            except:  # noqa: E722
                 pass
-            return cast(Union[None, Unset, list[str]], data)
+            return cast(None | Unset | list[str], data)
 
         scope = _parse_scope(d.pop("scope", UNSET))
-
 
         api_token = cls(
             id=id,
@@ -144,7 +124,6 @@ class ApiToken:
             last_used_at=last_used_at,
             scope=scope,
         )
-
 
         api_token.additional_properties = d
         return api_token

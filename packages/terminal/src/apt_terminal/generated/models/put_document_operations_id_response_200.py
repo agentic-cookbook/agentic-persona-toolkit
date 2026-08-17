@@ -1,72 +1,63 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar, cast
 
 from attrs import define as _attrs_define
-from attrs import field as _attrs_field
-
-from ..types import UNSET, Unset
-
-from typing import cast, Union
-
-
-
-
-
 
 T = TypeVar("T", bound="PutDocumentOperationsIdResponse200")
 
 
-
 @_attrs_define
 class PutDocumentOperationsIdResponse200:
-    """ 
-        Attributes:
-            id (str):
-            document_id (str):
-            block_id (Union[None, str]):
-            customer_id (str):
-            deleted_at (Union[None, str]):
-            ecosystem_id (str):
-            client_id (str):
-            client_seq (int):
-            op_type (str):
-            op_payload (str):
-            created_at (str):
-            sync_version (int):
-            undo_group_id (Union[None, str]):
-            inverse_of_op_id (Union[None, str]):
-     """
+    """
+    Attributes:
+        id (str):
+        document_id (str):
+        block_id (Union[None, str]):
+        customer_id (str):
+        deleted_at (Union[None, str]):
+        ecosystem_id (str):
+        client_id (str):
+        client_seq (int):
+        op_type (str):
+        op_payload (str):
+        created_at (str):
+        undo_group_id (Union[None, str]):
+        inverse_of_op_id (Union[None, str]):
+        updated_at (str):
+        sync_version (int):
+        sync_stamped_at (Union[None, str]):
+        sync_txid (int):
+    """
 
     id: str
     document_id: str
-    block_id: Union[None, str]
+    block_id: None | str
     customer_id: str
-    deleted_at: Union[None, str]
+    deleted_at: None | str
     ecosystem_id: str
     client_id: str
     client_seq: int
     op_type: str
     op_payload: str
     created_at: str
+    undo_group_id: None | str
+    inverse_of_op_id: None | str
+    updated_at: str
     sync_version: int
-    undo_group_id: Union[None, str]
-    inverse_of_op_id: Union[None, str]
-
-
-
-
+    sync_stamped_at: None | str
+    sync_txid: int
 
     def to_dict(self) -> dict[str, Any]:
         id = self.id
 
         document_id = self.document_id
 
-        block_id: Union[None, str]
+        block_id: None | str
         block_id = self.block_id
 
         customer_id = self.customer_id
 
-        deleted_at: Union[None, str]
+        deleted_at: None | str
         deleted_at = self.deleted_at
 
         ecosystem_id = self.ecosystem_id
@@ -81,37 +72,46 @@ class PutDocumentOperationsIdResponse200:
 
         created_at = self.created_at
 
-        sync_version = self.sync_version
-
-        undo_group_id: Union[None, str]
+        undo_group_id: None | str
         undo_group_id = self.undo_group_id
 
-        inverse_of_op_id: Union[None, str]
+        inverse_of_op_id: None | str
         inverse_of_op_id = self.inverse_of_op_id
 
+        updated_at = self.updated_at
+
+        sync_version = self.sync_version
+
+        sync_stamped_at: None | str
+        sync_stamped_at = self.sync_stamped_at
+
+        sync_txid = self.sync_txid
 
         field_dict: dict[str, Any] = {}
 
-        field_dict.update({
-            "id": id,
-            "documentId": document_id,
-            "blockId": block_id,
-            "customerId": customer_id,
-            "deletedAt": deleted_at,
-            "ecosystemId": ecosystem_id,
-            "clientId": client_id,
-            "clientSeq": client_seq,
-            "opType": op_type,
-            "opPayload": op_payload,
-            "createdAt": created_at,
-            "syncVersion": sync_version,
-            "undoGroupId": undo_group_id,
-            "inverseOfOpId": inverse_of_op_id,
-        })
+        field_dict.update(
+            {
+                "id": id,
+                "documentId": document_id,
+                "blockId": block_id,
+                "customerId": customer_id,
+                "deletedAt": deleted_at,
+                "ecosystemId": ecosystem_id,
+                "clientId": client_id,
+                "clientSeq": client_seq,
+                "opType": op_type,
+                "opPayload": op_payload,
+                "createdAt": created_at,
+                "undoGroupId": undo_group_id,
+                "inverseOfOpId": inverse_of_op_id,
+                "updatedAt": updated_at,
+                "syncVersion": sync_version,
+                "syncStampedAt": sync_stamped_at,
+                "syncTxid": sync_txid,
+            }
+        )
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -120,23 +120,21 @@ class PutDocumentOperationsIdResponse200:
 
         document_id = d.pop("documentId")
 
-        def _parse_block_id(data: object) -> Union[None, str]:
+        def _parse_block_id(data: object) -> None | str:
             if data is None:
                 return data
-            return cast(Union[None, str], data)
+            return cast(None | str, data)
 
         block_id = _parse_block_id(d.pop("blockId"))
 
-
         customer_id = d.pop("customerId")
 
-        def _parse_deleted_at(data: object) -> Union[None, str]:
+        def _parse_deleted_at(data: object) -> None | str:
             if data is None:
                 return data
-            return cast(Union[None, str], data)
+            return cast(None | str, data)
 
         deleted_at = _parse_deleted_at(d.pop("deletedAt"))
-
 
         ecosystem_id = d.pop("ecosystemId")
 
@@ -150,23 +148,32 @@ class PutDocumentOperationsIdResponse200:
 
         created_at = d.pop("createdAt")
 
-        sync_version = d.pop("syncVersion")
-
-        def _parse_undo_group_id(data: object) -> Union[None, str]:
+        def _parse_undo_group_id(data: object) -> None | str:
             if data is None:
                 return data
-            return cast(Union[None, str], data)
+            return cast(None | str, data)
 
         undo_group_id = _parse_undo_group_id(d.pop("undoGroupId"))
 
-
-        def _parse_inverse_of_op_id(data: object) -> Union[None, str]:
+        def _parse_inverse_of_op_id(data: object) -> None | str:
             if data is None:
                 return data
-            return cast(Union[None, str], data)
+            return cast(None | str, data)
 
         inverse_of_op_id = _parse_inverse_of_op_id(d.pop("inverseOfOpId"))
 
+        updated_at = d.pop("updatedAt")
+
+        sync_version = d.pop("syncVersion")
+
+        def _parse_sync_stamped_at(data: object) -> None | str:
+            if data is None:
+                return data
+            return cast(None | str, data)
+
+        sync_stamped_at = _parse_sync_stamped_at(d.pop("syncStampedAt"))
+
+        sync_txid = d.pop("syncTxid")
 
         put_document_operations_id_response_200 = cls(
             id=id,
@@ -180,10 +187,12 @@ class PutDocumentOperationsIdResponse200:
             op_type=op_type,
             op_payload=op_payload,
             created_at=created_at,
-            sync_version=sync_version,
             undo_group_id=undo_group_id,
             inverse_of_op_id=inverse_of_op_id,
+            updated_at=updated_at,
+            sync_version=sync_version,
+            sync_stamped_at=sync_stamped_at,
+            sync_txid=sync_txid,
         )
 
         return put_document_operations_id_response_200
-

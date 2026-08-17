@@ -1,39 +1,29 @@
 from http import HTTPStatus
-from typing import Any, Optional, Union, cast
+from typing import Any
 
 import httpx
 
-from ...client import AuthenticatedClient, Client
-from ...types import Response, UNSET
 from ... import errors
-
+from ...client import AuthenticatedClient, Client
 from ...models.eco_managed_row import EcoManagedRow
 from ...models.eco_send_invites_body import EcoSendInvitesBody
 from ...models.error import Error
-from typing import cast
-
+from ...types import Response
 
 
 def _get_kwargs(
     ecosystem_id: str,
     *,
     body: EcoSendInvitesBody,
-
 ) -> dict[str, Any]:
     headers: dict[str, Any] = {}
 
-
-    
-
-    
-
     _kwargs: dict[str, Any] = {
         "method": "post",
-        "url": "/auth/ecosystems/{ecosystem_id}/invitations".format(ecosystem_id=ecosystem_id,),
+        "url": f"/auth/ecosystems/{ecosystem_id}/invitations",
     }
 
     _kwargs["json"] = body.to_dict()
-
 
     headers["Content-Type"] = "application/json"
 
@@ -41,15 +31,16 @@ def _get_kwargs(
     return _kwargs
 
 
-
-def _parse_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Optional[Union[Error, list['EcoManagedRow']]]:
+def _parse_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Error | list["EcoManagedRow"] | None:
     if response.status_code == 201:
         response_201 = []
         _response_201 = response.json()
-        for componentsschemas_eco_managed_row_list_item_data in (_response_201):
-            componentsschemas_eco_managed_row_list_item = EcoManagedRow.from_dict(componentsschemas_eco_managed_row_list_item_data)
-
-
+        for componentsschemas_eco_managed_row_list_item_data in _response_201:
+            componentsschemas_eco_managed_row_list_item = EcoManagedRow.from_dict(
+                componentsschemas_eco_managed_row_list_item_data
+            )
 
             response_201.append(componentsschemas_eco_managed_row_list_item)
 
@@ -58,28 +49,20 @@ def _parse_response(*, client: Union[AuthenticatedClient, Client], response: htt
     if response.status_code == 400:
         response_400 = Error.from_dict(response.json())
 
-
-
         return response_400
 
     if response.status_code == 401:
         response_401 = Error.from_dict(response.json())
-
-
 
         return response_401
 
     if response.status_code == 403:
         response_403 = Error.from_dict(response.json())
 
-
-
         return response_403
 
     if response.status_code == 404:
         response_404 = Error.from_dict(response.json())
-
-
 
         return response_404
 
@@ -89,7 +72,9 @@ def _parse_response(*, client: Union[AuthenticatedClient, Client], response: htt
         return None
 
 
-def _build_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Response[Union[Error, list['EcoManagedRow']]]:
+def _build_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Response[Error | list["EcoManagedRow"]]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -103,9 +88,8 @@ def sync_detailed(
     *,
     client: AuthenticatedClient,
     body: EcoSendInvitesBody,
-
-) -> Response[Union[Error, list['EcoManagedRow']]]:
-    """ Send invitations (email/SMS) for an ecosystem (owner-scoped)
+) -> Response[Error | list["EcoManagedRow"]]:
+    """Send invitations (email/SMS) for an ecosystem (owner-scoped)
 
     Args:
         ecosystem_id (str):
@@ -117,13 +101,11 @@ def sync_detailed(
 
     Returns:
         Response[Union[Error, list['EcoManagedRow']]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         ecosystem_id=ecosystem_id,
-body=body,
-
+        body=body,
     )
 
     response = client.get_httpx_client().request(
@@ -132,14 +114,14 @@ body=body,
 
     return _build_response(client=client, response=response)
 
+
 def sync(
     ecosystem_id: str,
     *,
     client: AuthenticatedClient,
     body: EcoSendInvitesBody,
-
-) -> Optional[Union[Error, list['EcoManagedRow']]]:
-    """ Send invitations (email/SMS) for an ecosystem (owner-scoped)
+) -> Error | list["EcoManagedRow"] | None:
+    """Send invitations (email/SMS) for an ecosystem (owner-scoped)
 
     Args:
         ecosystem_id (str):
@@ -151,24 +133,22 @@ def sync(
 
     Returns:
         Union[Error, list['EcoManagedRow']]
-     """
-
+    """
 
     return sync_detailed(
         ecosystem_id=ecosystem_id,
-client=client,
-body=body,
-
+        client=client,
+        body=body,
     ).parsed
+
 
 async def asyncio_detailed(
     ecosystem_id: str,
     *,
     client: AuthenticatedClient,
     body: EcoSendInvitesBody,
-
-) -> Response[Union[Error, list['EcoManagedRow']]]:
-    """ Send invitations (email/SMS) for an ecosystem (owner-scoped)
+) -> Response[Error | list["EcoManagedRow"]]:
+    """Send invitations (email/SMS) for an ecosystem (owner-scoped)
 
     Args:
         ecosystem_id (str):
@@ -180,29 +160,25 @@ async def asyncio_detailed(
 
     Returns:
         Response[Union[Error, list['EcoManagedRow']]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         ecosystem_id=ecosystem_id,
-body=body,
-
+        body=body,
     )
 
-    response = await client.get_async_httpx_client().request(
-        **kwargs
-    )
+    response = await client.get_async_httpx_client().request(**kwargs)
 
     return _build_response(client=client, response=response)
+
 
 async def asyncio(
     ecosystem_id: str,
     *,
     client: AuthenticatedClient,
     body: EcoSendInvitesBody,
-
-) -> Optional[Union[Error, list['EcoManagedRow']]]:
-    """ Send invitations (email/SMS) for an ecosystem (owner-scoped)
+) -> Error | list["EcoManagedRow"] | None:
+    """Send invitations (email/SMS) for an ecosystem (owner-scoped)
 
     Args:
         ecosystem_id (str):
@@ -214,12 +190,12 @@ async def asyncio(
 
     Returns:
         Union[Error, list['EcoManagedRow']]
-     """
+    """
 
-
-    return (await asyncio_detailed(
-        ecosystem_id=ecosystem_id,
-client=client,
-body=body,
-
-    )).parsed
+    return (
+        await asyncio_detailed(
+            ecosystem_id=ecosystem_id,
+            client=client,
+            body=body,
+        )
+    ).parsed

@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class StorageAttachmentStatus(str, Enum):
     PENDING = "pending"
     READY = "ready"

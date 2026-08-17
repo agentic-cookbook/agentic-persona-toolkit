@@ -1,46 +1,34 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
-
 from ..models.registry_namespace_owner_kind import RegistryNamespaceOwnerKind
-from typing import cast, Union
-
-
-
-
-
 
 T = TypeVar("T", bound="RegistryNamespace")
 
 
-
 @_attrs_define
 class RegistryNamespace:
-    """ 
-        Attributes:
-            id (str):
-            owner_kind (RegistryNamespaceOwnerKind):
-            owner_id (str):
-            slug (Union[None, str]):
-            name (Union[None, str]):
-            rdid (Union[None, str]): The namespace reverse-domain prefix
-     """
+    """
+    Attributes:
+        id (str):
+        owner_kind (RegistryNamespaceOwnerKind):
+        owner_id (str):
+        slug (Union[None, str]):
+        name (Union[None, str]):
+        rdid (Union[None, str]): Always null for a namespace created after Task 5 (rdid-addressing-model); non-null only
+            on rows minted before it
+    """
 
     id: str
     owner_kind: RegistryNamespaceOwnerKind
     owner_id: str
-    slug: Union[None, str]
-    name: Union[None, str]
-    rdid: Union[None, str]
+    slug: None | str
+    name: None | str
+    rdid: None | str
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         id = self.id
@@ -49,30 +37,29 @@ class RegistryNamespace:
 
         owner_id = self.owner_id
 
-        slug: Union[None, str]
+        slug: None | str
         slug = self.slug
 
-        name: Union[None, str]
+        name: None | str
         name = self.name
 
-        rdid: Union[None, str]
+        rdid: None | str
         rdid = self.rdid
-
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "id": id,
-            "ownerKind": owner_kind,
-            "ownerId": owner_id,
-            "slug": slug,
-            "name": name,
-            "rdid": rdid,
-        })
+        field_dict.update(
+            {
+                "id": id,
+                "ownerKind": owner_kind,
+                "ownerId": owner_id,
+                "slug": slug,
+                "name": name,
+                "rdid": rdid,
+            }
+        )
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -81,34 +68,28 @@ class RegistryNamespace:
 
         owner_kind = RegistryNamespaceOwnerKind(d.pop("ownerKind"))
 
-
-
-
         owner_id = d.pop("ownerId")
 
-        def _parse_slug(data: object) -> Union[None, str]:
+        def _parse_slug(data: object) -> None | str:
             if data is None:
                 return data
-            return cast(Union[None, str], data)
+            return cast(None | str, data)
 
         slug = _parse_slug(d.pop("slug"))
 
-
-        def _parse_name(data: object) -> Union[None, str]:
+        def _parse_name(data: object) -> None | str:
             if data is None:
                 return data
-            return cast(Union[None, str], data)
+            return cast(None | str, data)
 
         name = _parse_name(d.pop("name"))
 
-
-        def _parse_rdid(data: object) -> Union[None, str]:
+        def _parse_rdid(data: object) -> None | str:
             if data is None:
                 return data
-            return cast(Union[None, str], data)
+            return cast(None | str, data)
 
         rdid = _parse_rdid(d.pop("rdid"))
-
 
         registry_namespace = cls(
             id=id,
@@ -118,7 +99,6 @@ class RegistryNamespace:
             name=name,
             rdid=rdid,
         )
-
 
         registry_namespace.additional_properties = d
         return registry_namespace

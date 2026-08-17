@@ -1,72 +1,54 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import TYPE_CHECKING, Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
-
 from ..models.patch_access_roles_id_body_default_for import PatchAccessRolesIdBodyDefaultFor
 from ..types import UNSET, Unset
-from typing import cast
-from typing import Union
 
 if TYPE_CHECKING:
-  from ..models.access_grant import AccessGrant
-
-
-
+    from ..models.access_grant import AccessGrant
 
 
 T = TypeVar("T", bound="PatchAccessRolesIdBody")
 
 
-
 @_attrs_define
 class PatchAccessRolesIdBody:
-    """ 
-        Attributes:
-            name (Union[Unset, str]):
-            description (Union[Unset, str]):
-            default_for (Union[Unset, PatchAccessRolesIdBodyDefaultFor]):
-            grants (Union[Unset, list['AccessGrant']]):
-     """
+    """
+    Attributes:
+        name (Union[Unset, str]):
+        description (Union[Unset, str]):
+        default_for (Union[Unset, PatchAccessRolesIdBodyDefaultFor]):
+        grants (Union[Unset, list['AccessGrant']]):
+    """
 
-    name: Union[Unset, str] = UNSET
-    description: Union[Unset, str] = UNSET
-    default_for: Union[Unset, PatchAccessRolesIdBodyDefaultFor] = UNSET
-    grants: Union[Unset, list['AccessGrant']] = UNSET
+    name: Unset | str = UNSET
+    description: Unset | str = UNSET
+    default_for: Unset | PatchAccessRolesIdBodyDefaultFor = UNSET
+    grants: Unset | list["AccessGrant"] = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
-
-
-
-
     def to_dict(self) -> dict[str, Any]:
-        from ..models.access_grant import AccessGrant
         name = self.name
 
         description = self.description
 
-        default_for: Union[Unset, str] = UNSET
+        default_for: Unset | str = UNSET
         if not isinstance(self.default_for, Unset):
             default_for = self.default_for.value
 
-
-        grants: Union[Unset, list[dict[str, Any]]] = UNSET
+        grants: Unset | list[dict[str, Any]] = UNSET
         if not isinstance(self.grants, Unset):
             grants = []
             for grants_item_data in self.grants:
                 grants_item = grants_item_data.to_dict()
                 grants.append(grants_item)
 
-
-
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-        })
+        field_dict.update({})
         if name is not UNSET:
             field_dict["name"] = name
         if description is not UNSET:
@@ -78,35 +60,28 @@ class PatchAccessRolesIdBody:
 
         return field_dict
 
-
-
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.access_grant import AccessGrant
+
         d = dict(src_dict)
         name = d.pop("name", UNSET)
 
         description = d.pop("description", UNSET)
 
         _default_for = d.pop("defaultFor", UNSET)
-        default_for: Union[Unset, PatchAccessRolesIdBodyDefaultFor]
-        if isinstance(_default_for,  Unset):
+        default_for: Unset | PatchAccessRolesIdBodyDefaultFor
+        if isinstance(_default_for, Unset):
             default_for = UNSET
         else:
             default_for = PatchAccessRolesIdBodyDefaultFor(_default_for)
 
-
-
-
         grants = []
         _grants = d.pop("grants", UNSET)
-        for grants_item_data in (_grants or []):
+        for grants_item_data in _grants or []:
             grants_item = AccessGrant.from_dict(grants_item_data)
 
-
-
             grants.append(grants_item)
-
 
         patch_access_roles_id_body = cls(
             name=name,
@@ -114,7 +89,6 @@ class PatchAccessRolesIdBody:
             default_for=default_for,
             grants=grants,
         )
-
 
         patch_access_roles_id_body.additional_properties = d
         return patch_access_roles_id_body

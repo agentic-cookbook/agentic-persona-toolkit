@@ -1,0 +1,204 @@
+from collections.abc import Mapping
+from typing import TYPE_CHECKING, Any, TypeVar, Union, cast
+
+from attrs import define as _attrs_define
+
+from ..types import UNSET, Unset
+
+if TYPE_CHECKING:
+    from ..models.put_game_definitions_id_body_data_type_0_type_1 import (
+        PutGameDefinitionsIdBodyDataType0Type1,
+    )
+
+
+T = TypeVar("T", bound="PutGameDefinitionsIdBody")
+
+
+@_attrs_define
+class PutGameDefinitionsIdBody:
+    """
+    Attributes:
+        ecosystem_id (Union[Unset, str]):
+        author_customer_id (Union[Unset, str]):
+        game_id (Union[Unset, str]):
+        kind (Union[Unset, str]):
+        key (Union[Unset, str]):
+        name (Union[Unset, str]):
+        description (Union[None, Unset, str]):
+        status (Union[Unset, str]):
+        sort_order (Union[Unset, int]):
+        data (Union['PutGameDefinitionsIdBodyDataType0Type1', None, Unset, bool, float, list[Any], str]):
+        sync_txid (Union[Unset, int]):
+    """
+
+    ecosystem_id: Unset | str = UNSET
+    author_customer_id: Unset | str = UNSET
+    game_id: Unset | str = UNSET
+    kind: Unset | str = UNSET
+    key: Unset | str = UNSET
+    name: Unset | str = UNSET
+    description: None | Unset | str = UNSET
+    status: Unset | str = UNSET
+    sort_order: Unset | int = UNSET
+    data: Union[
+        "PutGameDefinitionsIdBodyDataType0Type1", None, Unset, bool, float, list[Any], str
+    ] = UNSET
+    sync_txid: Unset | int = UNSET
+
+    def to_dict(self) -> dict[str, Any]:
+        from ..models.put_game_definitions_id_body_data_type_0_type_1 import (
+            PutGameDefinitionsIdBodyDataType0Type1,
+        )
+
+        ecosystem_id = self.ecosystem_id
+
+        author_customer_id = self.author_customer_id
+
+        game_id = self.game_id
+
+        kind = self.kind
+
+        key = self.key
+
+        name = self.name
+
+        description: None | Unset | str
+        if isinstance(self.description, Unset):
+            description = UNSET
+        else:
+            description = self.description
+
+        status = self.status
+
+        sort_order = self.sort_order
+
+        data: None | Unset | bool | dict[str, Any] | float | list[Any] | str
+        if isinstance(self.data, Unset):
+            data = UNSET
+        elif isinstance(self.data, PutGameDefinitionsIdBodyDataType0Type1):
+            data = self.data.to_dict()
+        elif isinstance(self.data, list):
+            data = self.data
+
+        else:
+            data = self.data
+
+        sync_txid = self.sync_txid
+
+        field_dict: dict[str, Any] = {}
+
+        field_dict.update({})
+        if ecosystem_id is not UNSET:
+            field_dict["ecosystemId"] = ecosystem_id
+        if author_customer_id is not UNSET:
+            field_dict["authorCustomerId"] = author_customer_id
+        if game_id is not UNSET:
+            field_dict["gameId"] = game_id
+        if kind is not UNSET:
+            field_dict["kind"] = kind
+        if key is not UNSET:
+            field_dict["key"] = key
+        if name is not UNSET:
+            field_dict["name"] = name
+        if description is not UNSET:
+            field_dict["description"] = description
+        if status is not UNSET:
+            field_dict["status"] = status
+        if sort_order is not UNSET:
+            field_dict["sortOrder"] = sort_order
+        if data is not UNSET:
+            field_dict["data"] = data
+        if sync_txid is not UNSET:
+            field_dict["syncTxid"] = sync_txid
+
+        return field_dict
+
+    @classmethod
+    def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
+        from ..models.put_game_definitions_id_body_data_type_0_type_1 import (
+            PutGameDefinitionsIdBodyDataType0Type1,
+        )
+
+        d = dict(src_dict)
+        ecosystem_id = d.pop("ecosystemId", UNSET)
+
+        author_customer_id = d.pop("authorCustomerId", UNSET)
+
+        game_id = d.pop("gameId", UNSET)
+
+        kind = d.pop("kind", UNSET)
+
+        key = d.pop("key", UNSET)
+
+        name = d.pop("name", UNSET)
+
+        def _parse_description(data: object) -> None | Unset | str:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(None | Unset | str, data)
+
+        description = _parse_description(d.pop("description", UNSET))
+
+        status = d.pop("status", UNSET)
+
+        sort_order = d.pop("sortOrder", UNSET)
+
+        def _parse_data(
+            data: object,
+        ) -> Union[
+            "PutGameDefinitionsIdBodyDataType0Type1", None, Unset, bool, float, list[Any], str
+        ]:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            try:
+                if not isinstance(data, dict):
+                    raise TypeError()
+                data_type_0_type_1 = PutGameDefinitionsIdBodyDataType0Type1.from_dict(data)
+
+                return data_type_0_type_1
+            except:  # noqa: E722
+                pass
+            try:
+                if not isinstance(data, list):
+                    raise TypeError()
+                data_type_0_type_2 = cast(list[Any], data)
+
+                return data_type_0_type_2
+            except:  # noqa: E722
+                pass
+            return cast(
+                Union[
+                    "PutGameDefinitionsIdBodyDataType0Type1",
+                    None,
+                    Unset,
+                    bool,
+                    float,
+                    list[Any],
+                    str,
+                ],
+                data,
+            )
+
+        data = _parse_data(d.pop("data", UNSET))
+
+        sync_txid = d.pop("syncTxid", UNSET)
+
+        put_game_definitions_id_body = cls(
+            ecosystem_id=ecosystem_id,
+            author_customer_id=author_customer_id,
+            game_id=game_id,
+            kind=kind,
+            key=key,
+            name=name,
+            description=description,
+            status=status,
+            sort_order=sort_order,
+            data=data,
+            sync_txid=sync_txid,
+        )
+
+        return put_game_definitions_id_body

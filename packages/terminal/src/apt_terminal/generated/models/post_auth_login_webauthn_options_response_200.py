@@ -1,66 +1,54 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import TYPE_CHECKING, Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
-
-from typing import cast
-
 if TYPE_CHECKING:
-  from ..models.post_auth_login_webauthn_options_response_200_options import PostAuthLoginWebauthnOptionsResponse200Options
-
-
-
+    from ..models.post_auth_login_webauthn_options_response_200_options import (
+        PostAuthLoginWebauthnOptionsResponse200Options,
+    )
 
 
 T = TypeVar("T", bound="PostAuthLoginWebauthnOptionsResponse200")
 
 
-
 @_attrs_define
 class PostAuthLoginWebauthnOptionsResponse200:
-    """ 
-        Attributes:
-            options (PostAuthLoginWebauthnOptionsResponse200Options):
-            token (str):
-     """
+    """
+    Attributes:
+        options (PostAuthLoginWebauthnOptionsResponse200Options):
+        token (str):
+    """
 
-    options: 'PostAuthLoginWebauthnOptionsResponse200Options'
+    options: "PostAuthLoginWebauthnOptionsResponse200Options"
     token: str
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
-
-
-
-
     def to_dict(self) -> dict[str, Any]:
-        from ..models.post_auth_login_webauthn_options_response_200_options import PostAuthLoginWebauthnOptionsResponse200Options
         options = self.options.to_dict()
 
         token = self.token
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "options": options,
-            "token": token,
-        })
+        field_dict.update(
+            {
+                "options": options,
+                "token": token,
+            }
+        )
 
         return field_dict
 
-
-
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.post_auth_login_webauthn_options_response_200_options import PostAuthLoginWebauthnOptionsResponse200Options
+        from ..models.post_auth_login_webauthn_options_response_200_options import (
+            PostAuthLoginWebauthnOptionsResponse200Options,
+        )
+
         d = dict(src_dict)
         options = PostAuthLoginWebauthnOptionsResponse200Options.from_dict(d.pop("options"))
-
-
-
 
         token = d.pop("token")
 
@@ -68,7 +56,6 @@ class PostAuthLoginWebauthnOptionsResponse200:
             options=options,
             token=token,
         )
-
 
         post_auth_login_webauthn_options_response_200.additional_properties = d
         return post_auth_login_webauthn_options_response_200

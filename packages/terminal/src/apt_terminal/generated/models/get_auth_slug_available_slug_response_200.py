@@ -1,60 +1,47 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
+from ..models.get_auth_slug_available_slug_response_200_reason import (
+    GetAuthSlugAvailableSlugResponse200Reason,
+)
 from ..types import UNSET, Unset
-
-from ..models.get_auth_slug_available_slug_response_200_reason import GetAuthSlugAvailableSlugResponse200Reason
-from ..types import UNSET, Unset
-from typing import Union
-
-
-
-
-
 
 T = TypeVar("T", bound="GetAuthSlugAvailableSlugResponse200")
 
 
-
 @_attrs_define
 class GetAuthSlugAvailableSlugResponse200:
-    """ 
-        Attributes:
-            available (bool):
-            reason (Union[Unset, GetAuthSlugAvailableSlugResponse200Reason]):
-     """
+    """
+    Attributes:
+        available (bool):
+        reason (Union[Unset, GetAuthSlugAvailableSlugResponse200Reason]):
+    """
 
     available: bool
-    reason: Union[Unset, GetAuthSlugAvailableSlugResponse200Reason] = UNSET
+    reason: Unset | GetAuthSlugAvailableSlugResponse200Reason = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         available = self.available
 
-        reason: Union[Unset, str] = UNSET
+        reason: Unset | str = UNSET
         if not isinstance(self.reason, Unset):
             reason = self.reason.value
 
-
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "available": available,
-        })
+        field_dict.update(
+            {
+                "available": available,
+            }
+        )
         if reason is not UNSET:
             field_dict["reason"] = reason
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -62,20 +49,16 @@ class GetAuthSlugAvailableSlugResponse200:
         available = d.pop("available")
 
         _reason = d.pop("reason", UNSET)
-        reason: Union[Unset, GetAuthSlugAvailableSlugResponse200Reason]
-        if isinstance(_reason,  Unset):
+        reason: Unset | GetAuthSlugAvailableSlugResponse200Reason
+        if isinstance(_reason, Unset):
             reason = UNSET
         else:
             reason = GetAuthSlugAvailableSlugResponse200Reason(_reason)
-
-
-
 
         get_auth_slug_available_slug_response_200 = cls(
             available=available,
             reason=reason,
         )
-
 
         get_auth_slug_available_slug_response_200.additional_properties = d
         return get_auth_slug_available_slug_response_200

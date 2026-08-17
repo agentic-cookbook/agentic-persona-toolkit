@@ -1,68 +1,52 @@
 from http import HTTPStatus
-from typing import Any, Optional, Union, cast
+from typing import Any
 
 import httpx
 
-from ...client import AuthenticatedClient, Client
-from ...types import Response, UNSET
 from ... import errors
-
+from ...client import AuthenticatedClient, Client
 from ...models.error import Error
-from ...models.get_content_markdown_id_versions_response_200 import GetContentMarkdownIdVersionsResponse200
-from ...types import UNSET, Unset
-from typing import cast
-from typing import Union
-
+from ...models.get_content_markdown_id_versions_response_200 import (
+    GetContentMarkdownIdVersionsResponse200,
+)
+from ...types import UNSET, Response, Unset
 
 
 def _get_kwargs(
     id: str,
     *,
-    workspace: Union[Unset, str] = UNSET,
-
+    workspace: Unset | str = UNSET,
 ) -> dict[str, Any]:
-    
-
-    
-
     params: dict[str, Any] = {}
 
     params["workspace"] = workspace
 
-
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
-
 
     _kwargs: dict[str, Any] = {
         "method": "get",
-        "url": "/content/markdown/{id}/versions".format(id=id,),
+        "url": f"/content/markdown/{id}/versions",
         "params": params,
     }
-
 
     return _kwargs
 
 
-
-def _parse_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Optional[Union[Error, GetContentMarkdownIdVersionsResponse200]]:
+def _parse_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Error | GetContentMarkdownIdVersionsResponse200 | None:
     if response.status_code == 200:
         response_200 = GetContentMarkdownIdVersionsResponse200.from_dict(response.json())
-
-
 
         return response_200
 
     if response.status_code == 401:
         response_401 = Error.from_dict(response.json())
 
-
-
         return response_401
 
     if response.status_code == 404:
         response_404 = Error.from_dict(response.json())
-
-
 
         return response_404
 
@@ -72,7 +56,9 @@ def _parse_response(*, client: Union[AuthenticatedClient, Client], response: htt
         return None
 
 
-def _build_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Response[Union[Error, GetContentMarkdownIdVersionsResponse200]]:
+def _build_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Response[Error | GetContentMarkdownIdVersionsResponse200]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -85,10 +71,9 @@ def sync_detailed(
     id: str,
     *,
     client: AuthenticatedClient,
-    workspace: Union[Unset, str] = UNSET,
-
-) -> Response[Union[Error, GetContentMarkdownIdVersionsResponse200]]:
-    """ List a document’s versions, newest first (metadata only)
+    workspace: Unset | str = UNSET,
+) -> Response[Error | GetContentMarkdownIdVersionsResponse200]:
+    """List a document’s versions, newest first (metadata only)
 
     Args:
         id (str):
@@ -100,13 +85,11 @@ def sync_detailed(
 
     Returns:
         Response[Union[Error, GetContentMarkdownIdVersionsResponse200]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         id=id,
-workspace=workspace,
-
+        workspace=workspace,
     )
 
     response = client.get_httpx_client().request(
@@ -115,14 +98,14 @@ workspace=workspace,
 
     return _build_response(client=client, response=response)
 
+
 def sync(
     id: str,
     *,
     client: AuthenticatedClient,
-    workspace: Union[Unset, str] = UNSET,
-
-) -> Optional[Union[Error, GetContentMarkdownIdVersionsResponse200]]:
-    """ List a document’s versions, newest first (metadata only)
+    workspace: Unset | str = UNSET,
+) -> Error | GetContentMarkdownIdVersionsResponse200 | None:
+    """List a document’s versions, newest first (metadata only)
 
     Args:
         id (str):
@@ -134,24 +117,22 @@ def sync(
 
     Returns:
         Union[Error, GetContentMarkdownIdVersionsResponse200]
-     """
-
+    """
 
     return sync_detailed(
         id=id,
-client=client,
-workspace=workspace,
-
+        client=client,
+        workspace=workspace,
     ).parsed
+
 
 async def asyncio_detailed(
     id: str,
     *,
     client: AuthenticatedClient,
-    workspace: Union[Unset, str] = UNSET,
-
-) -> Response[Union[Error, GetContentMarkdownIdVersionsResponse200]]:
-    """ List a document’s versions, newest first (metadata only)
+    workspace: Unset | str = UNSET,
+) -> Response[Error | GetContentMarkdownIdVersionsResponse200]:
+    """List a document’s versions, newest first (metadata only)
 
     Args:
         id (str):
@@ -163,29 +144,25 @@ async def asyncio_detailed(
 
     Returns:
         Response[Union[Error, GetContentMarkdownIdVersionsResponse200]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         id=id,
-workspace=workspace,
-
+        workspace=workspace,
     )
 
-    response = await client.get_async_httpx_client().request(
-        **kwargs
-    )
+    response = await client.get_async_httpx_client().request(**kwargs)
 
     return _build_response(client=client, response=response)
+
 
 async def asyncio(
     id: str,
     *,
     client: AuthenticatedClient,
-    workspace: Union[Unset, str] = UNSET,
-
-) -> Optional[Union[Error, GetContentMarkdownIdVersionsResponse200]]:
-    """ List a document’s versions, newest first (metadata only)
+    workspace: Unset | str = UNSET,
+) -> Error | GetContentMarkdownIdVersionsResponse200 | None:
+    """List a document’s versions, newest first (metadata only)
 
     Args:
         id (str):
@@ -197,12 +174,12 @@ async def asyncio(
 
     Returns:
         Union[Error, GetContentMarkdownIdVersionsResponse200]
-     """
+    """
 
-
-    return (await asyncio_detailed(
-        id=id,
-client=client,
-workspace=workspace,
-
-    )).parsed
+    return (
+        await asyncio_detailed(
+            id=id,
+            client=client,
+            workspace=workspace,
+        )
+    ).parsed

@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class MarkdownDocumentSummaryKind(str, Enum):
     PAPER = "paper"
     RESEARCH = "research"

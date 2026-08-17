@@ -1,54 +1,40 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
-
-
-
-
-
-
-
 T = TypeVar("T", bound="IntegrationActionRequestType2")
-
 
 
 @_attrs_define
 class IntegrationActionRequestType2:
-    """ actionType=sms — an outbound text message (Twilio-style)
+    """actionType=sms — an outbound text message (Twilio-style)
 
-        Attributes:
-            to (str): E.164 phone number (e.g. +15551234567)
-            body (str):
-     """
+    Attributes:
+        to (str): E.164 phone number (e.g. +15551234567)
+        body (str):
+    """
 
     to: str
     body: str
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         to = self.to
 
         body = self.body
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "to": to,
-            "body": body,
-        })
+        field_dict.update(
+            {
+                "to": to,
+                "body": body,
+            }
+        )
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -61,7 +47,6 @@ class IntegrationActionRequestType2:
             to=to,
             body=body,
         )
-
 
         integration_action_request_type_2.additional_properties = d
         return integration_action_request_type_2

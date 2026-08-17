@@ -1,44 +1,31 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import TYPE_CHECKING, Any, TypeVar, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
-
-from typing import cast
-
 if TYPE_CHECKING:
-  from ..models.poll_tally_option import PollTallyOption
-
-
-
+    from ..models.poll_tally_option import PollTallyOption
 
 
 T = TypeVar("T", bound="PollTally")
 
 
-
 @_attrs_define
 class PollTally:
-    """ 
-        Attributes:
-            poll_id (str):
-            options (list['PollTallyOption']):
-            my_option_ids (list[str]):
-     """
+    """
+    Attributes:
+        poll_id (str):
+        options (list['PollTallyOption']):
+        my_option_ids (list[str]):
+    """
 
     poll_id: str
-    options: list['PollTallyOption']
+    options: list["PollTallyOption"]
     my_option_ids: list[str]
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
-
-
-
-
     def to_dict(self) -> dict[str, Any]:
-        from ..models.poll_tally_option import PollTallyOption
         poll_id = self.poll_id
 
         options = []
@@ -46,50 +33,41 @@ class PollTally:
             options_item = options_item_data.to_dict()
             options.append(options_item)
 
-
-
         my_option_ids = self.my_option_ids
-
-
-
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "pollId": poll_id,
-            "options": options,
-            "myOptionIds": my_option_ids,
-        })
+        field_dict.update(
+            {
+                "pollId": poll_id,
+                "options": options,
+                "myOptionIds": my_option_ids,
+            }
+        )
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.poll_tally_option import PollTallyOption
+
         d = dict(src_dict)
         poll_id = d.pop("pollId")
 
         options = []
         _options = d.pop("options")
-        for options_item_data in (_options):
+        for options_item_data in _options:
             options_item = PollTallyOption.from_dict(options_item_data)
-
-
 
             options.append(options_item)
 
-
         my_option_ids = cast(list[str], d.pop("myOptionIds"))
-
 
         poll_tally = cls(
             poll_id=poll_id,
             options=options,
             my_option_ids=my_option_ids,
         )
-
 
         poll_tally.additional_properties = d
         return poll_tally

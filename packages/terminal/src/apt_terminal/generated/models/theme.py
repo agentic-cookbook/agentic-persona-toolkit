@@ -1,56 +1,42 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import TYPE_CHECKING, Any, TypeVar, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
-
-from typing import cast
-from typing import cast, Union
-
 if TYPE_CHECKING:
-  from ..models.theme_data import ThemeData
-
-
-
+    from ..models.theme_data import ThemeData
 
 
 T = TypeVar("T", bound="Theme")
 
 
-
 @_attrs_define
 class Theme:
-    """ 
-        Attributes:
-            key (str):
-            label (str):
-            based_on (Union[None, str]):
-            data (ThemeData):
-            created_at (str):
-            updated_at (str):
-     """
+    """
+    Attributes:
+        key (str):
+        label (str):
+        based_on (Union[None, str]):
+        data (ThemeData):
+        created_at (str):
+        updated_at (str):
+    """
 
     key: str
     label: str
-    based_on: Union[None, str]
-    data: 'ThemeData'
+    based_on: None | str
+    data: "ThemeData"
     created_at: str
     updated_at: str
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
-
-
-
-
     def to_dict(self) -> dict[str, Any]:
-        from ..models.theme_data import ThemeData
         key = self.key
 
         label = self.label
 
-        based_on: Union[None, str]
+        based_on: None | str
         based_on = self.based_on
 
         data = self.data.to_dict()
@@ -59,42 +45,38 @@ class Theme:
 
         updated_at = self.updated_at
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "key": key,
-            "label": label,
-            "basedOn": based_on,
-            "data": data,
-            "createdAt": created_at,
-            "updatedAt": updated_at,
-        })
+        field_dict.update(
+            {
+                "key": key,
+                "label": label,
+                "basedOn": based_on,
+                "data": data,
+                "createdAt": created_at,
+                "updatedAt": updated_at,
+            }
+        )
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.theme_data import ThemeData
+
         d = dict(src_dict)
         key = d.pop("key")
 
         label = d.pop("label")
 
-        def _parse_based_on(data: object) -> Union[None, str]:
+        def _parse_based_on(data: object) -> None | str:
             if data is None:
                 return data
-            return cast(Union[None, str], data)
+            return cast(None | str, data)
 
         based_on = _parse_based_on(d.pop("basedOn"))
 
-
         data = ThemeData.from_dict(d.pop("data"))
-
-
-
 
         created_at = d.pop("createdAt")
 
@@ -108,7 +90,6 @@ class Theme:
             created_at=created_at,
             updated_at=updated_at,
         )
-
 
         theme.additional_properties = d
         return theme

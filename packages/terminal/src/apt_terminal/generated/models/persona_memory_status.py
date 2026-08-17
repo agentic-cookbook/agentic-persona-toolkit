@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class PersonaMemoryStatus(str, Enum):
     ACTIVE = "active"
     ARCHIVED = "archived"

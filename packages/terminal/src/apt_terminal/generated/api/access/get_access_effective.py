@@ -1,18 +1,13 @@
 from http import HTTPStatus
-from typing import Any, Optional, Union, cast
+from typing import Any
 
 import httpx
 
-from ...client import AuthenticatedClient, Client
-from ...types import Response, UNSET
 from ... import errors
-
+from ...client import AuthenticatedClient, Client
 from ...models.access_effective import AccessEffective
 from ...models.error import Error
-from ...types import UNSET, Unset
-from typing import cast
-from typing import Union
-
+from ...types import UNSET, Response, Unset
 
 
 def _get_kwargs(
@@ -21,13 +16,8 @@ def _get_kwargs(
     feature: str,
     subject_kind: str,
     subject_id: str,
-    item_id: Union[Unset, str] = UNSET,
-
+    item_id: Unset | str = UNSET,
 ) -> dict[str, Any]:
-    
-
-    
-
     params: dict[str, Any] = {}
 
     params["workspace"] = workspace
@@ -40,9 +30,7 @@ def _get_kwargs(
 
     params["itemId"] = item_id
 
-
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
-
 
     _kwargs: dict[str, Any] = {
         "method": "get",
@@ -50,44 +38,34 @@ def _get_kwargs(
         "params": params,
     }
 
-
     return _kwargs
 
 
-
-def _parse_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Optional[Union[AccessEffective, Error]]:
+def _parse_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> AccessEffective | Error | None:
     if response.status_code == 200:
         response_200 = AccessEffective.from_dict(response.json())
-
-
 
         return response_200
 
     if response.status_code == 400:
         response_400 = Error.from_dict(response.json())
 
-
-
         return response_400
 
     if response.status_code == 401:
         response_401 = Error.from_dict(response.json())
-
-
 
         return response_401
 
     if response.status_code == 403:
         response_403 = Error.from_dict(response.json())
 
-
-
         return response_403
 
     if response.status_code == 404:
         response_404 = Error.from_dict(response.json())
-
-
 
         return response_404
 
@@ -97,7 +75,9 @@ def _parse_response(*, client: Union[AuthenticatedClient, Client], response: htt
         return None
 
 
-def _build_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Response[Union[AccessEffective, Error]]:
+def _build_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Response[AccessEffective | Error]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -113,10 +93,9 @@ def sync_detailed(
     feature: str,
     subject_kind: str,
     subject_id: str,
-    item_id: Union[Unset, str] = UNSET,
-
-) -> Response[Union[AccessEffective, Error]]:
-    """ A subject's effective verbs + provenance (the explainer; requires M)
+    item_id: Unset | str = UNSET,
+) -> Response[AccessEffective | Error]:
+    """A subject's effective verbs + provenance (the explainer; requires M)
 
     Args:
         workspace (str):
@@ -131,16 +110,14 @@ def sync_detailed(
 
     Returns:
         Response[Union[AccessEffective, Error]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         workspace=workspace,
-feature=feature,
-subject_kind=subject_kind,
-subject_id=subject_id,
-item_id=item_id,
-
+        feature=feature,
+        subject_kind=subject_kind,
+        subject_id=subject_id,
+        item_id=item_id,
     )
 
     response = client.get_httpx_client().request(
@@ -149,6 +126,7 @@ item_id=item_id,
 
     return _build_response(client=client, response=response)
 
+
 def sync(
     *,
     client: AuthenticatedClient,
@@ -156,10 +134,9 @@ def sync(
     feature: str,
     subject_kind: str,
     subject_id: str,
-    item_id: Union[Unset, str] = UNSET,
-
-) -> Optional[Union[AccessEffective, Error]]:
-    """ A subject's effective verbs + provenance (the explainer; requires M)
+    item_id: Unset | str = UNSET,
+) -> AccessEffective | Error | None:
+    """A subject's effective verbs + provenance (the explainer; requires M)
 
     Args:
         workspace (str):
@@ -174,18 +151,17 @@ def sync(
 
     Returns:
         Union[AccessEffective, Error]
-     """
-
+    """
 
     return sync_detailed(
         client=client,
-workspace=workspace,
-feature=feature,
-subject_kind=subject_kind,
-subject_id=subject_id,
-item_id=item_id,
-
+        workspace=workspace,
+        feature=feature,
+        subject_kind=subject_kind,
+        subject_id=subject_id,
+        item_id=item_id,
     ).parsed
+
 
 async def asyncio_detailed(
     *,
@@ -194,10 +170,9 @@ async def asyncio_detailed(
     feature: str,
     subject_kind: str,
     subject_id: str,
-    item_id: Union[Unset, str] = UNSET,
-
-) -> Response[Union[AccessEffective, Error]]:
-    """ A subject's effective verbs + provenance (the explainer; requires M)
+    item_id: Unset | str = UNSET,
+) -> Response[AccessEffective | Error]:
+    """A subject's effective verbs + provenance (the explainer; requires M)
 
     Args:
         workspace (str):
@@ -212,23 +187,20 @@ async def asyncio_detailed(
 
     Returns:
         Response[Union[AccessEffective, Error]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         workspace=workspace,
-feature=feature,
-subject_kind=subject_kind,
-subject_id=subject_id,
-item_id=item_id,
-
+        feature=feature,
+        subject_kind=subject_kind,
+        subject_id=subject_id,
+        item_id=item_id,
     )
 
-    response = await client.get_async_httpx_client().request(
-        **kwargs
-    )
+    response = await client.get_async_httpx_client().request(**kwargs)
 
     return _build_response(client=client, response=response)
+
 
 async def asyncio(
     *,
@@ -237,10 +209,9 @@ async def asyncio(
     feature: str,
     subject_kind: str,
     subject_id: str,
-    item_id: Union[Unset, str] = UNSET,
-
-) -> Optional[Union[AccessEffective, Error]]:
-    """ A subject's effective verbs + provenance (the explainer; requires M)
+    item_id: Unset | str = UNSET,
+) -> AccessEffective | Error | None:
+    """A subject's effective verbs + provenance (the explainer; requires M)
 
     Args:
         workspace (str):
@@ -255,15 +226,15 @@ async def asyncio(
 
     Returns:
         Union[AccessEffective, Error]
-     """
+    """
 
-
-    return (await asyncio_detailed(
-        client=client,
-workspace=workspace,
-feature=feature,
-subject_kind=subject_kind,
-subject_id=subject_id,
-item_id=item_id,
-
-    )).parsed
+    return (
+        await asyncio_detailed(
+            client=client,
+            workspace=workspace,
+            feature=feature,
+            subject_kind=subject_kind,
+            subject_id=subject_id,
+            item_id=item_id,
+        )
+    ).parsed

@@ -1,47 +1,33 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 from ..types import UNSET, Unset
 
-from ..types import UNSET, Unset
-from typing import cast, Union
-from typing import Union
-
-
-
-
-
-
 T = TypeVar("T", bound="PostStorageUploadsBody")
-
 
 
 @_attrs_define
 class PostStorageUploadsBody:
-    """ 
-        Attributes:
-            filename (str):
-            content_type (str):
-            owner_type (Union[Unset, str]): Polymorphic owner kind (defaults to 'standalone').
-            ecosystem_id (Union[None, Unset, str]):
-            size_bytes (Union[Unset, int]): Declared size; enforced against the storage quota at init.
-            content_hash (Union[Unset, str]): When it matches an existing ready object, the upload is deduplicated.
-     """
+    """
+    Attributes:
+        filename (str):
+        content_type (str):
+        owner_type (Union[Unset, str]): Polymorphic owner kind (defaults to 'standalone').
+        ecosystem_id (Union[None, Unset, str]):
+        size_bytes (Union[Unset, int]): Declared size; enforced against the storage quota at init.
+        content_hash (Union[Unset, str]): When it matches an existing ready object, the upload is deduplicated.
+    """
 
     filename: str
     content_type: str
-    owner_type: Union[Unset, str] = UNSET
-    ecosystem_id: Union[None, Unset, str] = UNSET
-    size_bytes: Union[Unset, int] = UNSET
-    content_hash: Union[Unset, str] = UNSET
+    owner_type: Unset | str = UNSET
+    ecosystem_id: None | Unset | str = UNSET
+    size_bytes: Unset | int = UNSET
+    content_hash: Unset | str = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         filename = self.filename
@@ -50,7 +36,7 @@ class PostStorageUploadsBody:
 
         owner_type = self.owner_type
 
-        ecosystem_id: Union[None, Unset, str]
+        ecosystem_id: None | Unset | str
         if isinstance(self.ecosystem_id, Unset):
             ecosystem_id = UNSET
         else:
@@ -60,13 +46,14 @@ class PostStorageUploadsBody:
 
         content_hash = self.content_hash
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "filename": filename,
-            "contentType": content_type,
-        })
+        field_dict.update(
+            {
+                "filename": filename,
+                "contentType": content_type,
+            }
+        )
         if owner_type is not UNSET:
             field_dict["ownerType"] = owner_type
         if ecosystem_id is not UNSET:
@@ -78,8 +65,6 @@ class PostStorageUploadsBody:
 
         return field_dict
 
-
-
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
@@ -89,15 +74,14 @@ class PostStorageUploadsBody:
 
         owner_type = d.pop("ownerType", UNSET)
 
-        def _parse_ecosystem_id(data: object) -> Union[None, Unset, str]:
+        def _parse_ecosystem_id(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         ecosystem_id = _parse_ecosystem_id(d.pop("ecosystemId", UNSET))
-
 
         size_bytes = d.pop("sizeBytes", UNSET)
 
@@ -111,7 +95,6 @@ class PostStorageUploadsBody:
             size_bytes=size_bytes,
             content_hash=content_hash,
         )
-
 
         post_storage_uploads_body.additional_properties = d
         return post_storage_uploads_body

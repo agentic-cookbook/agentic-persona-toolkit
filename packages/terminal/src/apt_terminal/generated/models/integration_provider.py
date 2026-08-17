@@ -1,41 +1,37 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import TYPE_CHECKING, Any, TypeVar, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
-
 from ..models.integration_provider_auth_method import IntegrationProviderAuthMethod
 from ..types import UNSET, Unset
-from typing import cast
-from typing import Union
 
 if TYPE_CHECKING:
-  from ..models.integration_provider_config_fields_item import IntegrationProviderConfigFieldsItem
-
-
-
+    from ..models.integration_provider_config_fields_item import IntegrationProviderConfigFieldsItem
+    from ..models.integration_provider_links_item import IntegrationProviderLinksItem
 
 
 T = TypeVar("T", bound="IntegrationProvider")
 
 
-
 @_attrs_define
 class IntegrationProvider:
-    """ 
-        Attributes:
-            provider_id (str):
-            display_name (str):
-            auth_method (IntegrationProviderAuthMethod):
-            service_types (list[str]):
-            capabilities (list[str]): read | write | auth
-            default_poll_interval_ms (int): Default minimum sync interval (ms)
-            config_fields (Union[Unset, list['IntegrationProviderConfigFieldsItem']]): For api_key providers: declarative
-                config/credential fields, rendered + validated identically at ecosystem and user scope (absent for OAuth-style
-                providers).
-     """
+    """
+    Attributes:
+        provider_id (str):
+        display_name (str):
+        auth_method (IntegrationProviderAuthMethod):
+        service_types (list[str]):
+        capabilities (list[str]): read | write | auth
+        default_poll_interval_ms (int): Default minimum sync interval (ms)
+        subtitle (str): Short human category for the picker list + filter (e.g. Email, Social)
+        description (str): What the service is and what enabling it does
+        links (list['IntegrationProviderLinksItem']): Out-links for the info card (homepage / docs / "get your keys")
+        config_fields (Union[Unset, list['IntegrationProviderConfigFieldsItem']]): For api_key providers: declarative
+            config/credential fields, rendered + validated identically at ecosystem and user scope (absent for OAuth-style
+            providers).
+    """
 
     provider_id: str
     display_name: str
@@ -43,15 +39,13 @@ class IntegrationProvider:
     service_types: list[str]
     capabilities: list[str]
     default_poll_interval_ms: int
-    config_fields: Union[Unset, list['IntegrationProviderConfigFieldsItem']] = UNSET
+    subtitle: str
+    description: str
+    links: list["IntegrationProviderLinksItem"]
+    config_fields: Unset | list["IntegrationProviderConfigFieldsItem"] = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
-
-
-
-
     def to_dict(self) -> dict[str, Any]:
-        from ..models.integration_provider_config_fields_item import IntegrationProviderConfigFieldsItem
         provider_id = self.provider_id
 
         display_name = self.display_name
@@ -60,44 +54,53 @@ class IntegrationProvider:
 
         service_types = self.service_types
 
-
-
         capabilities = self.capabilities
-
-
 
         default_poll_interval_ms = self.default_poll_interval_ms
 
-        config_fields: Union[Unset, list[dict[str, Any]]] = UNSET
+        subtitle = self.subtitle
+
+        description = self.description
+
+        links = []
+        for links_item_data in self.links:
+            links_item = links_item_data.to_dict()
+            links.append(links_item)
+
+        config_fields: Unset | list[dict[str, Any]] = UNSET
         if not isinstance(self.config_fields, Unset):
             config_fields = []
             for config_fields_item_data in self.config_fields:
                 config_fields_item = config_fields_item_data.to_dict()
                 config_fields.append(config_fields_item)
 
-
-
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "providerId": provider_id,
-            "displayName": display_name,
-            "authMethod": auth_method,
-            "serviceTypes": service_types,
-            "capabilities": capabilities,
-            "defaultPollIntervalMs": default_poll_interval_ms,
-        })
+        field_dict.update(
+            {
+                "providerId": provider_id,
+                "displayName": display_name,
+                "authMethod": auth_method,
+                "serviceTypes": service_types,
+                "capabilities": capabilities,
+                "defaultPollIntervalMs": default_poll_interval_ms,
+                "subtitle": subtitle,
+                "description": description,
+                "links": links,
+            }
+        )
         if config_fields is not UNSET:
             field_dict["configFields"] = config_fields
 
         return field_dict
 
-
-
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.integration_provider_config_fields_item import IntegrationProviderConfigFieldsItem
+        from ..models.integration_provider_config_fields_item import (
+            IntegrationProviderConfigFieldsItem,
+        )
+        from ..models.integration_provider_links_item import IntegrationProviderLinksItem
+
         d = dict(src_dict)
         provider_id = d.pop("providerId")
 
@@ -105,26 +108,31 @@ class IntegrationProvider:
 
         auth_method = IntegrationProviderAuthMethod(d.pop("authMethod"))
 
-
-
-
         service_types = cast(list[str], d.pop("serviceTypes"))
-
 
         capabilities = cast(list[str], d.pop("capabilities"))
 
-
         default_poll_interval_ms = d.pop("defaultPollIntervalMs")
+
+        subtitle = d.pop("subtitle")
+
+        description = d.pop("description")
+
+        links = []
+        _links = d.pop("links")
+        for links_item_data in _links:
+            links_item = IntegrationProviderLinksItem.from_dict(links_item_data)
+
+            links.append(links_item)
 
         config_fields = []
         _config_fields = d.pop("configFields", UNSET)
-        for config_fields_item_data in (_config_fields or []):
-            config_fields_item = IntegrationProviderConfigFieldsItem.from_dict(config_fields_item_data)
-
-
+        for config_fields_item_data in _config_fields or []:
+            config_fields_item = IntegrationProviderConfigFieldsItem.from_dict(
+                config_fields_item_data
+            )
 
             config_fields.append(config_fields_item)
-
 
         integration_provider = cls(
             provider_id=provider_id,
@@ -133,9 +141,11 @@ class IntegrationProvider:
             service_types=service_types,
             capabilities=capabilities,
             default_poll_interval_ms=default_poll_interval_ms,
+            subtitle=subtitle,
+            description=description,
+            links=links,
             config_fields=config_fields,
         )
-
 
         integration_provider.additional_properties = d
         return integration_provider

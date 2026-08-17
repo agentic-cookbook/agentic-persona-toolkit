@@ -1,0 +1,76 @@
+from collections.abc import Mapping
+from typing import Any, TypeVar
+
+from attrs import define as _attrs_define
+
+from ..types import UNSET, Unset
+
+T = TypeVar("T", bound="PutPersonaMemoryLinksIdBody")
+
+
+@_attrs_define
+class PutPersonaMemoryLinksIdBody:
+    """
+    Attributes:
+        ecosystem_id (Union[Unset, str]):
+        src_id (Union[Unset, str]):
+        dst_id (Union[Unset, str]):
+        relation (Union[Unset, str]):
+        sync_txid (Union[Unset, int]):
+    """
+
+    ecosystem_id: Unset | str = UNSET
+    src_id: Unset | str = UNSET
+    dst_id: Unset | str = UNSET
+    relation: Unset | str = UNSET
+    sync_txid: Unset | int = UNSET
+
+    def to_dict(self) -> dict[str, Any]:
+        ecosystem_id = self.ecosystem_id
+
+        src_id = self.src_id
+
+        dst_id = self.dst_id
+
+        relation = self.relation
+
+        sync_txid = self.sync_txid
+
+        field_dict: dict[str, Any] = {}
+
+        field_dict.update({})
+        if ecosystem_id is not UNSET:
+            field_dict["ecosystemId"] = ecosystem_id
+        if src_id is not UNSET:
+            field_dict["srcId"] = src_id
+        if dst_id is not UNSET:
+            field_dict["dstId"] = dst_id
+        if relation is not UNSET:
+            field_dict["relation"] = relation
+        if sync_txid is not UNSET:
+            field_dict["syncTxid"] = sync_txid
+
+        return field_dict
+
+    @classmethod
+    def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
+        d = dict(src_dict)
+        ecosystem_id = d.pop("ecosystemId", UNSET)
+
+        src_id = d.pop("srcId", UNSET)
+
+        dst_id = d.pop("dstId", UNSET)
+
+        relation = d.pop("relation", UNSET)
+
+        sync_txid = d.pop("syncTxid", UNSET)
+
+        put_persona_memory_links_id_body = cls(
+            ecosystem_id=ecosystem_id,
+            src_id=src_id,
+            dst_id=dst_id,
+            relation=relation,
+            sync_txid=sync_txid,
+        )
+
+        return put_persona_memory_links_id_body

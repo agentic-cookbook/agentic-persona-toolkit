@@ -1,0 +1,97 @@
+from collections.abc import Mapping
+from typing import Any, TypeVar, cast
+
+from attrs import define as _attrs_define
+from attrs import field as _attrs_field
+
+from ..types import UNSET, Unset
+
+T = TypeVar("T", bound="PostProcessingJobsClaimBody")
+
+
+@_attrs_define
+class PostProcessingJobsClaimBody:
+    """
+    Attributes:
+        job_types (Union[Unset, list[str]]): Filter to specific job types; absent = any type
+        min_priority (Union[Unset, int]): Claim only jobs with priority >= this value (interactive lane = 100)
+        batch (Union[Unset, int]): Max jobs to claim (default 1)
+        lease_ms (Union[Unset, int]): Lease duration in ms (default 30 000)
+        worker_id (Union[Unset, str]): Label for the claimed rows; defaults to api-token name or userId
+    """
+
+    job_types: Unset | list[str] = UNSET
+    min_priority: Unset | int = UNSET
+    batch: Unset | int = UNSET
+    lease_ms: Unset | int = UNSET
+    worker_id: Unset | str = UNSET
+    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
+
+    def to_dict(self) -> dict[str, Any]:
+        job_types: Unset | list[str] = UNSET
+        if not isinstance(self.job_types, Unset):
+            job_types = self.job_types
+
+        min_priority = self.min_priority
+
+        batch = self.batch
+
+        lease_ms = self.lease_ms
+
+        worker_id = self.worker_id
+
+        field_dict: dict[str, Any] = {}
+        field_dict.update(self.additional_properties)
+        field_dict.update({})
+        if job_types is not UNSET:
+            field_dict["jobTypes"] = job_types
+        if min_priority is not UNSET:
+            field_dict["minPriority"] = min_priority
+        if batch is not UNSET:
+            field_dict["batch"] = batch
+        if lease_ms is not UNSET:
+            field_dict["leaseMs"] = lease_ms
+        if worker_id is not UNSET:
+            field_dict["workerId"] = worker_id
+
+        return field_dict
+
+    @classmethod
+    def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
+        d = dict(src_dict)
+        job_types = cast(list[str], d.pop("jobTypes", UNSET))
+
+        min_priority = d.pop("minPriority", UNSET)
+
+        batch = d.pop("batch", UNSET)
+
+        lease_ms = d.pop("leaseMs", UNSET)
+
+        worker_id = d.pop("workerId", UNSET)
+
+        post_processing_jobs_claim_body = cls(
+            job_types=job_types,
+            min_priority=min_priority,
+            batch=batch,
+            lease_ms=lease_ms,
+            worker_id=worker_id,
+        )
+
+        post_processing_jobs_claim_body.additional_properties = d
+        return post_processing_jobs_claim_body
+
+    @property
+    def additional_keys(self) -> list[str]:
+        return list(self.additional_properties.keys())
+
+    def __getitem__(self, key: str) -> Any:
+        return self.additional_properties[key]
+
+    def __setitem__(self, key: str, value: Any) -> None:
+        self.additional_properties[key] = value
+
+    def __delitem__(self, key: str) -> None:
+        del self.additional_properties[key]
+
+    def __contains__(self, key: str) -> bool:
+        return key in self.additional_properties

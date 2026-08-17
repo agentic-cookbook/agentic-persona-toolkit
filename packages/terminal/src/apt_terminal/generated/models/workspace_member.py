@@ -1,84 +1,66 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 from ..types import UNSET, Unset
 
-from ..types import UNSET, Unset
-from dateutil.parser import isoparse
-from typing import cast
-from typing import cast, Union
-from typing import Union
-import datetime
-
-
-
-
-
-
 T = TypeVar("T", bound="WorkspaceMember")
-
 
 
 @_attrs_define
 class WorkspaceMember:
-    """ 
-        Attributes:
-            user_id (str):
-            is_admin (bool): Admin of any of the org's teams (the roster's strongest role)
-            added_at (datetime.datetime): Earliest membership across the org's teams
-            email (Union[None, Unset, str]):
-            display_name (Union[None, Unset, str]):
-     """
+    """
+    Attributes:
+        user_id (str):
+        is_admin (bool): Admin of any of the org's teams (the roster's strongest role)
+        added_at (str): Earliest membership across the org's teams
+        email (Union[None, Unset, str]):
+        display_name (Union[None, Unset, str]):
+    """
 
     user_id: str
     is_admin: bool
-    added_at: datetime.datetime
-    email: Union[None, Unset, str] = UNSET
-    display_name: Union[None, Unset, str] = UNSET
+    added_at: str
+    email: None | Unset | str = UNSET
+    display_name: None | Unset | str = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         user_id = self.user_id
 
         is_admin = self.is_admin
 
-        added_at = self.added_at.isoformat()
+        added_at = self.added_at
 
-        email: Union[None, Unset, str]
+        email: None | Unset | str
         if isinstance(self.email, Unset):
             email = UNSET
         else:
             email = self.email
 
-        display_name: Union[None, Unset, str]
+        display_name: None | Unset | str
         if isinstance(self.display_name, Unset):
             display_name = UNSET
         else:
             display_name = self.display_name
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "userId": user_id,
-            "isAdmin": is_admin,
-            "addedAt": added_at,
-        })
+        field_dict.update(
+            {
+                "userId": user_id,
+                "isAdmin": is_admin,
+                "addedAt": added_at,
+            }
+        )
         if email is not UNSET:
             field_dict["email"] = email
         if display_name is not UNSET:
             field_dict["displayName"] = display_name
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -87,30 +69,25 @@ class WorkspaceMember:
 
         is_admin = d.pop("isAdmin")
 
-        added_at = isoparse(d.pop("addedAt"))
+        added_at = d.pop("addedAt")
 
-
-
-
-        def _parse_email(data: object) -> Union[None, Unset, str]:
+        def _parse_email(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         email = _parse_email(d.pop("email", UNSET))
 
-
-        def _parse_display_name(data: object) -> Union[None, Unset, str]:
+        def _parse_display_name(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         display_name = _parse_display_name(d.pop("displayName", UNSET))
-
 
         workspace_member = cls(
             user_id=user_id,
@@ -119,7 +96,6 @@ class WorkspaceMember:
             email=email,
             display_name=display_name,
         )
-
 
         workspace_member.additional_properties = d
         return workspace_member

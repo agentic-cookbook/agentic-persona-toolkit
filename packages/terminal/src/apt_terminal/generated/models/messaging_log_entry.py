@@ -1,45 +1,38 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
-
 from ..models.messaging_log_entry_channel import MessagingLogEntryChannel
+from ..models.messaging_log_entry_origin import MessagingLogEntryOrigin
 from ..models.messaging_log_entry_status import MessagingLogEntryStatus
 from ..types import UNSET, Unset
-from typing import cast, Union
-from typing import Union
-
-
-
-
-
 
 T = TypeVar("T", bound="MessagingLogEntry")
 
 
-
 @_attrs_define
 class MessagingLogEntry:
-    """ 
-        Attributes:
-            id (str):
-            customer_id (str): Target user (recipient) id
-            ecosystem_id (str): Ecosystem (tenant) id
-            channel (MessagingLogEntryChannel):
-            recipient (str): Resolved destination (email address or phone)
-            body (str):
-            status (MessagingLogEntryStatus): Send outcome
-            created_at (str):
-            deleted_at (Union[None, Unset, str]):
-            subject (Union[None, Unset, str]):
-            template_id (Union[None, Unset, str]):
-            provider_id (Union[None, Unset, str]): Provider message id (when sent)
-            error_message (Union[None, Unset, str]):
-            sent_by (Union[None, Unset, str]): Admin user id who issued the send
-     """
+    """
+    Attributes:
+        id (str):
+        customer_id (str): Target user (recipient) id
+        ecosystem_id (str): Ecosystem (tenant) id
+        channel (MessagingLogEntryChannel):
+        recipient (str): Resolved destination (email address or phone)
+        body (str):
+        status (MessagingLogEntryStatus): Send outcome
+        origin (MessagingLogEntryOrigin): Sending surface: 'ecosystem' = the per-ecosystem Messaging tool; 'platform' =
+            automated/system send (only the admin log shows these)
+        created_at (str):
+        deleted_at (Union[None, Unset, str]):
+        subject (Union[None, Unset, str]):
+        template_id (Union[None, Unset, str]):
+        provider_id (Union[None, Unset, str]): Provider message id (when sent)
+        error_message (Union[None, Unset, str]):
+        sent_by (Union[None, Unset, str]): Admin user id who issued the send
+    """
 
     id: str
     customer_id: str
@@ -48,18 +41,15 @@ class MessagingLogEntry:
     recipient: str
     body: str
     status: MessagingLogEntryStatus
+    origin: MessagingLogEntryOrigin
     created_at: str
-    deleted_at: Union[None, Unset, str] = UNSET
-    subject: Union[None, Unset, str] = UNSET
-    template_id: Union[None, Unset, str] = UNSET
-    provider_id: Union[None, Unset, str] = UNSET
-    error_message: Union[None, Unset, str] = UNSET
-    sent_by: Union[None, Unset, str] = UNSET
+    deleted_at: None | Unset | str = UNSET
+    subject: None | Unset | str = UNSET
+    template_id: None | Unset | str = UNSET
+    provider_id: None | Unset | str = UNSET
+    error_message: None | Unset | str = UNSET
+    sent_by: None | Unset | str = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         id = self.id
@@ -76,57 +66,61 @@ class MessagingLogEntry:
 
         status = self.status.value
 
+        origin = self.origin.value
+
         created_at = self.created_at
 
-        deleted_at: Union[None, Unset, str]
+        deleted_at: None | Unset | str
         if isinstance(self.deleted_at, Unset):
             deleted_at = UNSET
         else:
             deleted_at = self.deleted_at
 
-        subject: Union[None, Unset, str]
+        subject: None | Unset | str
         if isinstance(self.subject, Unset):
             subject = UNSET
         else:
             subject = self.subject
 
-        template_id: Union[None, Unset, str]
+        template_id: None | Unset | str
         if isinstance(self.template_id, Unset):
             template_id = UNSET
         else:
             template_id = self.template_id
 
-        provider_id: Union[None, Unset, str]
+        provider_id: None | Unset | str
         if isinstance(self.provider_id, Unset):
             provider_id = UNSET
         else:
             provider_id = self.provider_id
 
-        error_message: Union[None, Unset, str]
+        error_message: None | Unset | str
         if isinstance(self.error_message, Unset):
             error_message = UNSET
         else:
             error_message = self.error_message
 
-        sent_by: Union[None, Unset, str]
+        sent_by: None | Unset | str
         if isinstance(self.sent_by, Unset):
             sent_by = UNSET
         else:
             sent_by = self.sent_by
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "id": id,
-            "customerId": customer_id,
-            "ecosystemId": ecosystem_id,
-            "channel": channel,
-            "recipient": recipient,
-            "body": body,
-            "status": status,
-            "createdAt": created_at,
-        })
+        field_dict.update(
+            {
+                "id": id,
+                "customerId": customer_id,
+                "ecosystemId": ecosystem_id,
+                "channel": channel,
+                "recipient": recipient,
+                "body": body,
+                "status": status,
+                "origin": origin,
+                "createdAt": created_at,
+            }
+        )
         if deleted_at is not UNSET:
             field_dict["deletedAt"] = deleted_at
         if subject is not UNSET:
@@ -142,8 +136,6 @@ class MessagingLogEntry:
 
         return field_dict
 
-
-
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
@@ -155,79 +147,69 @@ class MessagingLogEntry:
 
         channel = MessagingLogEntryChannel(d.pop("channel"))
 
-
-
-
         recipient = d.pop("recipient")
 
         body = d.pop("body")
 
         status = MessagingLogEntryStatus(d.pop("status"))
 
-
-
+        origin = MessagingLogEntryOrigin(d.pop("origin"))
 
         created_at = d.pop("createdAt")
 
-        def _parse_deleted_at(data: object) -> Union[None, Unset, str]:
+        def _parse_deleted_at(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         deleted_at = _parse_deleted_at(d.pop("deletedAt", UNSET))
 
-
-        def _parse_subject(data: object) -> Union[None, Unset, str]:
+        def _parse_subject(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         subject = _parse_subject(d.pop("subject", UNSET))
 
-
-        def _parse_template_id(data: object) -> Union[None, Unset, str]:
+        def _parse_template_id(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         template_id = _parse_template_id(d.pop("templateId", UNSET))
 
-
-        def _parse_provider_id(data: object) -> Union[None, Unset, str]:
+        def _parse_provider_id(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         provider_id = _parse_provider_id(d.pop("providerId", UNSET))
 
-
-        def _parse_error_message(data: object) -> Union[None, Unset, str]:
+        def _parse_error_message(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         error_message = _parse_error_message(d.pop("errorMessage", UNSET))
 
-
-        def _parse_sent_by(data: object) -> Union[None, Unset, str]:
+        def _parse_sent_by(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         sent_by = _parse_sent_by(d.pop("sentBy", UNSET))
-
 
         messaging_log_entry = cls(
             id=id,
@@ -237,6 +219,7 @@ class MessagingLogEntry:
             recipient=recipient,
             body=body,
             status=status,
+            origin=origin,
             created_at=created_at,
             deleted_at=deleted_at,
             subject=subject,
@@ -245,7 +228,6 @@ class MessagingLogEntry:
             error_message=error_message,
             sent_by=sent_by,
         )
-
 
         messaging_log_entry.additional_properties = d
         return messaging_log_entry

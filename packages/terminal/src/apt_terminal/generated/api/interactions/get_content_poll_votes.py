@@ -1,34 +1,24 @@
 from http import HTTPStatus
-from typing import Any, Optional, Union, cast
+from typing import Any
 
 import httpx
 
-from ...client import AuthenticatedClient, Client
-from ...types import Response, UNSET
 from ... import errors
-
+from ...client import AuthenticatedClient, Client
 from ...models.error import Error
 from ...models.poll_tally import PollTally
-from typing import cast
-
+from ...types import UNSET, Response
 
 
 def _get_kwargs(
     *,
     poll_id: str,
-
 ) -> dict[str, Any]:
-    
-
-    
-
     params: dict[str, Any] = {}
 
     params["pollId"] = poll_id
 
-
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
-
 
     _kwargs: dict[str, Any] = {
         "method": "get",
@@ -36,30 +26,24 @@ def _get_kwargs(
         "params": params,
     }
 
-
     return _kwargs
 
 
-
-def _parse_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Optional[Union[Error, PollTally]]:
+def _parse_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Error | PollTally | None:
     if response.status_code == 200:
         response_200 = PollTally.from_dict(response.json())
-
-
 
         return response_200
 
     if response.status_code == 400:
         response_400 = Error.from_dict(response.json())
 
-
-
         return response_400
 
     if response.status_code == 401:
         response_401 = Error.from_dict(response.json())
-
-
 
         return response_401
 
@@ -69,7 +53,9 @@ def _parse_response(*, client: Union[AuthenticatedClient, Client], response: htt
         return None
 
 
-def _build_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Response[Union[Error, PollTally]]:
+def _build_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Response[Error | PollTally]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -82,9 +68,8 @@ def sync_detailed(
     *,
     client: AuthenticatedClient,
     poll_id: str,
-
-) -> Response[Union[Error, PollTally]]:
-    """ Tally a poll — per-option counts + the caller’s chosen options
+) -> Response[Error | PollTally]:
+    """Tally a poll — per-option counts + the caller’s chosen options
 
     Args:
         poll_id (str):
@@ -95,12 +80,10 @@ def sync_detailed(
 
     Returns:
         Response[Union[Error, PollTally]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         poll_id=poll_id,
-
     )
 
     response = client.get_httpx_client().request(
@@ -109,13 +92,13 @@ def sync_detailed(
 
     return _build_response(client=client, response=response)
 
+
 def sync(
     *,
     client: AuthenticatedClient,
     poll_id: str,
-
-) -> Optional[Union[Error, PollTally]]:
-    """ Tally a poll — per-option counts + the caller’s chosen options
+) -> Error | PollTally | None:
+    """Tally a poll — per-option counts + the caller’s chosen options
 
     Args:
         poll_id (str):
@@ -126,22 +109,20 @@ def sync(
 
     Returns:
         Union[Error, PollTally]
-     """
-
+    """
 
     return sync_detailed(
         client=client,
-poll_id=poll_id,
-
+        poll_id=poll_id,
     ).parsed
+
 
 async def asyncio_detailed(
     *,
     client: AuthenticatedClient,
     poll_id: str,
-
-) -> Response[Union[Error, PollTally]]:
-    """ Tally a poll — per-option counts + the caller’s chosen options
+) -> Response[Error | PollTally]:
+    """Tally a poll — per-option counts + the caller’s chosen options
 
     Args:
         poll_id (str):
@@ -152,27 +133,23 @@ async def asyncio_detailed(
 
     Returns:
         Response[Union[Error, PollTally]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         poll_id=poll_id,
-
     )
 
-    response = await client.get_async_httpx_client().request(
-        **kwargs
-    )
+    response = await client.get_async_httpx_client().request(**kwargs)
 
     return _build_response(client=client, response=response)
+
 
 async def asyncio(
     *,
     client: AuthenticatedClient,
     poll_id: str,
-
-) -> Optional[Union[Error, PollTally]]:
-    """ Tally a poll — per-option counts + the caller’s chosen options
+) -> Error | PollTally | None:
+    """Tally a poll — per-option counts + the caller’s chosen options
 
     Args:
         poll_id (str):
@@ -183,11 +160,11 @@ async def asyncio(
 
     Returns:
         Union[Error, PollTally]
-     """
+    """
 
-
-    return (await asyncio_detailed(
-        client=client,
-poll_id=poll_id,
-
-    )).parsed
+    return (
+        await asyncio_detailed(
+            client=client,
+            poll_id=poll_id,
+        )
+    ).parsed

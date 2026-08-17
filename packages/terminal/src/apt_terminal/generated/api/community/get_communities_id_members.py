@@ -1,57 +1,41 @@
 from http import HTTPStatus
-from typing import Any, Optional, Union, cast
+from typing import Any
 
 import httpx
 
-from ...client import AuthenticatedClient, Client
-from ...types import Response, UNSET
 from ... import errors
-
+from ...client import AuthenticatedClient, Client
 from ...models.error import Error
 from ...models.get_communities_id_members_response_200 import GetCommunitiesIdMembersResponse200
-from typing import cast
-
+from ...types import Response
 
 
 def _get_kwargs(
     id: str,
-
 ) -> dict[str, Any]:
-    
-
-    
-
-    
-
     _kwargs: dict[str, Any] = {
         "method": "get",
-        "url": "/communities/{id}/members".format(id=id,),
+        "url": f"/communities/{id}/members",
     }
-
 
     return _kwargs
 
 
-
-def _parse_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Optional[Union[Error, GetCommunitiesIdMembersResponse200]]:
+def _parse_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Error | GetCommunitiesIdMembersResponse200 | None:
     if response.status_code == 200:
         response_200 = GetCommunitiesIdMembersResponse200.from_dict(response.json())
-
-
 
         return response_200
 
     if response.status_code == 401:
         response_401 = Error.from_dict(response.json())
 
-
-
         return response_401
 
     if response.status_code == 403:
         response_403 = Error.from_dict(response.json())
-
-
 
         return response_403
 
@@ -61,7 +45,9 @@ def _parse_response(*, client: Union[AuthenticatedClient, Client], response: htt
         return None
 
 
-def _build_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Response[Union[Error, GetCommunitiesIdMembersResponse200]]:
+def _build_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Response[Error | GetCommunitiesIdMembersResponse200]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -74,9 +60,8 @@ def sync_detailed(
     id: str,
     *,
     client: AuthenticatedClient,
-
-) -> Response[Union[Error, GetCommunitiesIdMembersResponse200]]:
-    """ List the membership roster (community admin only)
+) -> Response[Error | GetCommunitiesIdMembersResponse200]:
+    """List the membership roster (community admin only)
 
     Args:
         id (str):
@@ -87,12 +72,10 @@ def sync_detailed(
 
     Returns:
         Response[Union[Error, GetCommunitiesIdMembersResponse200]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         id=id,
-
     )
 
     response = client.get_httpx_client().request(
@@ -101,13 +84,13 @@ def sync_detailed(
 
     return _build_response(client=client, response=response)
 
+
 def sync(
     id: str,
     *,
     client: AuthenticatedClient,
-
-) -> Optional[Union[Error, GetCommunitiesIdMembersResponse200]]:
-    """ List the membership roster (community admin only)
+) -> Error | GetCommunitiesIdMembersResponse200 | None:
+    """List the membership roster (community admin only)
 
     Args:
         id (str):
@@ -118,22 +101,20 @@ def sync(
 
     Returns:
         Union[Error, GetCommunitiesIdMembersResponse200]
-     """
-
+    """
 
     return sync_detailed(
         id=id,
-client=client,
-
+        client=client,
     ).parsed
+
 
 async def asyncio_detailed(
     id: str,
     *,
     client: AuthenticatedClient,
-
-) -> Response[Union[Error, GetCommunitiesIdMembersResponse200]]:
-    """ List the membership roster (community admin only)
+) -> Response[Error | GetCommunitiesIdMembersResponse200]:
+    """List the membership roster (community admin only)
 
     Args:
         id (str):
@@ -144,27 +125,23 @@ async def asyncio_detailed(
 
     Returns:
         Response[Union[Error, GetCommunitiesIdMembersResponse200]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         id=id,
-
     )
 
-    response = await client.get_async_httpx_client().request(
-        **kwargs
-    )
+    response = await client.get_async_httpx_client().request(**kwargs)
 
     return _build_response(client=client, response=response)
+
 
 async def asyncio(
     id: str,
     *,
     client: AuthenticatedClient,
-
-) -> Optional[Union[Error, GetCommunitiesIdMembersResponse200]]:
-    """ List the membership roster (community admin only)
+) -> Error | GetCommunitiesIdMembersResponse200 | None:
+    """List the membership roster (community admin only)
 
     Args:
         id (str):
@@ -175,11 +152,11 @@ async def asyncio(
 
     Returns:
         Union[Error, GetCommunitiesIdMembersResponse200]
-     """
+    """
 
-
-    return (await asyncio_detailed(
-        id=id,
-client=client,
-
-    )).parsed
+    return (
+        await asyncio_detailed(
+            id=id,
+            client=client,
+        )
+    ).parsed

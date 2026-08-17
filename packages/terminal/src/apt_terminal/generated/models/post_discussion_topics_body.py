@@ -1,46 +1,33 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 from ..types import UNSET, Unset
 
-from ..types import UNSET, Unset
-from typing import Union
-
-
-
-
-
-
 T = TypeVar("T", bound="PostDiscussionTopicsBody")
-
 
 
 @_attrs_define
 class PostDiscussionTopicsBody:
-    """ 
-        Attributes:
-            title (str):
-            body (str): Opening-post markdown; stored as a content.markdown body document.
-            community_id (str): Community instance to create under; the caller must be its admin (else 403).
-            category_id (Union[Unset, str]): Optional category to file the topic under; must belong to the same community
-                (else 400).
-            is_public (Union[Unset, bool]): Whether anonymous callers can read the topic via /public/discussion (default
-                true).
-     """
+    """
+    Attributes:
+        title (str):
+        body (str): Opening-post markdown; stored as a content.markdown body document.
+        community_id (str): Community instance to create under; the caller must be its admin (else 403).
+        category_id (Union[Unset, str]): Optional category to file the topic under; must belong to the same community
+            (else 400).
+        is_public (Union[Unset, bool]): Whether anonymous callers can read the topic via /public/discussion (default
+            true).
+    """
 
     title: str
     body: str
     community_id: str
-    category_id: Union[Unset, str] = UNSET
-    is_public: Union[Unset, bool] = UNSET
+    category_id: Unset | str = UNSET
+    is_public: Unset | bool = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         title = self.title
@@ -53,22 +40,21 @@ class PostDiscussionTopicsBody:
 
         is_public = self.is_public
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "title": title,
-            "body": body,
-            "communityId": community_id,
-        })
+        field_dict.update(
+            {
+                "title": title,
+                "body": body,
+                "communityId": community_id,
+            }
+        )
         if category_id is not UNSET:
             field_dict["categoryId"] = category_id
         if is_public is not UNSET:
             field_dict["isPublic"] = is_public
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -90,7 +76,6 @@ class PostDiscussionTopicsBody:
             category_id=category_id,
             is_public=is_public,
         )
-
 
         post_discussion_topics_body.additional_properties = d
         return post_discussion_topics_body

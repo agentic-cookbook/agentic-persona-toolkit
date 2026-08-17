@@ -1,76 +1,63 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import TYPE_CHECKING, Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
-
-from typing import cast
-
 if TYPE_CHECKING:
-  from ..models.get_ecosystem_applications_app_id_schema_grants_response_200_grants_item import GetEcosystemApplicationsAppIdSchemaGrantsResponse200GrantsItem
-
-
-
+    from ..models.get_ecosystem_applications_app_id_schema_grants_response_200_grants_item import (
+        GetEcosystemApplicationsAppIdSchemaGrantsResponse200GrantsItem,
+    )
 
 
 T = TypeVar("T", bound="GetEcosystemApplicationsAppIdSchemaGrantsResponse200")
 
 
-
 @_attrs_define
 class GetEcosystemApplicationsAppIdSchemaGrantsResponse200:
-    """ 
-        Attributes:
-            grants (list['GetEcosystemApplicationsAppIdSchemaGrantsResponse200GrantsItem']):
-     """
+    """
+    Attributes:
+        grants (list['GetEcosystemApplicationsAppIdSchemaGrantsResponse200GrantsItem']):
+    """
 
-    grants: list['GetEcosystemApplicationsAppIdSchemaGrantsResponse200GrantsItem']
+    grants: list["GetEcosystemApplicationsAppIdSchemaGrantsResponse200GrantsItem"]
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
-
-
-
-
     def to_dict(self) -> dict[str, Any]:
-        from ..models.get_ecosystem_applications_app_id_schema_grants_response_200_grants_item import GetEcosystemApplicationsAppIdSchemaGrantsResponse200GrantsItem
         grants = []
         for grants_item_data in self.grants:
             grants_item = grants_item_data.to_dict()
             grants.append(grants_item)
 
-
-
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "grants": grants,
-        })
+        field_dict.update(
+            {
+                "grants": grants,
+            }
+        )
 
         return field_dict
 
-
-
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.get_ecosystem_applications_app_id_schema_grants_response_200_grants_item import GetEcosystemApplicationsAppIdSchemaGrantsResponse200GrantsItem
+        from ..models.get_ecosystem_applications_app_id_schema_grants_response_200_grants_item import (
+            GetEcosystemApplicationsAppIdSchemaGrantsResponse200GrantsItem,
+        )
+
         d = dict(src_dict)
         grants = []
         _grants = d.pop("grants")
-        for grants_item_data in (_grants):
-            grants_item = GetEcosystemApplicationsAppIdSchemaGrantsResponse200GrantsItem.from_dict(grants_item_data)
-
-
+        for grants_item_data in _grants:
+            grants_item = GetEcosystemApplicationsAppIdSchemaGrantsResponse200GrantsItem.from_dict(
+                grants_item_data
+            )
 
             grants.append(grants_item)
-
 
         get_ecosystem_applications_app_id_schema_grants_response_200 = cls(
             grants=grants,
         )
-
 
         get_ecosystem_applications_app_id_schema_grants_response_200.additional_properties = d
         return get_ecosystem_applications_app_id_schema_grants_response_200

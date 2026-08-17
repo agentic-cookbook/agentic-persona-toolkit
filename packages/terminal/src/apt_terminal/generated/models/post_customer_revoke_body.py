@@ -1,48 +1,34 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
-
-
-
-
-
-
-
 T = TypeVar("T", bound="PostCustomerRevokeBody")
-
 
 
 @_attrs_define
 class PostCustomerRevokeBody:
-    """ 
-        Attributes:
-            refresh_token (str):
-     """
+    """
+    Attributes:
+        refresh_token (str):
+    """
 
     refresh_token: str
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
-
-
-
-
     def to_dict(self) -> dict[str, Any]:
         refresh_token = self.refresh_token
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "refreshToken": refresh_token,
-        })
+        field_dict.update(
+            {
+                "refreshToken": refresh_token,
+            }
+        )
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -52,7 +38,6 @@ class PostCustomerRevokeBody:
         post_customer_revoke_body = cls(
             refresh_token=refresh_token,
         )
-
 
         post_customer_revoke_body.additional_properties = d
         return post_customer_revoke_body

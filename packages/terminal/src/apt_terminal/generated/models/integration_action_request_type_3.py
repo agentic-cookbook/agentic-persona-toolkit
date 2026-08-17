@@ -1,26 +1,17 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 from ..types import UNSET, Unset
 
-from ..types import UNSET, Unset
-from typing import Union
-
-
-
-
-
-
 T = TypeVar("T", bound="IntegrationActionRequestType3")
-
 
 
 @_attrs_define
 class IntegrationActionRequestType3:
-    """ actionType=submit — a Reddit-style subreddit submission; exactly one of url (link post) or non-empty text (self
+    """actionType=submit — a Reddit-style subreddit submission; exactly one of url (link post) or non-empty text (self
     post) is required (an empty-string text counts as absent)
 
         Attributes:
@@ -28,17 +19,13 @@ class IntegrationActionRequestType3:
             title (str):
             url (Union[Unset, str]): Link post target (mutually exclusive with text)
             text (Union[Unset, str]): Self-post body (mutually exclusive with url)
-     """
+    """
 
     subreddit: str
     title: str
-    url: Union[Unset, str] = UNSET
-    text: Union[Unset, str] = UNSET
+    url: Unset | str = UNSET
+    text: Unset | str = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         subreddit = self.subreddit
@@ -49,21 +36,20 @@ class IntegrationActionRequestType3:
 
         text = self.text
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "subreddit": subreddit,
-            "title": title,
-        })
+        field_dict.update(
+            {
+                "subreddit": subreddit,
+                "title": title,
+            }
+        )
         if url is not UNSET:
             field_dict["url"] = url
         if text is not UNSET:
             field_dict["text"] = text
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -82,7 +68,6 @@ class IntegrationActionRequestType3:
             url=url,
             text=text,
         )
-
 
         integration_action_request_type_3.additional_properties = d
         return integration_action_request_type_3

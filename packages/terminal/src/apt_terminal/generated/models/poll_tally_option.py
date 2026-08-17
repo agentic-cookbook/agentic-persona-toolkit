@@ -1,40 +1,27 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
-
-
-
-
-
-
-
 T = TypeVar("T", bound="PollTallyOption")
-
 
 
 @_attrs_define
 class PollTallyOption:
-    """ 
-        Attributes:
-            option_id (str):
-            text (str):
-            sort_order (int):
-            votes (int):
-     """
+    """
+    Attributes:
+        option_id (str):
+        text (str):
+        sort_order (int):
+        votes (int):
+    """
 
     option_id: str
     text: str
     sort_order: int
     votes: int
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         option_id = self.option_id
@@ -45,19 +32,18 @@ class PollTallyOption:
 
         votes = self.votes
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "optionId": option_id,
-            "text": text,
-            "sortOrder": sort_order,
-            "votes": votes,
-        })
+        field_dict.update(
+            {
+                "optionId": option_id,
+                "text": text,
+                "sortOrder": sort_order,
+                "votes": votes,
+            }
+        )
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -76,7 +62,6 @@ class PollTallyOption:
             sort_order=sort_order,
             votes=votes,
         )
-
 
         poll_tally_option.additional_properties = d
         return poll_tally_option

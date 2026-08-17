@@ -1,46 +1,33 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 from ..types import UNSET, Unset
 
-from ..types import UNSET, Unset
-from typing import Union
-
-
-
-
-
-
 T = TypeVar("T", bound="PostOauthSigninLoginBody")
-
 
 
 @_attrs_define
 class PostOauthSigninLoginBody:
-    """ 
-        Attributes:
-            client_id (str):
-            return_ (str):
-            password (str):
-            email (Union[Unset, str]):
-            slug (Union[Unset, str]):
-            identifier (Union[Unset, str]):
-     """
+    """
+    Attributes:
+        client_id (str):
+        return_ (str):
+        password (str):
+        email (Union[Unset, str]):
+        slug (Union[Unset, str]):
+        identifier (Union[Unset, str]):
+    """
 
     client_id: str
     return_: str
     password: str
-    email: Union[Unset, str] = UNSET
-    slug: Union[Unset, str] = UNSET
-    identifier: Union[Unset, str] = UNSET
+    email: Unset | str = UNSET
+    slug: Unset | str = UNSET
+    identifier: Unset | str = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         client_id = self.client_id
@@ -55,14 +42,15 @@ class PostOauthSigninLoginBody:
 
         identifier = self.identifier
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "clientId": client_id,
-            "return": return_,
-            "password": password,
-        })
+        field_dict.update(
+            {
+                "clientId": client_id,
+                "return": return_,
+                "password": password,
+            }
+        )
         if email is not UNSET:
             field_dict["email"] = email
         if slug is not UNSET:
@@ -71,8 +59,6 @@ class PostOauthSigninLoginBody:
             field_dict["identifier"] = identifier
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -97,7 +83,6 @@ class PostOauthSigninLoginBody:
             slug=slug,
             identifier=identifier,
         )
-
 
         post_oauth_signin_login_body.additional_properties = d
         return post_oauth_signin_login_body

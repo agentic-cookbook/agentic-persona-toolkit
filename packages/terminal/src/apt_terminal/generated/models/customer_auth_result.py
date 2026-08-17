@@ -1,38 +1,25 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
-
-
-
-
-
-
-
 T = TypeVar("T", bound="CustomerAuthResult")
-
 
 
 @_attrs_define
 class CustomerAuthResult:
-    """ 
-        Attributes:
-            token (str): End-customer access token (typ='customer' JWT, short-lived)
-            refresh_token (str): Opaque customer-session refresh token (single-use; rotated on refresh)
-            customer_id (str): The end-customer id
-     """
+    """
+    Attributes:
+        token (str): End-customer access token (typ='customer' JWT, short-lived)
+        refresh_token (str): Opaque customer-session refresh token (single-use; rotated on refresh)
+        customer_id (str): The end-customer id
+    """
 
     token: str
     refresh_token: str
     customer_id: str
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         token = self.token
@@ -41,18 +28,17 @@ class CustomerAuthResult:
 
         customer_id = self.customer_id
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "token": token,
-            "refreshToken": refresh_token,
-            "customerId": customer_id,
-        })
+        field_dict.update(
+            {
+                "token": token,
+                "refreshToken": refresh_token,
+                "customerId": customer_id,
+            }
+        )
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -68,7 +54,6 @@ class CustomerAuthResult:
             refresh_token=refresh_token,
             customer_id=customer_id,
         )
-
 
         customer_auth_result.additional_properties = d
         return customer_auth_result

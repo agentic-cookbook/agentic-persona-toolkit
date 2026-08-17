@@ -1,0 +1,252 @@
+from collections.abc import Mapping
+from typing import Any, TypeVar, cast
+
+from attrs import define as _attrs_define
+from attrs import field as _attrs_field
+
+from ..models.campaign_status import CampaignStatus
+from ..types import UNSET, Unset
+
+T = TypeVar("T", bound="Campaign")
+
+
+@_attrs_define
+class Campaign:
+    """
+    Attributes:
+        id (str):
+        ecosystem_id (str):
+        list_id (str):
+        name (str):
+        subject (str):
+        html_body (str):
+        text_body (str):
+        from_name (Union[None, str]):
+        status (CampaignStatus):
+        recipient_count (int):
+        sent_count (int):
+        failed_count (int):
+        created_at (str):
+        updated_at (str):
+        created_by (Union[None, Unset, str]):
+        scheduled_at (Union[None, Unset, str]):
+        started_at (Union[None, Unset, str]):
+        completed_at (Union[None, Unset, str]):
+    """
+
+    id: str
+    ecosystem_id: str
+    list_id: str
+    name: str
+    subject: str
+    html_body: str
+    text_body: str
+    from_name: None | str
+    status: CampaignStatus
+    recipient_count: int
+    sent_count: int
+    failed_count: int
+    created_at: str
+    updated_at: str
+    created_by: None | Unset | str = UNSET
+    scheduled_at: None | Unset | str = UNSET
+    started_at: None | Unset | str = UNSET
+    completed_at: None | Unset | str = UNSET
+    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
+
+    def to_dict(self) -> dict[str, Any]:
+        id = self.id
+
+        ecosystem_id = self.ecosystem_id
+
+        list_id = self.list_id
+
+        name = self.name
+
+        subject = self.subject
+
+        html_body = self.html_body
+
+        text_body = self.text_body
+
+        from_name: None | str
+        from_name = self.from_name
+
+        status = self.status.value
+
+        recipient_count = self.recipient_count
+
+        sent_count = self.sent_count
+
+        failed_count = self.failed_count
+
+        created_at = self.created_at
+
+        updated_at = self.updated_at
+
+        created_by: None | Unset | str
+        if isinstance(self.created_by, Unset):
+            created_by = UNSET
+        else:
+            created_by = self.created_by
+
+        scheduled_at: None | Unset | str
+        if isinstance(self.scheduled_at, Unset):
+            scheduled_at = UNSET
+        else:
+            scheduled_at = self.scheduled_at
+
+        started_at: None | Unset | str
+        if isinstance(self.started_at, Unset):
+            started_at = UNSET
+        else:
+            started_at = self.started_at
+
+        completed_at: None | Unset | str
+        if isinstance(self.completed_at, Unset):
+            completed_at = UNSET
+        else:
+            completed_at = self.completed_at
+
+        field_dict: dict[str, Any] = {}
+        field_dict.update(self.additional_properties)
+        field_dict.update(
+            {
+                "id": id,
+                "ecosystemId": ecosystem_id,
+                "listId": list_id,
+                "name": name,
+                "subject": subject,
+                "htmlBody": html_body,
+                "textBody": text_body,
+                "fromName": from_name,
+                "status": status,
+                "recipientCount": recipient_count,
+                "sentCount": sent_count,
+                "failedCount": failed_count,
+                "createdAt": created_at,
+                "updatedAt": updated_at,
+            }
+        )
+        if created_by is not UNSET:
+            field_dict["createdBy"] = created_by
+        if scheduled_at is not UNSET:
+            field_dict["scheduledAt"] = scheduled_at
+        if started_at is not UNSET:
+            field_dict["startedAt"] = started_at
+        if completed_at is not UNSET:
+            field_dict["completedAt"] = completed_at
+
+        return field_dict
+
+    @classmethod
+    def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
+        d = dict(src_dict)
+        id = d.pop("id")
+
+        ecosystem_id = d.pop("ecosystemId")
+
+        list_id = d.pop("listId")
+
+        name = d.pop("name")
+
+        subject = d.pop("subject")
+
+        html_body = d.pop("htmlBody")
+
+        text_body = d.pop("textBody")
+
+        def _parse_from_name(data: object) -> None | str:
+            if data is None:
+                return data
+            return cast(None | str, data)
+
+        from_name = _parse_from_name(d.pop("fromName"))
+
+        status = CampaignStatus(d.pop("status"))
+
+        recipient_count = d.pop("recipientCount")
+
+        sent_count = d.pop("sentCount")
+
+        failed_count = d.pop("failedCount")
+
+        created_at = d.pop("createdAt")
+
+        updated_at = d.pop("updatedAt")
+
+        def _parse_created_by(data: object) -> None | Unset | str:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(None | Unset | str, data)
+
+        created_by = _parse_created_by(d.pop("createdBy", UNSET))
+
+        def _parse_scheduled_at(data: object) -> None | Unset | str:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(None | Unset | str, data)
+
+        scheduled_at = _parse_scheduled_at(d.pop("scheduledAt", UNSET))
+
+        def _parse_started_at(data: object) -> None | Unset | str:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(None | Unset | str, data)
+
+        started_at = _parse_started_at(d.pop("startedAt", UNSET))
+
+        def _parse_completed_at(data: object) -> None | Unset | str:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(None | Unset | str, data)
+
+        completed_at = _parse_completed_at(d.pop("completedAt", UNSET))
+
+        campaign = cls(
+            id=id,
+            ecosystem_id=ecosystem_id,
+            list_id=list_id,
+            name=name,
+            subject=subject,
+            html_body=html_body,
+            text_body=text_body,
+            from_name=from_name,
+            status=status,
+            recipient_count=recipient_count,
+            sent_count=sent_count,
+            failed_count=failed_count,
+            created_at=created_at,
+            updated_at=updated_at,
+            created_by=created_by,
+            scheduled_at=scheduled_at,
+            started_at=started_at,
+            completed_at=completed_at,
+        )
+
+        campaign.additional_properties = d
+        return campaign
+
+    @property
+    def additional_keys(self) -> list[str]:
+        return list(self.additional_properties.keys())
+
+    def __getitem__(self, key: str) -> Any:
+        return self.additional_properties[key]
+
+    def __setitem__(self, key: str, value: Any) -> None:
+        self.additional_properties[key] = value
+
+    def __delitem__(self, key: str) -> None:
+        del self.additional_properties[key]
+
+    def __contains__(self, key: str) -> bool:
+        return key in self.additional_properties

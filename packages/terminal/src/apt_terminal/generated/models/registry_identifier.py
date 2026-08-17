@@ -1,41 +1,27 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
-
-from typing import cast, Union
-
-
-
-
-
-
 T = TypeVar("T", bound="RegistryIdentifier")
-
 
 
 @_attrs_define
 class RegistryIdentifier:
-    """ 
-        Attributes:
-            rdid (str): Reverse-domain identifier (e.g. com.acme.app)
-            entity_type (str): e.g. 'namespace', 'ecosystem', 'organization'
-            entity_id (str): The UUID the rdid resolves to
-            created_by (Union[None, str]): Minter; null for system mappings
-     """
+    """
+    Attributes:
+        rdid (str): Reverse-domain identifier (e.g. com.acme.app)
+        entity_type (str): e.g. 'namespace', 'ecosystem', 'organization'
+        entity_id (str): The UUID the rdid resolves to
+        created_by (Union[None, str]): Minter; null for system mappings
+    """
 
     rdid: str
     entity_type: str
     entity_id: str
-    created_by: Union[None, str]
+    created_by: None | str
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         rdid = self.rdid
@@ -44,22 +30,21 @@ class RegistryIdentifier:
 
         entity_id = self.entity_id
 
-        created_by: Union[None, str]
+        created_by: None | str
         created_by = self.created_by
-
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "rdid": rdid,
-            "entityType": entity_type,
-            "entityId": entity_id,
-            "createdBy": created_by,
-        })
+        field_dict.update(
+            {
+                "rdid": rdid,
+                "entityType": entity_type,
+                "entityId": entity_id,
+                "createdBy": created_by,
+            }
+        )
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -70,13 +55,12 @@ class RegistryIdentifier:
 
         entity_id = d.pop("entityId")
 
-        def _parse_created_by(data: object) -> Union[None, str]:
+        def _parse_created_by(data: object) -> None | str:
             if data is None:
                 return data
-            return cast(Union[None, str], data)
+            return cast(None | str, data)
 
         created_by = _parse_created_by(d.pop("createdBy"))
-
 
         registry_identifier = cls(
             rdid=rdid,
@@ -84,7 +68,6 @@ class RegistryIdentifier:
             entity_id=entity_id,
             created_by=created_by,
         )
-
 
         registry_identifier.additional_properties = d
         return registry_identifier

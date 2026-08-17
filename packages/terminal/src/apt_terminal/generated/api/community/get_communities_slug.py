@@ -1,57 +1,41 @@
 from http import HTTPStatus
-from typing import Any, Optional, Union, cast
+from typing import Any
 
 import httpx
 
-from ...client import AuthenticatedClient, Client
-from ...types import Response, UNSET
 from ... import errors
-
+from ...client import AuthenticatedClient, Client
 from ...models.community import Community
 from ...models.error import Error
-from typing import cast
-
+from ...types import Response
 
 
 def _get_kwargs(
     slug: str,
-
 ) -> dict[str, Any]:
-    
-
-    
-
-    
-
     _kwargs: dict[str, Any] = {
         "method": "get",
-        "url": "/communities/{slug}".format(slug=slug,),
+        "url": f"/communities/{slug}",
     }
-
 
     return _kwargs
 
 
-
-def _parse_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Optional[Union[Community, Error]]:
+def _parse_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Community | Error | None:
     if response.status_code == 200:
         response_200 = Community.from_dict(response.json())
-
-
 
         return response_200
 
     if response.status_code == 401:
         response_401 = Error.from_dict(response.json())
 
-
-
         return response_401
 
     if response.status_code == 404:
         response_404 = Error.from_dict(response.json())
-
-
 
         return response_404
 
@@ -61,7 +45,9 @@ def _parse_response(*, client: Union[AuthenticatedClient, Client], response: htt
         return None
 
 
-def _build_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Response[Union[Community, Error]]:
+def _build_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Response[Community | Error]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -74,9 +60,8 @@ def sync_detailed(
     slug: str,
     *,
     client: AuthenticatedClient,
-
-) -> Response[Union[Community, Error]]:
-    """ Get one community instance (+ its settings) by slug
+) -> Response[Community | Error]:
+    """Get one community instance (+ its settings) by slug
 
     Args:
         slug (str):
@@ -87,12 +72,10 @@ def sync_detailed(
 
     Returns:
         Response[Union[Community, Error]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         slug=slug,
-
     )
 
     response = client.get_httpx_client().request(
@@ -101,13 +84,13 @@ def sync_detailed(
 
     return _build_response(client=client, response=response)
 
+
 def sync(
     slug: str,
     *,
     client: AuthenticatedClient,
-
-) -> Optional[Union[Community, Error]]:
-    """ Get one community instance (+ its settings) by slug
+) -> Community | Error | None:
+    """Get one community instance (+ its settings) by slug
 
     Args:
         slug (str):
@@ -118,22 +101,20 @@ def sync(
 
     Returns:
         Union[Community, Error]
-     """
-
+    """
 
     return sync_detailed(
         slug=slug,
-client=client,
-
+        client=client,
     ).parsed
+
 
 async def asyncio_detailed(
     slug: str,
     *,
     client: AuthenticatedClient,
-
-) -> Response[Union[Community, Error]]:
-    """ Get one community instance (+ its settings) by slug
+) -> Response[Community | Error]:
+    """Get one community instance (+ its settings) by slug
 
     Args:
         slug (str):
@@ -144,27 +125,23 @@ async def asyncio_detailed(
 
     Returns:
         Response[Union[Community, Error]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         slug=slug,
-
     )
 
-    response = await client.get_async_httpx_client().request(
-        **kwargs
-    )
+    response = await client.get_async_httpx_client().request(**kwargs)
 
     return _build_response(client=client, response=response)
+
 
 async def asyncio(
     slug: str,
     *,
     client: AuthenticatedClient,
-
-) -> Optional[Union[Community, Error]]:
-    """ Get one community instance (+ its settings) by slug
+) -> Community | Error | None:
+    """Get one community instance (+ its settings) by slug
 
     Args:
         slug (str):
@@ -175,11 +152,11 @@ async def asyncio(
 
     Returns:
         Union[Community, Error]
-     """
+    """
 
-
-    return (await asyncio_detailed(
-        slug=slug,
-client=client,
-
-    )).parsed
+    return (
+        await asyncio_detailed(
+            slug=slug,
+            client=client,
+        )
+    ).parsed

@@ -1,49 +1,44 @@
 from http import HTTPStatus
-from typing import Any, Optional, Union, cast
+from typing import Any
 
 import httpx
 
-from ...client import AuthenticatedClient, Client
-from ...types import Response, UNSET
 from ... import errors
-
+from ...client import AuthenticatedClient, Client
 from ...models.error import Error
-from ...models.string_list import StringList
-from typing import cast
-
+from ...models.markdown_category_tree import MarkdownCategoryTree
+from ...types import UNSET, Response, Unset
 
 
 def _get_kwargs(
-    
+    *,
+    workspace: Unset | str = UNSET,
 ) -> dict[str, Any]:
-    
+    params: dict[str, Any] = {}
 
-    
+    params["workspace"] = workspace
 
-    
+    params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 
     _kwargs: dict[str, Any] = {
         "method": "get",
         "url": "/content/markdown/categories",
+        "params": params,
     }
-
 
     return _kwargs
 
 
-
-def _parse_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Optional[Union[Error, StringList]]:
+def _parse_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Error | MarkdownCategoryTree | None:
     if response.status_code == 200:
-        response_200 = StringList.from_dict(response.json())
-
-
+        response_200 = MarkdownCategoryTree.from_dict(response.json())
 
         return response_200
 
     if response.status_code == 401:
         response_401 = Error.from_dict(response.json())
-
-
 
         return response_401
 
@@ -53,7 +48,9 @@ def _parse_response(*, client: Union[AuthenticatedClient, Client], response: htt
         return None
 
 
-def _build_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Response[Union[Error, StringList]]:
+def _build_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Response[Error | MarkdownCategoryTree]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -65,24 +62,28 @@ def _build_response(*, client: Union[AuthenticatedClient, Client], response: htt
 def sync_detailed(
     *,
     client: AuthenticatedClient,
+    workspace: Unset | str = UNSET,
+) -> Response[Error | MarkdownCategoryTree]:
+    """List the caller's existing categories (names + the category TREE)
 
-) -> Response[Union[Error, StringList]]:
-    """ List the caller's existing category names (autocomplete source)
+     The account's full set of categories (content.categories), scoped to the workspace owner and
+    ecosystem. `items` is the distinct, alphabetical NAME list — the autocomplete/browse source for the
+    research classification UI. `nodes` is the same set with its structure kept (id + parentId), which
+    is what a hierarchical browser folds into a tree.
 
-     The account's full set of category names (content.categories), scoped to the caller and ecosystem,
-    distinct and alphabetical — the autocomplete/browse source for the research classification UI.
+    Args:
+        workspace (Union[Unset, str]):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Union[Error, StringList]]
-     """
-
+        Response[Union[Error, MarkdownCategoryTree]]
+    """
 
     kwargs = _get_kwargs(
-        
+        workspace=workspace,
     )
 
     response = client.get_httpx_client().request(
@@ -91,79 +92,94 @@ def sync_detailed(
 
     return _build_response(client=client, response=response)
 
+
 def sync(
     *,
     client: AuthenticatedClient,
+    workspace: Unset | str = UNSET,
+) -> Error | MarkdownCategoryTree | None:
+    """List the caller's existing categories (names + the category TREE)
 
-) -> Optional[Union[Error, StringList]]:
-    """ List the caller's existing category names (autocomplete source)
+     The account's full set of categories (content.categories), scoped to the workspace owner and
+    ecosystem. `items` is the distinct, alphabetical NAME list — the autocomplete/browse source for the
+    research classification UI. `nodes` is the same set with its structure kept (id + parentId), which
+    is what a hierarchical browser folds into a tree.
 
-     The account's full set of category names (content.categories), scoped to the caller and ecosystem,
-    distinct and alphabetical — the autocomplete/browse source for the research classification UI.
+    Args:
+        workspace (Union[Unset, str]):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Union[Error, StringList]
-     """
-
+        Union[Error, MarkdownCategoryTree]
+    """
 
     return sync_detailed(
         client=client,
-
+        workspace=workspace,
     ).parsed
+
 
 async def asyncio_detailed(
     *,
     client: AuthenticatedClient,
+    workspace: Unset | str = UNSET,
+) -> Response[Error | MarkdownCategoryTree]:
+    """List the caller's existing categories (names + the category TREE)
 
-) -> Response[Union[Error, StringList]]:
-    """ List the caller's existing category names (autocomplete source)
+     The account's full set of categories (content.categories), scoped to the workspace owner and
+    ecosystem. `items` is the distinct, alphabetical NAME list — the autocomplete/browse source for the
+    research classification UI. `nodes` is the same set with its structure kept (id + parentId), which
+    is what a hierarchical browser folds into a tree.
 
-     The account's full set of category names (content.categories), scoped to the caller and ecosystem,
-    distinct and alphabetical — the autocomplete/browse source for the research classification UI.
+    Args:
+        workspace (Union[Unset, str]):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Union[Error, StringList]]
-     """
-
+        Response[Union[Error, MarkdownCategoryTree]]
+    """
 
     kwargs = _get_kwargs(
-        
+        workspace=workspace,
     )
 
-    response = await client.get_async_httpx_client().request(
-        **kwargs
-    )
+    response = await client.get_async_httpx_client().request(**kwargs)
 
     return _build_response(client=client, response=response)
+
 
 async def asyncio(
     *,
     client: AuthenticatedClient,
+    workspace: Unset | str = UNSET,
+) -> Error | MarkdownCategoryTree | None:
+    """List the caller's existing categories (names + the category TREE)
 
-) -> Optional[Union[Error, StringList]]:
-    """ List the caller's existing category names (autocomplete source)
+     The account's full set of categories (content.categories), scoped to the workspace owner and
+    ecosystem. `items` is the distinct, alphabetical NAME list — the autocomplete/browse source for the
+    research classification UI. `nodes` is the same set with its structure kept (id + parentId), which
+    is what a hierarchical browser folds into a tree.
 
-     The account's full set of category names (content.categories), scoped to the caller and ecosystem,
-    distinct and alphabetical — the autocomplete/browse source for the research classification UI.
+    Args:
+        workspace (Union[Unset, str]):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Union[Error, StringList]
-     """
+        Union[Error, MarkdownCategoryTree]
+    """
 
-
-    return (await asyncio_detailed(
-        client=client,
-
-    )).parsed
+    return (
+        await asyncio_detailed(
+            client=client,
+            workspace=workspace,
+        )
+    ).parsed

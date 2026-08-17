@@ -1,79 +1,65 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import TYPE_CHECKING, Any, TypeVar, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 from ..types import UNSET, Unset
 
-from ..types import UNSET, Unset
-from typing import cast
-from typing import cast, Union
-from typing import Union
-
 if TYPE_CHECKING:
-  from ..models.post_themes_body_data import PostThemesBodyData
-
-
-
+    from ..models.post_themes_body_data import PostThemesBodyData
 
 
 T = TypeVar("T", bound="PostThemesBody")
 
 
-
 @_attrs_define
 class PostThemesBody:
-    """ 
-        Attributes:
-            key (str): DNS-ish slug, unique among live themes
-            label (str):
-            data (PostThemesBodyData):
-            based_on (Union[None, Unset, str]): the seed theme key this derives from
-     """
+    """
+    Attributes:
+        key (str): DNS-ish slug, unique among live themes
+        label (str):
+        data (PostThemesBodyData):
+        based_on (Union[None, Unset, str]): the seed theme key this derives from
+    """
 
     key: str
     label: str
-    data: 'PostThemesBodyData'
-    based_on: Union[None, Unset, str] = UNSET
+    data: "PostThemesBodyData"
+    based_on: None | Unset | str = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
-
-
-
-
     def to_dict(self) -> dict[str, Any]:
-        from ..models.post_themes_body_data import PostThemesBodyData
         key = self.key
 
         label = self.label
 
         data = self.data.to_dict()
 
-        based_on: Union[None, Unset, str]
+        based_on: None | Unset | str
         if isinstance(self.based_on, Unset):
             based_on = UNSET
         else:
             based_on = self.based_on
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "key": key,
-            "label": label,
-            "data": data,
-        })
+        field_dict.update(
+            {
+                "key": key,
+                "label": label,
+                "data": data,
+            }
+        )
         if based_on is not UNSET:
             field_dict["basedOn"] = based_on
 
         return field_dict
 
-
-
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.post_themes_body_data import PostThemesBodyData
+
         d = dict(src_dict)
         key = d.pop("key")
 
@@ -81,18 +67,14 @@ class PostThemesBody:
 
         data = PostThemesBodyData.from_dict(d.pop("data"))
 
-
-
-
-        def _parse_based_on(data: object) -> Union[None, Unset, str]:
+        def _parse_based_on(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         based_on = _parse_based_on(d.pop("basedOn", UNSET))
-
 
         post_themes_body = cls(
             key=key,
@@ -100,7 +82,6 @@ class PostThemesBody:
             data=data,
             based_on=based_on,
         )
-
 
         post_themes_body.additional_properties = d
         return post_themes_body

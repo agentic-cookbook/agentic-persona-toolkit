@@ -1,41 +1,32 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar, cast
 
 from attrs import define as _attrs_define
-from attrs import field as _attrs_field
-
-from ..types import UNSET, Unset
-
-from typing import cast, Union
-
-
-
-
-
 
 T = TypeVar("T", bound="PutUsageRateLimitTiersIdResponse200")
 
 
-
 @_attrs_define
 class PutUsageRateLimitTiersIdResponse200:
-    """ 
-        Attributes:
-            id (str):
-            slug (str):
-            name (str):
-            rate_capacity (int):
-            rate_refill_tokens (int):
-            rate_refill_seconds (int):
-            quota_requests (Union[None, int]):
-            quota_bytes (Union[None, int]):
-            quota_period_days (int):
-            quota_enforced (bool):
-            is_default (bool):
-            is_active (bool):
-            created_at (str):
-            updated_at (str):
-     """
+    """
+    Attributes:
+        id (str):
+        slug (str):
+        name (str):
+        rate_capacity (int):
+        rate_refill_tokens (int):
+        rate_refill_seconds (int):
+        quota_requests (Union[None, int]):
+        quota_bytes (Union[None, int]):
+        quota_tokens (Union[None, int]):
+        quota_cost_micros (Union[None, int]):
+        quota_period_days (int):
+        quota_enforced (bool):
+        is_default (bool):
+        is_active (bool):
+        created_at (str):
+        updated_at (str):
+    """
 
     id: str
     slug: str
@@ -43,18 +34,16 @@ class PutUsageRateLimitTiersIdResponse200:
     rate_capacity: int
     rate_refill_tokens: int
     rate_refill_seconds: int
-    quota_requests: Union[None, int]
-    quota_bytes: Union[None, int]
+    quota_requests: None | int
+    quota_bytes: None | int
+    quota_tokens: None | int
+    quota_cost_micros: None | int
     quota_period_days: int
     quota_enforced: bool
     is_default: bool
     is_active: bool
     created_at: str
     updated_at: str
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         id = self.id
@@ -69,11 +58,17 @@ class PutUsageRateLimitTiersIdResponse200:
 
         rate_refill_seconds = self.rate_refill_seconds
 
-        quota_requests: Union[None, int]
+        quota_requests: None | int
         quota_requests = self.quota_requests
 
-        quota_bytes: Union[None, int]
+        quota_bytes: None | int
         quota_bytes = self.quota_bytes
+
+        quota_tokens: None | int
+        quota_tokens = self.quota_tokens
+
+        quota_cost_micros: None | int
+        quota_cost_micros = self.quota_cost_micros
 
         quota_period_days = self.quota_period_days
 
@@ -87,29 +82,30 @@ class PutUsageRateLimitTiersIdResponse200:
 
         updated_at = self.updated_at
 
-
         field_dict: dict[str, Any] = {}
 
-        field_dict.update({
-            "id": id,
-            "slug": slug,
-            "name": name,
-            "rateCapacity": rate_capacity,
-            "rateRefillTokens": rate_refill_tokens,
-            "rateRefillSeconds": rate_refill_seconds,
-            "quotaRequests": quota_requests,
-            "quotaBytes": quota_bytes,
-            "quotaPeriodDays": quota_period_days,
-            "quotaEnforced": quota_enforced,
-            "isDefault": is_default,
-            "isActive": is_active,
-            "createdAt": created_at,
-            "updatedAt": updated_at,
-        })
+        field_dict.update(
+            {
+                "id": id,
+                "slug": slug,
+                "name": name,
+                "rateCapacity": rate_capacity,
+                "rateRefillTokens": rate_refill_tokens,
+                "rateRefillSeconds": rate_refill_seconds,
+                "quotaRequests": quota_requests,
+                "quotaBytes": quota_bytes,
+                "quotaTokens": quota_tokens,
+                "quotaCostMicros": quota_cost_micros,
+                "quotaPeriodDays": quota_period_days,
+                "quotaEnforced": quota_enforced,
+                "isDefault": is_default,
+                "isActive": is_active,
+                "createdAt": created_at,
+                "updatedAt": updated_at,
+            }
+        )
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -126,21 +122,33 @@ class PutUsageRateLimitTiersIdResponse200:
 
         rate_refill_seconds = d.pop("rateRefillSeconds")
 
-        def _parse_quota_requests(data: object) -> Union[None, int]:
+        def _parse_quota_requests(data: object) -> None | int:
             if data is None:
                 return data
-            return cast(Union[None, int], data)
+            return cast(None | int, data)
 
         quota_requests = _parse_quota_requests(d.pop("quotaRequests"))
 
-
-        def _parse_quota_bytes(data: object) -> Union[None, int]:
+        def _parse_quota_bytes(data: object) -> None | int:
             if data is None:
                 return data
-            return cast(Union[None, int], data)
+            return cast(None | int, data)
 
         quota_bytes = _parse_quota_bytes(d.pop("quotaBytes"))
 
+        def _parse_quota_tokens(data: object) -> None | int:
+            if data is None:
+                return data
+            return cast(None | int, data)
+
+        quota_tokens = _parse_quota_tokens(d.pop("quotaTokens"))
+
+        def _parse_quota_cost_micros(data: object) -> None | int:
+            if data is None:
+                return data
+            return cast(None | int, data)
+
+        quota_cost_micros = _parse_quota_cost_micros(d.pop("quotaCostMicros"))
 
         quota_period_days = d.pop("quotaPeriodDays")
 
@@ -163,6 +171,8 @@ class PutUsageRateLimitTiersIdResponse200:
             rate_refill_seconds=rate_refill_seconds,
             quota_requests=quota_requests,
             quota_bytes=quota_bytes,
+            quota_tokens=quota_tokens,
+            quota_cost_micros=quota_cost_micros,
             quota_period_days=quota_period_days,
             quota_enforced=quota_enforced,
             is_default=is_default,
@@ -172,4 +182,3 @@ class PutUsageRateLimitTiersIdResponse200:
         )
 
         return put_usage_rate_limit_tiers_id_response_200
-

@@ -1,76 +1,57 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import TYPE_CHECKING, Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
-
-from typing import cast
-
 if TYPE_CHECKING:
-  from ..models.bucket_row import BucketRow
-
-
-
+    from ..models.bucket_row import BucketRow
 
 
 T = TypeVar("T", bound="BucketRowList")
 
 
-
 @_attrs_define
 class BucketRowList:
-    """ 
-        Attributes:
-            rows (list['BucketRow']):
-     """
+    """
+    Attributes:
+        rows (list['BucketRow']):
+    """
 
-    rows: list['BucketRow']
+    rows: list["BucketRow"]
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
-
-
-
-
     def to_dict(self) -> dict[str, Any]:
-        from ..models.bucket_row import BucketRow
         rows = []
         for rows_item_data in self.rows:
             rows_item = rows_item_data.to_dict()
             rows.append(rows_item)
 
-
-
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "rows": rows,
-        })
+        field_dict.update(
+            {
+                "rows": rows,
+            }
+        )
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.bucket_row import BucketRow
+
         d = dict(src_dict)
         rows = []
         _rows = d.pop("rows")
-        for rows_item_data in (_rows):
+        for rows_item_data in _rows:
             rows_item = BucketRow.from_dict(rows_item_data)
 
-
-
             rows.append(rows_item)
-
 
         bucket_row_list = cls(
             rows=rows,
         )
-
 
         bucket_row_list.additional_properties = d
         return bucket_row_list

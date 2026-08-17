@@ -1,17 +1,16 @@
 from http import HTTPStatus
-from typing import Any, Optional, Union, cast
+from typing import Any
 
 import httpx
 
-from ...client import AuthenticatedClient, Client
-from ...types import Response, UNSET
 from ... import errors
-
+from ...client import AuthenticatedClient, Client
 from ...models.error import Error
 from ...models.gamification_preference import GamificationPreference
-from ...models.put_gamification_subjects_subject_type_subject_id_preference_body import PutGamificationSubjectsSubjectTypeSubjectIdPreferenceBody
-from typing import cast
-
+from ...models.put_gamification_subjects_subject_type_subject_id_preference_body import (
+    PutGamificationSubjectsSubjectTypeSubjectIdPreferenceBody,
+)
+from ...types import Response
 
 
 def _get_kwargs(
@@ -19,22 +18,15 @@ def _get_kwargs(
     subject_id: str,
     *,
     body: PutGamificationSubjectsSubjectTypeSubjectIdPreferenceBody,
-
 ) -> dict[str, Any]:
     headers: dict[str, Any] = {}
 
-
-    
-
-    
-
     _kwargs: dict[str, Any] = {
         "method": "put",
-        "url": "/gamification/subjects/{subject_type}/{subject_id}/preference".format(subject_type=subject_type,subject_id=subject_id,),
+        "url": f"/gamification/subjects/{subject_type}/{subject_id}/preference",
     }
 
     _kwargs["json"] = body.to_dict()
-
 
     headers["Content-Type"] = "application/json"
 
@@ -42,33 +34,26 @@ def _get_kwargs(
     return _kwargs
 
 
-
-def _parse_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Optional[Union[Error, GamificationPreference]]:
+def _parse_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Error | GamificationPreference | None:
     if response.status_code == 200:
         response_200 = GamificationPreference.from_dict(response.json())
-
-
 
         return response_200
 
     if response.status_code == 400:
         response_400 = Error.from_dict(response.json())
 
-
-
         return response_400
 
     if response.status_code == 401:
         response_401 = Error.from_dict(response.json())
 
-
-
         return response_401
 
     if response.status_code == 403:
         response_403 = Error.from_dict(response.json())
-
-
 
         return response_403
 
@@ -78,7 +63,9 @@ def _parse_response(*, client: Union[AuthenticatedClient, Client], response: htt
         return None
 
 
-def _build_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Response[Union[Error, GamificationPreference]]:
+def _build_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Response[Error | GamificationPreference]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -93,9 +80,8 @@ def sync_detailed(
     *,
     client: AuthenticatedClient,
     body: PutGamificationSubjectsSubjectTypeSubjectIdPreferenceBody,
-
-) -> Response[Union[Error, GamificationPreference]]:
-    """ Set a subject’s opt-out (self for a user, or admin)
+) -> Response[Error | GamificationPreference]:
+    """Set a subject’s opt-out (self for a user, or admin)
 
     Args:
         subject_type (str):
@@ -108,14 +94,12 @@ def sync_detailed(
 
     Returns:
         Response[Union[Error, GamificationPreference]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         subject_type=subject_type,
-subject_id=subject_id,
-body=body,
-
+        subject_id=subject_id,
+        body=body,
     )
 
     response = client.get_httpx_client().request(
@@ -124,15 +108,15 @@ body=body,
 
     return _build_response(client=client, response=response)
 
+
 def sync(
     subject_type: str,
     subject_id: str,
     *,
     client: AuthenticatedClient,
     body: PutGamificationSubjectsSubjectTypeSubjectIdPreferenceBody,
-
-) -> Optional[Union[Error, GamificationPreference]]:
-    """ Set a subject’s opt-out (self for a user, or admin)
+) -> Error | GamificationPreference | None:
+    """Set a subject’s opt-out (self for a user, or admin)
 
     Args:
         subject_type (str):
@@ -145,16 +129,15 @@ def sync(
 
     Returns:
         Union[Error, GamificationPreference]
-     """
-
+    """
 
     return sync_detailed(
         subject_type=subject_type,
-subject_id=subject_id,
-client=client,
-body=body,
-
+        subject_id=subject_id,
+        client=client,
+        body=body,
     ).parsed
+
 
 async def asyncio_detailed(
     subject_type: str,
@@ -162,9 +145,8 @@ async def asyncio_detailed(
     *,
     client: AuthenticatedClient,
     body: PutGamificationSubjectsSubjectTypeSubjectIdPreferenceBody,
-
-) -> Response[Union[Error, GamificationPreference]]:
-    """ Set a subject’s opt-out (self for a user, or admin)
+) -> Response[Error | GamificationPreference]:
+    """Set a subject’s opt-out (self for a user, or admin)
 
     Args:
         subject_type (str):
@@ -177,21 +159,18 @@ async def asyncio_detailed(
 
     Returns:
         Response[Union[Error, GamificationPreference]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         subject_type=subject_type,
-subject_id=subject_id,
-body=body,
-
+        subject_id=subject_id,
+        body=body,
     )
 
-    response = await client.get_async_httpx_client().request(
-        **kwargs
-    )
+    response = await client.get_async_httpx_client().request(**kwargs)
 
     return _build_response(client=client, response=response)
+
 
 async def asyncio(
     subject_type: str,
@@ -199,9 +178,8 @@ async def asyncio(
     *,
     client: AuthenticatedClient,
     body: PutGamificationSubjectsSubjectTypeSubjectIdPreferenceBody,
-
-) -> Optional[Union[Error, GamificationPreference]]:
-    """ Set a subject’s opt-out (self for a user, or admin)
+) -> Error | GamificationPreference | None:
+    """Set a subject’s opt-out (self for a user, or admin)
 
     Args:
         subject_type (str):
@@ -214,13 +192,13 @@ async def asyncio(
 
     Returns:
         Union[Error, GamificationPreference]
-     """
+    """
 
-
-    return (await asyncio_detailed(
-        subject_type=subject_type,
-subject_id=subject_id,
-client=client,
-body=body,
-
-    )).parsed
+    return (
+        await asyncio_detailed(
+            subject_type=subject_type,
+            subject_id=subject_id,
+            client=client,
+            body=body,
+        )
+    ).parsed

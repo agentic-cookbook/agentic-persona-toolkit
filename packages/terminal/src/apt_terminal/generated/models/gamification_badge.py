@@ -1,37 +1,27 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 from ..types import UNSET, Unset
 
-from ..types import UNSET, Unset
-from typing import cast, Union
-from typing import Union
-
-
-
-
-
-
 T = TypeVar("T", bound="GamificationBadge")
-
 
 
 @_attrs_define
 class GamificationBadge:
-    """ 
-        Attributes:
-            id (str):
-            name (str):
-            description (str):
-            icon (str):
-            criteria_type (str):
-            criteria_threshold (int):
-            point_value (int):
-            subject_type (Union[None, Unset, str]):
-     """
+    """
+    Attributes:
+        id (str):
+        name (str):
+        description (str):
+        icon (str):
+        criteria_type (str):
+        criteria_threshold (int):
+        point_value (int):
+        subject_type (Union[None, Unset, str]):
+    """
 
     id: str
     name: str
@@ -40,12 +30,8 @@ class GamificationBadge:
     criteria_type: str
     criteria_threshold: int
     point_value: int
-    subject_type: Union[None, Unset, str] = UNSET
+    subject_type: None | Unset | str = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         id = self.id
@@ -62,30 +48,29 @@ class GamificationBadge:
 
         point_value = self.point_value
 
-        subject_type: Union[None, Unset, str]
+        subject_type: None | Unset | str
         if isinstance(self.subject_type, Unset):
             subject_type = UNSET
         else:
             subject_type = self.subject_type
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "id": id,
-            "name": name,
-            "description": description,
-            "icon": icon,
-            "criteriaType": criteria_type,
-            "criteriaThreshold": criteria_threshold,
-            "pointValue": point_value,
-        })
+        field_dict.update(
+            {
+                "id": id,
+                "name": name,
+                "description": description,
+                "icon": icon,
+                "criteriaType": criteria_type,
+                "criteriaThreshold": criteria_threshold,
+                "pointValue": point_value,
+            }
+        )
         if subject_type is not UNSET:
             field_dict["subjectType"] = subject_type
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -104,15 +89,14 @@ class GamificationBadge:
 
         point_value = d.pop("pointValue")
 
-        def _parse_subject_type(data: object) -> Union[None, Unset, str]:
+        def _parse_subject_type(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         subject_type = _parse_subject_type(d.pop("subjectType", UNSET))
-
 
         gamification_badge = cls(
             id=id,
@@ -124,7 +108,6 @@ class GamificationBadge:
             point_value=point_value,
             subject_type=subject_type,
         )
-
 
         gamification_badge.additional_properties = d
         return gamification_badge

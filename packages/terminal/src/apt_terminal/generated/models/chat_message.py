@@ -1,44 +1,30 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar, cast
+from uuid import UUID
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
-
-from typing import cast, Union
-from uuid import UUID
-
-
-
-
-
-
 T = TypeVar("T", bound="ChatMessage")
-
 
 
 @_attrs_define
 class ChatMessage:
-    """ 
-        Attributes:
-            id (UUID):
-            role (str): e.g. user, assistant, tool, system
-            content (str):
-            tool_name (Union[None, str]):
-            created_at (str):
-     """
+    """
+    Attributes:
+        id (UUID):
+        role (str): e.g. user, assistant, tool, system
+        content (str):
+        tool_name (Union[None, str]):
+        created_at (str):
+    """
 
     id: UUID
     role: str
     content: str
-    tool_name: Union[None, str]
+    tool_name: None | str
     created_at: str
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         id = str(self.id)
@@ -47,45 +33,40 @@ class ChatMessage:
 
         content = self.content
 
-        tool_name: Union[None, str]
+        tool_name: None | str
         tool_name = self.tool_name
 
         created_at = self.created_at
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "id": id,
-            "role": role,
-            "content": content,
-            "toolName": tool_name,
-            "createdAt": created_at,
-        })
+        field_dict.update(
+            {
+                "id": id,
+                "role": role,
+                "content": content,
+                "toolName": tool_name,
+                "createdAt": created_at,
+            }
+        )
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
         id = UUID(d.pop("id"))
 
-
-
-
         role = d.pop("role")
 
         content = d.pop("content")
 
-        def _parse_tool_name(data: object) -> Union[None, str]:
+        def _parse_tool_name(data: object) -> None | str:
             if data is None:
                 return data
-            return cast(Union[None, str], data)
+            return cast(None | str, data)
 
         tool_name = _parse_tool_name(d.pop("toolName"))
-
 
         created_at = d.pop("createdAt")
 
@@ -96,7 +77,6 @@ class ChatMessage:
             tool_name=tool_name,
             created_at=created_at,
         )
-
 
         chat_message.additional_properties = d
         return chat_message

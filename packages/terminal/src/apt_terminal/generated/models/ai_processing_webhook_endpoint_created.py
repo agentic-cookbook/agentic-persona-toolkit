@@ -1,42 +1,31 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar, cast
+from uuid import UUID
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 from ..types import UNSET, Unset
 
-from ..types import UNSET, Unset
-from typing import cast
-from typing import cast, Union
-from typing import Union
-from uuid import UUID
-
-
-
-
-
-
 T = TypeVar("T", bound="AiProcessingWebhookEndpointCreated")
-
 
 
 @_attrs_define
 class AiProcessingWebhookEndpointCreated:
-    """ 
-        Attributes:
-            id (UUID):
-            ecosystem_id (str): Ecosystem that owns this endpoint
-            customer_id (str): User who registered the endpoint
-            url (str): HTTPS-only delivery target URL
-            event_types (list[str]): Subscribed event types (e.g. job.succeeded, job.failed)
-            active (bool): Whether the endpoint receives deliveries
-            created_at (str): ISO 8601 timestamp
-            updated_at (str): ISO 8601 timestamp of last modification
-            secret (str): whsec_-prefixed Standard Webhooks signing secret — returned exactly once. Store it; it cannot be
-                retrieved again.
-            description (Union[None, Unset, str]): Human-readable label
-     """
+    """
+    Attributes:
+        id (UUID):
+        ecosystem_id (str): Ecosystem that owns this endpoint
+        customer_id (str): User who registered the endpoint
+        url (str): HTTPS-only delivery target URL
+        event_types (list[str]): Subscribed event types (e.g. job.succeeded, job.failed)
+        active (bool): Whether the endpoint receives deliveries
+        created_at (str): ISO 8601 timestamp
+        updated_at (str): ISO 8601 timestamp of last modification
+        secret (str): whsec_-prefixed Standard Webhooks signing secret — returned exactly once. Store it; it cannot be
+            retrieved again.
+        description (Union[None, Unset, str]): Human-readable label
+    """
 
     id: UUID
     ecosystem_id: str
@@ -47,12 +36,8 @@ class AiProcessingWebhookEndpointCreated:
     created_at: str
     updated_at: str
     secret: str
-    description: Union[None, Unset, str] = UNSET
+    description: None | Unset | str = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         id = str(self.id)
@@ -65,8 +50,6 @@ class AiProcessingWebhookEndpointCreated:
 
         event_types = self.event_types
 
-
-
         active = self.active
 
         created_at = self.created_at
@@ -75,40 +58,36 @@ class AiProcessingWebhookEndpointCreated:
 
         secret = self.secret
 
-        description: Union[None, Unset, str]
+        description: None | Unset | str
         if isinstance(self.description, Unset):
             description = UNSET
         else:
             description = self.description
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "id": id,
-            "ecosystemId": ecosystem_id,
-            "customerId": customer_id,
-            "url": url,
-            "eventTypes": event_types,
-            "active": active,
-            "createdAt": created_at,
-            "updatedAt": updated_at,
-            "secret": secret,
-        })
+        field_dict.update(
+            {
+                "id": id,
+                "ecosystemId": ecosystem_id,
+                "customerId": customer_id,
+                "url": url,
+                "eventTypes": event_types,
+                "active": active,
+                "createdAt": created_at,
+                "updatedAt": updated_at,
+                "secret": secret,
+            }
+        )
         if description is not UNSET:
             field_dict["description"] = description
 
         return field_dict
 
-
-
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
         id = UUID(d.pop("id"))
-
-
-
 
         ecosystem_id = d.pop("ecosystemId")
 
@@ -118,7 +97,6 @@ class AiProcessingWebhookEndpointCreated:
 
         event_types = cast(list[str], d.pop("eventTypes"))
 
-
         active = d.pop("active")
 
         created_at = d.pop("createdAt")
@@ -127,15 +105,14 @@ class AiProcessingWebhookEndpointCreated:
 
         secret = d.pop("secret")
 
-        def _parse_description(data: object) -> Union[None, Unset, str]:
+        def _parse_description(data: object) -> None | Unset | str:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | Unset | str, data)
 
         description = _parse_description(d.pop("description", UNSET))
-
 
         ai_processing_webhook_endpoint_created = cls(
             id=id,
@@ -149,7 +126,6 @@ class AiProcessingWebhookEndpointCreated:
             secret=secret,
             description=description,
         )
-
 
         ai_processing_webhook_endpoint_created.additional_properties = d
         return ai_processing_webhook_endpoint_created

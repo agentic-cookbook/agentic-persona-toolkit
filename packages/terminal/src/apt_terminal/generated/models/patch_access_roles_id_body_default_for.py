@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class PatchAccessRolesIdBodyDefaultFor(str, Enum):
     CUSTOMER = "customer"
     PERSONA = "persona"

@@ -1,62 +1,50 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
-
-from ..models.post_project_projects_id_participants_body_participant_kind import PostProjectProjectsIdParticipantsBodyParticipantKind
-
-
-
-
-
+from ..models.post_project_projects_id_participants_body_participant_kind import (
+    PostProjectProjectsIdParticipantsBodyParticipantKind,
+)
 
 T = TypeVar("T", bound="PostProjectProjectsIdParticipantsBody")
 
 
-
 @_attrs_define
 class PostProjectProjectsIdParticipantsBody:
-    """ 
-        Attributes:
-            participant_kind (PostProjectProjectsIdParticipantsBodyParticipantKind):
-            participant_id (str):
-     """
+    """
+    Attributes:
+        participant_kind (PostProjectProjectsIdParticipantsBodyParticipantKind):
+        participant_id (str):
+    """
 
     participant_kind: PostProjectProjectsIdParticipantsBodyParticipantKind
     participant_id: str
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         participant_kind = self.participant_kind.value
 
         participant_id = self.participant_id
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "participantKind": participant_kind,
-            "participantId": participant_id,
-        })
+        field_dict.update(
+            {
+                "participantKind": participant_kind,
+                "participantId": participant_id,
+            }
+        )
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
-        participant_kind = PostProjectProjectsIdParticipantsBodyParticipantKind(d.pop("participantKind"))
-
-
-
+        participant_kind = PostProjectProjectsIdParticipantsBodyParticipantKind(
+            d.pop("participantKind")
+        )
 
         participant_id = d.pop("participantId")
 
@@ -64,7 +52,6 @@ class PostProjectProjectsIdParticipantsBody:
             participant_kind=participant_kind,
             participant_id=participant_id,
         )
-
 
         post_project_projects_id_participants_body.additional_properties = d
         return post_project_projects_id_participants_body

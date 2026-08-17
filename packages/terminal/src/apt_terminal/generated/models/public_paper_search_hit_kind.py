@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class PublicPaperSearchHitKind(str, Enum):
     PAPER = "paper"
     RESEARCH = "research"

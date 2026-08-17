@@ -1,49 +1,47 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
-
-from ..models.get_account_mfa_response_200_preferred_method_type_1 import GetAccountMfaResponse200PreferredMethodType1
-from ..models.get_account_mfa_response_200_preferred_method_type_2_type_1 import GetAccountMfaResponse200PreferredMethodType2Type1
-from ..models.get_account_mfa_response_200_preferred_method_type_3_type_1 import GetAccountMfaResponse200PreferredMethodType3Type1
-from typing import cast, Union
-
-
-
-
-
+from ..models.get_account_mfa_response_200_preferred_method_type_1 import (
+    GetAccountMfaResponse200PreferredMethodType1,
+)
+from ..models.get_account_mfa_response_200_preferred_method_type_2_type_1 import (
+    GetAccountMfaResponse200PreferredMethodType2Type1,
+)
+from ..models.get_account_mfa_response_200_preferred_method_type_3_type_1 import (
+    GetAccountMfaResponse200PreferredMethodType3Type1,
+)
 
 T = TypeVar("T", bound="GetAccountMfaResponse200")
 
 
-
 @_attrs_define
 class GetAccountMfaResponse200:
-    """ 
-        Attributes:
-            sms (bool):
-            totp (bool):
-            webauthn (bool):
-            totp_pending (bool): A TOTP enrollment awaits confirmation
-            recovery_remaining (int): Unused recovery codes
-            preferred_method (Union[GetAccountMfaResponse200PreferredMethodType1,
-                GetAccountMfaResponse200PreferredMethodType2Type1, GetAccountMfaResponse200PreferredMethodType3Type1, None]):
-     """
+    """
+    Attributes:
+        sms (bool):
+        totp (bool):
+        webauthn (bool):
+        totp_pending (bool): A TOTP enrollment awaits confirmation
+        recovery_remaining (int): Unused recovery codes
+        preferred_method (Union[GetAccountMfaResponse200PreferredMethodType1,
+            GetAccountMfaResponse200PreferredMethodType2Type1, GetAccountMfaResponse200PreferredMethodType3Type1, None]):
+    """
 
     sms: bool
     totp: bool
     webauthn: bool
     totp_pending: bool
     recovery_remaining: int
-    preferred_method: Union[GetAccountMfaResponse200PreferredMethodType1, GetAccountMfaResponse200PreferredMethodType2Type1, GetAccountMfaResponse200PreferredMethodType3Type1, None]
+    preferred_method: (
+        GetAccountMfaResponse200PreferredMethodType1
+        | GetAccountMfaResponse200PreferredMethodType2Type1
+        | GetAccountMfaResponse200PreferredMethodType3Type1
+        | None
+    )
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         sms = self.sms
@@ -56,31 +54,30 @@ class GetAccountMfaResponse200:
 
         recovery_remaining = self.recovery_remaining
 
-        preferred_method: Union[None, str]
-        if isinstance(self.preferred_method, GetAccountMfaResponse200PreferredMethodType1):
-            preferred_method = self.preferred_method.value
-        elif isinstance(self.preferred_method, GetAccountMfaResponse200PreferredMethodType2Type1):
-            preferred_method = self.preferred_method.value
-        elif isinstance(self.preferred_method, GetAccountMfaResponse200PreferredMethodType3Type1):
+        preferred_method: None | str
+        if (
+            isinstance(self.preferred_method, GetAccountMfaResponse200PreferredMethodType1)
+            or isinstance(self.preferred_method, GetAccountMfaResponse200PreferredMethodType2Type1)
+            or isinstance(self.preferred_method, GetAccountMfaResponse200PreferredMethodType3Type1)
+        ):
             preferred_method = self.preferred_method.value
         else:
             preferred_method = self.preferred_method
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "sms": sms,
-            "totp": totp,
-            "webauthn": webauthn,
-            "totpPending": totp_pending,
-            "recoveryRemaining": recovery_remaining,
-            "preferredMethod": preferred_method,
-        })
+        field_dict.update(
+            {
+                "sms": sms,
+                "totp": totp,
+                "webauthn": webauthn,
+                "totpPending": totp_pending,
+                "recoveryRemaining": recovery_remaining,
+                "preferredMethod": preferred_method,
+            }
+        )
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -95,7 +92,14 @@ class GetAccountMfaResponse200:
 
         recovery_remaining = d.pop("recoveryRemaining")
 
-        def _parse_preferred_method(data: object) -> Union[GetAccountMfaResponse200PreferredMethodType1, GetAccountMfaResponse200PreferredMethodType2Type1, GetAccountMfaResponse200PreferredMethodType3Type1, None]:
+        def _parse_preferred_method(
+            data: object,
+        ) -> (
+            GetAccountMfaResponse200PreferredMethodType1
+            | GetAccountMfaResponse200PreferredMethodType2Type1
+            | GetAccountMfaResponse200PreferredMethodType3Type1
+            | None
+        ):
             if data is None:
                 return data
             try:
@@ -103,35 +107,38 @@ class GetAccountMfaResponse200:
                     raise TypeError()
                 preferred_method_type_1 = GetAccountMfaResponse200PreferredMethodType1(data)
 
-
-
                 return preferred_method_type_1
-            except: # noqa: E722
+            except:  # noqa: E722
                 pass
             try:
                 if not isinstance(data, str):
                     raise TypeError()
-                preferred_method_type_2_type_1 = GetAccountMfaResponse200PreferredMethodType2Type1(data)
-
-
+                preferred_method_type_2_type_1 = GetAccountMfaResponse200PreferredMethodType2Type1(
+                    data
+                )
 
                 return preferred_method_type_2_type_1
-            except: # noqa: E722
+            except:  # noqa: E722
                 pass
             try:
                 if not isinstance(data, str):
                     raise TypeError()
-                preferred_method_type_3_type_1 = GetAccountMfaResponse200PreferredMethodType3Type1(data)
-
-
+                preferred_method_type_3_type_1 = GetAccountMfaResponse200PreferredMethodType3Type1(
+                    data
+                )
 
                 return preferred_method_type_3_type_1
-            except: # noqa: E722
+            except:  # noqa: E722
                 pass
-            return cast(Union[GetAccountMfaResponse200PreferredMethodType1, GetAccountMfaResponse200PreferredMethodType2Type1, GetAccountMfaResponse200PreferredMethodType3Type1, None], data)
+            return cast(
+                GetAccountMfaResponse200PreferredMethodType1
+                | GetAccountMfaResponse200PreferredMethodType2Type1
+                | GetAccountMfaResponse200PreferredMethodType3Type1
+                | None,
+                data,
+            )
 
         preferred_method = _parse_preferred_method(d.pop("preferredMethod"))
-
 
         get_account_mfa_response_200 = cls(
             sms=sms,
@@ -141,7 +148,6 @@ class GetAccountMfaResponse200:
             recovery_remaining=recovery_remaining,
             preferred_method=preferred_method,
         )
-
 
         get_account_mfa_response_200.additional_properties = d
         return get_account_mfa_response_200

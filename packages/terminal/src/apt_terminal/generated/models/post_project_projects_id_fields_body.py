@@ -1,46 +1,32 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
-
 from ..models.post_project_projects_id_fields_body_type import PostProjectProjectsIdFieldsBodyType
 from ..types import UNSET, Unset
-from typing import cast
-from typing import Union
-
-
-
-
-
 
 T = TypeVar("T", bound="PostProjectProjectsIdFieldsBody")
 
 
-
 @_attrs_define
 class PostProjectProjectsIdFieldsBody:
-    """ 
-        Attributes:
-            key (str):
-            label (str):
-            type_ (PostProjectProjectsIdFieldsBodyType):
-            options (Union[Unset, list[str]]): required (non-empty) for a select field; omitted for every other type
-            position (Union[Unset, int]): explicit field order; defaults to append (max+1)
-     """
+    """
+    Attributes:
+        key (str):
+        label (str):
+        type_ (PostProjectProjectsIdFieldsBodyType):
+        options (Union[Unset, list[str]]): required (non-empty) for a select field; omitted for every other type
+        position (Union[Unset, int]): explicit field order; defaults to append (max+1)
+    """
 
     key: str
     label: str
     type_: PostProjectProjectsIdFieldsBodyType
-    options: Union[Unset, list[str]] = UNSET
-    position: Union[Unset, int] = UNSET
+    options: Unset | list[str] = UNSET
+    position: Unset | int = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         key = self.key
@@ -49,30 +35,27 @@ class PostProjectProjectsIdFieldsBody:
 
         type_ = self.type_.value
 
-        options: Union[Unset, list[str]] = UNSET
+        options: Unset | list[str] = UNSET
         if not isinstance(self.options, Unset):
             options = self.options
 
-
-
         position = self.position
-
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "key": key,
-            "label": label,
-            "type": type_,
-        })
+        field_dict.update(
+            {
+                "key": key,
+                "label": label,
+                "type": type_,
+            }
+        )
         if options is not UNSET:
             field_dict["options"] = options
         if position is not UNSET:
             field_dict["position"] = position
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -83,11 +66,7 @@ class PostProjectProjectsIdFieldsBody:
 
         type_ = PostProjectProjectsIdFieldsBodyType(d.pop("type"))
 
-
-
-
         options = cast(list[str], d.pop("options", UNSET))
-
 
         position = d.pop("position", UNSET)
 
@@ -98,7 +77,6 @@ class PostProjectProjectsIdFieldsBody:
             options=options,
             position=position,
         )
-
 
         post_project_projects_id_fields_body.additional_properties = d
         return post_project_projects_id_fields_body

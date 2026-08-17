@@ -1,79 +1,61 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import TYPE_CHECKING, Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 from ..types import UNSET, Unset
 
-from ..types import UNSET, Unset
-from typing import cast
-from typing import Union
-
 if TYPE_CHECKING:
-  from ..models.access_assignment import AccessAssignment
-
-
-
+    from ..models.access_assignment import AccessAssignment
 
 
 T = TypeVar("T", bound="AccessAssignmentList")
 
 
-
 @_attrs_define
 class AccessAssignmentList:
-    """ 
-        Attributes:
-            assignments (list['AccessAssignment']):
-            restricted (Union[Unset, bool]): present on item-scoped listings: whether the item is RESTRICTED
-     """
+    """
+    Attributes:
+        assignments (list['AccessAssignment']):
+        restricted (Union[Unset, bool]): present on item-scoped listings: whether the item is RESTRICTED
+    """
 
-    assignments: list['AccessAssignment']
-    restricted: Union[Unset, bool] = UNSET
+    assignments: list["AccessAssignment"]
+    restricted: Unset | bool = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
-
-
-
-
     def to_dict(self) -> dict[str, Any]:
-        from ..models.access_assignment import AccessAssignment
         assignments = []
         for assignments_item_data in self.assignments:
             assignments_item = assignments_item_data.to_dict()
             assignments.append(assignments_item)
 
-
-
         restricted = self.restricted
-
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "assignments": assignments,
-        })
+        field_dict.update(
+            {
+                "assignments": assignments,
+            }
+        )
         if restricted is not UNSET:
             field_dict["restricted"] = restricted
 
         return field_dict
 
-
-
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.access_assignment import AccessAssignment
+
         d = dict(src_dict)
         assignments = []
         _assignments = d.pop("assignments")
-        for assignments_item_data in (_assignments):
+        for assignments_item_data in _assignments:
             assignments_item = AccessAssignment.from_dict(assignments_item_data)
 
-
-
             assignments.append(assignments_item)
-
 
         restricted = d.pop("restricted", UNSET)
 
@@ -81,7 +63,6 @@ class AccessAssignmentList:
             assignments=assignments,
             restricted=restricted,
         )
-
 
         access_assignment_list.additional_properties = d
         return access_assignment_list

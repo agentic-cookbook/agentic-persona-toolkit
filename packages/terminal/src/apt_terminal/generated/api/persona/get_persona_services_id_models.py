@@ -1,56 +1,46 @@
 from http import HTTPStatus
-from typing import Any, Optional, Union, cast
+from typing import Any, Union, cast
 
 import httpx
 
-from ...client import AuthenticatedClient, Client
-from ...types import Response, UNSET
 from ... import errors
-
+from ...client import AuthenticatedClient, Client
 from ...models.error import Error
 from ...models.persona_service_model_type_1 import PersonaServiceModelType1
-from typing import cast
-from typing import cast, Union
-
+from ...types import Response
 
 
 def _get_kwargs(
     id: str,
-
 ) -> dict[str, Any]:
-    
-
-    
-
-    
-
     _kwargs: dict[str, Any] = {
         "method": "get",
-        "url": "/persona/services/{id}/models".format(id=id,),
+        "url": f"/persona/services/{id}/models",
     }
-
 
     return _kwargs
 
 
-
-def _parse_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Optional[Union[Error, list[Union['PersonaServiceModelType1', str]]]]:
+def _parse_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Error | list[Union["PersonaServiceModelType1", str]] | None:
     if response.status_code == 200:
         response_200 = []
         _response_200 = response.json()
-        for response_200_item_data in (_response_200):
-            def _parse_response_200_item(data: object) -> Union['PersonaServiceModelType1', str]:
+        for response_200_item_data in _response_200:
+
+            def _parse_response_200_item(data: object) -> Union["PersonaServiceModelType1", str]:
                 try:
                     if not isinstance(data, dict):
                         raise TypeError()
-                    componentsschemas_persona_service_model_type_1 = PersonaServiceModelType1.from_dict(data)
-
-
+                    componentsschemas_persona_service_model_type_1 = (
+                        PersonaServiceModelType1.from_dict(data)
+                    )
 
                     return componentsschemas_persona_service_model_type_1
-                except: # noqa: E722
+                except:  # noqa: E722
                     pass
-                return cast(Union['PersonaServiceModelType1', str], data)
+                return cast(Union["PersonaServiceModelType1", str], data)
 
             response_200_item = _parse_response_200_item(response_200_item_data)
 
@@ -61,28 +51,20 @@ def _parse_response(*, client: Union[AuthenticatedClient, Client], response: htt
     if response.status_code == 400:
         response_400 = Error.from_dict(response.json())
 
-
-
         return response_400
 
     if response.status_code == 401:
         response_401 = Error.from_dict(response.json())
-
-
 
         return response_401
 
     if response.status_code == 404:
         response_404 = Error.from_dict(response.json())
 
-
-
         return response_404
 
     if response.status_code == 502:
         response_502 = Error.from_dict(response.json())
-
-
 
         return response_502
 
@@ -92,7 +74,9 @@ def _parse_response(*, client: Union[AuthenticatedClient, Client], response: htt
         return None
 
 
-def _build_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Response[Union[Error, list[Union['PersonaServiceModelType1', str]]]]:
+def _build_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Response[Error | list[Union["PersonaServiceModelType1", str]]]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -105,9 +89,8 @@ def sync_detailed(
     id: str,
     *,
     client: AuthenticatedClient,
-
-) -> Response[Union[Error, list[Union['PersonaServiceModelType1', str]]]]:
-    """ Live provider model catalog — fetched fresh, not persisted
+) -> Response[Error | list[Union["PersonaServiceModelType1", str]]]:
+    """Live provider model catalog — fetched fresh, not persisted
 
     Args:
         id (str):
@@ -118,12 +101,10 @@ def sync_detailed(
 
     Returns:
         Response[Union[Error, list[Union['PersonaServiceModelType1', str]]]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         id=id,
-
     )
 
     response = client.get_httpx_client().request(
@@ -132,13 +113,13 @@ def sync_detailed(
 
     return _build_response(client=client, response=response)
 
+
 def sync(
     id: str,
     *,
     client: AuthenticatedClient,
-
-) -> Optional[Union[Error, list[Union['PersonaServiceModelType1', str]]]]:
-    """ Live provider model catalog — fetched fresh, not persisted
+) -> Error | list[Union["PersonaServiceModelType1", str]] | None:
+    """Live provider model catalog — fetched fresh, not persisted
 
     Args:
         id (str):
@@ -149,22 +130,20 @@ def sync(
 
     Returns:
         Union[Error, list[Union['PersonaServiceModelType1', str]]]
-     """
-
+    """
 
     return sync_detailed(
         id=id,
-client=client,
-
+        client=client,
     ).parsed
+
 
 async def asyncio_detailed(
     id: str,
     *,
     client: AuthenticatedClient,
-
-) -> Response[Union[Error, list[Union['PersonaServiceModelType1', str]]]]:
-    """ Live provider model catalog — fetched fresh, not persisted
+) -> Response[Error | list[Union["PersonaServiceModelType1", str]]]:
+    """Live provider model catalog — fetched fresh, not persisted
 
     Args:
         id (str):
@@ -175,27 +154,23 @@ async def asyncio_detailed(
 
     Returns:
         Response[Union[Error, list[Union['PersonaServiceModelType1', str]]]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         id=id,
-
     )
 
-    response = await client.get_async_httpx_client().request(
-        **kwargs
-    )
+    response = await client.get_async_httpx_client().request(**kwargs)
 
     return _build_response(client=client, response=response)
+
 
 async def asyncio(
     id: str,
     *,
     client: AuthenticatedClient,
-
-) -> Optional[Union[Error, list[Union['PersonaServiceModelType1', str]]]]:
-    """ Live provider model catalog — fetched fresh, not persisted
+) -> Error | list[Union["PersonaServiceModelType1", str]] | None:
+    """Live provider model catalog — fetched fresh, not persisted
 
     Args:
         id (str):
@@ -206,11 +181,11 @@ async def asyncio(
 
     Returns:
         Union[Error, list[Union['PersonaServiceModelType1', str]]]
-     """
+    """
 
-
-    return (await asyncio_detailed(
-        id=id,
-client=client,
-
-    )).parsed
+    return (
+        await asyncio_detailed(
+            id=id,
+            client=client,
+        )
+    ).parsed

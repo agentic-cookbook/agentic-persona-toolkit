@@ -1,30 +1,23 @@
 from http import HTTPStatus
-from typing import Any, Optional, Union, cast
+from typing import Any
 
 import httpx
 
-from ...client import AuthenticatedClient, Client
-from ...types import Response, UNSET
 from ... import errors
-
+from ...client import AuthenticatedClient, Client
 from ...models.error import Error
 from ...models.post_billing_tier_entitlements_body import PostBillingTierEntitlementsBody
-from ...models.post_billing_tier_entitlements_response_201 import PostBillingTierEntitlementsResponse201
-from typing import cast
-
+from ...models.post_billing_tier_entitlements_response_201 import (
+    PostBillingTierEntitlementsResponse201,
+)
+from ...types import Response
 
 
 def _get_kwargs(
     *,
     body: PostBillingTierEntitlementsBody,
-
 ) -> dict[str, Any]:
     headers: dict[str, Any] = {}
-
-
-    
-
-    
 
     _kwargs: dict[str, Any] = {
         "method": "post",
@@ -33,33 +26,27 @@ def _get_kwargs(
 
     _kwargs["json"] = body.to_dict()
 
-
     headers["Content-Type"] = "application/json"
 
     _kwargs["headers"] = headers
     return _kwargs
 
 
-
-def _parse_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Optional[Union[Error, PostBillingTierEntitlementsResponse201]]:
+def _parse_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Error | PostBillingTierEntitlementsResponse201 | None:
     if response.status_code == 201:
         response_201 = PostBillingTierEntitlementsResponse201.from_dict(response.json())
-
-
 
         return response_201
 
     if response.status_code == 400:
         response_400 = Error.from_dict(response.json())
 
-
-
         return response_400
 
     if response.status_code == 401:
         response_401 = Error.from_dict(response.json())
-
-
 
         return response_401
 
@@ -69,7 +56,9 @@ def _parse_response(*, client: Union[AuthenticatedClient, Client], response: htt
         return None
 
 
-def _build_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Response[Union[Error, PostBillingTierEntitlementsResponse201]]:
+def _build_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Response[Error | PostBillingTierEntitlementsResponse201]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -82,9 +71,8 @@ def sync_detailed(
     *,
     client: AuthenticatedClient,
     body: PostBillingTierEntitlementsBody,
-
-) -> Response[Union[Error, PostBillingTierEntitlementsResponse201]]:
-    """ Create tier_entitlements
+) -> Response[Error | PostBillingTierEntitlementsResponse201]:
+    """Create tier_entitlements
 
     Args:
         body (PostBillingTierEntitlementsBody):
@@ -95,12 +83,10 @@ def sync_detailed(
 
     Returns:
         Response[Union[Error, PostBillingTierEntitlementsResponse201]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         body=body,
-
     )
 
     response = client.get_httpx_client().request(
@@ -109,13 +95,13 @@ def sync_detailed(
 
     return _build_response(client=client, response=response)
 
+
 def sync(
     *,
     client: AuthenticatedClient,
     body: PostBillingTierEntitlementsBody,
-
-) -> Optional[Union[Error, PostBillingTierEntitlementsResponse201]]:
-    """ Create tier_entitlements
+) -> Error | PostBillingTierEntitlementsResponse201 | None:
+    """Create tier_entitlements
 
     Args:
         body (PostBillingTierEntitlementsBody):
@@ -126,22 +112,20 @@ def sync(
 
     Returns:
         Union[Error, PostBillingTierEntitlementsResponse201]
-     """
-
+    """
 
     return sync_detailed(
         client=client,
-body=body,
-
+        body=body,
     ).parsed
+
 
 async def asyncio_detailed(
     *,
     client: AuthenticatedClient,
     body: PostBillingTierEntitlementsBody,
-
-) -> Response[Union[Error, PostBillingTierEntitlementsResponse201]]:
-    """ Create tier_entitlements
+) -> Response[Error | PostBillingTierEntitlementsResponse201]:
+    """Create tier_entitlements
 
     Args:
         body (PostBillingTierEntitlementsBody):
@@ -152,27 +136,23 @@ async def asyncio_detailed(
 
     Returns:
         Response[Union[Error, PostBillingTierEntitlementsResponse201]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         body=body,
-
     )
 
-    response = await client.get_async_httpx_client().request(
-        **kwargs
-    )
+    response = await client.get_async_httpx_client().request(**kwargs)
 
     return _build_response(client=client, response=response)
+
 
 async def asyncio(
     *,
     client: AuthenticatedClient,
     body: PostBillingTierEntitlementsBody,
-
-) -> Optional[Union[Error, PostBillingTierEntitlementsResponse201]]:
-    """ Create tier_entitlements
+) -> Error | PostBillingTierEntitlementsResponse201 | None:
+    """Create tier_entitlements
 
     Args:
         body (PostBillingTierEntitlementsBody):
@@ -183,11 +163,11 @@ async def asyncio(
 
     Returns:
         Union[Error, PostBillingTierEntitlementsResponse201]
-     """
+    """
 
-
-    return (await asyncio_detailed(
-        client=client,
-body=body,
-
-    )).parsed
+    return (
+        await asyncio_detailed(
+            client=client,
+            body=body,
+        )
+    ).parsed

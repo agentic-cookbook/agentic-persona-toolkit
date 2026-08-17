@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class PutMeAppearanceBodyTextSize(str, Enum):
     DEFAULT = "default"
     EXTRA_LARGE = "extra-large"

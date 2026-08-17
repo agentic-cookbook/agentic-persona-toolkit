@@ -1,30 +1,21 @@
 from http import HTTPStatus
-from typing import Any, Optional, Union, cast
+from typing import Any
 
 import httpx
 
-from ...client import AuthenticatedClient, Client
-from ...types import Response, UNSET
 from ... import errors
-
+from ...client import AuthenticatedClient, Client
 from ...models.error import Error
 from ...models.post_content_reactions_body import PostContentReactionsBody
 from ...models.reaction import Reaction
-from typing import cast
-
+from ...types import Response
 
 
 def _get_kwargs(
     *,
     body: PostContentReactionsBody,
-
 ) -> dict[str, Any]:
     headers: dict[str, Any] = {}
-
-
-    
-
-    
 
     _kwargs: dict[str, Any] = {
         "method": "post",
@@ -33,40 +24,32 @@ def _get_kwargs(
 
     _kwargs["json"] = body.to_dict()
 
-
     headers["Content-Type"] = "application/json"
 
     _kwargs["headers"] = headers
     return _kwargs
 
 
-
-def _parse_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Optional[Union[Error, Reaction]]:
+def _parse_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Error | Reaction | None:
     if response.status_code == 200:
         response_200 = Reaction.from_dict(response.json())
-
-
 
         return response_200
 
     if response.status_code == 201:
         response_201 = Reaction.from_dict(response.json())
 
-
-
         return response_201
 
     if response.status_code == 400:
         response_400 = Error.from_dict(response.json())
 
-
-
         return response_400
 
     if response.status_code == 401:
         response_401 = Error.from_dict(response.json())
-
-
 
         return response_401
 
@@ -76,7 +59,9 @@ def _parse_response(*, client: Union[AuthenticatedClient, Client], response: htt
         return None
 
 
-def _build_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Response[Union[Error, Reaction]]:
+def _build_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Response[Error | Reaction]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -89,9 +74,8 @@ def sync_detailed(
     *,
     client: AuthenticatedClient,
     body: PostContentReactionsBody,
-
-) -> Response[Union[Error, Reaction]]:
-    """ Add a reaction (idempotent on the caller's target+emoji)
+) -> Response[Error | Reaction]:
+    """Add a reaction (idempotent on the caller's target+emoji)
 
     Args:
         body (PostContentReactionsBody):
@@ -102,12 +86,10 @@ def sync_detailed(
 
     Returns:
         Response[Union[Error, Reaction]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         body=body,
-
     )
 
     response = client.get_httpx_client().request(
@@ -116,13 +98,13 @@ def sync_detailed(
 
     return _build_response(client=client, response=response)
 
+
 def sync(
     *,
     client: AuthenticatedClient,
     body: PostContentReactionsBody,
-
-) -> Optional[Union[Error, Reaction]]:
-    """ Add a reaction (idempotent on the caller's target+emoji)
+) -> Error | Reaction | None:
+    """Add a reaction (idempotent on the caller's target+emoji)
 
     Args:
         body (PostContentReactionsBody):
@@ -133,22 +115,20 @@ def sync(
 
     Returns:
         Union[Error, Reaction]
-     """
-
+    """
 
     return sync_detailed(
         client=client,
-body=body,
-
+        body=body,
     ).parsed
+
 
 async def asyncio_detailed(
     *,
     client: AuthenticatedClient,
     body: PostContentReactionsBody,
-
-) -> Response[Union[Error, Reaction]]:
-    """ Add a reaction (idempotent on the caller's target+emoji)
+) -> Response[Error | Reaction]:
+    """Add a reaction (idempotent on the caller's target+emoji)
 
     Args:
         body (PostContentReactionsBody):
@@ -159,27 +139,23 @@ async def asyncio_detailed(
 
     Returns:
         Response[Union[Error, Reaction]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         body=body,
-
     )
 
-    response = await client.get_async_httpx_client().request(
-        **kwargs
-    )
+    response = await client.get_async_httpx_client().request(**kwargs)
 
     return _build_response(client=client, response=response)
+
 
 async def asyncio(
     *,
     client: AuthenticatedClient,
     body: PostContentReactionsBody,
-
-) -> Optional[Union[Error, Reaction]]:
-    """ Add a reaction (idempotent on the caller's target+emoji)
+) -> Error | Reaction | None:
+    """Add a reaction (idempotent on the caller's target+emoji)
 
     Args:
         body (PostContentReactionsBody):
@@ -190,11 +166,11 @@ async def asyncio(
 
     Returns:
         Union[Error, Reaction]
-     """
+    """
 
-
-    return (await asyncio_detailed(
-        client=client,
-body=body,
-
-    )).parsed
+    return (
+        await asyncio_detailed(
+            client=client,
+            body=body,
+        )
+    ).parsed

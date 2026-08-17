@@ -1,69 +1,61 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
-
-from ..models.post_project_projects_id_artifacts_body_direction import PostProjectProjectsIdArtifactsBodyDirection
-
-
-
-
-
+from ..models.post_project_projects_id_artifacts_body_direction import (
+    PostProjectProjectsIdArtifactsBodyDirection,
+)
+from ..models.post_project_projects_id_artifacts_body_target_kind import (
+    PostProjectProjectsIdArtifactsBodyTargetKind,
+)
 
 T = TypeVar("T", bound="PostProjectProjectsIdArtifactsBody")
 
 
-
 @_attrs_define
 class PostProjectProjectsIdArtifactsBody:
-    """ 
-        Attributes:
-            direction (PostProjectProjectsIdArtifactsBodyDirection):
-            target_kind (str): the target's registry, e.g. 'content.markdown'
-            target_id (str):
-     """
+    """
+    Attributes:
+        direction (PostProjectProjectsIdArtifactsBodyDirection):
+        target_kind (PostProjectProjectsIdArtifactsBodyTargetKind): the target's registry, e.g. 'content.markdown'. Must
+            be a kind the target registry knows (400 otherwise), and the target itself must exist within the PROJECT owner's
+            reach (404 otherwise) — an unreachable id is indistinguishable from an absent one. GET
+            /project/projects/{id}/attachable lists the ids that will be accepted.
+        target_id (str):
+    """
 
     direction: PostProjectProjectsIdArtifactsBodyDirection
-    target_kind: str
+    target_kind: PostProjectProjectsIdArtifactsBodyTargetKind
     target_id: str
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         direction = self.direction.value
 
-        target_kind = self.target_kind
+        target_kind = self.target_kind.value
 
         target_id = self.target_id
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "direction": direction,
-            "targetKind": target_kind,
-            "targetId": target_id,
-        })
+        field_dict.update(
+            {
+                "direction": direction,
+                "targetKind": target_kind,
+                "targetId": target_id,
+            }
+        )
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
         direction = PostProjectProjectsIdArtifactsBodyDirection(d.pop("direction"))
 
-
-
-
-        target_kind = d.pop("targetKind")
+        target_kind = PostProjectProjectsIdArtifactsBodyTargetKind(d.pop("targetKind"))
 
         target_id = d.pop("targetId")
 
@@ -72,7 +64,6 @@ class PostProjectProjectsIdArtifactsBody:
             target_kind=target_kind,
             target_id=target_id,
         )
-
 
         post_project_projects_id_artifacts_body.additional_properties = d
         return post_project_projects_id_artifacts_body

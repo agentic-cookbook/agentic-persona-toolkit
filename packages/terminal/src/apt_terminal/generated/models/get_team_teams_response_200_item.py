@@ -1,37 +1,26 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar, cast
 
 from attrs import define as _attrs_define
-from attrs import field as _attrs_field
-
-from ..types import UNSET, Unset
-
-from typing import cast, Union
-
-
-
-
-
 
 T = TypeVar("T", bound="GetTeamTeamsResponse200Item")
 
 
-
 @_attrs_define
 class GetTeamTeamsResponse200Item:
-    """ 
-        Attributes:
-            id (str):
-            owner_kind (str):
-            owner_id (str):
-            slug (str):
-            name (str):
-            description (str):
-            created_by (Union[None, str]):
-            created_at (str):
-            updated_at (str):
-            is_deleted (bool):
-     """
+    """
+    Attributes:
+        id (str):
+        owner_kind (str):
+        owner_id (str):
+        slug (str):
+        name (str):
+        description (str):
+        created_by (Union[None, str]):
+        created_at (str):
+        updated_at (str):
+        is_deleted (bool):
+    """
 
     id: str
     owner_kind: str
@@ -39,14 +28,10 @@ class GetTeamTeamsResponse200Item:
     slug: str
     name: str
     description: str
-    created_by: Union[None, str]
+    created_by: None | str
     created_at: str
     updated_at: str
     is_deleted: bool
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         id = self.id
@@ -61,7 +46,7 @@ class GetTeamTeamsResponse200Item:
 
         description = self.description
 
-        created_by: Union[None, str]
+        created_by: None | str
         created_by = self.created_by
 
         created_at = self.created_at
@@ -70,25 +55,24 @@ class GetTeamTeamsResponse200Item:
 
         is_deleted = self.is_deleted
 
-
         field_dict: dict[str, Any] = {}
 
-        field_dict.update({
-            "id": id,
-            "ownerKind": owner_kind,
-            "ownerId": owner_id,
-            "slug": slug,
-            "name": name,
-            "description": description,
-            "createdBy": created_by,
-            "createdAt": created_at,
-            "updatedAt": updated_at,
-            "isDeleted": is_deleted,
-        })
+        field_dict.update(
+            {
+                "id": id,
+                "ownerKind": owner_kind,
+                "ownerId": owner_id,
+                "slug": slug,
+                "name": name,
+                "description": description,
+                "createdBy": created_by,
+                "createdAt": created_at,
+                "updatedAt": updated_at,
+                "isDeleted": is_deleted,
+            }
+        )
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -105,13 +89,12 @@ class GetTeamTeamsResponse200Item:
 
         description = d.pop("description")
 
-        def _parse_created_by(data: object) -> Union[None, str]:
+        def _parse_created_by(data: object) -> None | str:
             if data is None:
                 return data
-            return cast(Union[None, str], data)
+            return cast(None | str, data)
 
         created_by = _parse_created_by(d.pop("createdBy"))
-
 
         created_at = d.pop("createdAt")
 
@@ -133,4 +116,3 @@ class GetTeamTeamsResponse200Item:
         )
 
         return get_team_teams_response_200_item
-

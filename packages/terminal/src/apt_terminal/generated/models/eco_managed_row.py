@@ -1,50 +1,32 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
-
-
-
-
-
-
-
 T = TypeVar("T", bound="EcoManagedRow")
-
 
 
 @_attrs_define
 class EcoManagedRow:
-    """ A row from the ecosystem-scoped invitation surface (pending user, invitation, invitation request, admin note, or
+    """A row from the ecosystem-scoped invitation surface (pending user, invitation, invitation request, admin note, or
     history entry). Intentionally open — the shape mirrors the admin routes 1:1, so no fixed property schema is repeated
     here.
 
-     """
+    """
 
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
-
-
-
-
     def to_dict(self) -> dict[str, Any]:
-        
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
 
         return field_dict
 
-
-
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
-        eco_managed_row = cls(
-        )
-
+        eco_managed_row = cls()
 
         eco_managed_row.additional_properties = d
         return eco_managed_row

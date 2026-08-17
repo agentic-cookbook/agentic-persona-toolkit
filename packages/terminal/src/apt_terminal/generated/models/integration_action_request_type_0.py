@@ -1,79 +1,60 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 from ..types import UNSET, Unset
 
-from ..types import UNSET, Unset
-from typing import cast
-from typing import Union
-
-
-
-
-
-
 T = TypeVar("T", bound="IntegrationActionRequestType0")
-
 
 
 @_attrs_define
 class IntegrationActionRequestType0:
-    """ actionType=send — an outbound email; at least one body is required
+    """actionType=send — an outbound email; at least one body is required
 
-        Attributes:
-            to (list[str]):
-            subject (str):
-            cc (Union[Unset, list[str]]):
-            bcc (Union[Unset, list[str]]):
-            body_text (Union[Unset, str]):
-            body_html (Union[Unset, str]):
-     """
+    Attributes:
+        to (list[str]):
+        subject (str):
+        cc (Union[Unset, list[str]]):
+        bcc (Union[Unset, list[str]]):
+        body_text (Union[Unset, str]):
+        body_html (Union[Unset, str]):
+    """
 
     to: list[str]
     subject: str
-    cc: Union[Unset, list[str]] = UNSET
-    bcc: Union[Unset, list[str]] = UNSET
-    body_text: Union[Unset, str] = UNSET
-    body_html: Union[Unset, str] = UNSET
+    cc: Unset | list[str] = UNSET
+    bcc: Unset | list[str] = UNSET
+    body_text: Unset | str = UNSET
+    body_html: Unset | str = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         to = self.to
 
-
-
         subject = self.subject
 
-        cc: Union[Unset, list[str]] = UNSET
+        cc: Unset | list[str] = UNSET
         if not isinstance(self.cc, Unset):
             cc = self.cc
 
-
-
-        bcc: Union[Unset, list[str]] = UNSET
+        bcc: Unset | list[str] = UNSET
         if not isinstance(self.bcc, Unset):
             bcc = self.bcc
-
-
 
         body_text = self.body_text
 
         body_html = self.body_html
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "to": to,
-            "subject": subject,
-        })
+        field_dict.update(
+            {
+                "to": to,
+                "subject": subject,
+            }
+        )
         if cc is not UNSET:
             field_dict["cc"] = cc
         if bcc is not UNSET:
@@ -85,21 +66,16 @@ class IntegrationActionRequestType0:
 
         return field_dict
 
-
-
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
         to = cast(list[str], d.pop("to"))
 
-
         subject = d.pop("subject")
 
         cc = cast(list[str], d.pop("cc", UNSET))
 
-
         bcc = cast(list[str], d.pop("bcc", UNSET))
-
 
         body_text = d.pop("bodyText", UNSET)
 
@@ -113,7 +89,6 @@ class IntegrationActionRequestType0:
             body_text=body_text,
             body_html=body_html,
         )
-
 
         integration_action_request_type_0.additional_properties = d
         return integration_action_request_type_0

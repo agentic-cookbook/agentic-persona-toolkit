@@ -1,42 +1,29 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 from ..types import UNSET, Unset
 
-from ..types import UNSET, Unset
-from typing import Union
-
-
-
-
-
-
 T = TypeVar("T", bound="PostAuthLoginBody")
-
 
 
 @_attrs_define
 class PostAuthLoginBody:
-    """ 
-        Attributes:
-            password (str):
-            email (Union[Unset, str]): Email address
-            slug (Union[Unset, str]): User id (login handle)
-            identifier (Union[Unset, str]): Email, user id, or a verified phone number (E.164) — classified server-side
-     """
+    """
+    Attributes:
+        password (str):
+        email (Union[Unset, str]): Email address
+        slug (Union[Unset, str]): User id (login handle)
+        identifier (Union[Unset, str]): Email, user id, or a verified phone number (E.164) — classified server-side
+    """
 
     password: str
-    email: Union[Unset, str] = UNSET
-    slug: Union[Unset, str] = UNSET
-    identifier: Union[Unset, str] = UNSET
+    email: Unset | str = UNSET
+    slug: Unset | str = UNSET
+    identifier: Unset | str = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         password = self.password
@@ -47,12 +34,13 @@ class PostAuthLoginBody:
 
         identifier = self.identifier
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "password": password,
-        })
+        field_dict.update(
+            {
+                "password": password,
+            }
+        )
         if email is not UNSET:
             field_dict["email"] = email
         if slug is not UNSET:
@@ -61,8 +49,6 @@ class PostAuthLoginBody:
             field_dict["identifier"] = identifier
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -81,7 +67,6 @@ class PostAuthLoginBody:
             slug=slug,
             identifier=identifier,
         )
-
 
         post_auth_login_body.additional_properties = d
         return post_auth_login_body

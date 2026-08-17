@@ -1,39 +1,29 @@
 from http import HTTPStatus
-from typing import Any, Optional, Union, cast
+from typing import Any
 
 import httpx
 
-from ...client import AuthenticatedClient, Client
-from ...types import Response, UNSET
 from ... import errors
-
+from ...client import AuthenticatedClient, Client
 from ...models.auth_method_setting import AuthMethodSetting
 from ...models.error import Error
 from ...models.patch_auth_methods_method_body import PatchAuthMethodsMethodBody
-from typing import cast
-
+from ...types import Response
 
 
 def _get_kwargs(
     method: str,
     *,
     body: PatchAuthMethodsMethodBody,
-
 ) -> dict[str, Any]:
     headers: dict[str, Any] = {}
 
-
-    
-
-    
-
     _kwargs: dict[str, Any] = {
         "method": "patch",
-        "url": "/auth/methods/{method}".format(method=method,),
+        "url": f"/auth/methods/{method}",
     }
 
     _kwargs["json"] = body.to_dict()
-
 
     headers["Content-Type"] = "application/json"
 
@@ -41,33 +31,26 @@ def _get_kwargs(
     return _kwargs
 
 
-
-def _parse_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Optional[Union[AuthMethodSetting, Error]]:
+def _parse_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> AuthMethodSetting | Error | None:
     if response.status_code == 200:
         response_200 = AuthMethodSetting.from_dict(response.json())
-
-
 
         return response_200
 
     if response.status_code == 400:
         response_400 = Error.from_dict(response.json())
 
-
-
         return response_400
 
     if response.status_code == 401:
         response_401 = Error.from_dict(response.json())
 
-
-
         return response_401
 
     if response.status_code == 403:
         response_403 = Error.from_dict(response.json())
-
-
 
         return response_403
 
@@ -77,7 +60,9 @@ def _parse_response(*, client: Union[AuthenticatedClient, Client], response: htt
         return None
 
 
-def _build_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Response[Union[AuthMethodSetting, Error]]:
+def _build_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Response[AuthMethodSetting | Error]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -91,9 +76,8 @@ def sync_detailed(
     *,
     client: AuthenticatedClient,
     body: PatchAuthMethodsMethodBody,
-
-) -> Response[Union[AuthMethodSetting, Error]]:
-    """ Enable or disable an auth method setting, upserting it (admin)
+) -> Response[AuthMethodSetting | Error]:
+    """Enable or disable an auth method setting, upserting it (admin)
 
     Args:
         method (str):
@@ -105,13 +89,11 @@ def sync_detailed(
 
     Returns:
         Response[Union[AuthMethodSetting, Error]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         method=method,
-body=body,
-
+        body=body,
     )
 
     response = client.get_httpx_client().request(
@@ -120,14 +102,14 @@ body=body,
 
     return _build_response(client=client, response=response)
 
+
 def sync(
     method: str,
     *,
     client: AuthenticatedClient,
     body: PatchAuthMethodsMethodBody,
-
-) -> Optional[Union[AuthMethodSetting, Error]]:
-    """ Enable or disable an auth method setting, upserting it (admin)
+) -> AuthMethodSetting | Error | None:
+    """Enable or disable an auth method setting, upserting it (admin)
 
     Args:
         method (str):
@@ -139,24 +121,22 @@ def sync(
 
     Returns:
         Union[AuthMethodSetting, Error]
-     """
-
+    """
 
     return sync_detailed(
         method=method,
-client=client,
-body=body,
-
+        client=client,
+        body=body,
     ).parsed
+
 
 async def asyncio_detailed(
     method: str,
     *,
     client: AuthenticatedClient,
     body: PatchAuthMethodsMethodBody,
-
-) -> Response[Union[AuthMethodSetting, Error]]:
-    """ Enable or disable an auth method setting, upserting it (admin)
+) -> Response[AuthMethodSetting | Error]:
+    """Enable or disable an auth method setting, upserting it (admin)
 
     Args:
         method (str):
@@ -168,29 +148,25 @@ async def asyncio_detailed(
 
     Returns:
         Response[Union[AuthMethodSetting, Error]]
-     """
-
+    """
 
     kwargs = _get_kwargs(
         method=method,
-body=body,
-
+        body=body,
     )
 
-    response = await client.get_async_httpx_client().request(
-        **kwargs
-    )
+    response = await client.get_async_httpx_client().request(**kwargs)
 
     return _build_response(client=client, response=response)
+
 
 async def asyncio(
     method: str,
     *,
     client: AuthenticatedClient,
     body: PatchAuthMethodsMethodBody,
-
-) -> Optional[Union[AuthMethodSetting, Error]]:
-    """ Enable or disable an auth method setting, upserting it (admin)
+) -> AuthMethodSetting | Error | None:
+    """Enable or disable an auth method setting, upserting it (admin)
 
     Args:
         method (str):
@@ -202,12 +178,12 @@ async def asyncio(
 
     Returns:
         Union[AuthMethodSetting, Error]
-     """
+    """
 
-
-    return (await asyncio_detailed(
-        method=method,
-client=client,
-body=body,
-
-    )).parsed
+    return (
+        await asyncio_detailed(
+            method=method,
+            client=client,
+            body=body,
+        )
+    ).parsed

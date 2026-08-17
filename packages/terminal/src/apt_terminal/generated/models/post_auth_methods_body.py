@@ -1,56 +1,42 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 from ..types import UNSET, Unset
 
-from ..types import UNSET, Unset
-from typing import Union
-
-
-
-
-
-
 T = TypeVar("T", bound="PostAuthMethodsBody")
-
 
 
 @_attrs_define
 class PostAuthMethodsBody:
-    """ 
-        Attributes:
-            method (str):
-            enabled (Union[Unset, bool]):  Default: True.
-     """
+    """
+    Attributes:
+        method (str):
+        enabled (Union[Unset, bool]):  Default: True.
+    """
 
     method: str
-    enabled: Union[Unset, bool] = True
+    enabled: Unset | bool = True
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         method = self.method
 
         enabled = self.enabled
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "method": method,
-        })
+        field_dict.update(
+            {
+                "method": method,
+            }
+        )
         if enabled is not UNSET:
             field_dict["enabled"] = enabled
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -63,7 +49,6 @@ class PostAuthMethodsBody:
             method=method,
             enabled=enabled,
         )
-
 
         post_auth_methods_body.additional_properties = d
         return post_auth_methods_body

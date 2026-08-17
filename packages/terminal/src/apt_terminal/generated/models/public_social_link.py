@@ -1,38 +1,25 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
-
-
-
-
-
-
-
 T = TypeVar("T", bound="PublicSocialLink")
-
 
 
 @_attrs_define
 class PublicSocialLink:
-    """ 
-        Attributes:
-            platform (str):
-            url (str):
-            handle (str):
-     """
+    """
+    Attributes:
+        platform (str):
+        url (str):
+        handle (str):
+    """
 
     platform: str
     url: str
     handle: str
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
-
-
-
-
 
     def to_dict(self) -> dict[str, Any]:
         platform = self.platform
@@ -41,18 +28,17 @@ class PublicSocialLink:
 
         handle = self.handle
 
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({
-            "platform": platform,
-            "url": url,
-            "handle": handle,
-        })
+        field_dict.update(
+            {
+                "platform": platform,
+                "url": url,
+                "handle": handle,
+            }
+        )
 
         return field_dict
-
-
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
@@ -68,7 +54,6 @@ class PublicSocialLink:
             url=url,
             handle=handle,
         )
-
 
         public_social_link.additional_properties = d
         return public_social_link
