@@ -65,8 +65,11 @@ export function ChatInput({
           so they don't inject autofill attributes (data-dashlane-rid, etc.) that
           mutate the DOM before hydration and trip React's hydration mismatch:
           Dashlane reads data-form-type="other" (its SAWF "ignore" value, set on
-          both this field and its container); 1Password/LastPass/Bitwarden read
-          their own ignore attrs. autoComplete="off" alone is not enough. */}
+          both this field and its container); 1Password/LastPass/Bitwarden/Proton
+          Pass read their own ignore attrs, and none of them reads another's.
+          autoComplete="off" alone is not enough — it speaks only to the browser.
+          The list of record is `@agentic-toolkit/ui/lib/autofill`; it is spelled
+          out here because this package ships zero runtime dependencies. */}
       {/* `name` and `aria-label` are kept for their own sake, not as an autofill
           hint — the measurement above showed they do nothing for that. A
           placeholder is a weak accessible name at the best of times, and a
@@ -84,6 +87,7 @@ export function ChatInput({
         data-1p-ignore="true"
         data-lpignore="true"
         data-bwignore="true"
+        data-protonpass-ignore="true"
         autoFocus={autoFocus}
         disabled={disabled}
         enterKeyHint="send"

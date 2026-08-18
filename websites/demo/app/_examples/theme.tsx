@@ -14,6 +14,7 @@ import { useDemoTheme } from '../theme-store'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { noAutofillProps } from '@/lib/autofill'
 
 const SITE_TOKENS = [
   '--color-surface',
@@ -445,8 +446,8 @@ const TOPICS: Topic[] = [
             demo: (
               <div className="apt-controls">
                 <div className="apt-control-row">
-                  <input type="text" placeholder="Default input" />
-                  <input type="text" placeholder="Focused input — click to focus" />
+                  <input type="text" placeholder="Default input" {...noAutofillProps} />
+                  <input type="text" placeholder="Focused input — click to focus" {...noAutofillProps} />
                 </div>
                 <label className="apt-control-row">
                   <input type="checkbox" defaultChecked /> Checkbox
@@ -555,7 +556,7 @@ const TOPICS: Topic[] = [
                   <p>Line seven.</p>
                   <p>Line eight.</p>
                 </div>
-                <input type="text" defaultValue="Caret color appears when this input is focused" className="apt-chrome-caret" />
+                <input type="text" defaultValue="Caret color appears when this input is focused" className="apt-chrome-caret" {...noAutofillProps} />
               </div>
             ),
             css: CHROME_CSS,
