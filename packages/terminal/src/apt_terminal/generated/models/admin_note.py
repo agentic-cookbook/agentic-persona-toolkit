@@ -1,47 +1,66 @@
 from collections.abc import Mapping
-from typing import TYPE_CHECKING, Any, TypeVar
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-if TYPE_CHECKING:
-    from ..models.eco_notes_reconcile_body_notes_item import EcoNotesReconcileBodyNotesItem
-
-
-T = TypeVar("T", bound="EcoNotesReconcileBody")
+T = TypeVar("T", bound="AdminNote")
 
 
 @_attrs_define
-class EcoNotesReconcileBody:
-    """
+class AdminNote:
+    """An operator note attached to some other row. Never visible to that row’s subject.
+
     Attributes:
+        id (str):
+        ecosystem_id (str):
         subject_table (str):
         subject_id (str):
-        notes (list['EcoNotesReconcileBodyNotesItem']):
+        content (str):
+        created_by (str):
+        created_at (str):
+        updated_at (str):
     """
 
+    id: str
+    ecosystem_id: str
     subject_table: str
     subject_id: str
-    notes: list["EcoNotesReconcileBodyNotesItem"]
+    content: str
+    created_by: str
+    created_at: str
+    updated_at: str
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
+        id = self.id
+
+        ecosystem_id = self.ecosystem_id
+
         subject_table = self.subject_table
 
         subject_id = self.subject_id
 
-        notes = []
-        for notes_item_data in self.notes:
-            notes_item = notes_item_data.to_dict()
-            notes.append(notes_item)
+        content = self.content
+
+        created_by = self.created_by
+
+        created_at = self.created_at
+
+        updated_at = self.updated_at
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
             {
+                "id": id,
+                "ecosystemId": ecosystem_id,
                 "subjectTable": subject_table,
                 "subjectId": subject_id,
-                "notes": notes,
+                "content": content,
+                "createdBy": created_by,
+                "createdAt": created_at,
+                "updatedAt": updated_at,
             }
         )
 
@@ -49,28 +68,36 @@ class EcoNotesReconcileBody:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.eco_notes_reconcile_body_notes_item import EcoNotesReconcileBodyNotesItem
-
         d = dict(src_dict)
+        id = d.pop("id")
+
+        ecosystem_id = d.pop("ecosystemId")
+
         subject_table = d.pop("subjectTable")
 
         subject_id = d.pop("subjectId")
 
-        notes = []
-        _notes = d.pop("notes")
-        for notes_item_data in _notes:
-            notes_item = EcoNotesReconcileBodyNotesItem.from_dict(notes_item_data)
+        content = d.pop("content")
 
-            notes.append(notes_item)
+        created_by = d.pop("createdBy")
 
-        eco_notes_reconcile_body = cls(
+        created_at = d.pop("createdAt")
+
+        updated_at = d.pop("updatedAt")
+
+        admin_note = cls(
+            id=id,
+            ecosystem_id=ecosystem_id,
             subject_table=subject_table,
             subject_id=subject_id,
-            notes=notes,
+            content=content,
+            created_by=created_by,
+            created_at=created_at,
+            updated_at=updated_at,
         )
 
-        eco_notes_reconcile_body.additional_properties = d
-        return eco_notes_reconcile_body
+        admin_note.additional_properties = d
+        return admin_note
 
     @property
     def additional_keys(self) -> list[str]:

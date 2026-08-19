@@ -4,72 +4,68 @@ from typing import Any, TypeVar
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
-
-T = TypeVar("T", bound="EcoAddPendingUsersBodyUsersItem")
+T = TypeVar("T", bound="PersonaBootstrapBucketAccess")
 
 
 @_attrs_define
-class EcoAddPendingUsersBodyUsersItem:
-    """
+class PersonaBootstrapBucketAccess:
+    """A visitor token reports create/update/delete false whatever the underlying grant says.
+
     Attributes:
-        name (str):
-        email (Union[Unset, str]):
-        phone (Union[Unset, str]):
-        note (Union[Unset, str]):
+        read (bool):
+        create (bool):
+        update (bool):
+        delete (bool):
     """
 
-    name: str
-    email: Unset | str = UNSET
-    phone: Unset | str = UNSET
-    note: Unset | str = UNSET
+    read: bool
+    create: bool
+    update: bool
+    delete: bool
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        name = self.name
+        read = self.read
 
-        email = self.email
+        create = self.create
 
-        phone = self.phone
+        update = self.update
 
-        note = self.note
+        delete = self.delete
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
             {
-                "name": name,
+                "read": read,
+                "create": create,
+                "update": update,
+                "delete": delete,
             }
         )
-        if email is not UNSET:
-            field_dict["email"] = email
-        if phone is not UNSET:
-            field_dict["phone"] = phone
-        if note is not UNSET:
-            field_dict["note"] = note
 
         return field_dict
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
-        name = d.pop("name")
+        read = d.pop("read")
 
-        email = d.pop("email", UNSET)
+        create = d.pop("create")
 
-        phone = d.pop("phone", UNSET)
+        update = d.pop("update")
 
-        note = d.pop("note", UNSET)
+        delete = d.pop("delete")
 
-        eco_add_pending_users_body_users_item = cls(
-            name=name,
-            email=email,
-            phone=phone,
-            note=note,
+        persona_bootstrap_bucket_access = cls(
+            read=read,
+            create=create,
+            update=update,
+            delete=delete,
         )
 
-        eco_add_pending_users_body_users_item.additional_properties = d
-        return eco_add_pending_users_body_users_item
+        persona_bootstrap_bucket_access.additional_properties = d
+        return persona_bootstrap_bucket_access
 
     @property
     def additional_keys(self) -> list[str]:

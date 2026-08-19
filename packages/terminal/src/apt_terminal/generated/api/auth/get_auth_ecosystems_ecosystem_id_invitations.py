@@ -5,8 +5,8 @@ import httpx
 
 from ... import errors
 from ...client import AuthenticatedClient, Client
-from ...models.eco_managed_row import EcoManagedRow
 from ...models.error import Error
+from ...models.invitation import Invitation
 from ...types import Response
 
 
@@ -24,16 +24,14 @@ def _get_kwargs(
 
 def _parse_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Error | list["EcoManagedRow"] | None:
+) -> Error | list["Invitation"] | None:
     if response.status_code == 200:
         response_200 = []
         _response_200 = response.json()
-        for componentsschemas_eco_managed_row_list_item_data in _response_200:
-            componentsschemas_eco_managed_row_list_item = EcoManagedRow.from_dict(
-                componentsschemas_eco_managed_row_list_item_data
-            )
+        for response_200_item_data in _response_200:
+            response_200_item = Invitation.from_dict(response_200_item_data)
 
-            response_200.append(componentsschemas_eco_managed_row_list_item)
+            response_200.append(response_200_item)
 
         return response_200
 
@@ -65,7 +63,7 @@ def _parse_response(
 
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[Error | list["EcoManagedRow"]]:
+) -> Response[Error | list["Invitation"]]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -78,7 +76,7 @@ def sync_detailed(
     ecosystem_id: str,
     *,
     client: AuthenticatedClient,
-) -> Response[Error | list["EcoManagedRow"]]:
+) -> Response[Error | list["Invitation"]]:
     """List an ecosystem’s sent invitations (owner-scoped)
 
     Args:
@@ -89,7 +87,7 @@ def sync_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Union[Error, list['EcoManagedRow']]]
+        Response[Union[Error, list['Invitation']]]
     """
 
     kwargs = _get_kwargs(
@@ -107,7 +105,7 @@ def sync(
     ecosystem_id: str,
     *,
     client: AuthenticatedClient,
-) -> Error | list["EcoManagedRow"] | None:
+) -> Error | list["Invitation"] | None:
     """List an ecosystem’s sent invitations (owner-scoped)
 
     Args:
@@ -118,7 +116,7 @@ def sync(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Union[Error, list['EcoManagedRow']]
+        Union[Error, list['Invitation']]
     """
 
     return sync_detailed(
@@ -131,7 +129,7 @@ async def asyncio_detailed(
     ecosystem_id: str,
     *,
     client: AuthenticatedClient,
-) -> Response[Error | list["EcoManagedRow"]]:
+) -> Response[Error | list["Invitation"]]:
     """List an ecosystem’s sent invitations (owner-scoped)
 
     Args:
@@ -142,7 +140,7 @@ async def asyncio_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Union[Error, list['EcoManagedRow']]]
+        Response[Union[Error, list['Invitation']]]
     """
 
     kwargs = _get_kwargs(
@@ -158,7 +156,7 @@ async def asyncio(
     ecosystem_id: str,
     *,
     client: AuthenticatedClient,
-) -> Error | list["EcoManagedRow"] | None:
+) -> Error | list["Invitation"] | None:
     """List an ecosystem’s sent invitations (owner-scoped)
 
     Args:
@@ -169,7 +167,7 @@ async def asyncio(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Union[Error, list['EcoManagedRow']]
+        Union[Error, list['Invitation']]
     """
 
     return (

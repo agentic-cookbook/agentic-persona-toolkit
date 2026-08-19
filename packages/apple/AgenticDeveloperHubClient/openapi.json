@@ -13,6 +13,9 @@
       "name": "account"
     },
     {
+      "name": "announcements"
+    },
+    {
       "name": "audience"
     },
     {
@@ -103,6 +106,9 @@
       "name": "personal"
     },
     {
+      "name": "presence"
+    },
+    {
       "name": "processing"
     },
     {
@@ -125,6 +131,9 @@
     },
     {
       "name": "storage"
+    },
+    {
+      "name": "sync"
     },
     {
       "name": "system"
@@ -1607,18 +1616,265 @@
           }
         }
       },
-      "EcoManagedRow": {
+      "PendingUser": {
         "type": "object",
-        "additionalProperties": true,
-        "description": "A row from the ecosystem-scoped invitation surface (pending user, invitation, invitation request, admin note, or history entry). Intentionally open — the shape mirrors the admin routes 1:1, so no fixed property schema is repeated here."
-      },
-      "EcoManagedRowList": {
-        "type": "array",
-        "items": {
-          "$ref": "#/components/schemas/EcoManagedRow"
+        "description": "A person known to the ecosystem who has not accepted an invitation yet.",
+        "required": [
+          "id",
+          "ecosystemId",
+          "userNumber",
+          "name",
+          "email",
+          "phone",
+          "status",
+          "requestCount",
+          "invitedCount",
+          "lastRequestAt",
+          "lastInviteSentAt",
+          "firstRequestedAt",
+          "lastSource",
+          "lastNote",
+          "acceptedCustomerId",
+          "createdAt",
+          "updatedAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 36
+          },
+          "ecosystemId": {
+            "type": "string",
+            "maxLength": 36
+          },
+          "userNumber": {
+            "type": "integer",
+            "description": "Sequential within the ecosystem, assigned on insert"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 255
+          },
+          "email": {
+            "type": "string",
+            "maxLength": 255,
+            "nullable": true
+          },
+          "phone": {
+            "type": "string",
+            "maxLength": 32,
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "invited",
+              "accepted",
+              "declined"
+            ]
+          },
+          "requestCount": {
+            "type": "integer"
+          },
+          "invitedCount": {
+            "type": "integer"
+          },
+          "lastRequestAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "lastInviteSentAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "firstRequestedAt": {
+            "type": "string"
+          },
+          "lastSource": {
+            "type": "string",
+            "maxLength": 120,
+            "nullable": true
+          },
+          "lastNote": {
+            "type": "string",
+            "nullable": true
+          },
+          "acceptedCustomerId": {
+            "type": "string",
+            "maxLength": 36,
+            "nullable": true
+          },
+          "contactId": {
+            "type": "string",
+            "maxLength": 36,
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
         }
       },
-      "EcoAddPendingUsersBody": {
+      "Invitation": {
+        "type": "object",
+        "description": "One invite delivered to one destination. Inviting by both email and SMS makes two.",
+        "required": [
+          "id",
+          "ecosystemId",
+          "pendingUserId",
+          "name",
+          "channel",
+          "destination",
+          "tokenHash",
+          "status",
+          "sentBy",
+          "sentAt",
+          "expiresAt",
+          "acceptedAt",
+          "acceptedCustomerId",
+          "messageLogId",
+          "adminNote",
+          "createdAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 36
+          },
+          "ecosystemId": {
+            "type": "string",
+            "maxLength": 36
+          },
+          "pendingUserId": {
+            "type": "string",
+            "maxLength": 36
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 255
+          },
+          "channel": {
+            "type": "string",
+            "enum": [
+              "email",
+              "sms"
+            ]
+          },
+          "destination": {
+            "type": "string",
+            "maxLength": 255
+          },
+          "tokenHash": {
+            "type": "string",
+            "maxLength": 64
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "sent",
+              "registered",
+              "accepted",
+              "expired",
+              "revoked"
+            ]
+          },
+          "sentBy": {
+            "type": "string",
+            "maxLength": 36
+          },
+          "sentAt": {
+            "type": "string"
+          },
+          "expiresAt": {
+            "type": "string"
+          },
+          "acceptedAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "acceptedCustomerId": {
+            "type": "string",
+            "maxLength": 36,
+            "nullable": true
+          },
+          "messageLogId": {
+            "type": "string",
+            "maxLength": 36,
+            "nullable": true
+          },
+          "adminNote": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string"
+          }
+        }
+      },
+      "InvitationRequest": {
+        "type": "object",
+        "description": "An unsolicited ask to join, as captured by the public request form.",
+        "required": [
+          "id",
+          "ecosystemId",
+          "pendingUserId",
+          "name",
+          "email",
+          "phone",
+          "source",
+          "note",
+          "createdAt",
+          "userNumber"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 36
+          },
+          "ecosystemId": {
+            "type": "string",
+            "maxLength": 36
+          },
+          "pendingUserId": {
+            "type": "string",
+            "maxLength": 36
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 255
+          },
+          "email": {
+            "type": "string",
+            "maxLength": 255,
+            "nullable": true
+          },
+          "phone": {
+            "type": "string",
+            "maxLength": 32,
+            "nullable": true
+          },
+          "source": {
+            "type": "string",
+            "maxLength": 120,
+            "nullable": true
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "userNumber": {
+            "type": "integer",
+            "nullable": true
+          }
+        }
+      },
+      "AddPendingUsersBody": {
         "type": "object",
         "required": [
           "users"
@@ -1628,35 +1884,39 @@
             "type": "array",
             "minItems": 1,
             "items": {
-              "type": "object",
-              "required": [
-                "name"
-              ],
-              "properties": {
-                "name": {
-                  "type": "string",
-                  "minLength": 1,
-                  "maxLength": 255
-                },
-                "email": {
-                  "type": "string",
-                  "format": "email",
-                  "maxLength": 255
-                },
-                "phone": {
-                  "type": "string",
-                  "maxLength": 32
-                },
-                "note": {
-                  "type": "string"
-                }
-              }
+              "$ref": "#/components/schemas/AddPendingUser"
             }
           }
         }
       },
-      "EcoSendInvitesBody": {
+      "AddPendingUser": {
         "type": "object",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "maxLength": 255
+          },
+          "phone": {
+            "type": "string",
+            "maxLength": 32
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "SendInvitesBody": {
+        "type": "object",
+        "description": "Names the people to invite and the channels to reach them on. At least one channel is required.",
         "required": [
           "pendingUserIds"
         ],
@@ -1671,59 +1931,135 @@
             }
           },
           "email": {
-            "type": "object",
-            "properties": {
-              "note": {
-                "type": "string"
-              }
-            }
+            "$ref": "#/components/schemas/SendInviteChannel"
           },
           "sms": {
-            "type": "object",
-            "properties": {
-              "note": {
-                "type": "string"
-              }
+            "$ref": "#/components/schemas/SendInviteChannel"
+          }
+        }
+      },
+      "SendInviteChannel": {
+        "type": "object",
+        "description": "Send on this channel. `note` is added to the message body.",
+        "properties": {
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "Announcement": {
+        "type": "object",
+        "required": [
+          "id",
+          "createdBy",
+          "title",
+          "body",
+          "audience",
+          "status",
+          "createdAt",
+          "updatedAt",
+          "sentAt",
+          "totalRecipients",
+          "sentCount"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 36
+          },
+          "createdBy": {
+            "type": "string",
+            "maxLength": 36
+          },
+          "title": {
+            "type": "string"
+          },
+          "body": {
+            "type": "string"
+          },
+          "audience": {
+            "type": "string",
+            "description": "See AnnouncementCreate.audience"
+          },
+          "status": {
+            "type": "string",
+            "description": "e.g. sending, sent"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          },
+          "sentAt": {
+            "type": "string",
+            "nullable": true,
+            "description": "null until the fan-out finishes"
+          },
+          "totalRecipients": {
+            "type": "integer"
+          },
+          "sentCount": {
+            "type": "integer"
+          }
+        }
+      },
+      "AnnouncementList": {
+        "type": "object",
+        "required": [
+          "announcements"
+        ],
+        "properties": {
+          "announcements": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Announcement"
             }
           }
         }
       },
-      "EcoNotesReconcileBody": {
+      "AnnouncementCreate": {
         "type": "object",
         "required": [
-          "subjectTable",
-          "subjectId",
-          "notes"
+          "title",
+          "body"
         ],
         "properties": {
-          "subjectTable": {
+          "title": {
             "type": "string",
-            "minLength": 1,
-            "maxLength": 120
+            "minLength": 1
           },
-          "subjectId": {
+          "body": {
             "type": "string",
-            "minLength": 1,
+            "minLength": 1
+          },
+          "audience": {
+            "type": "string",
+            "default": "all_hub",
+            "description": "Reserved for targeting. Stored and echoed back, but fan-out currently reaches every live customer of the ecosystem whatever this says — it is not yet an enum, and no value narrows the audience."
+          }
+        }
+      },
+      "AnnouncementAccepted": {
+        "type": "object",
+        "required": [
+          "id",
+          "recipientCount",
+          "status"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
             "maxLength": 36
           },
-          "notes": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "required": [
-                "content"
-              ],
-              "properties": {
-                "id": {
-                  "type": "string",
-                  "maxLength": 36
-                },
-                "content": {
-                  "type": "string",
-                  "minLength": 1
-                }
-              }
-            }
+          "recipientCount": {
+            "type": "integer"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "sending"
+            ]
           }
         }
       },
@@ -2905,6 +3241,234 @@
             }
           }
         ]
+      },
+      "DmMessage": {
+        "type": "object",
+        "description": "One direct message. Also the payload of a `message` event on the DM SSE stream.",
+        "required": [
+          "id",
+          "chatId",
+          "senderParticipantId",
+          "senderUserId",
+          "seq",
+          "role",
+          "body",
+          "state",
+          "dateSent"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "chatId": {
+            "type": "string",
+            "maxLength": 36
+          },
+          "senderParticipantId": {
+            "type": "string",
+            "nullable": true
+          },
+          "senderUserId": {
+            "type": "string"
+          },
+          "seq": {
+            "type": "integer",
+            "description": "Per-chat monotonic sequence; the stream cursor"
+          },
+          "role": {
+            "type": "string"
+          },
+          "body": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string"
+          },
+          "dateSent": {
+            "type": "string"
+          }
+        }
+      },
+      "DmMessagePreview": {
+        "type": "object",
+        "nullable": true,
+        "description": "The chat's most recent message, trimmed to what a chat list renders.",
+        "required": [
+          "id",
+          "senderParticipantId",
+          "body",
+          "seq",
+          "dateSent"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "senderParticipantId": {
+            "type": "string",
+            "nullable": true
+          },
+          "body": {
+            "type": "string"
+          },
+          "seq": {
+            "type": "integer"
+          },
+          "dateSent": {
+            "type": "string"
+          }
+        }
+      },
+      "DmChatSummary": {
+        "type": "object",
+        "required": [
+          "chatId",
+          "otherUserId",
+          "lastMessage",
+          "unreadCount"
+        ],
+        "properties": {
+          "chatId": {
+            "type": "string",
+            "maxLength": 36
+          },
+          "otherUserId": {
+            "type": "string"
+          },
+          "lastMessage": {
+            "$ref": "#/components/schemas/DmMessagePreview"
+          },
+          "unreadCount": {
+            "type": "integer"
+          }
+        }
+      },
+      "DmChatList": {
+        "type": "object",
+        "required": [
+          "chats",
+          "total",
+          "page",
+          "pageSize"
+        ],
+        "properties": {
+          "chats": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DmChatSummary"
+            }
+          },
+          "total": {
+            "type": "integer"
+          },
+          "page": {
+            "type": "integer"
+          },
+          "pageSize": {
+            "type": "integer"
+          }
+        }
+      },
+      "DmMessageList": {
+        "type": "object",
+        "required": [
+          "items",
+          "total",
+          "page",
+          "pageSize"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DmMessage"
+            }
+          },
+          "total": {
+            "type": "integer"
+          },
+          "page": {
+            "type": "integer"
+          },
+          "pageSize": {
+            "type": "integer"
+          }
+        }
+      },
+      "DmCreateRequest": {
+        "type": "object",
+        "required": [
+          "recipientId"
+        ],
+        "properties": {
+          "recipientId": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The other user. The caller's own id is a 400."
+          }
+        }
+      },
+      "DmCreateResult": {
+        "type": "object",
+        "required": [
+          "id",
+          "otherUserId",
+          "created"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 36,
+            "description": "The chat id"
+          },
+          "otherUserId": {
+            "type": "string"
+          },
+          "created": {
+            "type": "boolean",
+            "description": "false when an existing chat was reused"
+          }
+        }
+      },
+      "DmSendMessage": {
+        "type": "object",
+        "required": [
+          "body"
+        ],
+        "properties": {
+          "body": {
+            "type": "string",
+            "minLength": 1
+          },
+          "clientMessageId": {
+            "type": "string",
+            "description": "Idempotency key; a replay returns 200"
+          }
+        }
+      },
+      "DmReadRequest": {
+        "type": "object",
+        "properties": {
+          "messageId": {
+            "type": "string",
+            "description": "Mark read through this message; omit for the latest"
+          }
+        }
+      },
+      "DmReadResult": {
+        "type": "object",
+        "required": [
+          "success",
+          "unreadCount"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "unreadCount": {
+            "type": "integer"
+          }
+        }
       },
       "CommunicationSettings": {
         "type": "object",
@@ -5807,6 +6371,10 @@
           }
         }
       },
+      "NotificationWakeEvent": {
+        "type": "object",
+        "description": "The payload of every event on GET /notifications/stream — always `{}`. The SSE `event:` name (`notification` or `ready`) carries the whole meaning; the body deliberately carries none, so a client can never read the stream instead of the inbox."
+      },
       "Friendship": {
         "type": "object",
         "required": [
@@ -6132,6 +6700,52 @@
           },
           "createdAt": {
             "type": "string"
+          }
+        }
+      },
+      "PresenceView": {
+        "type": "object",
+        "required": [
+          "userId",
+          "online",
+          "lastSeenAt"
+        ],
+        "properties": {
+          "userId": {
+            "type": "string"
+          },
+          "online": {
+            "type": "boolean"
+          },
+          "lastSeenAt": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "PresenceList": {
+        "type": "object",
+        "required": [
+          "presence"
+        ],
+        "properties": {
+          "presence": {
+            "type": "array",
+            "description": "One entry per requested id, in the order requested (duplicates included).",
+            "items": {
+              "$ref": "#/components/schemas/PresenceView"
+            }
+          }
+        }
+      },
+      "PresenceHeartbeatResult": {
+        "type": "object",
+        "required": [
+          "success"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean"
           }
         }
       },
@@ -9774,6 +10388,308 @@
           }
         }
       },
+      "VisitorToken": {
+        "type": "object",
+        "required": [
+          "token",
+          "expiresAt",
+          "personaId"
+        ],
+        "properties": {
+          "token": {
+            "type": "string",
+            "description": "The bearer token itself, `tmp_` followed by 64 hex characters. Returned once at mint and stored only as a hash — it cannot be recovered."
+          },
+          "expiresAt": {
+            "type": "string"
+          },
+          "personaId": {
+            "type": "string"
+          }
+        }
+      },
+      "VisitorConversationCreate": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 200,
+            "description": "Defaults to \"New chat\""
+          }
+        }
+      },
+      "VisitorConversation": {
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "model",
+          "personaSlug",
+          "personaId",
+          "state",
+          "createdAt",
+          "updatedAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "model": {
+            "type": "string",
+            "description": "The persona's configured model, copied at creation"
+          },
+          "personaSlug": {
+            "type": "string",
+            "nullable": true
+          },
+          "personaId": {
+            "type": "string",
+            "nullable": true
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "open",
+              "closed"
+            ]
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        }
+      },
+      "VisitorMessage": {
+        "type": "object",
+        "required": [
+          "id",
+          "role",
+          "content",
+          "toolName",
+          "createdAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string"
+          },
+          "toolName": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string"
+          }
+        }
+      },
+      "VisitorConversationDetail": {
+        "type": "object",
+        "required": [
+          "conversation",
+          "messages"
+        ],
+        "properties": {
+          "conversation": {
+            "$ref": "#/components/schemas/VisitorConversation"
+          },
+          "messages": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VisitorMessage"
+            }
+          }
+        }
+      },
+      "VisitorTurnRequest": {
+        "type": "object",
+        "required": [
+          "message"
+        ],
+        "properties": {
+          "message": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Over the per-message character ceiling this is a 422, not a 400"
+          },
+          "clientMessageId": {
+            "type": "string"
+          }
+        }
+      },
+      "VisitorTurnEvent": {
+        "description": "One event in the visitor turn stream. The SSE `event:` name is the discriminator (`open` | `token` | `tool_call_started` | `tool_call_completed` | `status` | `award` | `done` | `ended` | `error`); the JSON `data:` payload is one of the shapes below.",
+        "oneOf": [
+          {
+            "title": "VisitorOpenEvent",
+            "type": "object",
+            "description": "open — the stream is live (empty payload)"
+          },
+          {
+            "title": "VisitorTokenEvent",
+            "type": "object",
+            "description": "token — a chunk of streamed text",
+            "required": [
+              "text"
+            ],
+            "properties": {
+              "text": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "title": "VisitorToolCallStartedEvent",
+            "type": "object",
+            "description": "tool_call_started — the persona invoked a tool",
+            "required": [
+              "name",
+              "arguments"
+            ],
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "arguments": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "title": "VisitorToolCallCompletedEvent",
+            "type": "object",
+            "description": "tool_call_completed — a tool finished",
+            "required": [
+              "name",
+              "ok",
+              "result"
+            ],
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "ok": {
+                "type": "boolean"
+              },
+              "result": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "title": "VisitorStatusEvent",
+            "type": "object",
+            "description": "status — the turn is being retried; not an error yet",
+            "required": [
+              "phase",
+              "attempt"
+            ],
+            "properties": {
+              "phase": {
+                "type": "string",
+                "enum": [
+                  "retrying"
+                ]
+              },
+              "attempt": {
+                "type": "integer"
+              }
+            }
+          },
+          {
+            "title": "VisitorAwardEvent",
+            "type": "object",
+            "description": "award — the turn earned badges or XP",
+            "required": [
+              "badges",
+              "xpGained",
+              "leveledUpTo"
+            ],
+            "properties": {
+              "badges": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/VisitorAwardBadge"
+                }
+              },
+              "xpGained": {
+                "type": "integer"
+              },
+              "leveledUpTo": {
+                "type": "integer",
+                "nullable": true
+              }
+            }
+          },
+          {
+            "title": "VisitorDoneEvent",
+            "type": "object",
+            "description": "done — the turn completed (empty payload)"
+          },
+          {
+            "title": "VisitorEndedEvent",
+            "type": "object",
+            "description": "ended — the persona closed the conversation; further turns are 409",
+            "required": [
+              "reason"
+            ],
+            "properties": {
+              "reason": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "title": "VisitorErrorEvent",
+            "type": "object",
+            "description": "error — the turn failed. Internal causes are replaced with generic copy.",
+            "required": [
+              "message"
+            ],
+            "properties": {
+              "message": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      },
+      "VisitorAwardBadge": {
+        "type": "object",
+        "required": [
+          "badgeId",
+          "name",
+          "icon",
+          "tier",
+          "description"
+        ],
+        "properties": {
+          "badgeId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "icon": {
+            "type": "string"
+          },
+          "tier": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        }
+      },
       "RegistryIdentifier": {
         "type": "object",
         "required": [
@@ -10840,6 +11756,168 @@
           }
         }
       },
+      "EcosystemAuthSettings": {
+        "type": "object",
+        "description": "An ecosystem's sign-up and sign-in policy. Defaults are returned when nothing has been set.",
+        "required": [
+          "signupMode",
+          "loginEnabled",
+          "allowedProviders"
+        ],
+        "properties": {
+          "signupMode": {
+            "type": "string",
+            "enum": [
+              "open",
+              "invite_only",
+              "closed"
+            ],
+            "description": "Defaults to invite_only"
+          },
+          "loginEnabled": {
+            "type": "boolean",
+            "description": "Defaults to true"
+          },
+          "allowedProviders": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true,
+            "description": "null means every configured provider. An empty array is stored as null, never as \"none\"."
+          }
+        }
+      },
+      "EcosystemAuthSettingsUpdate": {
+        "type": "object",
+        "description": "A partial update — supply at least one field. Anything omitted is left as it was.",
+        "properties": {
+          "signupMode": {
+            "type": "string",
+            "enum": [
+              "open",
+              "invite_only",
+              "closed"
+            ]
+          },
+          "loginEnabled": {
+            "type": "boolean"
+          },
+          "allowedProviders": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "nullable": true,
+            "description": "Every slug must name a configured provider, or the call is a 400. An empty array is coerced to null (all providers) rather than locking everyone out."
+          }
+        }
+      },
+      "EcosystemSigninApp": {
+        "type": "object",
+        "description": "An OAuth client that signs users into this ecosystem. The app token is represented by its non-secret prefix only — the secret itself is never part of this shape.",
+        "required": [
+          "id",
+          "slug",
+          "name",
+          "allowedReturnOrigins",
+          "defaultEcosystemId",
+          "jwtAudience",
+          "isInternal",
+          "appTokenPrefix",
+          "githubEnabled"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string",
+            "description": "The full client slug, composed server-side as \"<ecosystem>.<leaf>\""
+          },
+          "name": {
+            "type": "string"
+          },
+          "allowedReturnOrigins": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "defaultEcosystemId": {
+            "type": "string"
+          },
+          "jwtAudience": {
+            "type": "string",
+            "nullable": true
+          },
+          "isInternal": {
+            "type": "boolean",
+            "description": "Always false here — internal clients are not listed or editable"
+          },
+          "appTokenPrefix": {
+            "type": "string",
+            "nullable": true
+          },
+          "githubEnabled": {
+            "type": "boolean"
+          }
+        }
+      },
+      "EcosystemSigninAppCreate": {
+        "type": "object",
+        "required": [
+          "slug",
+          "name"
+        ],
+        "properties": {
+          "slug": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64,
+            "pattern": "^[a-z0-9]([a-z0-9-]*[a-z0-9])?$",
+            "description": "The LEAF only — the stored slug is \"<ecosystem-slug>.<this>\", composed by the server. A composed slug over 100 characters is a 400."
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "allowedReturnOrigins": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "default": [],
+            "description": "Bare http(s) origins: no credentials, no path, no query, no fragment. Anything else is a 400."
+          },
+          "enableGithub": {
+            "type": "boolean",
+            "default": true
+          }
+        }
+      },
+      "EcosystemSigninAppUpdate": {
+        "type": "object",
+        "description": "A partial update — supply at least one field. `slug` and the owning ecosystem are deliberately not patchable: both are identity, not configuration.",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "allowedReturnOrigins": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "githubEnabled": {
+            "type": "boolean"
+          }
+        }
+      },
       "PersonaDemoPreviewChoice": {
         "type": "object",
         "required": [
@@ -10888,6 +11966,279 @@
           },
           "message": {
             "type": "string"
+          }
+        }
+      },
+      "PersonaBootstrap": {
+        "type": "object",
+        "description": "Everything an implementation needs to start acting as its persona, in one read: who it is, what to say, what it may touch, and where to talk. Derived entirely from the bearer token — there are no parameters.",
+        "required": [
+          "persona",
+          "prompt",
+          "auth",
+          "buckets",
+          "memory",
+          "tools",
+          "chat"
+        ],
+        "properties": {
+          "persona": {
+            "$ref": "#/components/schemas/PersonaBootstrapPersona"
+          },
+          "prompt": {
+            "$ref": "#/components/schemas/PersonaBootstrapPrompt"
+          },
+          "auth": {
+            "$ref": "#/components/schemas/PersonaBootstrapAuth"
+          },
+          "buckets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonaBootstrapBucket"
+            }
+          },
+          "memory": {
+            "$ref": "#/components/schemas/PersonaBootstrapMemory"
+          },
+          "tools": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonaBootstrapTool"
+            }
+          },
+          "chat": {
+            "$ref": "#/components/schemas/PersonaBootstrapChat"
+          }
+        }
+      },
+      "PersonaBootstrapPersona": {
+        "type": "object",
+        "required": [
+          "id",
+          "slug",
+          "name",
+          "description",
+          "avatarUrl"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "avatarUrl": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "PersonaBootstrapPrompt": {
+        "type": "object",
+        "required": [
+          "system",
+          "voice",
+          "character"
+        ],
+        "properties": {
+          "system": {
+            "type": "string"
+          },
+          "voice": {
+            "type": "string",
+            "nullable": true
+          },
+          "character": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "PersonaBootstrapAuth": {
+        "type": "object",
+        "description": "What the presented token is. A `visitor` token is the anonymous, read-shaped class.",
+        "required": [
+          "tokenClass",
+          "subject",
+          "expiresAt",
+          "scope"
+        ],
+        "properties": {
+          "tokenClass": {
+            "type": "string",
+            "enum": [
+              "persona",
+              "visitor"
+            ]
+          },
+          "subject": {
+            "$ref": "#/components/schemas/PersonaBootstrapSubject"
+          },
+          "expiresAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "scope": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "PersonaBootstrapSubject": {
+        "type": "object",
+        "required": [
+          "kind",
+          "id"
+        ],
+        "properties": {
+          "kind": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          }
+        }
+      },
+      "PersonaBootstrapBucket": {
+        "type": "object",
+        "description": "A bucket the token can at least read. Unreadable buckets are omitted, not listed as denied.",
+        "required": [
+          "id",
+          "name",
+          "kind",
+          "scope",
+          "access"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "scope": {
+            "type": "string",
+            "enum": [
+              "global"
+            ]
+          },
+          "access": {
+            "$ref": "#/components/schemas/PersonaBootstrapBucketAccess"
+          }
+        }
+      },
+      "PersonaBootstrapBucketAccess": {
+        "type": "object",
+        "description": "A visitor token reports create/update/delete false whatever the underlying grant says.",
+        "required": [
+          "read",
+          "create",
+          "update",
+          "delete"
+        ],
+        "properties": {
+          "read": {
+            "type": "boolean"
+          },
+          "create": {
+            "type": "boolean"
+          },
+          "update": {
+            "type": "boolean"
+          },
+          "delete": {
+            "type": "boolean"
+          }
+        }
+      },
+      "PersonaBootstrapMemory": {
+        "type": "object",
+        "description": "Both false for a visitor token.",
+        "required": [
+          "read",
+          "write"
+        ],
+        "properties": {
+          "read": {
+            "type": "boolean"
+          },
+          "write": {
+            "type": "boolean"
+          }
+        }
+      },
+      "PersonaBootstrapTool": {
+        "type": "object",
+        "required": [
+          "name",
+          "displayName",
+          "readOnly",
+          "autonomous"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "readOnly": {
+            "type": "boolean"
+          },
+          "autonomous": {
+            "type": "boolean",
+            "description": "May be called without a human in the loop"
+          }
+        }
+      },
+      "PersonaBootstrapChat": {
+        "type": "object",
+        "required": [
+          "conversationsUrl",
+          "streaming",
+          "limits"
+        ],
+        "properties": {
+          "conversationsUrl": {
+            "type": "string",
+            "description": "Where to open conversations — the public visitor surface or the authenticated one"
+          },
+          "streaming": {
+            "type": "string",
+            "enum": [
+              "sse"
+            ]
+          },
+          "limits": {
+            "$ref": "#/components/schemas/PersonaBootstrapChatLimits"
+          }
+        }
+      },
+      "PersonaBootstrapChatLimits": {
+        "type": "object",
+        "required": [
+          "maxConversationLength",
+          "maxMessageChars"
+        ],
+        "properties": {
+          "maxConversationLength": {
+            "type": "integer"
+          },
+          "maxMessageChars": {
+            "type": "integer"
           }
         }
       },
@@ -11388,6 +12739,152 @@
               "type": "string"
             },
             "description": "Canonical addresses still sitting in that space, informational. Read as \"these exist nearby\", never as \"the release failed\"."
+          }
+        }
+      },
+      "AdminNote": {
+        "type": "object",
+        "description": "An operator note attached to some other row. Never visible to that row’s subject.",
+        "required": [
+          "id",
+          "ecosystemId",
+          "subjectTable",
+          "subjectId",
+          "content",
+          "createdBy",
+          "createdAt",
+          "updatedAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 36
+          },
+          "ecosystemId": {
+            "type": "string",
+            "maxLength": 36
+          },
+          "subjectTable": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "subjectId": {
+            "type": "string",
+            "maxLength": 36
+          },
+          "content": {
+            "type": "string"
+          },
+          "createdBy": {
+            "type": "string",
+            "maxLength": 36
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        }
+      },
+      "AdminNotesReconcileBody": {
+        "type": "object",
+        "required": [
+          "subjectTable",
+          "subjectId",
+          "notes"
+        ],
+        "properties": {
+          "subjectTable": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "subjectId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 36
+          },
+          "notes": {
+            "type": "array",
+            "description": "The complete set for this subject. Anything absent is deleted.",
+            "items": {
+              "$ref": "#/components/schemas/AdminNoteInput"
+            }
+          }
+        }
+      },
+      "AdminNoteInput": {
+        "type": "object",
+        "required": [
+          "content"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 36,
+            "description": "Omit to create; supply to update in place"
+          },
+          "content": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "EntityHistoryEntry": {
+        "type": "object",
+        "description": "One thing that happened to a row. Append-only; nothing here is editable.",
+        "required": [
+          "id",
+          "ecosystemId",
+          "subjectTable",
+          "subjectId",
+          "actorId",
+          "actorLabel",
+          "action",
+          "detail",
+          "createdAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 36
+          },
+          "ecosystemId": {
+            "type": "string",
+            "maxLength": 36
+          },
+          "subjectTable": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "subjectId": {
+            "type": "string",
+            "maxLength": 36
+          },
+          "actorId": {
+            "type": "string",
+            "maxLength": 36,
+            "nullable": true
+          },
+          "actorLabel": {
+            "type": "string",
+            "maxLength": 120,
+            "nullable": true
+          },
+          "action": {
+            "type": "string",
+            "maxLength": 60,
+            "description": "Free text, not an enum — each subsystem names its own. Emitted today: request_received, invite_sent, note_added, status_changed, accepted, notes_updated."
+          },
+          "detail": {
+            "type": "object",
+            "additionalProperties": true,
+            "nullable": true,
+            "description": "Action-specific payload; the shape is whatever emitted the entry."
+          },
+          "createdAt": {
+            "type": "string"
           }
         }
       },
@@ -12144,6 +13641,75 @@
           },
           "watermark": {
             "type": "string"
+          }
+        }
+      },
+      "SyncEnrollmentRow": {
+        "type": "object",
+        "description": "One resource from the sync catalog as it stands for a given ecosystem: what the code ships as the default, and whether an operator has overridden it.",
+        "required": [
+          "resource",
+          "scope",
+          "pushMode",
+          "defaultEnabled",
+          "enabled",
+          "overridden"
+        ],
+        "properties": {
+          "resource": {
+            "type": "string",
+            "description": "\"<schema>.<table>\", e.g. content.contacts"
+          },
+          "scope": {
+            "type": "string",
+            "enum": [
+              "customer",
+              "ecosystem"
+            ]
+          },
+          "pushMode": {
+            "type": "string",
+            "enum": [
+              "generic",
+              "route"
+            ],
+            "description": "'route' means /sync/push refuses direct writes; the row's own route owns them"
+          },
+          "defaultEnabled": {
+            "type": "boolean",
+            "description": "What the shipped catalog says"
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "What is actually in force — the override if there is one"
+          },
+          "overridden": {
+            "type": "boolean"
+          }
+        }
+      },
+      "SyncEnrollmentList": {
+        "type": "object",
+        "required": [
+          "tables"
+        ],
+        "properties": {
+          "tables": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SyncEnrollmentRow"
+            }
+          }
+        }
+      },
+      "SyncEnrollmentUpdate": {
+        "type": "object",
+        "required": [
+          "enabled"
+        ],
+        "properties": {
+          "enabled": {
+            "type": "boolean"
           }
         }
       },
@@ -20777,7 +22343,10 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/EcoManagedRowList"
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/InvitationRequest"
+                  }
                 }
               }
             }
@@ -20928,7 +22497,10 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/EcoManagedRowList"
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PendingUser"
+                  }
                 }
               }
             }
@@ -20999,7 +22571,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/EcoAddPendingUsersBody"
+                "$ref": "#/components/schemas/AddPendingUsersBody"
               }
             }
           }
@@ -21010,7 +22582,10 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/EcoManagedRowList"
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PendingUser"
+                  }
                 }
               }
             }
@@ -21161,7 +22736,10 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/EcoManagedRowList"
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Invitation"
+                  }
                 }
               }
             }
@@ -21232,7 +22810,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/EcoSendInvitesBody"
+                "$ref": "#/components/schemas/SendInvitesBody"
               }
             }
           }
@@ -21243,7 +22821,10 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/EcoManagedRowList"
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Invitation"
+                  }
                 }
               }
             }
@@ -21410,7 +22991,10 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/EcoManagedRowList"
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AdminNote"
+                  }
                 }
               }
             }
@@ -21481,7 +23065,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/EcoNotesReconcileBody"
+                "$ref": "#/components/schemas/AdminNotesReconcileBody"
               }
             }
           }
@@ -21591,7 +23175,10 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/EcoManagedRowList"
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EntityHistoryEntry"
+                  }
                 }
               }
             }
@@ -21602,6 +23189,651 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/invitation-requests": {
+      "get": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "List join requests, newest first",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Invitation requests",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/InvitationRequest"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/invitation-requests/{id}": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "delete": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Delete a join request",
+        "description": "Removes the request only. The pending user it produced is left alone.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Deleted"
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/pending-users": {
+      "get": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "List pending users, newest first",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Pending users",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PendingUser"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Add people to the pending list",
+        "description": "Adds one or more people without inviting them — sending is a separate step (POST /auth/invitations). Each gets the next `userNumber` for the ecosystem.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddPendingUsersBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The created pending users",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PendingUser"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/pending-users/{id}": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "delete": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Delete a pending user",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Deleted"
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/invitations": {
+      "get": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "List sent invitations, newest first",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Invitations",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Invitation"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Send invitations to pending users",
+        "description": "One invitation per person per requested channel that they have a destination for — so naming three people with both `email` and `sms` returns up to six rows. Every id is checked before anything is sent: one unknown id fails the whole call with 404.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendInvitesBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The invitations that were sent",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Invitation"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/invitations/{id}": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "delete": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Delete a sent invitation",
+        "description": "Deletes the record. It does not revoke a token already in someone’s inbox.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Deleted"
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/announcements": {
+      "get": {
+        "tags": [
+          "announcements"
+        ],
+        "summary": "List the ecosystem's announcements, newest first",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Announcements with their delivery counts",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnnouncementList"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "announcements"
+        ],
+        "summary": "Compose and send an announcement",
+        "description": "Accepted, not completed: the response is 202 and delivery runs in the background. Poll the announcement to watch `sentCount` climb and `sentAt` appear. A delivery failure therefore never surfaces here.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AnnouncementCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Queued for delivery",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnnouncementAccepted"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/announcements/{id}": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "get": {
+        "tags": [
+          "announcements"
+        ],
+        "summary": "Get one announcement and its delivery progress",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The announcement",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Announcement"
                 }
               }
             }
@@ -25711,6 +27943,494 @@
             "description": "Deleted"
           },
           "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/chat/dms": {
+      "get": {
+        "tags": [
+          "chat"
+        ],
+        "summary": "List the caller's DM chats, newest activity first",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "required": false,
+            "description": "Clamped server-side to at most 500.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 500,
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paged DM chats",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DmChatList"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "chat"
+        ],
+        "summary": "Open (or reuse) a DM chat with another user",
+        "description": "Idempotent per user pair: 201 when a chat was created, 200 when one already existed. 403 when the recipient cannot be contacted (a block, or a privacy setting).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DmCreateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The existing chat",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DmCreateResult"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "The newly created chat",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DmCreateResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/chat/dms/{chatId}/messages": {
+      "parameters": [
+        {
+          "name": "chatId",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "get": {
+        "tags": [
+          "chat"
+        ],
+        "summary": "List the messages in a DM chat, oldest first",
+        "description": "Paginates from the newest end — page 1 is the most recent window — but returns each page in ascending `seq` order. 404 (not 403) when the caller is not a participant, so a chat id cannot be probed for existence.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "required": false,
+            "description": "Clamped server-side to at most 200.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200,
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paged DM messages",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DmMessageList"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "chat"
+        ],
+        "summary": "Send a DM",
+        "description": "Send a message into a DM chat. Supplying `clientMessageId` makes the send idempotent: a replay returns 200 with the already-stored message instead of 201.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DmSendMessage"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The message a previous send with this clientMessageId stored",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DmMessage"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "The stored message",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DmMessage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/chat/dms/{chatId}/read": {
+      "parameters": [
+        {
+          "name": "chatId",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "post": {
+        "tags": [
+          "chat"
+        ],
+        "summary": "Mark a DM chat read up to a message",
+        "description": "Marks the chat read through `messageId`. Omit it — or name a message that is not this chat's — to mark the latest message read, which always leaves `unreadCount` 0.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DmReadRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The recomputed unread count",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DmReadResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/chat/dms/{chatId}/stream": {
+      "parameters": [
+        {
+          "name": "chatId",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "get": {
+        "tags": [
+          "chat"
+        ],
+        "summary": "Stream new DMs in a chat (SSE)",
+        "description": "Server-Sent Events (`text/event-stream`). Emits one `message` event per DM with `seq` greater than the `after` cursor — first the backlog, then each new message as it arrives. There is no `open`, `error`, or keepalive event, and no terminal event: the stream simply closes after at most 5 minutes, and the client reconnects with `after` set to the last `seq` it saw. Unlike the conversation turn stream, failures here are real HTTP statuses raised before the stream opens, never in-band.\n\nBecause a browser `EventSource` cannot set headers, this route (alone among the DM routes) also accepts the bearer token as an `access_token` query parameter.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "after",
+            "in": "query",
+            "required": false,
+            "description": "Last `seq` already seen; only later messages are emitted. Defaults to 0.",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
+            }
+          },
+          {
+            "name": "access_token",
+            "in": "query",
+            "required": false,
+            "description": "The bearer token, for clients that cannot send an Authorization header.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "SSE stream of `message` events",
+            "content": {
+              "text/event-stream": {
+                "schema": {
+                  "$ref": "#/components/schemas/DmMessage"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
             "description": "Error",
             "content": {
               "application/json": {
@@ -35311,6 +38031,53 @@
         }
       }
     },
+    "/notifications/stream": {
+      "get": {
+        "tags": [
+          "notifications"
+        ],
+        "summary": "Wake on new notifications (SSE)",
+        "description": "Server-Sent Events (`text/event-stream`). Emits a `notification` event with an empty `{}` payload each time something lands for the caller; re-read GET /notifications or /notifications/unread-count to find out what.\n\nIf the backend was started without a notification hub, the stream instead emits a single `ready` event and closes immediately — the client should fall back to polling. Otherwise it stays open for at most 5 minutes and then closes with no terminal event; reconnect.\n\nBecause a browser `EventSource` cannot set headers, the bearer token may be passed as an `access_token` query parameter instead. Connecting also marks the caller present, and disconnecting marks them away.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "access_token",
+            "in": "query",
+            "required": false,
+            "description": "The bearer token, for clients that cannot send an Authorization header.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "SSE stream of `notification` wake events (or one `ready` event, then close)",
+            "content": {
+              "text/event-stream": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationWakeEvent"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/notifications/{id}/read": {
       "parameters": [
         {
@@ -38402,6 +41169,99 @@
         "responses": {
           "204": {
             "description": "removed"
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/presence": {
+      "get": {
+        "tags": [
+          "presence"
+        ],
+        "summary": "Look up the presence of specific users",
+        "description": "Returns one entry per requested id. The caller always sees their own true state; every other id is visibility-gated, and one the caller may not see reports `online: false, lastSeenAt: null` — indistinguishable from genuinely offline.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "userIds",
+            "in": "query",
+            "required": false,
+            "description": "The users to look up. Repeat the parameter, comma-separate the values, or both. At most 100 *distinct* ids — the cap is applied after de-duplication, so a longer list that collapses to 100 or fewer is accepted. Omitted means an empty result.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Presence for the requested users",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PresenceList"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/presence/heartbeat": {
+      "post": {
+        "tags": [
+          "presence"
+        ],
+        "summary": "Refresh the caller's last-seen timestamp",
+        "description": "Marks the caller active now. Takes no body — any body sent is ignored. This only moves `lastSeenAt`; whether a user counts as *online* is driven by their open streaming connections, not by this call.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Recorded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PresenceHeartbeatResult"
+                }
+              }
+            }
           },
           "401": {
             "description": "Error",
@@ -48116,6 +50976,415 @@
         }
       }
     },
+    "/public/personas/{slug}/visitor-tokens": {
+      "parameters": [
+        {
+          "name": "slug",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          },
+          "description": "The public persona's slug"
+        }
+      ],
+      "post": {
+        "tags": [
+          "public"
+        ],
+        "summary": "Mint an anonymous visitor token for a public persona",
+        "description": "Unauthenticated, and the only way to obtain a visitor token. The token is returned once and never again — nothing server-side can reproduce it.\n\nSlugs are unique per owner, not globally, so a slug shared by two *public* personas is a 409 rather than an arbitrary pick. A persona that is not public, does not exist, or whose owner cannot be resolved is uniformly a 404.\n\nRefused with 403 when the owning ecosystem has not enabled visitor chat, 503 when visitor chat is switched off globally, and 429 past the per-IP hourly mint limit.",
+        "responses": {
+          "201": {
+            "description": "A visitor token, shown once",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VisitorToken"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/public/visitor-chat/conversations": {
+      "post": {
+        "tags": [
+          "public"
+        ],
+        "summary": "Start a visitor conversation",
+        "description": "Requires a visitor token (`tmp_…`) in the Authorization header — any other kind of token is a 403. The persona is taken from the token. Conversations expire on their own after a fixed window.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VisitorConversationCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The new conversation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VisitorConversation"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/public/visitor-chat/conversations/{id}": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "get": {
+        "tags": [
+          "public"
+        ],
+        "summary": "Read a visitor conversation and its messages",
+        "description": "Scoped to the token that created it: another visitor's conversation, or an expired one, is a 404 — the same answer as one that never existed.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The conversation with its messages",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VisitorConversationDetail"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/public/visitor-chat/conversations/{id}/turns": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "post": {
+        "tags": [
+          "public"
+        ],
+        "summary": "Take a turn in a visitor conversation (SSE)",
+        "description": "Streams the persona's reply as Server-Sent Events (`text/event-stream`): an `open` event, then `token`, `tool_call_started`, `tool_call_completed`, `status` and `award` events, ending in `done`, `ended` (the persona closed the chat) or `error`.\n\nEvery check happens BEFORE the stream opens, so a refusal is always a real HTTP status: 409 when the conversation is closed or full, 422 when the message is too long or is screened out, 429 past a rate window, 503 when capacity or budget is exhausted. Once the stream is open, HTTP is already 200 and any later failure arrives as an `error` event instead.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VisitorTurnRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "SSE stream of the reply",
+            "content": {
+              "text/event-stream": {
+                "schema": {
+                  "$ref": "#/components/schemas/VisitorTurnEvent"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/registry/identifiers": {
       "get": {
         "tags": [
@@ -52058,6 +55327,506 @@
         }
       }
     },
+    "/ecosystem/auth-settings/{id}": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          },
+          "description": "Ecosystem uuid or rdid"
+        }
+      ],
+      "get": {
+        "tags": [
+          "registry"
+        ],
+        "summary": "Read an ecosystem's sign-up/sign-in policy",
+        "description": "An ecosystem that has never been configured returns the defaults, not a 404.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The policy in force",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EcosystemAuthSettings"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "registry"
+        ],
+        "summary": "Update an ecosystem's sign-up/sign-in policy",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EcosystemAuthSettingsUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The policy after the update",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EcosystemAuthSettings"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ecosystem/signin-apps/{id}": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          },
+          "description": "Ecosystem uuid or rdid"
+        }
+      ],
+      "get": {
+        "tags": [
+          "registry"
+        ],
+        "summary": "List an ecosystem's sign-in apps",
+        "description": "Internal clients are excluded — they are not manageable through this surface.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sign-in apps",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EcosystemSigninApp"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "registry"
+        ],
+        "summary": "Create a sign-in app for an ecosystem",
+        "description": "The client is bound to this ecosystem by the server; the body cannot name a different one. Asking for GitHub sign-in when no GitHub provider is configured is a 400, checked before anything is written.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EcosystemSigninAppCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The created app",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EcosystemSigninApp"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ecosystem/signin-apps/{id}/{clientId}": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          },
+          "description": "Ecosystem uuid or rdid"
+        },
+        {
+          "name": "clientId",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          },
+          "description": "The client uuid"
+        }
+      ],
+      "patch": {
+        "tags": [
+          "registry"
+        ],
+        "summary": "Update a sign-in app",
+        "description": "A client belonging to another ecosystem is a 404, not a 403 — the two are indistinguishable from outside. An internal client exists but is a 403.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EcosystemSigninAppUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The app after the update",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EcosystemSigninApp"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "registry"
+        ],
+        "summary": "Delete a sign-in app",
+        "description": "Also removes the client’s provider links. Internal clients cannot be deleted (403).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "deleted"
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/persona/bootstrap": {
+      "get": {
+        "tags": [
+          "registry"
+        ],
+        "summary": "Everything a persona implementation needs to start, from its token alone",
+        "description": "Requires a persona or visitor API token (`tmp_…`) in the Authorization header — NOT a user session JWT, which is a 400, and not an application token, which is a 403. The token identifies the persona; there is nothing to pass.\n\nA visitor token gets the same shape with the anonymous floor applied: no tools, no memory, read-only buckets, and the public conversation URL. If the persona has since been made non-public, a visitor token stops working (403) even though it has not expired.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The persona, its prompt, and what its token may do",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PersonaBootstrap"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/persona/demo-preview": {
       "post": {
         "tags": [
@@ -54381,6 +58150,229 @@
             }
           },
           "404": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/system/admin-notes": {
+      "get": {
+        "tags": [
+          "system"
+        ],
+        "summary": "Read a subject's admin notes, oldest first",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "subjectTable",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "subjectId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Admin notes",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AdminNote"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "system"
+        ],
+        "summary": "Reconcile a subject's admin notes",
+        "description": "Replaces the whole set for the subject rather than editing one note: a note with an `id` is updated, one without is created, and any existing note the body omits is DELETED. Sending an empty `notes` array clears them all. Appends one `notes_updated` entry to the subject's history.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminNotesReconcileBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "ok"
+                  ],
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/system/entity-history": {
+      "get": {
+        "tags": [
+          "system"
+        ],
+        "summary": "Read a subject's history, newest first",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "subjectTable",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "subjectId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "History entries",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EntityHistoryEntry"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
             "description": "Error",
             "content": {
               "application/json": {
@@ -57276,6 +61268,221 @@
             }
           },
           "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/sync/tables/{id}": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          },
+          "description": "Ecosystem rdid or uuid"
+        }
+      ],
+      "get": {
+        "tags": [
+          "sync"
+        ],
+        "summary": "List an ecosystem's sync enrollment, default and effective",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Every catalog resource with its effective state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SyncEnrollmentList"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/sync/tables/{id}/{resource}": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          },
+          "description": "Ecosystem rdid or uuid"
+        },
+        {
+          "name": "resource",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          },
+          "description": "\"<schema>.<table>\" from the catalog"
+        }
+      ],
+      "put": {
+        "tags": [
+          "sync"
+        ],
+        "summary": "Override whether one resource syncs for an ecosystem",
+        "description": "A resource that is not in the catalog is a 400 — overrides cannot invent resources.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SyncEnrollmentUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The catalog after the write",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SyncEnrollmentList"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "sync"
+        ],
+        "summary": "Drop the override and fall back to the catalog default",
+        "description": "Idempotent, and deliberately unvalidated: clearing an override that was never set — or one naming a resource the catalog has since dropped — succeeds rather than 400ing, so a stale override can always be cleaned up.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The catalog after the clear",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SyncEnrollmentList"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
             "description": "Error",
             "content": {
               "application/json": {

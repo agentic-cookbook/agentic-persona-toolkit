@@ -5,7 +5,7 @@ import httpx
 
 from ... import errors
 from ...client import AuthenticatedClient, Client
-from ...models.eco_notes_reconcile_body import EcoNotesReconcileBody
+from ...models.admin_notes_reconcile_body import AdminNotesReconcileBody
 from ...models.error import Error
 from ...models.put_auth_ecosystems_ecosystem_id_admin_notes_response_200 import (
     PutAuthEcosystemsEcosystemIdAdminNotesResponse200,
@@ -16,7 +16,7 @@ from ...types import Response
 def _get_kwargs(
     ecosystem_id: str,
     *,
-    body: EcoNotesReconcileBody,
+    body: AdminNotesReconcileBody,
 ) -> dict[str, Any]:
     headers: dict[str, Any] = {}
 
@@ -82,13 +82,13 @@ def sync_detailed(
     ecosystem_id: str,
     *,
     client: AuthenticatedClient,
-    body: EcoNotesReconcileBody,
+    body: AdminNotesReconcileBody,
 ) -> Response[Error | PutAuthEcosystemsEcosystemIdAdminNotesResponse200]:
     """Reconcile a subject’s admin notes within an ecosystem (owner-scoped)
 
     Args:
         ecosystem_id (str):
-        body (EcoNotesReconcileBody):
+        body (AdminNotesReconcileBody):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -114,13 +114,13 @@ def sync(
     ecosystem_id: str,
     *,
     client: AuthenticatedClient,
-    body: EcoNotesReconcileBody,
+    body: AdminNotesReconcileBody,
 ) -> Error | PutAuthEcosystemsEcosystemIdAdminNotesResponse200 | None:
     """Reconcile a subject’s admin notes within an ecosystem (owner-scoped)
 
     Args:
         ecosystem_id (str):
-        body (EcoNotesReconcileBody):
+        body (AdminNotesReconcileBody):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -141,13 +141,13 @@ async def asyncio_detailed(
     ecosystem_id: str,
     *,
     client: AuthenticatedClient,
-    body: EcoNotesReconcileBody,
+    body: AdminNotesReconcileBody,
 ) -> Response[Error | PutAuthEcosystemsEcosystemIdAdminNotesResponse200]:
     """Reconcile a subject’s admin notes within an ecosystem (owner-scoped)
 
     Args:
         ecosystem_id (str):
-        body (EcoNotesReconcileBody):
+        body (AdminNotesReconcileBody):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -171,13 +171,13 @@ async def asyncio(
     ecosystem_id: str,
     *,
     client: AuthenticatedClient,
-    body: EcoNotesReconcileBody,
+    body: AdminNotesReconcileBody,
 ) -> Error | PutAuthEcosystemsEcosystemIdAdminNotesResponse200 | None:
     """Reconcile a subject’s admin notes within an ecosystem (owner-scoped)
 
     Args:
         ecosystem_id (str):
-        body (EcoNotesReconcileBody):
+        body (AdminNotesReconcileBody):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.

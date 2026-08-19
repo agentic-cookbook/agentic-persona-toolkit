@@ -5,16 +5,16 @@ import httpx
 
 from ... import errors
 from ...client import AuthenticatedClient, Client
-from ...models.eco_add_pending_users_body import EcoAddPendingUsersBody
-from ...models.eco_managed_row import EcoManagedRow
+from ...models.add_pending_users_body import AddPendingUsersBody
 from ...models.error import Error
+from ...models.pending_user import PendingUser
 from ...types import Response
 
 
 def _get_kwargs(
     ecosystem_id: str,
     *,
-    body: EcoAddPendingUsersBody,
+    body: AddPendingUsersBody,
 ) -> dict[str, Any]:
     headers: dict[str, Any] = {}
 
@@ -33,16 +33,14 @@ def _get_kwargs(
 
 def _parse_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Error | list["EcoManagedRow"] | None:
+) -> Error | list["PendingUser"] | None:
     if response.status_code == 201:
         response_201 = []
         _response_201 = response.json()
-        for componentsschemas_eco_managed_row_list_item_data in _response_201:
-            componentsschemas_eco_managed_row_list_item = EcoManagedRow.from_dict(
-                componentsschemas_eco_managed_row_list_item_data
-            )
+        for response_201_item_data in _response_201:
+            response_201_item = PendingUser.from_dict(response_201_item_data)
 
-            response_201.append(componentsschemas_eco_managed_row_list_item)
+            response_201.append(response_201_item)
 
         return response_201
 
@@ -74,7 +72,7 @@ def _parse_response(
 
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[Error | list["EcoManagedRow"]]:
+) -> Response[Error | list["PendingUser"]]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -87,20 +85,20 @@ def sync_detailed(
     ecosystem_id: str,
     *,
     client: AuthenticatedClient,
-    body: EcoAddPendingUsersBody,
-) -> Response[Error | list["EcoManagedRow"]]:
+    body: AddPendingUsersBody,
+) -> Response[Error | list["PendingUser"]]:
     """Add pending users to an ecosystem (owner-scoped)
 
     Args:
         ecosystem_id (str):
-        body (EcoAddPendingUsersBody):
+        body (AddPendingUsersBody):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Union[Error, list['EcoManagedRow']]]
+        Response[Union[Error, list['PendingUser']]]
     """
 
     kwargs = _get_kwargs(
@@ -119,20 +117,20 @@ def sync(
     ecosystem_id: str,
     *,
     client: AuthenticatedClient,
-    body: EcoAddPendingUsersBody,
-) -> Error | list["EcoManagedRow"] | None:
+    body: AddPendingUsersBody,
+) -> Error | list["PendingUser"] | None:
     """Add pending users to an ecosystem (owner-scoped)
 
     Args:
         ecosystem_id (str):
-        body (EcoAddPendingUsersBody):
+        body (AddPendingUsersBody):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Union[Error, list['EcoManagedRow']]
+        Union[Error, list['PendingUser']]
     """
 
     return sync_detailed(
@@ -146,20 +144,20 @@ async def asyncio_detailed(
     ecosystem_id: str,
     *,
     client: AuthenticatedClient,
-    body: EcoAddPendingUsersBody,
-) -> Response[Error | list["EcoManagedRow"]]:
+    body: AddPendingUsersBody,
+) -> Response[Error | list["PendingUser"]]:
     """Add pending users to an ecosystem (owner-scoped)
 
     Args:
         ecosystem_id (str):
-        body (EcoAddPendingUsersBody):
+        body (AddPendingUsersBody):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Union[Error, list['EcoManagedRow']]]
+        Response[Union[Error, list['PendingUser']]]
     """
 
     kwargs = _get_kwargs(
@@ -176,20 +174,20 @@ async def asyncio(
     ecosystem_id: str,
     *,
     client: AuthenticatedClient,
-    body: EcoAddPendingUsersBody,
-) -> Error | list["EcoManagedRow"] | None:
+    body: AddPendingUsersBody,
+) -> Error | list["PendingUser"] | None:
     """Add pending users to an ecosystem (owner-scoped)
 
     Args:
         ecosystem_id (str):
-        body (EcoAddPendingUsersBody):
+        body (AddPendingUsersBody):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Union[Error, list['EcoManagedRow']]
+        Union[Error, list['PendingUser']]
     """
 
     return (

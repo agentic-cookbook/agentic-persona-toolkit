@@ -1,37 +1,35 @@
 from collections.abc import Mapping
-from typing import TYPE_CHECKING, Any, TypeVar
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-if TYPE_CHECKING:
-    from ..models.eco_add_pending_users_body_users_item import EcoAddPendingUsersBodyUsersItem
-
-
-T = TypeVar("T", bound="EcoAddPendingUsersBody")
+T = TypeVar("T", bound="PersonaBootstrapSubject")
 
 
 @_attrs_define
-class EcoAddPendingUsersBody:
+class PersonaBootstrapSubject:
     """
     Attributes:
-        users (list['EcoAddPendingUsersBodyUsersItem']):
+        kind (str):
+        id (str):
     """
 
-    users: list["EcoAddPendingUsersBodyUsersItem"]
+    kind: str
+    id: str
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        users = []
-        for users_item_data in self.users:
-            users_item = users_item_data.to_dict()
-            users.append(users_item)
+        kind = self.kind
+
+        id = self.id
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
             {
-                "users": users,
+                "kind": kind,
+                "id": id,
             }
         )
 
@@ -39,22 +37,18 @@ class EcoAddPendingUsersBody:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.eco_add_pending_users_body_users_item import EcoAddPendingUsersBodyUsersItem
-
         d = dict(src_dict)
-        users = []
-        _users = d.pop("users")
-        for users_item_data in _users:
-            users_item = EcoAddPendingUsersBodyUsersItem.from_dict(users_item_data)
+        kind = d.pop("kind")
 
-            users.append(users_item)
+        id = d.pop("id")
 
-        eco_add_pending_users_body = cls(
-            users=users,
+        persona_bootstrap_subject = cls(
+            kind=kind,
+            id=id,
         )
 
-        eco_add_pending_users_body.additional_properties = d
-        return eco_add_pending_users_body
+        persona_bootstrap_subject.additional_properties = d
+        return persona_bootstrap_subject
 
     @property
     def additional_keys(self) -> list[str]:

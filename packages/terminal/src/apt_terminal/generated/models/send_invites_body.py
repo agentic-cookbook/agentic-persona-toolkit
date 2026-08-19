@@ -7,25 +7,25 @@ from attrs import field as _attrs_field
 from ..types import UNSET, Unset
 
 if TYPE_CHECKING:
-    from ..models.eco_send_invites_body_email import EcoSendInvitesBodyEmail
-    from ..models.eco_send_invites_body_sms import EcoSendInvitesBodySms
+    from ..models.send_invite_channel import SendInviteChannel
 
 
-T = TypeVar("T", bound="EcoSendInvitesBody")
+T = TypeVar("T", bound="SendInvitesBody")
 
 
 @_attrs_define
-class EcoSendInvitesBody:
-    """
+class SendInvitesBody:
+    """Names the people to invite and the channels to reach them on. At least one channel is required.
+
     Attributes:
         pending_user_ids (list[str]):
-        email (Union[Unset, EcoSendInvitesBodyEmail]):
-        sms (Union[Unset, EcoSendInvitesBodySms]):
+        email (Union[Unset, SendInviteChannel]): Send on this channel. `note` is added to the message body.
+        sms (Union[Unset, SendInviteChannel]): Send on this channel. `note` is added to the message body.
     """
 
     pending_user_ids: list[str]
-    email: Union[Unset, "EcoSendInvitesBodyEmail"] = UNSET
-    sms: Union[Unset, "EcoSendInvitesBodySms"] = UNSET
+    email: Union[Unset, "SendInviteChannel"] = UNSET
+    sms: Union[Unset, "SendInviteChannel"] = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -55,34 +55,33 @@ class EcoSendInvitesBody:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.eco_send_invites_body_email import EcoSendInvitesBodyEmail
-        from ..models.eco_send_invites_body_sms import EcoSendInvitesBodySms
+        from ..models.send_invite_channel import SendInviteChannel
 
         d = dict(src_dict)
         pending_user_ids = cast(list[str], d.pop("pendingUserIds"))
 
         _email = d.pop("email", UNSET)
-        email: Unset | EcoSendInvitesBodyEmail
+        email: Unset | SendInviteChannel
         if isinstance(_email, Unset):
             email = UNSET
         else:
-            email = EcoSendInvitesBodyEmail.from_dict(_email)
+            email = SendInviteChannel.from_dict(_email)
 
         _sms = d.pop("sms", UNSET)
-        sms: Unset | EcoSendInvitesBodySms
+        sms: Unset | SendInviteChannel
         if isinstance(_sms, Unset):
             sms = UNSET
         else:
-            sms = EcoSendInvitesBodySms.from_dict(_sms)
+            sms = SendInviteChannel.from_dict(_sms)
 
-        eco_send_invites_body = cls(
+        send_invites_body = cls(
             pending_user_ids=pending_user_ids,
             email=email,
             sms=sms,
         )
 
-        eco_send_invites_body.additional_properties = d
-        return eco_send_invites_body
+        send_invites_body.additional_properties = d
+        return send_invites_body
 
     @property
     def additional_keys(self) -> list[str]:

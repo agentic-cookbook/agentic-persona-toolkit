@@ -4,43 +4,51 @@ from typing import Any, TypeVar
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
-
-T = TypeVar("T", bound="EcoSendInvitesBodyEmail")
+T = TypeVar("T", bound="PersonaBootstrapChatLimits")
 
 
 @_attrs_define
-class EcoSendInvitesBodyEmail:
+class PersonaBootstrapChatLimits:
     """
     Attributes:
-        note (Union[Unset, str]):
+        max_conversation_length (int):
+        max_message_chars (int):
     """
 
-    note: Unset | str = UNSET
+    max_conversation_length: int
+    max_message_chars: int
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        note = self.note
+        max_conversation_length = self.max_conversation_length
+
+        max_message_chars = self.max_message_chars
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({})
-        if note is not UNSET:
-            field_dict["note"] = note
+        field_dict.update(
+            {
+                "maxConversationLength": max_conversation_length,
+                "maxMessageChars": max_message_chars,
+            }
+        )
 
         return field_dict
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
-        note = d.pop("note", UNSET)
+        max_conversation_length = d.pop("maxConversationLength")
 
-        eco_send_invites_body_email = cls(
-            note=note,
+        max_message_chars = d.pop("maxMessageChars")
+
+        persona_bootstrap_chat_limits = cls(
+            max_conversation_length=max_conversation_length,
+            max_message_chars=max_message_chars,
         )
 
-        eco_send_invites_body_email.additional_properties = d
-        return eco_send_invites_body_email
+        persona_bootstrap_chat_limits.additional_properties = d
+        return persona_bootstrap_chat_limits
 
     @property
     def additional_keys(self) -> list[str]:

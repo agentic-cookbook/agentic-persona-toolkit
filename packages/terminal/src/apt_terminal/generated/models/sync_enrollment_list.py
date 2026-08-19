@@ -1,46 +1,60 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar
+from typing import TYPE_CHECKING, Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
+if TYPE_CHECKING:
+    from ..models.sync_enrollment_row import SyncEnrollmentRow
 
-T = TypeVar("T", bound="EcoSendInvitesBodySms")
+
+T = TypeVar("T", bound="SyncEnrollmentList")
 
 
 @_attrs_define
-class EcoSendInvitesBodySms:
+class SyncEnrollmentList:
     """
     Attributes:
-        note (Union[Unset, str]):
+        tables (list['SyncEnrollmentRow']):
     """
 
-    note: Unset | str = UNSET
+    tables: list["SyncEnrollmentRow"]
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        note = self.note
+        tables = []
+        for tables_item_data in self.tables:
+            tables_item = tables_item_data.to_dict()
+            tables.append(tables_item)
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({})
-        if note is not UNSET:
-            field_dict["note"] = note
+        field_dict.update(
+            {
+                "tables": tables,
+            }
+        )
 
         return field_dict
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        d = dict(src_dict)
-        note = d.pop("note", UNSET)
+        from ..models.sync_enrollment_row import SyncEnrollmentRow
 
-        eco_send_invites_body_sms = cls(
-            note=note,
+        d = dict(src_dict)
+        tables = []
+        _tables = d.pop("tables")
+        for tables_item_data in _tables:
+            tables_item = SyncEnrollmentRow.from_dict(tables_item_data)
+
+            tables.append(tables_item)
+
+        sync_enrollment_list = cls(
+            tables=tables,
         )
 
-        eco_send_invites_body_sms.additional_properties = d
-        return eco_send_invites_body_sms
+        sync_enrollment_list.additional_properties = d
+        return sync_enrollment_list
 
     @property
     def additional_keys(self) -> list[str]:

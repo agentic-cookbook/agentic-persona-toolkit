@@ -16,6 +16,11 @@ from .access_role import AccessRole
 from .access_role_default_for import AccessRoleDefaultFor
 from .access_role_envelope import AccessRoleEnvelope
 from .access_role_list import AccessRoleList
+from .add_pending_user import AddPendingUser
+from .add_pending_users_body import AddPendingUsersBody
+from .admin_note import AdminNote
+from .admin_note_input import AdminNoteInput
+from .admin_notes_reconcile_body import AdminNotesReconcileBody
 from .ai_processing_claimed_job import AiProcessingClaimedJob
 from .ai_processing_claimed_job_payload import AiProcessingClaimedJobPayload
 from .ai_processing_job import AiProcessingJob
@@ -23,6 +28,11 @@ from .ai_processing_webhook_delivery import AiProcessingWebhookDelivery
 from .ai_processing_webhook_delivery_payload import AiProcessingWebhookDeliveryPayload
 from .ai_processing_webhook_endpoint import AiProcessingWebhookEndpoint
 from .ai_processing_webhook_endpoint_created import AiProcessingWebhookEndpointCreated
+from .announcement import Announcement
+from .announcement_accepted import AnnouncementAccepted
+from .announcement_accepted_status import AnnouncementAcceptedStatus
+from .announcement_create import AnnouncementCreate
+from .announcement_list import AnnouncementList
 from .api_token import ApiToken
 from .api_token_created import ApiTokenCreated
 from .appearance_settings import AppearanceSettings
@@ -124,16 +134,27 @@ from .delivery import Delivery
 from .delivery_status import DeliveryStatus
 from .discussion_post import DiscussionPost
 from .discussion_topic import DiscussionTopic
-from .eco_add_pending_users_body import EcoAddPendingUsersBody
-from .eco_add_pending_users_body_users_item import EcoAddPendingUsersBodyUsersItem
-from .eco_managed_row import EcoManagedRow
-from .eco_notes_reconcile_body import EcoNotesReconcileBody
-from .eco_notes_reconcile_body_notes_item import EcoNotesReconcileBodyNotesItem
-from .eco_send_invites_body import EcoSendInvitesBody
-from .eco_send_invites_body_email import EcoSendInvitesBodyEmail
-from .eco_send_invites_body_sms import EcoSendInvitesBodySms
+from .dm_chat_list import DmChatList
+from .dm_chat_summary import DmChatSummary
+from .dm_create_request import DmCreateRequest
+from .dm_create_result import DmCreateResult
+from .dm_message import DmMessage
+from .dm_message_list import DmMessageList
+from .dm_message_preview_type_0 import DmMessagePreviewType0
+from .dm_read_request import DmReadRequest
+from .dm_read_result import DmReadResult
+from .dm_send_message import DmSendMessage
+from .ecosystem_auth_settings import EcosystemAuthSettings
+from .ecosystem_auth_settings_signup_mode import EcosystemAuthSettingsSignupMode
+from .ecosystem_auth_settings_update import EcosystemAuthSettingsUpdate
+from .ecosystem_auth_settings_update_signup_mode import EcosystemAuthSettingsUpdateSignupMode
 from .ecosystem_feature_flag import EcosystemFeatureFlag
 from .ecosystem_server_bag_entry import EcosystemServerBagEntry
+from .ecosystem_signin_app import EcosystemSigninApp
+from .ecosystem_signin_app_create import EcosystemSigninAppCreate
+from .ecosystem_signin_app_update import EcosystemSigninAppUpdate
+from .entity_history_entry import EntityHistoryEntry
+from .entity_history_entry_detail_type_0 import EntityHistoryEntryDetailType0
 from .error import Error
 from .error_error import ErrorError
 from .feature_flag import FeatureFlag
@@ -817,6 +838,10 @@ from .integration_provider_config_deliverability_webhook_type_0 import (
 )
 from .integration_provider_config_fields_item import IntegrationProviderConfigFieldsItem
 from .integration_provider_links_item import IntegrationProviderLinksItem
+from .invitation import Invitation
+from .invitation_channel import InvitationChannel
+from .invitation_request import InvitationRequest
+from .invitation_status import InvitationStatus
 from .invite_accept_request import InviteAcceptRequest
 from .invite_accept_result import InviteAcceptResult
 from .invite_accept_result_status import InviteAcceptResultStatus
@@ -869,6 +894,7 @@ from .notification_data import NotificationData
 from .notification_preference import NotificationPreference
 from .notification_preference_category import NotificationPreferenceCategory
 from .notification_status import NotificationStatus
+from .notification_wake_event import NotificationWakeEvent
 from .org_sheet import OrgSheet
 from .org_sheet_stats import OrgSheetStats
 from .org_sheet_subject_type import OrgSheetSubjectType
@@ -1014,6 +1040,22 @@ from .patch_registry_registries_registry_id_entries_entry_id_services_service_id
 from .patch_registry_registries_registry_id_entries_entry_id_services_service_id_body_pricing_model import (
     PatchRegistryRegistriesRegistryIdEntriesEntryIdServicesServiceIdBodyPricingModel,
 )
+from .pending_user import PendingUser
+from .pending_user_status import PendingUserStatus
+from .persona_bootstrap import PersonaBootstrap
+from .persona_bootstrap_auth import PersonaBootstrapAuth
+from .persona_bootstrap_auth_token_class import PersonaBootstrapAuthTokenClass
+from .persona_bootstrap_bucket import PersonaBootstrapBucket
+from .persona_bootstrap_bucket_access import PersonaBootstrapBucketAccess
+from .persona_bootstrap_bucket_scope import PersonaBootstrapBucketScope
+from .persona_bootstrap_chat import PersonaBootstrapChat
+from .persona_bootstrap_chat_limits import PersonaBootstrapChatLimits
+from .persona_bootstrap_chat_streaming import PersonaBootstrapChatStreaming
+from .persona_bootstrap_memory import PersonaBootstrapMemory
+from .persona_bootstrap_persona import PersonaBootstrapPersona
+from .persona_bootstrap_prompt import PersonaBootstrapPrompt
+from .persona_bootstrap_subject import PersonaBootstrapSubject
+from .persona_bootstrap_tool import PersonaBootstrapTool
 from .persona_demo_preview_choice import PersonaDemoPreviewChoice
 from .persona_demo_preview_diagnostic import PersonaDemoPreviewDiagnostic
 from .persona_demo_preview_diagnostic_severity import PersonaDemoPreviewDiagnosticSeverity
@@ -1742,6 +1784,9 @@ from .post_usage_usage_counters_response_201 import PostUsageUsageCountersRespon
 from .post_usage_usage_events_body import PostUsageUsageEventsBody
 from .post_usage_usage_events_response_201 import PostUsageUsageEventsResponse201
 from .postmark_deliverability_event import PostmarkDeliverabilityEvent
+from .presence_heartbeat_result import PresenceHeartbeatResult
+from .presence_list import PresenceList
+from .presence_view import PresenceView
 from .privacy_grant import PrivacyGrant
 from .privacy_grant_target_table import PrivacyGrantTargetTable
 from .problem_details import ProblemDetails
@@ -2224,6 +2269,7 @@ from .put_project_work_items_id_fields_body_values_item import (
 )
 from .put_settings_notifications_id_body import PutSettingsNotificationsIdBody
 from .put_settings_notifications_id_response_200 import PutSettingsNotificationsIdResponse200
+from .put_system_admin_notes_response_200 import PutSystemAdminNotesResponse200
 from .put_system_audit_events_id_body import PutSystemAuditEventsIdBody
 from .put_system_audit_events_id_response_200 import PutSystemAuditEventsIdResponse200
 from .put_system_feature_flags_id_body import PutSystemFeatureFlagsIdBody
@@ -2316,6 +2362,8 @@ from .search_discussion_post_result import SearchDiscussionPostResult
 from .search_discussion_topic_result import SearchDiscussionTopicResult
 from .search_document_result import SearchDocumentResult
 from .search_note_result import SearchNoteResult
+from .send_invite_channel import SendInviteChannel
+from .send_invites_body import SendInvitesBody
 from .send_result import SendResult
 from .server_bag import ServerBag
 from .signup_list_public import SignupListPublic
@@ -2338,6 +2386,11 @@ from .subject_sheet_trend import SubjectSheetTrend
 from .sync_change import SyncChange
 from .sync_change_data import SyncChangeData
 from .sync_change_op import SyncChangeOp
+from .sync_enrollment_list import SyncEnrollmentList
+from .sync_enrollment_row import SyncEnrollmentRow
+from .sync_enrollment_row_push_mode import SyncEnrollmentRowPushMode
+from .sync_enrollment_row_scope import SyncEnrollmentRowScope
+from .sync_enrollment_update import SyncEnrollmentUpdate
 from .sync_manifest_entry import SyncManifestEntry
 from .sync_pull_response import SyncPullResponse
 from .sync_push_op import SyncPushOp
@@ -2379,6 +2432,24 @@ from .usage_summary_row_scope import UsageSummaryRowScope
 from .user import User
 from .user_block import UserBlock
 from .user_profile_visibility import UserProfileVisibility
+from .visitor_award_badge import VisitorAwardBadge
+from .visitor_award_event import VisitorAwardEvent
+from .visitor_conversation import VisitorConversation
+from .visitor_conversation_create import VisitorConversationCreate
+from .visitor_conversation_detail import VisitorConversationDetail
+from .visitor_conversation_state import VisitorConversationState
+from .visitor_done_event import VisitorDoneEvent
+from .visitor_ended_event import VisitorEndedEvent
+from .visitor_error_event import VisitorErrorEvent
+from .visitor_message import VisitorMessage
+from .visitor_open_event import VisitorOpenEvent
+from .visitor_status_event import VisitorStatusEvent
+from .visitor_status_event_phase import VisitorStatusEventPhase
+from .visitor_token import VisitorToken
+from .visitor_token_event import VisitorTokenEvent
+from .visitor_tool_call_completed_event import VisitorToolCallCompletedEvent
+from .visitor_tool_call_started_event import VisitorToolCallStartedEvent
+from .visitor_turn_request import VisitorTurnRequest
 from .work_item import WorkItem
 from .work_item_assignee_kind_type_1 import WorkItemAssigneeKindType1
 from .work_item_assignee_kind_type_2_type_1 import WorkItemAssigneeKindType2Type1
@@ -2415,6 +2486,11 @@ __all__ = (
     "AccessRoleDefaultFor",
     "AccessRoleEnvelope",
     "AccessRoleList",
+    "AddPendingUser",
+    "AddPendingUsersBody",
+    "AdminNote",
+    "AdminNoteInput",
+    "AdminNotesReconcileBody",
     "AiProcessingClaimedJob",
     "AiProcessingClaimedJobPayload",
     "AiProcessingJob",
@@ -2422,6 +2498,11 @@ __all__ = (
     "AiProcessingWebhookDeliveryPayload",
     "AiProcessingWebhookEndpoint",
     "AiProcessingWebhookEndpointCreated",
+    "Announcement",
+    "AnnouncementAccepted",
+    "AnnouncementAcceptedStatus",
+    "AnnouncementCreate",
+    "AnnouncementList",
     "ApiToken",
     "ApiTokenCreated",
     "AppearanceSettings",
@@ -2505,16 +2586,27 @@ __all__ = (
     "DeliveryStatus",
     "DiscussionPost",
     "DiscussionTopic",
-    "EcoAddPendingUsersBody",
-    "EcoAddPendingUsersBodyUsersItem",
-    "EcoManagedRow",
-    "EcoNotesReconcileBody",
-    "EcoNotesReconcileBodyNotesItem",
-    "EcoSendInvitesBody",
-    "EcoSendInvitesBodyEmail",
-    "EcoSendInvitesBodySms",
+    "DmChatList",
+    "DmChatSummary",
+    "DmCreateRequest",
+    "DmCreateResult",
+    "DmMessage",
+    "DmMessageList",
+    "DmMessagePreviewType0",
+    "DmReadRequest",
+    "DmReadResult",
+    "DmSendMessage",
+    "EcosystemAuthSettings",
+    "EcosystemAuthSettingsSignupMode",
+    "EcosystemAuthSettingsUpdate",
+    "EcosystemAuthSettingsUpdateSignupMode",
     "EcosystemFeatureFlag",
     "EcosystemServerBagEntry",
+    "EcosystemSigninApp",
+    "EcosystemSigninAppCreate",
+    "EcosystemSigninAppUpdate",
+    "EntityHistoryEntry",
+    "EntityHistoryEntryDetailType0",
     "Error",
     "ErrorError",
     "FeatureFlag",
@@ -2974,6 +3066,10 @@ __all__ = (
     "IntegrationProviderConfigDeliverabilityWebhookType0",
     "IntegrationProviderConfigFieldsItem",
     "IntegrationProviderLinksItem",
+    "Invitation",
+    "InvitationChannel",
+    "InvitationRequest",
+    "InvitationStatus",
     "InviteAcceptRequest",
     "InviteAcceptResult",
     "InviteAcceptResultStatus",
@@ -3026,6 +3122,7 @@ __all__ = (
     "NotificationPreference",
     "NotificationPreferenceCategory",
     "NotificationStatus",
+    "NotificationWakeEvent",
     "OrgSheet",
     "OrgSheetStats",
     "OrgSheetSubjectType",
@@ -3097,6 +3194,22 @@ __all__ = (
     "PatchRegistryRegistriesRegistryIdEntriesEntryIdServicesServiceIdBody",
     "PatchRegistryRegistriesRegistryIdEntriesEntryIdServicesServiceIdBodyDeliveryMode",
     "PatchRegistryRegistriesRegistryIdEntriesEntryIdServicesServiceIdBodyPricingModel",
+    "PendingUser",
+    "PendingUserStatus",
+    "PersonaBootstrap",
+    "PersonaBootstrapAuth",
+    "PersonaBootstrapAuthTokenClass",
+    "PersonaBootstrapBucket",
+    "PersonaBootstrapBucketAccess",
+    "PersonaBootstrapBucketScope",
+    "PersonaBootstrapChat",
+    "PersonaBootstrapChatLimits",
+    "PersonaBootstrapChatStreaming",
+    "PersonaBootstrapMemory",
+    "PersonaBootstrapPersona",
+    "PersonaBootstrapPrompt",
+    "PersonaBootstrapSubject",
+    "PersonaBootstrapTool",
     "PersonaDemoPreviewChoice",
     "PersonaDemoPreviewDiagnostic",
     "PersonaDemoPreviewDiagnosticSeverity",
@@ -3579,6 +3692,9 @@ __all__ = (
     "PostUsageUsageEventsBody",
     "PostUsageUsageEventsResponse201",
     "PostmarkDeliverabilityEvent",
+    "PresenceHeartbeatResult",
+    "PresenceList",
+    "PresenceView",
     "PrivacyGrant",
     "PrivacyGrantTargetTable",
     "ProblemDetails",
@@ -3917,6 +4033,7 @@ __all__ = (
     "PutProjectWorkItemsIdFieldsBodyValuesItem",
     "PutSettingsNotificationsIdBody",
     "PutSettingsNotificationsIdResponse200",
+    "PutSystemAdminNotesResponse200",
     "PutSystemAuditEventsIdBody",
     "PutSystemAuditEventsIdResponse200",
     "PutSystemFeatureFlagsIdBody",
@@ -3997,6 +4114,8 @@ __all__ = (
     "SearchDiscussionTopicResult",
     "SearchDocumentResult",
     "SearchNoteResult",
+    "SendInviteChannel",
+    "SendInvitesBody",
     "SendResult",
     "ServerBag",
     "SignupListPublic",
@@ -4019,6 +4138,11 @@ __all__ = (
     "SyncChange",
     "SyncChangeData",
     "SyncChangeOp",
+    "SyncEnrollmentList",
+    "SyncEnrollmentRow",
+    "SyncEnrollmentRowPushMode",
+    "SyncEnrollmentRowScope",
+    "SyncEnrollmentUpdate",
     "SyncManifestEntry",
     "SyncPullResponse",
     "SyncPushOp",
@@ -4060,6 +4184,24 @@ __all__ = (
     "User",
     "UserBlock",
     "UserProfileVisibility",
+    "VisitorAwardBadge",
+    "VisitorAwardEvent",
+    "VisitorConversation",
+    "VisitorConversationCreate",
+    "VisitorConversationDetail",
+    "VisitorConversationState",
+    "VisitorDoneEvent",
+    "VisitorEndedEvent",
+    "VisitorErrorEvent",
+    "VisitorMessage",
+    "VisitorOpenEvent",
+    "VisitorStatusEvent",
+    "VisitorStatusEventPhase",
+    "VisitorToken",
+    "VisitorTokenEvent",
+    "VisitorToolCallCompletedEvent",
+    "VisitorToolCallStartedEvent",
+    "VisitorTurnRequest",
     "WorkItem",
     "WorkItemAssigneeKindType1",
     "WorkItemAssigneeKindType2Type1",
