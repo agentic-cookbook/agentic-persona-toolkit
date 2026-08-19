@@ -46,7 +46,7 @@ class PostContentQueueItemsBody:
 
         queue_id = self.queue_id
 
-        payload: None | bool | dict[str, Any] | float | list[Any] | str
+        payload: bool | dict[str, Any] | float | list[Any] | str | None
         if isinstance(self.payload, PostContentQueueItemsBodyPayloadType1):
             payload = self.payload.to_dict()
         elif isinstance(self.payload, list):
@@ -61,19 +61,19 @@ class PostContentQueueItemsBody:
 
         ecosystem_id = self.ecosystem_id
 
-        dequeued_at: None | Unset | str
+        dequeued_at: Unset | str | None
         if isinstance(self.dequeued_at, Unset):
             dequeued_at = UNSET
         else:
             dequeued_at = self.dequeued_at
 
-        acked_at: None | Unset | str
+        acked_at: Unset | str | None
         if isinstance(self.acked_at, Unset):
             acked_at = UNSET
         else:
             acked_at = self.acked_at
 
-        nacked_at: None | Unset | str
+        nacked_at: Unset | str | None
         if isinstance(self.nacked_at, Unset):
             nacked_at = UNSET
         else:

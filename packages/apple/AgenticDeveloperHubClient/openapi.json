@@ -190,6 +190,7 @@
           "avatarUrl",
           "slug",
           "publicProfileEnabled",
+          "profileVisibility",
           "capabilities"
         ],
         "properties": {
@@ -212,6 +213,15 @@
           "publicProfileEnabled": {
             "type": "boolean",
             "description": "Whether the public profile card is visible at /public/users/:slug"
+          },
+          "profileVisibility": {
+            "type": "string",
+            "enum": [
+              "public",
+              "hub",
+              "private"
+            ],
+            "description": "The principal's page-level profile visibility. Supersedes publicProfileEnabled, which is retained during the expand phase and written in parallel."
           },
           "capabilities": {
             "type": "array",
@@ -693,6 +703,32 @@
           }
         }
       },
+      "IntegrationConnectFields": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "string"
+        },
+        "description": "The provider's declared config fields (configFields), keyed by field key; validated + split into the secret vs non-secret config against the spec."
+      },
+      "IntegrationActionMediaItem": {
+        "type": "object",
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "url": {
+            "type": "string"
+          },
+          "altText": {
+            "type": "string"
+          }
+        }
+      },
+      "IntegrationActionFields": {
+        "type": "object",
+        "description": "Provider merge/custom fields — flat string, number, or boolean values",
+        "additionalProperties": true
+      },
       "ProblemDetails": {
         "type": "object",
         "required": [
@@ -1004,6 +1040,7 @@
       "IntegrationConnectRequest": {
         "oneOf": [
           {
+            "title": "IntegrationConnectOAuth",
             "type": "object",
             "required": [
               "type",
@@ -1045,6 +1082,7 @@
             }
           },
           {
+            "title": "IntegrationConnectApiKey",
             "type": "object",
             "required": [
               "type",
@@ -1071,15 +1109,12 @@
                 "description": "Target ecosystem id (the caller must manage it)"
               },
               "fields": {
-                "type": "object",
-                "additionalProperties": {
-                  "type": "string"
-                },
-                "description": "The provider's declared config fields (configFields), keyed by field key; validated + split into the secret vs non-secret config against the spec."
+                "$ref": "#/components/schemas/IntegrationConnectFields"
               }
             }
           },
           {
+            "title": "IntegrationConnectAppPassword",
             "type": "object",
             "required": [
               "type",
@@ -1118,6 +1153,7 @@
             }
           },
           {
+            "title": "IntegrationConnectPlaidLink",
             "type": "object",
             "required": [
               "type",
@@ -1149,6 +1185,7 @@
             }
           },
           {
+            "title": "IntegrationConnectOAuthInstance",
             "type": "object",
             "required": [
               "type",
@@ -1188,6 +1225,7 @@
       "IntegrationActionRequest": {
         "oneOf": [
           {
+            "title": "IntegrationActionSend",
             "type": "object",
             "description": "actionType=send — an outbound email; at least one body is required",
             "required": [
@@ -1226,6 +1264,7 @@
             }
           },
           {
+            "title": "IntegrationActionPost",
             "type": "object",
             "description": "actionType=post — an outbound social post; requires text or media",
             "properties": {
@@ -1235,18 +1274,7 @@
               "media": {
                 "type": "array",
                 "items": {
-                  "type": "object",
-                  "required": [
-                    "url"
-                  ],
-                  "properties": {
-                    "url": {
-                      "type": "string"
-                    },
-                    "altText": {
-                      "type": "string"
-                    }
-                  }
+                  "$ref": "#/components/schemas/IntegrationActionMediaItem"
                 }
               },
               "replyTo": {
@@ -1255,6 +1283,7 @@
             }
           },
           {
+            "title": "IntegrationActionSms",
             "type": "object",
             "description": "actionType=sms — an outbound text message (Twilio-style)",
             "required": [
@@ -1273,6 +1302,7 @@
             }
           },
           {
+            "title": "IntegrationActionSubmit",
             "type": "object",
             "description": "actionType=submit — a Reddit-style subreddit submission; exactly one of url (link post) or non-empty text (self post) is required (an empty-string text counts as absent)",
             "required": [
@@ -1300,6 +1330,7 @@
             }
           },
           {
+            "title": "IntegrationActionComment",
             "type": "object",
             "description": "actionType=comment — a Reddit reply (reuses the post shape); requires non-empty text and replyTo (a t1_/t3_ fullname); media is rejected by the handler",
             "properties": {
@@ -1309,18 +1340,7 @@
               "media": {
                 "type": "array",
                 "items": {
-                  "type": "object",
-                  "required": [
-                    "url"
-                  ],
-                  "properties": {
-                    "url": {
-                      "type": "string"
-                    },
-                    "altText": {
-                      "type": "string"
-                    }
-                  }
+                  "$ref": "#/components/schemas/IntegrationActionMediaItem"
                 }
               },
               "replyTo": {
@@ -1330,6 +1350,7 @@
             }
           },
           {
+            "title": "IntegrationActionSubscribe",
             "type": "object",
             "description": "actionType=subscribe — add or update one contact on a newsletter audience; audienceId is the PROVIDER list id",
             "required": [
@@ -1359,13 +1380,12 @@
                 }
               },
               "fields": {
-                "type": "object",
-                "description": "Provider merge/custom fields — flat string, number, or boolean values",
-                "additionalProperties": true
+                "$ref": "#/components/schemas/IntegrationActionFields"
               }
             }
           },
           {
+            "title": "IntegrationActionUnsubscribe",
             "type": "object",
             "description": "actionType=unsubscribe — remove one contact from ONE audience; audienceId is required (a list-less unsubscribe would be global)",
             "required": [
@@ -1385,6 +1405,7 @@
             }
           },
           {
+            "title": "IntegrationActionBroadcast",
             "type": "object",
             "description": "actionType=broadcast — compose (but do NOT send) a broadcast to an audience; returns the broadcast id",
             "required": [
@@ -1418,6 +1439,7 @@
             }
           },
           {
+            "title": "IntegrationActionBroadcastSend",
             "type": "object",
             "description": "actionType=broadcast_send — dispatch a broadcast previously created by actionType=broadcast",
             "required": [
@@ -2265,6 +2287,212 @@
           "publicKey": {
             "type": "string",
             "description": "the list's NEW embed key. The old key stops working immediately — any page still embedding it must be updated."
+          }
+        }
+      },
+      "BillingAccount": {
+        "type": "object",
+        "required": [
+          "id",
+          "offerId",
+          "status",
+          "createdAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "offerId": {
+            "type": "string"
+          },
+          "stripeCustomerId": {
+            "type": "string",
+            "nullable": true
+          },
+          "stripeCheckoutSessionId": {
+            "type": "string",
+            "nullable": true
+          },
+          "stripeSubscriptionId": {
+            "type": "string",
+            "nullable": true
+          },
+          "payerEmail": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string"
+          },
+          "currentPeriodEnd": {
+            "type": "string",
+            "nullable": true
+          },
+          "lapsedAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "claimedCustomerId": {
+            "type": "string",
+            "nullable": true
+          },
+          "claimedAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string"
+          }
+        }
+      },
+      "BillingResendClaim": {
+        "type": "object",
+        "required": [
+          "ok",
+          "accountId",
+          "expiresAt"
+        ],
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "accountId": {
+            "type": "string"
+          },
+          "expiresAt": {
+            "type": "string"
+          }
+        }
+      },
+      "BillingPriceOption": {
+        "type": "object",
+        "required": [
+          "id",
+          "productId",
+          "currency"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "productId": {
+            "type": "string"
+          },
+          "productName": {
+            "type": "string",
+            "nullable": true
+          },
+          "unitAmount": {
+            "type": "integer",
+            "nullable": true
+          },
+          "currency": {
+            "type": "string"
+          },
+          "interval": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "BillingRedriveResult": {
+        "type": "object",
+        "required": [
+          "examined",
+          "applied",
+          "terminal",
+          "stillPending",
+          "unreadable",
+          "failed",
+          "nextOffset"
+        ],
+        "properties": {
+          "examined": {
+            "type": "integer"
+          },
+          "applied": {
+            "type": "integer"
+          },
+          "terminal": {
+            "type": "integer"
+          },
+          "stillPending": {
+            "type": "integer"
+          },
+          "unreadable": {
+            "type": "integer"
+          },
+          "failed": {
+            "type": "integer"
+          },
+          "nextOffset": {
+            "type": "integer",
+            "nullable": true
+          }
+        }
+      },
+      "BillingClaimRequest": {
+        "type": "object",
+        "required": [
+          "token"
+        ],
+        "properties": {
+          "token": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "BillingClaimResult": {
+        "type": "object",
+        "required": [
+          "ok",
+          "ecosystemId",
+          "offerId"
+        ],
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "ecosystemId": {
+            "type": "string"
+          },
+          "offerId": {
+            "type": "string"
+          }
+        }
+      },
+      "StripeWebhookEvent": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": [
+          "id",
+          "type"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "created": {
+            "type": "integer"
+          },
+          "data": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        }
+      },
+      "BillingAck": {
+        "type": "object",
+        "required": [
+          "ok"
+        ],
+        "properties": {
+          "ok": {
+            "type": "boolean"
           }
         }
       },
@@ -8013,6 +8241,88 @@
           }
         }
       },
+      "ProviderConnectionUrlVar": {
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "example": {
+            "type": "string"
+          },
+          "secret": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ProviderConnectionHeaderVar": {
+        "type": "object",
+        "required": [
+          "header"
+        ],
+        "properties": {
+          "header": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "example": {
+            "type": "string"
+          },
+          "secret": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ProviderConnectionStringMap": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "string"
+        }
+      },
+      "ProviderConnectionAuth": {
+        "type": "object",
+        "required": [
+          "type"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "bearer",
+              "header",
+              "sigv4",
+              "oauth2"
+            ]
+          },
+          "header": {
+            "type": "string",
+            "description": "header auth: the header name (e.g. api-key)"
+          },
+          "scheme": {
+            "type": "string",
+            "enum": [
+              "bearer",
+              "raw"
+            ]
+          },
+          "region": {
+            "type": "string",
+            "description": "sigv4 (reserved)"
+          },
+          "tokenUrl": {
+            "type": "string",
+            "description": "oauth2 (reserved)"
+          }
+        }
+      },
       "ProviderConnectionSpec": {
         "type": "object",
         "nullable": true,
@@ -8030,97 +8340,24 @@
             "type": "array",
             "description": "base_url placeholders the connect UI prompts for and substitutes.",
             "items": {
-              "type": "object",
-              "required": [
-                "name"
-              ],
-              "properties": {
-                "name": {
-                  "type": "string"
-                },
-                "label": {
-                  "type": "string"
-                },
-                "example": {
-                  "type": "string"
-                },
-                "secret": {
-                  "type": "boolean"
-                }
-              }
+              "$ref": "#/components/schemas/ProviderConnectionUrlVar"
             }
           },
           "headerVars": {
             "type": "array",
             "description": "headers the connect UI prompts a per-connection value for and writes into extraHeaders.",
             "items": {
-              "type": "object",
-              "required": [
-                "header"
-              ],
-              "properties": {
-                "header": {
-                  "type": "string"
-                },
-                "label": {
-                  "type": "string"
-                },
-                "example": {
-                  "type": "string"
-                },
-                "secret": {
-                  "type": "boolean"
-                }
-              }
+              "$ref": "#/components/schemas/ProviderConnectionHeaderVar"
             }
           },
           "auth": {
-            "type": "object",
-            "required": [
-              "type"
-            ],
-            "properties": {
-              "type": {
-                "type": "string",
-                "enum": [
-                  "bearer",
-                  "header",
-                  "sigv4",
-                  "oauth2"
-                ]
-              },
-              "header": {
-                "type": "string",
-                "description": "header auth: the header name (e.g. api-key)"
-              },
-              "scheme": {
-                "type": "string",
-                "enum": [
-                  "bearer",
-                  "raw"
-                ]
-              },
-              "region": {
-                "type": "string",
-                "description": "sigv4 (reserved)"
-              },
-              "tokenUrl": {
-                "type": "string",
-                "description": "oauth2 (reserved)"
-              }
-            }
+            "$ref": "#/components/schemas/ProviderConnectionAuth"
           },
           "defaultQuery": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "string"
-            }
+            "$ref": "#/components/schemas/ProviderConnectionStringMap"
           },
           "extraHeaders": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "string"
-            }
+            "$ref": "#/components/schemas/ProviderConnectionStringMap"
           }
         }
       },
@@ -8251,7 +8488,7 @@
             "type": "string",
             "enum": [
               "public",
-              "unlisted"
+              "hub"
             ]
           },
           "createdAt": {
@@ -8677,7 +8914,8 @@
           "visibility": {
             "type": "string",
             "enum": [
-              "public"
+              "public",
+              "hub"
             ]
           },
           "createdAt": {
@@ -8747,7 +8985,8 @@
         "required": [
           "slug",
           "displayName",
-          "avatarUrl"
+          "avatarUrl",
+          "kind"
         ],
         "properties": {
           "slug": {
@@ -8760,6 +8999,13 @@
           "avatarUrl": {
             "type": "string",
             "nullable": true
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "user",
+              "organization"
+            ]
           }
         }
       },
@@ -10075,7 +10321,7 @@
             "type": "string",
             "enum": [
               "public",
-              "unlisted",
+              "hub",
               "private"
             ]
           },
@@ -10451,7 +10697,7 @@
             "type": "string",
             "enum": [
               "public",
-              "unlisted",
+              "hub",
               "private"
             ]
           },
@@ -11033,6 +11279,115 @@
           "total": {
             "type": "integer",
             "description": "Saturates at a 10,000-row count cap"
+          }
+        }
+      },
+      "ReservedIdentifier": {
+        "type": "object",
+        "required": [
+          "rdid",
+          "entityType",
+          "entityId",
+          "reason",
+          "heldSince",
+          "releasable"
+        ],
+        "properties": {
+          "rdid": {
+            "type": "string"
+          },
+          "entityType": {
+            "type": "string"
+          },
+          "entityId": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string",
+            "enum": [
+              "rename-leftover",
+              "orphan",
+              "deleted-entity"
+            ],
+            "description": "What is holding the name, and therefore what releasing it does: an in-window rename alias and an orphaned mapping are deleted; a deleted entity is RENAMED to a placeholder and its subtree moves with it."
+          },
+          "heldSince": {
+            "type": "string",
+            "nullable": true,
+            "description": "When the name got stuck: an alias's supersede instant, else the row's last write"
+          },
+          "releasable": {
+            "type": "boolean",
+            "description": "False for names this surface can only report — a revoked token slug (reserved by policy) and legacy reverse-domain handles. Releasing one answers 403."
+          }
+        }
+      },
+      "ReservedIdentifierPage": {
+        "type": "object",
+        "required": [
+          "items",
+          "page",
+          "pageSize",
+          "total"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReservedIdentifier"
+            }
+          },
+          "page": {
+            "type": "integer"
+          },
+          "pageSize": {
+            "type": "integer",
+            "description": "Clamped 1..200"
+          },
+          "total": {
+            "type": "integer",
+            "description": "Saturates at a 2,000-row cap: the list merges heterogeneous sources and cannot be paged by a single SQL OFFSET"
+          }
+        }
+      },
+      "ReleaseResult": {
+        "type": "object",
+        "required": [
+          "rdid",
+          "reason",
+          "freed",
+          "aliasesRemoved",
+          "stillHeldBy"
+        ],
+        "properties": {
+          "rdid": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string",
+            "enum": [
+              "rename-leftover",
+              "orphan",
+              "deleted-entity"
+            ]
+          },
+          "freed": {
+            "type": "boolean",
+            "description": "The released NAME is available again. Deliberately not \"the surrounding namespace is empty\" — a different type sharing that path is a different name."
+          },
+          "placeholder": {
+            "type": "string",
+            "description": "The name the entity was renamed to, when the release was a rename"
+          },
+          "aliasesRemoved": {
+            "type": "integer"
+          },
+          "stillHeldBy": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Canonical addresses still sitting in that space, informational. Read as \"these exist nearby\", never as \"the release failed\"."
           }
         }
       },
@@ -12931,6 +13286,15 @@
                   },
                   "publicProfileEnabled": {
                     "type": "boolean"
+                  },
+                  "profileVisibility": {
+                    "type": "string",
+                    "enum": [
+                      "public",
+                      "hub",
+                      "private"
+                    ],
+                    "description": "The principal's page-level profile visibility. Supersedes publicProfileEnabled, which is retained during the expand phase and written in parallel."
                   }
                 }
               }
@@ -23383,6 +23747,411 @@
         }
       }
     },
+    "/billing/accounts": {
+      "get": {
+        "tags": [
+          "billing"
+        ],
+        "summary": "The ecosystem’s payer accounts, newest first",
+        "description": "Scoped to the acting identity’s ecosystem and to `deleted_at IS NULL`, ordered by `createdAt` descending and capped at 500 rows. There is no pagination and no filter: this is an operator’s payer list, not a reporting API. `claimTokenHash` is never selected — it is the receipt half of a credential, and a list endpoint is the last place it should be reachable from.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Up to 500 accounts",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/BillingAccount"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/billing/accounts/{id}/resend-claim": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          },
+          "description": "The `billing.accounts` row to re-issue a claim link for"
+        }
+      ],
+      "post": {
+        "tags": [
+          "billing"
+        ],
+        "summary": "Mint a fresh claim token for one account and mail it again",
+        "description": "It MINTS rather than resends: the stored value is a one-way hash, so the original token is unrecoverable and there is nothing to re-send. A fresh token restarts the claim TTL — which is what an expired link needs — and invalidates the previous one by overwriting the hash, which is what an operator who suspects the first link leaked wants. Delivery happens after the transaction commits and cannot fail the call: the mailer never throws and logs every path that does not send, so a second failure is visible in the logs and this route can simply be called again. A 200 therefore means \"a new token exists\", not \"the payer received it\".",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A new claim token was minted and delivery attempted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BillingResendClaim"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/billing/prices": {
+      "get": {
+        "tags": [
+          "billing"
+        ],
+        "summary": "Active prices on the ecosystem’s connected Stripe account",
+        "description": "The list the offer editor picks a `stripe_price_id` from. Active prices only, with their product expanded, walked to a hard cap of 1000 — high enough that no plausible catalog of things an operator SELLS reaches it, low enough that one HTTP request cannot turn into an unbounded series of round-trips against a third party. Nothing is cached or stored: adh configures the OFFER, Stripe owns the money.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The active price catalog",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/BillingPriceOption"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/billing/events/redrive": {
+      "post": {
+        "tags": [
+          "billing"
+        ],
+        "summary": "Re-apply stored Stripe events the receiver could not apply",
+        "description": "The receiver STORES every verified event before it tries to apply it, so an event that arrived before its offer existed — or that hit a transient failure — is still on disk. This re-applies a batch of 100 in `receivedAt` order and reports what happened to each. `nextOffset` is the cursor: it is non-null exactly when the batch came back full, and passing it as `offset` is what makes the second call a DIFFERENT batch. Without it the fixed limit was not pagination at all — a row the redrive examines but cannot advance stays in the first hundred forever, and everything behind it was unreachable through this API.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "includeProcessed",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "What the batch did",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BillingRedriveResult"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/billing/claim": {
+      "post": {
+        "tags": [
+          "billing"
+        ],
+        "summary": "Redeem a claim token, binding a paid account to the caller",
+        "description": "Authenticated, and on the billing base rather than `/public`, because redeeming BINDS an adh identity to a paid account and there is nothing to bind without a session — a claim route mounted on `/public` would read the principal as undefined on every request and refuse every claim. The page that collects the token is the public half and lives in the frontend; it posts here once the visitor is signed in. A delegated (acting) principal is refused outright: delegation means \"act on their behalf\", and irreversibly claiming ownership of something they paid for is not that.\n\nIDEMPOTENT FOR THE CLAIMANT, single-use for everyone else. A repeat presentation by the identity that already claimed it returns the same body as the first call, so a prefetching mail client or a retried POST does not tell the payer their link is invalid; a DIFFERENT identity presenting the same token still gets the 404.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BillingClaimRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The account this token was bound to",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BillingClaimResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/public/webhooks/stripe/{ecosystemId}": {
+      "parameters": [
+        {
+          "name": "ecosystemId",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          },
+          "description": "The ecosystem whose Stripe webhook secret authenticates this call"
+        }
+      ],
+      "post": {
+        "tags": [
+          "billing"
+        ],
+        "summary": "Stripe event receiver (HMAC over the raw body, not a JWT)",
+        "description": "The only writer of `billing.accounts`. The signature is computed over the EXACT raw bytes, so the body is read as text and never re-serialized. Every stored secret for the ecosystem is tried in turn, which is what makes a secret rotation a non-event.\n\nIt STORES the event before it does anything that can fail, keyed uniquely on `(ecosystem_id, stripe_event_id)` — one Stripe account can serve two ecosystems under BYOK, so the Stripe event id alone is not a deduplication key. A replay of an already-stored event short-circuits to the same 200 without re-applying it.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StripeWebhookEvent"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Accepted (or already handled)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BillingAck"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/bucket/buckets/{bucketId}/types/{typeId}/rows": {
       "get": {
         "tags": [
@@ -29015,6 +29784,264 @@
             }
           },
           "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/customer/transfer": {
+      "post": {
+        "tags": [
+          "customer"
+        ],
+        "summary": "Move one customer (and the workspace they own) to another ecosystem (admin)",
+        "description": "Runs in ONE transaction. Rewrites the account tables, revokes API tokens scoped to the source, re-parents the ecosystems the user owns beneath it, and re-derives every affected rdid from the new parent chain. Old addresses remain resolvable as aliases.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "userId",
+                  "target"
+                ],
+                "properties": {
+                  "userId": {
+                    "type": "string",
+                    "description": "the customer's uuid"
+                  },
+                  "target": {
+                    "type": "string",
+                    "description": "destination ecosystem (uuid or rdid)"
+                  },
+                  "dryRun": {
+                    "type": "boolean",
+                    "description": "report conflicts without writing"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "What moved (or, for a dry run, what would collide)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "userId": {
+                      "type": "string"
+                    },
+                    "from": {
+                      "type": "string"
+                    },
+                    "to": {
+                      "type": "string"
+                    },
+                    "dryRun": {
+                      "type": "boolean"
+                    },
+                    "moved": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "integer"
+                      }
+                    },
+                    "revoked": {
+                      "type": "integer",
+                      "description": "API tokens deleted"
+                    },
+                    "ecosystemsReparented": {
+                      "type": "integer"
+                    },
+                    "rewritten": {
+                      "type": "integer",
+                      "description": "addresses re-derived by the cascade"
+                    },
+                    "conflicts": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "userId": {
+                            "type": "string"
+                          },
+                          "constraint": {
+                            "type": "string"
+                          },
+                          "detail": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/customer/transfer/preview": {
+      "get": {
+        "tags": [
+          "customer"
+        ],
+        "summary": "What would collide if these users moved, without moving them (admin)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "userIds",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "comma-separated customer uuids — the whole selection, in one call"
+          },
+          {
+            "name": "target",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "destination ecosystem (uuid or rdid)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Conflicts across the whole selection",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "target": {
+                      "type": "string"
+                    },
+                    "conflicts": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "userId": {
+                            "type": "string"
+                          },
+                          "constraint": {
+                            "type": "string"
+                          },
+                          "detail": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
             "description": "Error",
             "content": {
               "application/json": {
@@ -45921,7 +46948,7 @@
         "tags": [
           "public"
         ],
-        "summary": "Search public-profile users by slug or display name",
+        "summary": "Search visible user and organization profiles by slug or display name",
         "parameters": [
           {
             "name": "q",
@@ -45934,7 +46961,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Matching public users (max 20)",
+            "description": "Matching principals visible to the caller (max 20)",
             "content": {
               "application/json": {
                 "schema": {
@@ -46626,7 +47653,7 @@
         "tags": [
           "public"
         ],
-        "summary": "Get one public/unlisted entry by slug (301s a superseded slug)",
+        "summary": "Get one public entry by slug (301s a superseded slug)",
         "responses": {
           "200": {
             "description": "The entry, its parent registry summary, and its JSON-LD",
@@ -46677,6 +47704,54 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/PublicRegistrySitemap"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/search": {
+      "get": {
+        "tags": [
+          "public"
+        ],
+        "summary": "Search visible user and organization profiles as a signed-in viewer ('public' + 'hub')",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Matching principals ('public' + 'hub' profiles, max 20)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PublicUserSearchHit"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
                 }
               }
             }
@@ -46739,6 +47814,242 @@
         }
       }
     },
+    "/orgs/{slug}": {
+      "parameters": [
+        {
+          "name": "slug",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "get": {
+        "tags": [
+          "public"
+        ],
+        "summary": "Get an organization card as a signed-in viewer ('public' + 'hub' orgs)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Organization profile card",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicOrgProfile"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/{ownerSlug}/personas/{personaSlug}": {
+      "parameters": [
+        {
+          "name": "ownerSlug",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "personaSlug",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "get": {
+        "tags": [
+          "public"
+        ],
+        "summary": "Get a persona scoped to its owning user as a signed-in viewer ('public' + 'hub')",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Persona (public + hub rows)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicPersona"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/orgs/{ownerSlug}/personas/{personaSlug}": {
+      "parameters": [
+        {
+          "name": "ownerSlug",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "personaSlug",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "get": {
+        "tags": [
+          "public"
+        ],
+        "summary": "Get a persona scoped to its owning organization as a signed-in viewer ('public' + 'hub')",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Persona (public + hub rows)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicPersona"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/registries/{registrySlug}": {
+      "parameters": [
+        {
+          "name": "registrySlug",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "get": {
+        "tags": [
+          "public"
+        ],
+        "summary": "Get a registry as a signed-in viewer ('public' + 'hub' registries)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Registry metadata",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicRegistry"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/registries/{registrySlug}/entries/{entrySlug}": {
       "parameters": [
         {
@@ -46762,7 +48073,7 @@
         "tags": [
           "public"
         ],
-        "summary": "Get one entry as a signed-in viewer (public + authenticated fields)",
+        "summary": "Get one entry as a signed-in viewer (public + authenticated fields, 'hub' rows)",
         "security": [
           {
             "bearerAuth": []
@@ -46806,6 +48117,97 @@
       }
     },
     "/registry/identifiers": {
+      "get": {
+        "tags": [
+          "registry"
+        ],
+        "summary": "Search rdids by prefix, or resolve a batch of entity ids (admin only)",
+        "description": "Send `q` for a left-anchored prefix search, or `entityIds` for a batch reverse lookup — never both. Only canonical rows are returned; aliases are never offered. Unknown ids in a batch are omitted rather than failing the request.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "entityIds",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "entityType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "the matching mappings, rdid-ascending",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RegistryIdentifier"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
       "post": {
         "tags": [
           "registry"
@@ -47496,7 +48898,7 @@
                     "type": "string",
                     "enum": [
                       "public",
-                      "unlisted",
+                      "hub",
                       "private"
                     ]
                   },
@@ -47674,7 +49076,7 @@
                     "type": "string",
                     "enum": [
                       "public",
-                      "unlisted",
+                      "hub",
                       "private"
                     ]
                   },
@@ -48944,7 +50346,7 @@
                     "type": "string",
                     "enum": [
                       "public",
-                      "unlisted",
+                      "hub",
                       "private"
                     ]
                   },
@@ -49194,7 +50596,7 @@
                     "type": "string",
                     "enum": [
                       "public",
-                      "unlisted",
+                      "hub",
                       "private"
                     ]
                   },
@@ -52747,6 +54149,180 @@
             }
           },
           "403": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/system/reserved-identifiers": {
+      "get": {
+        "tags": [
+          "system"
+        ],
+        "summary": "Admin-only list of held-but-unused rdids (paginated, newest-stuck first)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Reserved identifier page",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReservedIdentifierPage"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/system/reserved-identifiers/release": {
+      "post": {
+        "tags": [
+          "system"
+        ],
+        "summary": "Release one held rdid back into the pool (admin)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "rdid",
+                  "entityType",
+                  "entityId"
+                ],
+                "properties": {
+                  "rdid": {
+                    "type": "string",
+                    "description": "The held identifier, exactly as listed"
+                  },
+                  "entityType": {
+                    "type": "string",
+                    "description": "Verified against the stored mapping"
+                  },
+                  "entityId": {
+                    "type": "string",
+                    "description": "Verified against the stored mapping"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "What the release did",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReleaseResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
             "description": "Error",
             "content": {
               "application/json": {
@@ -58294,6 +59870,955 @@
           "audience"
         ],
         "summary": "Delete templates",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Deleted"
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/billing/offers": {
+      "x-exposure": "owner",
+      "get": {
+        "tags": [
+          "billing"
+        ],
+        "summary": "List offers",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "maxLength": 36
+                      },
+                      "ecosystemId": {
+                        "type": "string",
+                        "maxLength": 36
+                      },
+                      "ownerKind": {
+                        "type": "string",
+                        "maxLength": 16
+                      },
+                      "ownerId": {
+                        "type": "string",
+                        "maxLength": 36
+                      },
+                      "slug": {
+                        "type": "string",
+                        "maxLength": 128
+                      },
+                      "name": {
+                        "type": "string",
+                        "maxLength": 255
+                      },
+                      "description": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "purpose": {
+                        "type": "string",
+                        "maxLength": 16
+                      },
+                      "stripePriceId": {
+                        "type": "string",
+                        "maxLength": 255
+                      },
+                      "stripeProductId": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "maxLength": 255
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "collectionMethod": {
+                        "type": "string",
+                        "maxLength": 32
+                      },
+                      "daysUntilDue": {
+                        "anyOf": [
+                          {
+                            "type": "integer",
+                            "minimum": -2147483648,
+                            "maximum": 2147483647
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "grantsEcosystemId": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "maxLength": 36
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "lapseAction": {
+                        "type": "string",
+                        "maxLength": 16
+                      },
+                      "graceDays": {
+                        "type": "integer",
+                        "minimum": -2147483648,
+                        "maximum": 2147483647
+                      },
+                      "isActive": {
+                        "type": "boolean"
+                      },
+                      "createdAt": {
+                        "type": "string"
+                      },
+                      "updatedAt": {
+                        "type": "string"
+                      },
+                      "deletedAt": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "ecosystemId",
+                      "ownerKind",
+                      "ownerId",
+                      "slug",
+                      "name",
+                      "description",
+                      "purpose",
+                      "stripePriceId",
+                      "stripeProductId",
+                      "collectionMethod",
+                      "daysUntilDue",
+                      "grantsEcosystemId",
+                      "lapseAction",
+                      "graceDays",
+                      "isActive",
+                      "createdAt",
+                      "updatedAt",
+                      "deletedAt"
+                    ],
+                    "additionalProperties": false
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "billing"
+        ],
+        "summary": "Create offers",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "type": "object",
+                "properties": {
+                  "ecosystemId": {
+                    "type": "string",
+                    "maxLength": 36
+                  },
+                  "slug": {
+                    "type": "string",
+                    "maxLength": 128
+                  },
+                  "name": {
+                    "type": "string",
+                    "maxLength": 255
+                  },
+                  "description": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "purpose": {
+                    "type": "string",
+                    "maxLength": 16
+                  },
+                  "stripePriceId": {
+                    "type": "string",
+                    "maxLength": 255
+                  },
+                  "stripeProductId": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "maxLength": 255
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "collectionMethod": {
+                    "type": "string",
+                    "maxLength": 32
+                  },
+                  "daysUntilDue": {
+                    "anyOf": [
+                      {
+                        "type": "integer",
+                        "minimum": -2147483648,
+                        "maximum": 2147483647
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "grantsEcosystemId": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "maxLength": 36
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "lapseAction": {
+                    "type": "string",
+                    "maxLength": 16
+                  },
+                  "graceDays": {
+                    "type": "integer",
+                    "minimum": -2147483648,
+                    "maximum": 2147483647
+                  },
+                  "isActive": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "slug",
+                  "name",
+                  "stripePriceId"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "offers",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "maxLength": 36
+                    },
+                    "ecosystemId": {
+                      "type": "string",
+                      "maxLength": 36
+                    },
+                    "ownerKind": {
+                      "type": "string",
+                      "maxLength": 16
+                    },
+                    "ownerId": {
+                      "type": "string",
+                      "maxLength": 36
+                    },
+                    "slug": {
+                      "type": "string",
+                      "maxLength": 128
+                    },
+                    "name": {
+                      "type": "string",
+                      "maxLength": 255
+                    },
+                    "description": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "purpose": {
+                      "type": "string",
+                      "maxLength": 16
+                    },
+                    "stripePriceId": {
+                      "type": "string",
+                      "maxLength": 255
+                    },
+                    "stripeProductId": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "maxLength": 255
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "collectionMethod": {
+                      "type": "string",
+                      "maxLength": 32
+                    },
+                    "daysUntilDue": {
+                      "anyOf": [
+                        {
+                          "type": "integer",
+                          "minimum": -2147483648,
+                          "maximum": 2147483647
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "grantsEcosystemId": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "maxLength": 36
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "lapseAction": {
+                      "type": "string",
+                      "maxLength": 16
+                    },
+                    "graceDays": {
+                      "type": "integer",
+                      "minimum": -2147483648,
+                      "maximum": 2147483647
+                    },
+                    "isActive": {
+                      "type": "boolean"
+                    },
+                    "createdAt": {
+                      "type": "string"
+                    },
+                    "updatedAt": {
+                      "type": "string"
+                    },
+                    "deletedAt": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "ecosystemId",
+                    "ownerKind",
+                    "ownerId",
+                    "slug",
+                    "name",
+                    "description",
+                    "purpose",
+                    "stripePriceId",
+                    "stripeProductId",
+                    "collectionMethod",
+                    "daysUntilDue",
+                    "grantsEcosystemId",
+                    "lapseAction",
+                    "graceDays",
+                    "isActive",
+                    "createdAt",
+                    "updatedAt",
+                    "deletedAt"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/billing/offers/{id}": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "get": {
+        "tags": [
+          "billing"
+        ],
+        "summary": "Get offers by id",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "offers",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "maxLength": 36
+                    },
+                    "ecosystemId": {
+                      "type": "string",
+                      "maxLength": 36
+                    },
+                    "ownerKind": {
+                      "type": "string",
+                      "maxLength": 16
+                    },
+                    "ownerId": {
+                      "type": "string",
+                      "maxLength": 36
+                    },
+                    "slug": {
+                      "type": "string",
+                      "maxLength": 128
+                    },
+                    "name": {
+                      "type": "string",
+                      "maxLength": 255
+                    },
+                    "description": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "purpose": {
+                      "type": "string",
+                      "maxLength": 16
+                    },
+                    "stripePriceId": {
+                      "type": "string",
+                      "maxLength": 255
+                    },
+                    "stripeProductId": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "maxLength": 255
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "collectionMethod": {
+                      "type": "string",
+                      "maxLength": 32
+                    },
+                    "daysUntilDue": {
+                      "anyOf": [
+                        {
+                          "type": "integer",
+                          "minimum": -2147483648,
+                          "maximum": 2147483647
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "grantsEcosystemId": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "maxLength": 36
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "lapseAction": {
+                      "type": "string",
+                      "maxLength": 16
+                    },
+                    "graceDays": {
+                      "type": "integer",
+                      "minimum": -2147483648,
+                      "maximum": 2147483647
+                    },
+                    "isActive": {
+                      "type": "boolean"
+                    },
+                    "createdAt": {
+                      "type": "string"
+                    },
+                    "updatedAt": {
+                      "type": "string"
+                    },
+                    "deletedAt": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "ecosystemId",
+                    "ownerKind",
+                    "ownerId",
+                    "slug",
+                    "name",
+                    "description",
+                    "purpose",
+                    "stripePriceId",
+                    "stripeProductId",
+                    "collectionMethod",
+                    "daysUntilDue",
+                    "grantsEcosystemId",
+                    "lapseAction",
+                    "graceDays",
+                    "isActive",
+                    "createdAt",
+                    "updatedAt",
+                    "deletedAt"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "billing"
+        ],
+        "summary": "Update offers",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "type": "object",
+                "properties": {
+                  "ecosystemId": {
+                    "type": "string",
+                    "maxLength": 36
+                  },
+                  "slug": {
+                    "type": "string",
+                    "maxLength": 128
+                  },
+                  "name": {
+                    "type": "string",
+                    "maxLength": 255
+                  },
+                  "description": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "purpose": {
+                    "type": "string",
+                    "maxLength": 16
+                  },
+                  "stripePriceId": {
+                    "type": "string",
+                    "maxLength": 255
+                  },
+                  "stripeProductId": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "maxLength": 255
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "collectionMethod": {
+                    "type": "string",
+                    "maxLength": 32
+                  },
+                  "daysUntilDue": {
+                    "anyOf": [
+                      {
+                        "type": "integer",
+                        "minimum": -2147483648,
+                        "maximum": 2147483647
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "grantsEcosystemId": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "maxLength": 36
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "lapseAction": {
+                    "type": "string",
+                    "maxLength": 16
+                  },
+                  "graceDays": {
+                    "type": "integer",
+                    "minimum": -2147483648,
+                    "maximum": 2147483647
+                  },
+                  "isActive": {
+                    "type": "boolean"
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "offers",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "maxLength": 36
+                    },
+                    "ecosystemId": {
+                      "type": "string",
+                      "maxLength": 36
+                    },
+                    "ownerKind": {
+                      "type": "string",
+                      "maxLength": 16
+                    },
+                    "ownerId": {
+                      "type": "string",
+                      "maxLength": 36
+                    },
+                    "slug": {
+                      "type": "string",
+                      "maxLength": 128
+                    },
+                    "name": {
+                      "type": "string",
+                      "maxLength": 255
+                    },
+                    "description": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "purpose": {
+                      "type": "string",
+                      "maxLength": 16
+                    },
+                    "stripePriceId": {
+                      "type": "string",
+                      "maxLength": 255
+                    },
+                    "stripeProductId": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "maxLength": 255
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "collectionMethod": {
+                      "type": "string",
+                      "maxLength": 32
+                    },
+                    "daysUntilDue": {
+                      "anyOf": [
+                        {
+                          "type": "integer",
+                          "minimum": -2147483648,
+                          "maximum": 2147483647
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "grantsEcosystemId": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "maxLength": 36
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "lapseAction": {
+                      "type": "string",
+                      "maxLength": 16
+                    },
+                    "graceDays": {
+                      "type": "integer",
+                      "minimum": -2147483648,
+                      "maximum": 2147483647
+                    },
+                    "isActive": {
+                      "type": "boolean"
+                    },
+                    "createdAt": {
+                      "type": "string"
+                    },
+                    "updatedAt": {
+                      "type": "string"
+                    },
+                    "deletedAt": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "ecosystemId",
+                    "ownerKind",
+                    "ownerId",
+                    "slug",
+                    "name",
+                    "description",
+                    "purpose",
+                    "stripePriceId",
+                    "stripeProductId",
+                    "collectionMethod",
+                    "daysUntilDue",
+                    "grantsEcosystemId",
+                    "lapseAction",
+                    "graceDays",
+                    "isActive",
+                    "createdAt",
+                    "updatedAt",
+                    "deletedAt"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "billing"
+        ],
+        "summary": "Delete offers",
         "security": [
           {
             "bearerAuth": []
@@ -77998,6 +80523,10 @@
                       "publicProfileEnabled": {
                         "type": "boolean"
                       },
+                      "profileVisibility": {
+                        "type": "string",
+                        "maxLength": 16
+                      },
                       "tokenVersion": {
                         "type": "integer",
                         "minimum": -9007199254740991,
@@ -78075,6 +80604,7 @@
                       "slug",
                       "avatarUrl",
                       "publicProfileEnabled",
+                      "profileVisibility",
                       "tokenVersion",
                       "preferredMfaMethod",
                       "mfaFailedAttempts",
@@ -78166,8 +80696,9 @@
                     "type": "string",
                     "maxLength": 1024
                   },
-                  "publicProfileEnabled": {
-                    "type": "boolean"
+                  "profileVisibility": {
+                    "type": "string",
+                    "maxLength": 16
                   },
                   "tokenVersion": {
                     "type": "integer",
@@ -78257,6 +80788,10 @@
                     "publicProfileEnabled": {
                       "type": "boolean"
                     },
+                    "profileVisibility": {
+                      "type": "string",
+                      "maxLength": 16
+                    },
                     "tokenVersion": {
                       "type": "integer",
                       "minimum": -9007199254740991,
@@ -78334,6 +80869,7 @@
                     "slug",
                     "avatarUrl",
                     "publicProfileEnabled",
+                    "profileVisibility",
                     "tokenVersion",
                     "preferredMfaMethod",
                     "mfaFailedAttempts",
@@ -78455,6 +80991,10 @@
                     "publicProfileEnabled": {
                       "type": "boolean"
                     },
+                    "profileVisibility": {
+                      "type": "string",
+                      "maxLength": 16
+                    },
                     "tokenVersion": {
                       "type": "integer",
                       "minimum": -9007199254740991,
@@ -78532,6 +81072,7 @@
                     "slug",
                     "avatarUrl",
                     "publicProfileEnabled",
+                    "profileVisibility",
                     "tokenVersion",
                     "preferredMfaMethod",
                     "mfaFailedAttempts",
@@ -78632,8 +81173,9 @@
                     "type": "string",
                     "maxLength": 1024
                   },
-                  "publicProfileEnabled": {
-                    "type": "boolean"
+                  "profileVisibility": {
+                    "type": "string",
+                    "maxLength": 16
                   },
                   "tokenVersion": {
                     "type": "integer",
@@ -78723,6 +81265,10 @@
                     "publicProfileEnabled": {
                       "type": "boolean"
                     },
+                    "profileVisibility": {
+                      "type": "string",
+                      "maxLength": 16
+                    },
                     "tokenVersion": {
                       "type": "integer",
                       "minimum": -9007199254740991,
@@ -78800,6 +81346,7 @@
                     "slug",
                     "avatarUrl",
                     "publicProfileEnabled",
+                    "profileVisibility",
                     "tokenVersion",
                     "preferredMfaMethod",
                     "mfaFailedAttempts",

@@ -44,7 +44,7 @@ class SyncPushResult:
 
         reason = self.reason
 
-        current: None | Unset | dict[str, Any]
+        current: Unset | dict[str, Any] | None
         if isinstance(self.current, Unset):
             current = UNSET
         elif isinstance(self.current, SyncPushResultCurrentType0):

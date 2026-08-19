@@ -56,12 +56,12 @@ class PostPersonaMemoryBlocksResponse201:
 
         customer_id = self.customer_id
 
-        deleted_at: None | str
+        deleted_at: str | None
         deleted_at = self.deleted_at
 
         name = self.name
 
-        content: None | bool | dict[str, Any] | float | list[Any] | str
+        content: bool | dict[str, Any] | float | list[Any] | str | None
         if isinstance(self.content, PostPersonaMemoryBlocksResponse201ContentType1):
             content = self.content.to_dict()
         elif isinstance(self.content, list):
@@ -70,7 +70,7 @@ class PostPersonaMemoryBlocksResponse201:
         else:
             content = self.content
 
-        size_limit: None | int
+        size_limit: int | None
         size_limit = self.size_limit
 
         created_at = self.created_at
@@ -79,7 +79,7 @@ class PostPersonaMemoryBlocksResponse201:
 
         sync_version = self.sync_version
 
-        sync_stamped_at: None | str
+        sync_stamped_at: str | None
         sync_stamped_at = self.sync_stamped_at
 
         sync_txid = self.sync_txid

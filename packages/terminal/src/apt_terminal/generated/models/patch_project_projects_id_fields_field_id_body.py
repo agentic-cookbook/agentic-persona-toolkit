@@ -37,7 +37,7 @@ class PatchProjectProjectsIdFieldsFieldIdBody:
         if not isinstance(self.type_, Unset):
             type_ = self.type_.value
 
-        options: None | Unset | list[str]
+        options: Unset | list[str] | None
         if isinstance(self.options, Unset):
             options = UNSET
         elif isinstance(self.options, list):

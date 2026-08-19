@@ -60,13 +60,13 @@ class PutIntegrationIntegrationAudiencesIdBody:
 
         name = self.name
 
-        member_count: None | Unset | int
+        member_count: Unset | int | None
         if isinstance(self.member_count, Unset):
             member_count = UNSET
         else:
             member_count = self.member_count
 
-        raw: None | Unset | bool | dict[str, Any] | float | list[Any] | str
+        raw: Unset | bool | dict[str, Any] | float | list[Any] | str | None
         if isinstance(self.raw, Unset):
             raw = UNSET
         elif isinstance(self.raw, PutIntegrationIntegrationAudiencesIdBodyRawType0Type1):

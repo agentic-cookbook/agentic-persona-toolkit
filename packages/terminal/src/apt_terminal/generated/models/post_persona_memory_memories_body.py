@@ -65,13 +65,13 @@ class PostPersonaMemoryMemoriesBody:
 
         scope = self.scope
 
-        subject_table: None | Unset | str
+        subject_table: Unset | str | None
         if isinstance(self.subject_table, Unset):
             subject_table = UNSET
         else:
             subject_table = self.subject_table
 
-        subject_id: None | Unset | str
+        subject_id: Unset | str | None
         if isinstance(self.subject_id, Unset):
             subject_id = UNSET
         else:
@@ -79,7 +79,7 @@ class PostPersonaMemoryMemoriesBody:
 
         status = self.status
 
-        supersedes_id: None | Unset | str
+        supersedes_id: Unset | str | None
         if isinstance(self.supersedes_id, Unset):
             supersedes_id = UNSET
         else:
@@ -93,13 +93,13 @@ class PostPersonaMemoryMemoriesBody:
         if not isinstance(self.tags, Unset):
             tags = self.tags
 
-        valid_from: None | Unset | str
+        valid_from: Unset | str | None
         if isinstance(self.valid_from, Unset):
             valid_from = UNSET
         else:
             valid_from = self.valid_from
 
-        valid_to: None | Unset | str
+        valid_to: Unset | str | None
         if isinstance(self.valid_to, Unset):
             valid_to = UNSET
         else:

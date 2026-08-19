@@ -37,13 +37,13 @@ class RegistryNamespace:
 
         owner_id = self.owner_id
 
-        slug: None | str
+        slug: str | None
         slug = self.slug
 
-        name: None | str
+        name: str | None
         name = self.name
 
-        rdid: None | str
+        rdid: str | None
         rdid = self.rdid
 
         field_dict: dict[str, Any] = {}

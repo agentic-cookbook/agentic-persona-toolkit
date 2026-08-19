@@ -30,19 +30,19 @@ class PutSystemAuditEventsIdBody:
     user_agent: Unset | str = UNSET
 
     def to_dict(self) -> dict[str, Any]:
-        ecosystem_id: None | Unset | str
+        ecosystem_id: Unset | str | None
         if isinstance(self.ecosystem_id, Unset):
             ecosystem_id = UNSET
         else:
             ecosystem_id = self.ecosystem_id
 
-        developer_id: None | Unset | str
+        developer_id: Unset | str | None
         if isinstance(self.developer_id, Unset):
             developer_id = UNSET
         else:
             developer_id = self.developer_id
 
-        actor_user_id: None | Unset | str
+        actor_user_id: Unset | str | None
         if isinstance(self.actor_user_id, Unset):
             actor_user_id = UNSET
         else:

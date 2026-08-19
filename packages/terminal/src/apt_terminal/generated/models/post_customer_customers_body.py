@@ -18,7 +18,7 @@ class PostCustomerCustomersBody:
         display_name (Union[None, Unset, str]):
         slug (Union[Unset, str]):
         avatar_url (Union[Unset, str]):
-        public_profile_enabled (Union[Unset, bool]):
+        profile_visibility (Union[Unset, str]):
         token_version (Union[Unset, int]):
         preferred_mfa_method (Union[None, Unset, str]):
         sync_txid (Union[Unset, int]):
@@ -30,7 +30,7 @@ class PostCustomerCustomersBody:
     display_name: None | Unset | str = UNSET
     slug: Unset | str = UNSET
     avatar_url: Unset | str = UNSET
-    public_profile_enabled: Unset | bool = UNSET
+    profile_visibility: Unset | str = UNSET
     token_version: Unset | int = UNSET
     preferred_mfa_method: None | Unset | str = UNSET
     sync_txid: Unset | int = UNSET
@@ -38,19 +38,19 @@ class PostCustomerCustomersBody:
     def to_dict(self) -> dict[str, Any]:
         ecosystem_id = self.ecosystem_id
 
-        external_id: None | Unset | str
+        external_id: Unset | str | None
         if isinstance(self.external_id, Unset):
             external_id = UNSET
         else:
             external_id = self.external_id
 
-        email: None | Unset | str
+        email: Unset | str | None
         if isinstance(self.email, Unset):
             email = UNSET
         else:
             email = self.email
 
-        display_name: None | Unset | str
+        display_name: Unset | str | None
         if isinstance(self.display_name, Unset):
             display_name = UNSET
         else:
@@ -60,11 +60,11 @@ class PostCustomerCustomersBody:
 
         avatar_url = self.avatar_url
 
-        public_profile_enabled = self.public_profile_enabled
+        profile_visibility = self.profile_visibility
 
         token_version = self.token_version
 
-        preferred_mfa_method: None | Unset | str
+        preferred_mfa_method: Unset | str | None
         if isinstance(self.preferred_mfa_method, Unset):
             preferred_mfa_method = UNSET
         else:
@@ -87,8 +87,8 @@ class PostCustomerCustomersBody:
             field_dict["slug"] = slug
         if avatar_url is not UNSET:
             field_dict["avatarUrl"] = avatar_url
-        if public_profile_enabled is not UNSET:
-            field_dict["publicProfileEnabled"] = public_profile_enabled
+        if profile_visibility is not UNSET:
+            field_dict["profileVisibility"] = profile_visibility
         if token_version is not UNSET:
             field_dict["tokenVersion"] = token_version
         if preferred_mfa_method is not UNSET:
@@ -134,7 +134,7 @@ class PostCustomerCustomersBody:
 
         avatar_url = d.pop("avatarUrl", UNSET)
 
-        public_profile_enabled = d.pop("publicProfileEnabled", UNSET)
+        profile_visibility = d.pop("profileVisibility", UNSET)
 
         token_version = d.pop("tokenVersion", UNSET)
 
@@ -156,7 +156,7 @@ class PostCustomerCustomersBody:
             display_name=display_name,
             slug=slug,
             avatar_url=avatar_url,
-            public_profile_enabled=public_profile_enabled,
+            profile_visibility=profile_visibility,
             token_version=token_version,
             preferred_mfa_method=preferred_mfa_method,
             sync_txid=sync_txid,

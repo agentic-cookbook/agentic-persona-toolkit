@@ -14,6 +14,7 @@ def _get_kwargs(
     registry_slug: str,
     entry_slug: str,
 ) -> dict[str, Any]:
+
     _kwargs: dict[str, Any] = {
         "method": "get",
         "url": f"/public/registries/{registry_slug}/entries/{entry_slug}",
@@ -62,7 +63,7 @@ def sync_detailed(
     *,
     client: AuthenticatedClient | Client,
 ) -> Response[Any | Error | PublicRegistryEntryResponse]:
-    """Get one public/unlisted entry by slug (301s a superseded slug)
+    """Get one public entry by slug (301s a superseded slug)
 
     Args:
         registry_slug (str):
@@ -94,7 +95,7 @@ def sync(
     *,
     client: AuthenticatedClient | Client,
 ) -> Any | Error | PublicRegistryEntryResponse | None:
-    """Get one public/unlisted entry by slug (301s a superseded slug)
+    """Get one public entry by slug (301s a superseded slug)
 
     Args:
         registry_slug (str):
@@ -121,7 +122,7 @@ async def asyncio_detailed(
     *,
     client: AuthenticatedClient | Client,
 ) -> Response[Any | Error | PublicRegistryEntryResponse]:
-    """Get one public/unlisted entry by slug (301s a superseded slug)
+    """Get one public entry by slug (301s a superseded slug)
 
     Args:
         registry_slug (str):
@@ -151,7 +152,7 @@ async def asyncio(
     *,
     client: AuthenticatedClient | Client,
 ) -> Any | Error | PublicRegistryEntryResponse | None:
-    """Get one public/unlisted entry by slug (301s a superseded slug)
+    """Get one public entry by slug (301s a superseded slug)
 
     Args:
         registry_slug (str):

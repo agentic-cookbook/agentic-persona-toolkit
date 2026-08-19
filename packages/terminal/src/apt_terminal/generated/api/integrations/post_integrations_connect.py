@@ -5,11 +5,11 @@ import httpx
 
 from ... import errors
 from ...client import AuthenticatedClient, Client
-from ...models.integration_connect_request_type_0 import IntegrationConnectRequestType0
-from ...models.integration_connect_request_type_1 import IntegrationConnectRequestType1
-from ...models.integration_connect_request_type_2 import IntegrationConnectRequestType2
-from ...models.integration_connect_request_type_3 import IntegrationConnectRequestType3
-from ...models.integration_connect_request_type_4 import IntegrationConnectRequestType4
+from ...models.integration_connect_api_key import IntegrationConnectApiKey
+from ...models.integration_connect_app_password import IntegrationConnectAppPassword
+from ...models.integration_connect_o_auth import IntegrationConnectOAuth
+from ...models.integration_connect_o_auth_instance import IntegrationConnectOAuthInstance
+from ...models.integration_connect_plaid_link import IntegrationConnectPlaidLink
 from ...models.integration_connection import IntegrationConnection
 from ...models.problem_details import ProblemDetails
 from ...types import Response
@@ -18,11 +18,11 @@ from ...types import Response
 def _get_kwargs(
     *,
     body: Union[
-        "IntegrationConnectRequestType0",
-        "IntegrationConnectRequestType1",
-        "IntegrationConnectRequestType2",
-        "IntegrationConnectRequestType3",
-        "IntegrationConnectRequestType4",
+        "IntegrationConnectApiKey",
+        "IntegrationConnectAppPassword",
+        "IntegrationConnectOAuth",
+        "IntegrationConnectOAuthInstance",
+        "IntegrationConnectPlaidLink",
     ],
 ) -> dict[str, Any]:
     headers: dict[str, Any] = {}
@@ -34,10 +34,10 @@ def _get_kwargs(
 
     _kwargs["json"]: dict[str, Any]
     if (
-        isinstance(body, IntegrationConnectRequestType0)
-        or isinstance(body, IntegrationConnectRequestType1)
-        or isinstance(body, IntegrationConnectRequestType2)
-        or isinstance(body, IntegrationConnectRequestType3)
+        isinstance(body, IntegrationConnectOAuth)
+        or isinstance(body, IntegrationConnectApiKey)
+        or isinstance(body, IntegrationConnectAppPassword)
+        or isinstance(body, IntegrationConnectPlaidLink)
     ):
         _kwargs["json"] = body.to_dict()
     else:
@@ -98,11 +98,11 @@ def sync_detailed(
     *,
     client: AuthenticatedClient,
     body: Union[
-        "IntegrationConnectRequestType0",
-        "IntegrationConnectRequestType1",
-        "IntegrationConnectRequestType2",
-        "IntegrationConnectRequestType3",
-        "IntegrationConnectRequestType4",
+        "IntegrationConnectApiKey",
+        "IntegrationConnectAppPassword",
+        "IntegrationConnectOAuth",
+        "IntegrationConnectOAuthInstance",
+        "IntegrationConnectPlaidLink",
     ],
 ) -> Response[IntegrationConnection | ProblemDetails]:
     """Connect an integration (polymorphic by auth method)
@@ -112,9 +112,9 @@ def sync_detailed(
     connection (tokens never echoed).
 
     Args:
-        body (Union['IntegrationConnectRequestType0', 'IntegrationConnectRequestType1',
-            'IntegrationConnectRequestType2', 'IntegrationConnectRequestType3',
-            'IntegrationConnectRequestType4']):
+        body (Union['IntegrationConnectApiKey', 'IntegrationConnectAppPassword',
+            'IntegrationConnectOAuth', 'IntegrationConnectOAuthInstance',
+            'IntegrationConnectPlaidLink']):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -139,11 +139,11 @@ def sync(
     *,
     client: AuthenticatedClient,
     body: Union[
-        "IntegrationConnectRequestType0",
-        "IntegrationConnectRequestType1",
-        "IntegrationConnectRequestType2",
-        "IntegrationConnectRequestType3",
-        "IntegrationConnectRequestType4",
+        "IntegrationConnectApiKey",
+        "IntegrationConnectAppPassword",
+        "IntegrationConnectOAuth",
+        "IntegrationConnectOAuthInstance",
+        "IntegrationConnectPlaidLink",
     ],
 ) -> IntegrationConnection | ProblemDetails | None:
     """Connect an integration (polymorphic by auth method)
@@ -153,9 +153,9 @@ def sync(
     connection (tokens never echoed).
 
     Args:
-        body (Union['IntegrationConnectRequestType0', 'IntegrationConnectRequestType1',
-            'IntegrationConnectRequestType2', 'IntegrationConnectRequestType3',
-            'IntegrationConnectRequestType4']):
+        body (Union['IntegrationConnectApiKey', 'IntegrationConnectAppPassword',
+            'IntegrationConnectOAuth', 'IntegrationConnectOAuthInstance',
+            'IntegrationConnectPlaidLink']):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -175,11 +175,11 @@ async def asyncio_detailed(
     *,
     client: AuthenticatedClient,
     body: Union[
-        "IntegrationConnectRequestType0",
-        "IntegrationConnectRequestType1",
-        "IntegrationConnectRequestType2",
-        "IntegrationConnectRequestType3",
-        "IntegrationConnectRequestType4",
+        "IntegrationConnectApiKey",
+        "IntegrationConnectAppPassword",
+        "IntegrationConnectOAuth",
+        "IntegrationConnectOAuthInstance",
+        "IntegrationConnectPlaidLink",
     ],
 ) -> Response[IntegrationConnection | ProblemDetails]:
     """Connect an integration (polymorphic by auth method)
@@ -189,9 +189,9 @@ async def asyncio_detailed(
     connection (tokens never echoed).
 
     Args:
-        body (Union['IntegrationConnectRequestType0', 'IntegrationConnectRequestType1',
-            'IntegrationConnectRequestType2', 'IntegrationConnectRequestType3',
-            'IntegrationConnectRequestType4']):
+        body (Union['IntegrationConnectApiKey', 'IntegrationConnectAppPassword',
+            'IntegrationConnectOAuth', 'IntegrationConnectOAuthInstance',
+            'IntegrationConnectPlaidLink']):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -214,11 +214,11 @@ async def asyncio(
     *,
     client: AuthenticatedClient,
     body: Union[
-        "IntegrationConnectRequestType0",
-        "IntegrationConnectRequestType1",
-        "IntegrationConnectRequestType2",
-        "IntegrationConnectRequestType3",
-        "IntegrationConnectRequestType4",
+        "IntegrationConnectApiKey",
+        "IntegrationConnectAppPassword",
+        "IntegrationConnectOAuth",
+        "IntegrationConnectOAuthInstance",
+        "IntegrationConnectPlaidLink",
     ],
 ) -> IntegrationConnection | ProblemDetails | None:
     """Connect an integration (polymorphic by auth method)
@@ -228,9 +228,9 @@ async def asyncio(
     connection (tokens never echoed).
 
     Args:
-        body (Union['IntegrationConnectRequestType0', 'IntegrationConnectRequestType1',
-            'IntegrationConnectRequestType2', 'IntegrationConnectRequestType3',
-            'IntegrationConnectRequestType4']):
+        body (Union['IntegrationConnectApiKey', 'IntegrationConnectAppPassword',
+            'IntegrationConnectOAuth', 'IntegrationConnectOAuthInstance',
+            'IntegrationConnectPlaidLink']):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.

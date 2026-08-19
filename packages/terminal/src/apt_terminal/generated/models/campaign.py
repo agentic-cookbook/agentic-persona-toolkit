@@ -69,7 +69,7 @@ class Campaign:
 
         text_body = self.text_body
 
-        from_name: None | str
+        from_name: str | None
         from_name = self.from_name
 
         status = self.status.value
@@ -84,25 +84,25 @@ class Campaign:
 
         updated_at = self.updated_at
 
-        created_by: None | Unset | str
+        created_by: Unset | str | None
         if isinstance(self.created_by, Unset):
             created_by = UNSET
         else:
             created_by = self.created_by
 
-        scheduled_at: None | Unset | str
+        scheduled_at: Unset | str | None
         if isinstance(self.scheduled_at, Unset):
             scheduled_at = UNSET
         else:
             scheduled_at = self.scheduled_at
 
-        started_at: None | Unset | str
+        started_at: Unset | str | None
         if isinstance(self.started_at, Unset):
             started_at = UNSET
         else:
             started_at = self.started_at
 
-        completed_at: None | Unset | str
+        completed_at: Unset | str | None
         if isinstance(self.completed_at, Unset):
             completed_at = UNSET
         else:

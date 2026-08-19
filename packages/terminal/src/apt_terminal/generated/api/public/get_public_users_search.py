@@ -13,6 +13,7 @@ def _get_kwargs(
     *,
     q: str,
 ) -> dict[str, Any]:
+
     params: dict[str, Any] = {}
 
     params["q"] = q
@@ -63,7 +64,7 @@ def sync_detailed(
     client: AuthenticatedClient | Client,
     q: str,
 ) -> Response[list["PublicUserSearchHit"]]:
-    """Search public-profile users by slug or display name
+    """Search visible user and organization profiles by slug or display name
 
     Args:
         q (str):
@@ -92,7 +93,7 @@ def sync(
     client: AuthenticatedClient | Client,
     q: str,
 ) -> list["PublicUserSearchHit"] | None:
-    """Search public-profile users by slug or display name
+    """Search visible user and organization profiles by slug or display name
 
     Args:
         q (str):
@@ -116,7 +117,7 @@ async def asyncio_detailed(
     client: AuthenticatedClient | Client,
     q: str,
 ) -> Response[list["PublicUserSearchHit"]]:
-    """Search public-profile users by slug or display name
+    """Search visible user and organization profiles by slug or display name
 
     Args:
         q (str):
@@ -143,7 +144,7 @@ async def asyncio(
     client: AuthenticatedClient | Client,
     q: str,
 ) -> list["PublicUserSearchHit"] | None:
-    """Search public-profile users by slug or display name
+    """Search visible user and organization profiles by slug or display name
 
     Args:
         q (str):

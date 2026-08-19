@@ -21,6 +21,7 @@ def _get_kwargs(
     | GetGamificationRealmsEcosystemIdBoardsStatKeyWindow = GetGamificationRealmsEcosystemIdBoardsStatKeyWindow.TRENDING,
     limit: Unset | int = 20,
 ) -> dict[str, Any]:
+
     params: dict[str, Any] = {}
 
     json_window: Unset | str = UNSET

@@ -53,7 +53,7 @@ class ProjectField:
 
         created_at = self.created_at
 
-        options: None | Unset | list[str]
+        options: Unset | list[str] | None
         if isinstance(self.options, Unset):
             options = UNSET
         elif isinstance(self.options, list):

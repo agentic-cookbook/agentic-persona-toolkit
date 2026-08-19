@@ -25,7 +25,7 @@ class GetPersonaProviderTemplatesIdSyncKeysResponse200:
     def to_dict(self) -> dict[str, Any]:
         from ..models.template_sync_keys_type_0 import TemplateSyncKeysType0
 
-        sync_keys: None | dict[str, Any]
+        sync_keys: dict[str, Any] | None
         if isinstance(self.sync_keys, TemplateSyncKeysType0):
             sync_keys = self.sync_keys.to_dict()
         else:

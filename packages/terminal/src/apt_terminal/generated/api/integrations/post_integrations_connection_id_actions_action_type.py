@@ -5,16 +5,16 @@ import httpx
 
 from ... import errors
 from ...client import AuthenticatedClient, Client
-from ...models.integration_action_request_type_0 import IntegrationActionRequestType0
-from ...models.integration_action_request_type_1 import IntegrationActionRequestType1
-from ...models.integration_action_request_type_2 import IntegrationActionRequestType2
-from ...models.integration_action_request_type_3 import IntegrationActionRequestType3
-from ...models.integration_action_request_type_4 import IntegrationActionRequestType4
-from ...models.integration_action_request_type_5 import IntegrationActionRequestType5
-from ...models.integration_action_request_type_6 import IntegrationActionRequestType6
-from ...models.integration_action_request_type_7 import IntegrationActionRequestType7
-from ...models.integration_action_request_type_8 import IntegrationActionRequestType8
+from ...models.integration_action_broadcast import IntegrationActionBroadcast
+from ...models.integration_action_broadcast_send import IntegrationActionBroadcastSend
+from ...models.integration_action_comment import IntegrationActionComment
+from ...models.integration_action_post import IntegrationActionPost
 from ...models.integration_action_result import IntegrationActionResult
+from ...models.integration_action_send import IntegrationActionSend
+from ...models.integration_action_sms import IntegrationActionSms
+from ...models.integration_action_submit import IntegrationActionSubmit
+from ...models.integration_action_subscribe import IntegrationActionSubscribe
+from ...models.integration_action_unsubscribe import IntegrationActionUnsubscribe
 from ...models.problem_details import ProblemDetails
 from ...types import UNSET, Response, Unset
 
@@ -24,15 +24,15 @@ def _get_kwargs(
     action_type: str,
     *,
     body: Union[
-        "IntegrationActionRequestType0",
-        "IntegrationActionRequestType1",
-        "IntegrationActionRequestType2",
-        "IntegrationActionRequestType3",
-        "IntegrationActionRequestType4",
-        "IntegrationActionRequestType5",
-        "IntegrationActionRequestType6",
-        "IntegrationActionRequestType7",
-        "IntegrationActionRequestType8",
+        "IntegrationActionBroadcast",
+        "IntegrationActionBroadcastSend",
+        "IntegrationActionComment",
+        "IntegrationActionPost",
+        "IntegrationActionSend",
+        "IntegrationActionSms",
+        "IntegrationActionSubmit",
+        "IntegrationActionSubscribe",
+        "IntegrationActionUnsubscribe",
     ],
     idempotency_key: Unset | str = UNSET,
 ) -> dict[str, Any]:
@@ -47,14 +47,14 @@ def _get_kwargs(
 
     _kwargs["json"]: dict[str, Any]
     if (
-        isinstance(body, IntegrationActionRequestType0)
-        or isinstance(body, IntegrationActionRequestType1)
-        or isinstance(body, IntegrationActionRequestType2)
-        or isinstance(body, IntegrationActionRequestType3)
-        or isinstance(body, IntegrationActionRequestType4)
-        or isinstance(body, IntegrationActionRequestType5)
-        or isinstance(body, IntegrationActionRequestType6)
-        or isinstance(body, IntegrationActionRequestType7)
+        isinstance(body, IntegrationActionSend)
+        or isinstance(body, IntegrationActionPost)
+        or isinstance(body, IntegrationActionSms)
+        or isinstance(body, IntegrationActionSubmit)
+        or isinstance(body, IntegrationActionComment)
+        or isinstance(body, IntegrationActionSubscribe)
+        or isinstance(body, IntegrationActionUnsubscribe)
+        or isinstance(body, IntegrationActionBroadcast)
     ):
         _kwargs["json"] = body.to_dict()
     else:
@@ -132,15 +132,15 @@ def sync_detailed(
     *,
     client: AuthenticatedClient,
     body: Union[
-        "IntegrationActionRequestType0",
-        "IntegrationActionRequestType1",
-        "IntegrationActionRequestType2",
-        "IntegrationActionRequestType3",
-        "IntegrationActionRequestType4",
-        "IntegrationActionRequestType5",
-        "IntegrationActionRequestType6",
-        "IntegrationActionRequestType7",
-        "IntegrationActionRequestType8",
+        "IntegrationActionBroadcast",
+        "IntegrationActionBroadcastSend",
+        "IntegrationActionComment",
+        "IntegrationActionPost",
+        "IntegrationActionSend",
+        "IntegrationActionSms",
+        "IntegrationActionSubmit",
+        "IntegrationActionSubscribe",
+        "IntegrationActionUnsubscribe",
     ],
     idempotency_key: Unset | str = UNSET,
 ) -> Response[IntegrationActionResult | ProblemDetails]:
@@ -156,11 +156,10 @@ def sync_detailed(
         connection_id (str):
         action_type (str):
         idempotency_key (Union[Unset, str]):
-        body (Union['IntegrationActionRequestType0', 'IntegrationActionRequestType1',
-            'IntegrationActionRequestType2', 'IntegrationActionRequestType3',
-            'IntegrationActionRequestType4', 'IntegrationActionRequestType5',
-            'IntegrationActionRequestType6', 'IntegrationActionRequestType7',
-            'IntegrationActionRequestType8']):
+        body (Union['IntegrationActionBroadcast', 'IntegrationActionBroadcastSend',
+            'IntegrationActionComment', 'IntegrationActionPost', 'IntegrationActionSend',
+            'IntegrationActionSms', 'IntegrationActionSubmit', 'IntegrationActionSubscribe',
+            'IntegrationActionUnsubscribe']):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -190,15 +189,15 @@ def sync(
     *,
     client: AuthenticatedClient,
     body: Union[
-        "IntegrationActionRequestType0",
-        "IntegrationActionRequestType1",
-        "IntegrationActionRequestType2",
-        "IntegrationActionRequestType3",
-        "IntegrationActionRequestType4",
-        "IntegrationActionRequestType5",
-        "IntegrationActionRequestType6",
-        "IntegrationActionRequestType7",
-        "IntegrationActionRequestType8",
+        "IntegrationActionBroadcast",
+        "IntegrationActionBroadcastSend",
+        "IntegrationActionComment",
+        "IntegrationActionPost",
+        "IntegrationActionSend",
+        "IntegrationActionSms",
+        "IntegrationActionSubmit",
+        "IntegrationActionSubscribe",
+        "IntegrationActionUnsubscribe",
     ],
     idempotency_key: Unset | str = UNSET,
 ) -> IntegrationActionResult | ProblemDetails | None:
@@ -214,11 +213,10 @@ def sync(
         connection_id (str):
         action_type (str):
         idempotency_key (Union[Unset, str]):
-        body (Union['IntegrationActionRequestType0', 'IntegrationActionRequestType1',
-            'IntegrationActionRequestType2', 'IntegrationActionRequestType3',
-            'IntegrationActionRequestType4', 'IntegrationActionRequestType5',
-            'IntegrationActionRequestType6', 'IntegrationActionRequestType7',
-            'IntegrationActionRequestType8']):
+        body (Union['IntegrationActionBroadcast', 'IntegrationActionBroadcastSend',
+            'IntegrationActionComment', 'IntegrationActionPost', 'IntegrationActionSend',
+            'IntegrationActionSms', 'IntegrationActionSubmit', 'IntegrationActionSubscribe',
+            'IntegrationActionUnsubscribe']):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -243,15 +241,15 @@ async def asyncio_detailed(
     *,
     client: AuthenticatedClient,
     body: Union[
-        "IntegrationActionRequestType0",
-        "IntegrationActionRequestType1",
-        "IntegrationActionRequestType2",
-        "IntegrationActionRequestType3",
-        "IntegrationActionRequestType4",
-        "IntegrationActionRequestType5",
-        "IntegrationActionRequestType6",
-        "IntegrationActionRequestType7",
-        "IntegrationActionRequestType8",
+        "IntegrationActionBroadcast",
+        "IntegrationActionBroadcastSend",
+        "IntegrationActionComment",
+        "IntegrationActionPost",
+        "IntegrationActionSend",
+        "IntegrationActionSms",
+        "IntegrationActionSubmit",
+        "IntegrationActionSubscribe",
+        "IntegrationActionUnsubscribe",
     ],
     idempotency_key: Unset | str = UNSET,
 ) -> Response[IntegrationActionResult | ProblemDetails]:
@@ -267,11 +265,10 @@ async def asyncio_detailed(
         connection_id (str):
         action_type (str):
         idempotency_key (Union[Unset, str]):
-        body (Union['IntegrationActionRequestType0', 'IntegrationActionRequestType1',
-            'IntegrationActionRequestType2', 'IntegrationActionRequestType3',
-            'IntegrationActionRequestType4', 'IntegrationActionRequestType5',
-            'IntegrationActionRequestType6', 'IntegrationActionRequestType7',
-            'IntegrationActionRequestType8']):
+        body (Union['IntegrationActionBroadcast', 'IntegrationActionBroadcastSend',
+            'IntegrationActionComment', 'IntegrationActionPost', 'IntegrationActionSend',
+            'IntegrationActionSms', 'IntegrationActionSubmit', 'IntegrationActionSubscribe',
+            'IntegrationActionUnsubscribe']):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -299,15 +296,15 @@ async def asyncio(
     *,
     client: AuthenticatedClient,
     body: Union[
-        "IntegrationActionRequestType0",
-        "IntegrationActionRequestType1",
-        "IntegrationActionRequestType2",
-        "IntegrationActionRequestType3",
-        "IntegrationActionRequestType4",
-        "IntegrationActionRequestType5",
-        "IntegrationActionRequestType6",
-        "IntegrationActionRequestType7",
-        "IntegrationActionRequestType8",
+        "IntegrationActionBroadcast",
+        "IntegrationActionBroadcastSend",
+        "IntegrationActionComment",
+        "IntegrationActionPost",
+        "IntegrationActionSend",
+        "IntegrationActionSms",
+        "IntegrationActionSubmit",
+        "IntegrationActionSubscribe",
+        "IntegrationActionUnsubscribe",
     ],
     idempotency_key: Unset | str = UNSET,
 ) -> IntegrationActionResult | ProblemDetails | None:
@@ -323,11 +320,10 @@ async def asyncio(
         connection_id (str):
         action_type (str):
         idempotency_key (Union[Unset, str]):
-        body (Union['IntegrationActionRequestType0', 'IntegrationActionRequestType1',
-            'IntegrationActionRequestType2', 'IntegrationActionRequestType3',
-            'IntegrationActionRequestType4', 'IntegrationActionRequestType5',
-            'IntegrationActionRequestType6', 'IntegrationActionRequestType7',
-            'IntegrationActionRequestType8']):
+        body (Union['IntegrationActionBroadcast', 'IntegrationActionBroadcastSend',
+            'IntegrationActionComment', 'IntegrationActionPost', 'IntegrationActionSend',
+            'IntegrationActionSms', 'IntegrationActionSubmit', 'IntegrationActionSubscribe',
+            'IntegrationActionUnsubscribe']):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.

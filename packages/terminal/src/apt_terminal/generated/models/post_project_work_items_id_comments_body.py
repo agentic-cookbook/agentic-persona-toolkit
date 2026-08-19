@@ -25,7 +25,7 @@ class PostProjectWorkItemsIdCommentsBody:
     def to_dict(self) -> dict[str, Any]:
         body = self.body
 
-        parent_id: None | Unset | str
+        parent_id: Unset | str | None
         if isinstance(self.parent_id, Unset):
             parent_id = UNSET
         else:

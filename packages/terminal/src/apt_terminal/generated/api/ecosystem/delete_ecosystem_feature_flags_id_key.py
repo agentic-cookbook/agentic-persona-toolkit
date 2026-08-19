@@ -16,6 +16,7 @@ def _get_kwargs(
     id: str,
     key: str,
 ) -> dict[str, Any]:
+
     _kwargs: dict[str, Any] = {
         "method": "delete",
         "url": f"/ecosystem/feature-flags/{id}/{key}",

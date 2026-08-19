@@ -61,13 +61,13 @@ class ProjectArtifact:
 
         updated_at = self.updated_at
 
-        target: None | dict[str, Any]
+        target: dict[str, Any] | None
         if isinstance(self.target, TargetDescriptor):
             target = self.target.to_dict()
         else:
             target = self.target
 
-        deleted_at: None | Unset | str
+        deleted_at: Unset | str | None
         if isinstance(self.deleted_at, Unset):
             deleted_at = UNSET
         else:

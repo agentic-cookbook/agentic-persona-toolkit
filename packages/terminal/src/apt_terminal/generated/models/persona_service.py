@@ -71,37 +71,37 @@ class PersonaService:
                 models_item = models_item_data
             models.append(models_item)
 
-        template_id: None | Unset | str
+        template_id: Unset | str | None
         if isinstance(self.template_id, Unset):
             template_id = UNSET
         else:
             template_id = self.template_id
 
-        connect_error: None | Unset | str
+        connect_error: Unset | str | None
         if isinstance(self.connect_error, Unset):
             connect_error = UNSET
         else:
             connect_error = self.connect_error
 
-        last_connected_at: None | Unset | str
+        last_connected_at: Unset | str | None
         if isinstance(self.last_connected_at, Unset):
             last_connected_at = UNSET
         else:
             last_connected_at = self.last_connected_at
 
-        documentation_url: None | Unset | str
+        documentation_url: Unset | str | None
         if isinstance(self.documentation_url, Unset):
             documentation_url = UNSET
         else:
             documentation_url = self.documentation_url
 
-        status_url: None | Unset | str
+        status_url: Unset | str | None
         if isinstance(self.status_url, Unset):
             status_url = UNSET
         else:
             status_url = self.status_url
 
-        models_fetched_at: None | Unset | str
+        models_fetched_at: Unset | str | None
         if isinstance(self.models_fetched_at, Unset):
             models_fetched_at = UNSET
         else:

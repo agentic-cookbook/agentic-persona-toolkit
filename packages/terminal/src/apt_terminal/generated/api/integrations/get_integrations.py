@@ -14,6 +14,7 @@ def _get_kwargs(
     *,
     ecosystem_id: str,
 ) -> dict[str, Any]:
+
     params: dict[str, Any] = {}
 
     params["ecosystemId"] = ecosystem_id

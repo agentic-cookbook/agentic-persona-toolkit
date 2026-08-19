@@ -36,17 +36,17 @@ class Delivery:
 
         email = self.email
 
-        name: None | str
+        name: str | None
         name = self.name
 
         status = self.status.value
 
         attempts = self.attempts
 
-        last_error: None | str
+        last_error: str | None
         last_error = self.last_error
 
-        sent_at: None | str
+        sent_at: str | None
         sent_at = self.sent_at
 
         field_dict: dict[str, Any] = {}

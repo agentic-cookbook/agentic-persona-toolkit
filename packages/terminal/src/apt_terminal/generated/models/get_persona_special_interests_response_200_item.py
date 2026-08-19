@@ -52,7 +52,7 @@ class GetPersonaSpecialInterestsResponse200Item:
 
         persona_id = self.persona_id
 
-        user_id: None | str
+        user_id: str | None
         user_id = self.user_id
 
         owner_kind = self.owner_kind
@@ -63,16 +63,16 @@ class GetPersonaSpecialInterestsResponse200Item:
 
         general = self.general
 
-        topical: None | str
+        topical: str | None
         topical = self.topical
 
-        specific: None | str
+        specific: str | None
         specific = self.specific
 
-        stances: None | str
+        stances: str | None
         stances = self.stances
 
-        bucket_id: None | str
+        bucket_id: str | None
         bucket_id = self.bucket_id
 
         position = self.position
@@ -83,7 +83,7 @@ class GetPersonaSpecialInterestsResponse200Item:
 
         updated_at = self.updated_at
 
-        bucket_type_id: None | Unset | str
+        bucket_type_id: Unset | str | None
         if isinstance(self.bucket_type_id, Unset):
             bucket_type_id = UNSET
         else:

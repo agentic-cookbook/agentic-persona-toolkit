@@ -18,6 +18,7 @@ class GetCustomerCustomersResponse200Item:
         slug (str):
         avatar_url (str):
         public_profile_enabled (bool):
+        profile_visibility (str):
         token_version (int):
         preferred_mfa_method (Union[None, str]):
         mfa_failed_attempts (int):
@@ -38,6 +39,7 @@ class GetCustomerCustomersResponse200Item:
     slug: str
     avatar_url: str
     public_profile_enabled: bool
+    profile_visibility: str
     token_version: int
     preferred_mfa_method: None | str
     mfa_failed_attempts: int
@@ -54,13 +56,13 @@ class GetCustomerCustomersResponse200Item:
 
         ecosystem_id = self.ecosystem_id
 
-        external_id: None | str
+        external_id: str | None
         external_id = self.external_id
 
-        email: None | str
+        email: str | None
         email = self.email
 
-        display_name: None | str
+        display_name: str | None
         display_name = self.display_name
 
         slug = self.slug
@@ -69,17 +71,19 @@ class GetCustomerCustomersResponse200Item:
 
         public_profile_enabled = self.public_profile_enabled
 
+        profile_visibility = self.profile_visibility
+
         token_version = self.token_version
 
-        preferred_mfa_method: None | str
+        preferred_mfa_method: str | None
         preferred_mfa_method = self.preferred_mfa_method
 
         mfa_failed_attempts = self.mfa_failed_attempts
 
-        mfa_locked_until: None | str
+        mfa_locked_until: str | None
         mfa_locked_until = self.mfa_locked_until
 
-        deleted_at: None | str
+        deleted_at: str | None
         deleted_at = self.deleted_at
 
         created_at = self.created_at
@@ -88,7 +92,7 @@ class GetCustomerCustomersResponse200Item:
 
         sync_version = self.sync_version
 
-        sync_stamped_at: None | str
+        sync_stamped_at: str | None
         sync_stamped_at = self.sync_stamped_at
 
         sync_txid = self.sync_txid
@@ -105,6 +109,7 @@ class GetCustomerCustomersResponse200Item:
                 "slug": slug,
                 "avatarUrl": avatar_url,
                 "publicProfileEnabled": public_profile_enabled,
+                "profileVisibility": profile_visibility,
                 "tokenVersion": token_version,
                 "preferredMfaMethod": preferred_mfa_method,
                 "mfaFailedAttempts": mfa_failed_attempts,
@@ -153,6 +158,8 @@ class GetCustomerCustomersResponse200Item:
         avatar_url = d.pop("avatarUrl")
 
         public_profile_enabled = d.pop("publicProfileEnabled")
+
+        profile_visibility = d.pop("profileVisibility")
 
         token_version = d.pop("tokenVersion")
 
@@ -203,6 +210,7 @@ class GetCustomerCustomersResponse200Item:
             slug=slug,
             avatar_url=avatar_url,
             public_profile_enabled=public_profile_enabled,
+            profile_visibility=profile_visibility,
             token_version=token_version,
             preferred_mfa_method=preferred_mfa_method,
             mfa_failed_attempts=mfa_failed_attempts,

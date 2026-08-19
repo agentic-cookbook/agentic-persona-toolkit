@@ -42,7 +42,7 @@ class PutPersonaMemoryBlocksIdBody:
 
         name = self.name
 
-        content: None | Unset | bool | dict[str, Any] | float | list[Any] | str
+        content: Unset | bool | dict[str, Any] | float | list[Any] | str | None
         if isinstance(self.content, Unset):
             content = UNSET
         elif isinstance(self.content, PutPersonaMemoryBlocksIdBodyContentType1):
@@ -53,7 +53,7 @@ class PutPersonaMemoryBlocksIdBody:
         else:
             content = self.content
 
-        size_limit: None | Unset | int
+        size_limit: Unset | int | None
         if isinstance(self.size_limit, Unset):
             size_limit = UNSET
         else:

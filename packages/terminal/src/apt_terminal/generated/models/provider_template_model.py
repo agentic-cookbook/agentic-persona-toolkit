@@ -44,10 +44,10 @@ class ProviderTemplateModel:
 
         name = self.name
 
-        description: None | str
+        description: str | None
         description = self.description
 
-        metadata: None | dict[str, Any]
+        metadata: dict[str, Any] | None
         if isinstance(self.metadata, ProviderTemplateModelMetadataType0):
             metadata = self.metadata.to_dict()
         else:
@@ -55,7 +55,7 @@ class ProviderTemplateModel:
 
         source = self.source.value
 
-        last_synced_at: None | str
+        last_synced_at: str | None
         last_synced_at = self.last_synced_at
 
         created_at = self.created_at

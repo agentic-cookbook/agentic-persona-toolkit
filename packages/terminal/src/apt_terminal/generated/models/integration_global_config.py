@@ -38,13 +38,13 @@ class IntegrationGlobalConfig:
 
         has_secret = self.has_secret
 
-        updated_by: None | Unset | str
+        updated_by: Unset | str | None
         if isinstance(self.updated_by, Unset):
             updated_by = UNSET
         else:
             updated_by = self.updated_by
 
-        updated_at: None | Unset | str
+        updated_at: Unset | str | None
         if isinstance(self.updated_at, Unset):
             updated_at = UNSET
         else:

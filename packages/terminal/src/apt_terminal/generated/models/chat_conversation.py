@@ -35,7 +35,7 @@ class ChatConversation:
 
         model = self.model
 
-        persona_slug: None | str
+        persona_slug: str | None
         persona_slug = self.persona_slug
 
         created_at = self.created_at

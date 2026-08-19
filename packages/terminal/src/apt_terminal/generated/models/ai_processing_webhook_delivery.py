@@ -77,19 +77,19 @@ class AiProcessingWebhookDelivery:
 
         updated_at = self.updated_at
 
-        response_status: None | Unset | int
+        response_status: Unset | int | None
         if isinstance(self.response_status, Unset):
             response_status = UNSET
         else:
             response_status = self.response_status
 
-        last_error: None | Unset | str
+        last_error: Unset | str | None
         if isinstance(self.last_error, Unset):
             last_error = UNSET
         else:
             last_error = self.last_error
 
-        delivered_at: None | Unset | str
+        delivered_at: Unset | str | None
         if isinstance(self.delivered_at, Unset):
             delivered_at = UNSET
         else:

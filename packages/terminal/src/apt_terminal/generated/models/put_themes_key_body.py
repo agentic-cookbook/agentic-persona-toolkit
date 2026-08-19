@@ -30,7 +30,7 @@ class PutThemesKeyBody:
     def to_dict(self) -> dict[str, Any]:
         label = self.label
 
-        based_on: None | Unset | str
+        based_on: Unset | str | None
         if isinstance(self.based_on, Unset):
             based_on = UNSET
         else:

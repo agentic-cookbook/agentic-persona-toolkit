@@ -39,7 +39,7 @@ class GetAccountMfaWebauthnResponse200ItemsItem:
 
         created_at = self.created_at
 
-        last_used_at: None | Unset | str
+        last_used_at: Unset | str | None
         if isinstance(self.last_used_at, Unset):
             last_used_at = UNSET
         else:

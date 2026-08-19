@@ -46,25 +46,25 @@ class CommunityDirectoryEntry:
 
         active_category_ids = self.active_category_ids
 
-        bio: None | Unset | str
+        bio: Unset | str | None
         if isinstance(self.bio, Unset):
             bio = UNSET
         else:
             bio = self.bio
 
-        display_name: None | Unset | str
+        display_name: Unset | str | None
         if isinstance(self.display_name, Unset):
             display_name = UNSET
         else:
             display_name = self.display_name
 
-        slug: None | Unset | str
+        slug: Unset | str | None
         if isinstance(self.slug, Unset):
             slug = UNSET
         else:
             slug = self.slug
 
-        avatar_url: None | Unset | str
+        avatar_url: Unset | str | None
         if isinstance(self.avatar_url, Unset):
             avatar_url = UNSET
         else:

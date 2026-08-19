@@ -64,7 +64,7 @@ class GetIntegrationIntegrationMediaItemsResponse200Item:
 
         customer_id = self.customer_id
 
-        deleted_at: None | str
+        deleted_at: str | None
         deleted_at = self.deleted_at
 
         ecosystem_id = self.ecosystem_id
@@ -79,27 +79,27 @@ class GetIntegrationIntegrationMediaItemsResponse200Item:
 
         title = self.title
 
-        artist: None | str
+        artist: str | None
         artist = self.artist
 
-        album: None | str
+        album: str | None
         album = self.album
 
-        image_url: None | str
+        image_url: str | None
         image_url = self.image_url
 
-        external_url: None | str
+        external_url: str | None
         external_url = self.external_url
 
-        duration_ms: None | int
+        duration_ms: int | None
         duration_ms = self.duration_ms
 
-        popularity: None | int
+        popularity: int | None
         popularity = self.popularity
 
         is_saved = self.is_saved
 
-        last_played_at: None | str
+        last_played_at: str | None
         last_played_at = self.last_played_at
 
         is_deleted = self.is_deleted
@@ -110,7 +110,7 @@ class GetIntegrationIntegrationMediaItemsResponse200Item:
 
         sync_version = self.sync_version
 
-        sync_stamped_at: None | str
+        sync_stamped_at: str | None
         sync_stamped_at = self.sync_stamped_at
 
         sync_txid = self.sync_txid

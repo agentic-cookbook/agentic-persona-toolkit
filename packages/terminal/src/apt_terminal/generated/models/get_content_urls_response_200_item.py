@@ -62,7 +62,7 @@ class GetContentUrlsResponse200Item:
 
         customer_id = self.customer_id
 
-        deleted_at: None | str
+        deleted_at: str | None
         deleted_at = self.deleted_at
 
         ecosystem_id = self.ecosystem_id
@@ -73,27 +73,27 @@ class GetContentUrlsResponse200Item:
 
         canonical_url_hash = self.canonical_url_hash
 
-        title: None | str
+        title: str | None
         title = self.title
 
-        description: None | str
+        description: str | None
         description = self.description
 
-        note: None | str
+        note: str | None
         note = self.note
 
-        preview_storage_key: None | str
+        preview_storage_key: str | None
         preview_storage_key = self.preview_storage_key
 
-        preview_url: None | str
+        preview_url: str | None
         preview_url = self.preview_url
 
         preview_status = self.preview_status
 
-        preview_error: None | str
+        preview_error: str | None
         preview_error = self.preview_error
 
-        preview_generated_at: None | str
+        preview_generated_at: str | None
         preview_generated_at = self.preview_generated_at
 
         preview_attempts = self.preview_attempts
@@ -106,7 +106,7 @@ class GetContentUrlsResponse200Item:
 
         sync_version = self.sync_version
 
-        sync_stamped_at: None | str
+        sync_stamped_at: str | None
         sync_stamped_at = self.sync_stamped_at
 
         sync_txid = self.sync_txid

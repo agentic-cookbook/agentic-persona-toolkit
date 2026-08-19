@@ -53,7 +53,7 @@ class BucketGrant:
 
         updated_at = self.updated_at
 
-        granted_by: None | Unset | str
+        granted_by: Unset | str | None
         if isinstance(self.granted_by, Unset):
             granted_by = UNSET
         else:

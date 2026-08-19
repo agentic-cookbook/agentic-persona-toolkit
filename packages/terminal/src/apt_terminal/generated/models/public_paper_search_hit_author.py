@@ -22,7 +22,7 @@ class PublicPaperSearchHitAuthor:
     def to_dict(self) -> dict[str, Any]:
         slug = self.slug
 
-        display_name: None | str
+        display_name: str | None
         display_name = self.display_name
 
         field_dict: dict[str, Any] = {}

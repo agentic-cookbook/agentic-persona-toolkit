@@ -4,6 +4,8 @@ from typing import Any, TypeVar, cast
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
+from ..models.user_profile_visibility import UserProfileVisibility
+
 T = TypeVar("T", bound="User")
 
 
@@ -17,6 +19,8 @@ class User:
         avatar_url (str):
         slug (Union[None, str]):
         public_profile_enabled (bool): Whether the public profile card is visible at /public/users/:slug
+        profile_visibility (UserProfileVisibility): The principal's page-level profile visibility. Supersedes
+            publicProfileEnabled, which is retained during the expand phase and written in parallel.
         capabilities (list[str]):
     """
 
@@ -26,6 +30,7 @@ class User:
     avatar_url: str
     slug: None | str
     public_profile_enabled: bool
+    profile_visibility: UserProfileVisibility
     capabilities: list[str]
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
@@ -38,10 +43,12 @@ class User:
 
         avatar_url = self.avatar_url
 
-        slug: None | str
+        slug: str | None
         slug = self.slug
 
         public_profile_enabled = self.public_profile_enabled
+
+        profile_visibility = self.profile_visibility.value
 
         capabilities = self.capabilities
 
@@ -55,6 +62,7 @@ class User:
                 "avatarUrl": avatar_url,
                 "slug": slug,
                 "publicProfileEnabled": public_profile_enabled,
+                "profileVisibility": profile_visibility,
                 "capabilities": capabilities,
             }
         )
@@ -81,6 +89,8 @@ class User:
 
         public_profile_enabled = d.pop("publicProfileEnabled")
 
+        profile_visibility = UserProfileVisibility(d.pop("profileVisibility"))
+
         capabilities = cast(list[str], d.pop("capabilities"))
 
         user = cls(
@@ -90,6 +100,7 @@ class User:
             avatar_url=avatar_url,
             slug=slug,
             public_profile_enabled=public_profile_enabled,
+            profile_visibility=profile_visibility,
             capabilities=capabilities,
         )
 

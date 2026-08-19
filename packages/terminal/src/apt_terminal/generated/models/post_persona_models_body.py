@@ -40,13 +40,13 @@ class PostPersonaModelsBody:
 
         name = self.name
 
-        description: None | Unset | str
+        description: Unset | str | None
         if isinstance(self.description, Unset):
             description = UNSET
         else:
             description = self.description
 
-        metadata: None | Unset | bool | dict[str, Any] | float | list[Any] | str
+        metadata: Unset | bool | dict[str, Any] | float | list[Any] | str | None
         if isinstance(self.metadata, Unset):
             metadata = UNSET
         elif isinstance(self.metadata, PostPersonaModelsBodyMetadataType0Type1):

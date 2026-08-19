@@ -42,7 +42,7 @@ class PutContentCategoriesIdBody:
 
         icon = self.icon
 
-        parent_id: None | Unset | str
+        parent_id: Unset | str | None
         if isinstance(self.parent_id, Unset):
             parent_id = UNSET
         else:

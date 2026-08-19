@@ -42,7 +42,7 @@ class PostContentContactsBody:
 
         owner_id = self.owner_id
 
-        person_user_id: None | Unset | str
+        person_user_id: Unset | str | None
         if isinstance(self.person_user_id, Unset):
             person_user_id = UNSET
         else:

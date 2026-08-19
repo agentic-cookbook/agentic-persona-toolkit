@@ -58,37 +58,37 @@ class PostIntegrationIntegrationBookmarksBody:
 
         ecosystem_id = self.ecosystem_id
 
-        excerpt: None | Unset | str
+        excerpt: Unset | str | None
         if isinstance(self.excerpt, Unset):
             excerpt = UNSET
         else:
             excerpt = self.excerpt
 
-        note: None | Unset | str
+        note: Unset | str | None
         if isinstance(self.note, Unset):
             note = UNSET
         else:
             note = self.note
 
-        tags: None | Unset | str
+        tags: Unset | str | None
         if isinstance(self.tags, Unset):
             tags = UNSET
         else:
             tags = self.tags
 
-        image_url: None | Unset | str
+        image_url: Unset | str | None
         if isinstance(self.image_url, Unset):
             image_url = UNSET
         else:
             image_url = self.image_url
 
-        collection_id: None | Unset | str
+        collection_id: Unset | str | None
         if isinstance(self.collection_id, Unset):
             collection_id = UNSET
         else:
             collection_id = self.collection_id
 
-        collection_name: None | Unset | str
+        collection_name: Unset | str | None
         if isinstance(self.collection_name, Unset):
             collection_name = UNSET
         else:
@@ -96,7 +96,7 @@ class PostIntegrationIntegrationBookmarksBody:
 
         is_favorite = self.is_favorite
 
-        external_created_at: None | Unset | str
+        external_created_at: Unset | str | None
         if isinstance(self.external_created_at, Unset):
             external_created_at = UNSET
         else:

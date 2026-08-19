@@ -28,7 +28,7 @@ class PostContentListsBody:
 
         ecosystem_id = self.ecosystem_id
 
-        description: None | Unset | str
+        description: Unset | str | None
         if isinstance(self.description, Unset):
             description = UNSET
         else:

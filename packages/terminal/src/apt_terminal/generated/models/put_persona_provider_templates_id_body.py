@@ -65,19 +65,19 @@ class PutPersonaProviderTemplatesIdBody:
 
         base_url = self.base_url
 
-        documentation_url: None | Unset | str
+        documentation_url: Unset | str | None
         if isinstance(self.documentation_url, Unset):
             documentation_url = UNSET
         else:
             documentation_url = self.documentation_url
 
-        status_url: None | Unset | str
+        status_url: Unset | str | None
         if isinstance(self.status_url, Unset):
             status_url = UNSET
         else:
             status_url = self.status_url
 
-        connection_spec: None | Unset | dict[str, Any]
+        connection_spec: Unset | dict[str, Any] | None
         if isinstance(self.connection_spec, Unset):
             connection_spec = UNSET
         elif isinstance(self.connection_spec, ProviderConnectionSpecType0):
@@ -85,7 +85,7 @@ class PutPersonaProviderTemplatesIdBody:
         else:
             connection_spec = self.connection_spec
 
-        sync_keys: None | Unset | dict[str, Any]
+        sync_keys: Unset | dict[str, Any] | None
         if isinstance(self.sync_keys, Unset):
             sync_keys = UNSET
         elif isinstance(self.sync_keys, TemplateSyncKeysType0):
@@ -93,7 +93,7 @@ class PutPersonaProviderTemplatesIdBody:
         else:
             sync_keys = self.sync_keys
 
-        available_via: None | Unset | dict[str, Any]
+        available_via: Unset | dict[str, Any] | None
         if isinstance(self.available_via, Unset):
             available_via = UNSET
         elif isinstance(self.available_via, TemplateAvailableViaType0):
@@ -101,7 +101,7 @@ class PutPersonaProviderTemplatesIdBody:
         else:
             available_via = self.available_via
 
-        modalities: None | Unset | list[str]
+        modalities: Unset | list[str] | None
         if isinstance(self.modalities, Unset):
             modalities = UNSET
         elif isinstance(self.modalities, list):

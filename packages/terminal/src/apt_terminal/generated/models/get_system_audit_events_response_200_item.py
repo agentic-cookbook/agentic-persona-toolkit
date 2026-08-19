@@ -34,13 +34,13 @@ class GetSystemAuditEventsResponse200Item:
     def to_dict(self) -> dict[str, Any]:
         id = self.id
 
-        ecosystem_id: None | str
+        ecosystem_id: str | None
         ecosystem_id = self.ecosystem_id
 
-        developer_id: None | str
+        developer_id: str | None
         developer_id = self.developer_id
 
-        actor_user_id: None | str
+        actor_user_id: str | None
         actor_user_id = self.actor_user_id
 
         event_type = self.event_type

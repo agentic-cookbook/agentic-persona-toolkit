@@ -48,7 +48,7 @@ class PutAudienceTemplatesIdResponse200:
 
         owner_id = self.owner_id
 
-        created_by: None | str
+        created_by: str | None
         created_by = self.created_by
 
         name = self.name

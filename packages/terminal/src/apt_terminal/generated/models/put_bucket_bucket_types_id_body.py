@@ -56,7 +56,7 @@ class PutBucketBucketTypesIdBody:
 
         ref_mode = self.ref_mode
 
-        metadata: None | Unset | bool | dict[str, Any] | float | list[Any] | str
+        metadata: Unset | bool | dict[str, Any] | float | list[Any] | str | None
         if isinstance(self.metadata, Unset):
             metadata = UNSET
         elif isinstance(self.metadata, PutBucketBucketTypesIdBodyMetadataType0Type1):

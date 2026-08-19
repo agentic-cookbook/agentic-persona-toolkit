@@ -52,31 +52,31 @@ class PostContentUrlsBody:
 
         ecosystem_id = self.ecosystem_id
 
-        title: None | Unset | str
+        title: Unset | str | None
         if isinstance(self.title, Unset):
             title = UNSET
         else:
             title = self.title
 
-        description: None | Unset | str
+        description: Unset | str | None
         if isinstance(self.description, Unset):
             description = UNSET
         else:
             description = self.description
 
-        note: None | Unset | str
+        note: Unset | str | None
         if isinstance(self.note, Unset):
             note = UNSET
         else:
             note = self.note
 
-        preview_storage_key: None | Unset | str
+        preview_storage_key: Unset | str | None
         if isinstance(self.preview_storage_key, Unset):
             preview_storage_key = UNSET
         else:
             preview_storage_key = self.preview_storage_key
 
-        preview_url: None | Unset | str
+        preview_url: Unset | str | None
         if isinstance(self.preview_url, Unset):
             preview_url = UNSET
         else:
@@ -84,13 +84,13 @@ class PostContentUrlsBody:
 
         preview_status = self.preview_status
 
-        preview_error: None | Unset | str
+        preview_error: Unset | str | None
         if isinstance(self.preview_error, Unset):
             preview_error = UNSET
         else:
             preview_error = self.preview_error
 
-        preview_generated_at: None | Unset | str
+        preview_generated_at: Unset | str | None
         if isinstance(self.preview_generated_at, Unset):
             preview_generated_at = UNSET
         else:

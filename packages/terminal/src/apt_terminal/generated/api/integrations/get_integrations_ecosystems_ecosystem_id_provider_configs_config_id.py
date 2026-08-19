@@ -14,6 +14,7 @@ def _get_kwargs(
     ecosystem_id: str,
     config_id: str,
 ) -> dict[str, Any]:
+
     _kwargs: dict[str, Any] = {
         "method": "get",
         "url": f"/integrations/ecosystems/{ecosystem_id}/provider-configs/{config_id}",

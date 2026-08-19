@@ -107,19 +107,19 @@ class PostIntegrationIntegrationAudienceContactsBody:
 
         ecosystem_id = self.ecosystem_id
 
-        first_name: None | Unset | str
+        first_name: Unset | str | None
         if isinstance(self.first_name, Unset):
             first_name = UNSET
         else:
             first_name = self.first_name
 
-        last_name: None | Unset | str
+        last_name: Unset | str | None
         if isinstance(self.last_name, Unset):
             last_name = UNSET
         else:
             last_name = self.last_name
 
-        tags: None | Unset | bool | dict[str, Any] | float | list[Any] | str
+        tags: Unset | bool | dict[str, Any] | float | list[Any] | str | None
         if isinstance(self.tags, Unset):
             tags = UNSET
         elif isinstance(self.tags, PostIntegrationIntegrationAudienceContactsBodyTagsType0Type1):
@@ -130,7 +130,7 @@ class PostIntegrationIntegrationAudienceContactsBody:
         else:
             tags = self.tags
 
-        fields: None | Unset | bool | dict[str, Any] | float | list[Any] | str
+        fields: Unset | bool | dict[str, Any] | float | list[Any] | str | None
         if isinstance(self.fields, Unset):
             fields = UNSET
         elif isinstance(
@@ -143,13 +143,13 @@ class PostIntegrationIntegrationAudienceContactsBody:
         else:
             fields = self.fields
 
-        subscribed_at: None | Unset | str
+        subscribed_at: Unset | str | None
         if isinstance(self.subscribed_at, Unset):
             subscribed_at = UNSET
         else:
             subscribed_at = self.subscribed_at
 
-        raw: None | Unset | bool | dict[str, Any] | float | list[Any] | str
+        raw: Unset | bool | dict[str, Any] | float | list[Any] | str | None
         if isinstance(self.raw, Unset):
             raw = UNSET
         elif isinstance(self.raw, PostIntegrationIntegrationAudienceContactsBodyRawType0Type1):

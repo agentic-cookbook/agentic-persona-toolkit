@@ -36,19 +36,19 @@ class PutPersonaSpecialInterestsIdBody:
 
         general = self.general
 
-        topical: None | Unset | str
+        topical: Unset | str | None
         if isinstance(self.topical, Unset):
             topical = UNSET
         else:
             topical = self.topical
 
-        specific: None | Unset | str
+        specific: Unset | str | None
         if isinstance(self.specific, Unset):
             specific = UNSET
         else:
             specific = self.specific
 
-        stances: None | Unset | str
+        stances: Unset | str | None
         if isinstance(self.stances, Unset):
             stances = UNSET
         else:

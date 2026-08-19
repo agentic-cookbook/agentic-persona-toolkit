@@ -4,6 +4,7 @@ from typing import Any, TypeVar
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
+from ..models.patch_auth_me_body_profile_visibility import PatchAuthMeBodyProfileVisibility
 from ..types import UNSET, Unset
 
 T = TypeVar("T", bound="PatchAuthMeBody")
@@ -18,12 +19,15 @@ class PatchAuthMeBody:
         slug (Union[Unset, str]):
         avatar_url (Union[Unset, str]):
         public_profile_enabled (Union[Unset, bool]):
+        profile_visibility (Union[Unset, PatchAuthMeBodyProfileVisibility]): The principal's page-level profile
+            visibility. Supersedes publicProfileEnabled, which is retained during the expand phase and written in parallel.
     """
 
     name: Unset | str = UNSET
     slug: Unset | str = UNSET
     avatar_url: Unset | str = UNSET
     public_profile_enabled: Unset | bool = UNSET
+    profile_visibility: Unset | PatchAuthMeBodyProfileVisibility = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -34,6 +38,10 @@ class PatchAuthMeBody:
         avatar_url = self.avatar_url
 
         public_profile_enabled = self.public_profile_enabled
+
+        profile_visibility: Unset | str = UNSET
+        if not isinstance(self.profile_visibility, Unset):
+            profile_visibility = self.profile_visibility.value
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
@@ -46,6 +54,8 @@ class PatchAuthMeBody:
             field_dict["avatarUrl"] = avatar_url
         if public_profile_enabled is not UNSET:
             field_dict["publicProfileEnabled"] = public_profile_enabled
+        if profile_visibility is not UNSET:
+            field_dict["profileVisibility"] = profile_visibility
 
         return field_dict
 
@@ -60,11 +70,19 @@ class PatchAuthMeBody:
 
         public_profile_enabled = d.pop("publicProfileEnabled", UNSET)
 
+        _profile_visibility = d.pop("profileVisibility", UNSET)
+        profile_visibility: Unset | PatchAuthMeBodyProfileVisibility
+        if isinstance(_profile_visibility, Unset):
+            profile_visibility = UNSET
+        else:
+            profile_visibility = PatchAuthMeBodyProfileVisibility(_profile_visibility)
+
         patch_auth_me_body = cls(
             name=name,
             slug=slug,
             avatar_url=avatar_url,
             public_profile_enabled=public_profile_enabled,
+            profile_visibility=profile_visibility,
         )
 
         patch_auth_me_body.additional_properties = d

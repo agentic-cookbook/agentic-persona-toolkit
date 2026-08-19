@@ -36,7 +36,7 @@ class CampaignCreate:
 
         text_body = self.text_body
 
-        from_name: None | Unset | str
+        from_name: Unset | str | None
         if isinstance(self.from_name, Unset):
             from_name = UNSET
         else:

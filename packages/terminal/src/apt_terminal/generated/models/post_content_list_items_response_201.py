@@ -54,14 +54,14 @@ class PostContentListItemsResponse201:
 
         customer_id = self.customer_id
 
-        deleted_at: None | str
+        deleted_at: str | None
         deleted_at = self.deleted_at
 
         list_id = self.list_id
 
         position = self.position
 
-        value: None | bool | dict[str, Any] | float | list[Any] | str
+        value: bool | dict[str, Any] | float | list[Any] | str | None
         if isinstance(self.value, PostContentListItemsResponse201ValueType1):
             value = self.value.to_dict()
         elif isinstance(self.value, list):
@@ -76,7 +76,7 @@ class PostContentListItemsResponse201:
 
         sync_version = self.sync_version
 
-        sync_stamped_at: None | str
+        sync_stamped_at: str | None
         sync_stamped_at = self.sync_stamped_at
 
         sync_txid = self.sync_txid

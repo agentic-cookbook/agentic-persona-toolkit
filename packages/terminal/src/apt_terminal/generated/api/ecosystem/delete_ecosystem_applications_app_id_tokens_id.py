@@ -13,6 +13,7 @@ def _get_kwargs(
     app_id: str,
     id: str,
 ) -> dict[str, Any]:
+
     _kwargs: dict[str, Any] = {
         "method": "delete",
         "url": f"/ecosystem/applications/{app_id}/tokens/{id}",

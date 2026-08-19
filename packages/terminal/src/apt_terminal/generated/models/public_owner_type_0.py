@@ -24,10 +24,10 @@ class PublicOwnerType0:
     def to_dict(self) -> dict[str, Any]:
         slug = self.slug
 
-        display_name: None | str
+        display_name: str | None
         display_name = self.display_name
 
-        avatar_url: None | str
+        avatar_url: str | None
         avatar_url = self.avatar_url
 
         field_dict: dict[str, Any] = {}

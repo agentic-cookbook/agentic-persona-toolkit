@@ -13,6 +13,7 @@ def _get_kwargs(
     id: str,
     customer_id: str,
 ) -> dict[str, Any]:
+
     _kwargs: dict[str, Any] = {
         "method": "delete",
         "url": f"/communities/{id}/members/{customer_id}",

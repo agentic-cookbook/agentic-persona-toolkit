@@ -30,7 +30,7 @@ class PostBillingSubscriptionTiersBody:
 
         name = self.name
 
-        description: None | Unset | str
+        description: Unset | str | None
         if isinstance(self.description, Unset):
             description = UNSET
         else:

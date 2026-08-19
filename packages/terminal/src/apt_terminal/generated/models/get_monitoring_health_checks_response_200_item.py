@@ -46,13 +46,13 @@ class GetMonitoringHealthChecksResponse200Item:
 
         status = self.status
 
-        response_time_ms: None | int
+        response_time_ms: int | None
         response_time_ms = self.response_time_ms
 
-        status_code: None | int
+        status_code: int | None
         status_code = self.status_code
 
-        error_message: None | str
+        error_message: str | None
         error_message = self.error_message
 
         checked_at = self.checked_at

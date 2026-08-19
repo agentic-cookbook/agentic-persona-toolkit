@@ -49,7 +49,7 @@ class ProjectParticipant:
 
         added_at = self.added_at
 
-        added_by: None | Unset | str
+        added_by: Unset | str | None
         if isinstance(self.added_by, Unset):
             added_by = UNSET
         else:

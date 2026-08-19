@@ -53,7 +53,7 @@ class AiProcessingWebhookEndpoint:
 
         updated_at = self.updated_at
 
-        description: None | Unset | str
+        description: Unset | str | None
         if isinstance(self.description, Unset):
             description = UNSET
         else:

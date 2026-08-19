@@ -30,7 +30,7 @@ class PutMonitoringSiteGroupsIdBody:
 
         slug = self.slug
 
-        description: None | Unset | str
+        description: Unset | str | None
         if isinstance(self.description, Unset):
             description = UNSET
         else:

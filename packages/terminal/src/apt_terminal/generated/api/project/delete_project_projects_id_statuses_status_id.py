@@ -13,6 +13,7 @@ def _get_kwargs(
     id: str,
     status_id: str,
 ) -> dict[str, Any]:
+
     _kwargs: dict[str, Any] = {
         "method": "delete",
         "url": f"/project/projects/{id}/statuses/{status_id}",

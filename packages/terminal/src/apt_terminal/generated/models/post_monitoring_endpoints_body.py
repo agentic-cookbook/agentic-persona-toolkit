@@ -42,7 +42,7 @@ class PostMonitoringEndpointsBody:
 
         expected_status = self.expected_status
 
-        expected_body_contains: None | Unset | str
+        expected_body_contains: Unset | str | None
         if isinstance(self.expected_body_contains, Unset):
             expected_body_contains = UNSET
         else:

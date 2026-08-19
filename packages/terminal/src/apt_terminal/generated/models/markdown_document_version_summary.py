@@ -48,19 +48,19 @@ class MarkdownDocumentVersionSummary:
 
         created_at = self.created_at
 
-        author_type: None | Unset | str
+        author_type: Unset | str | None
         if isinstance(self.author_type, Unset):
             author_type = UNSET
         else:
             author_type = self.author_type
 
-        author_id: None | Unset | str
+        author_id: Unset | str | None
         if isinstance(self.author_id, Unset):
             author_id = UNSET
         else:
             author_id = self.author_id
 
-        author_name: None | Unset | str
+        author_name: Unset | str | None
         if isinstance(self.author_name, Unset):
             author_name = UNSET
         else:

@@ -72,31 +72,31 @@ class RegistryPersonaApproval:
 
         created_at = self.created_at
 
-        subject_id: None | Unset | str
+        subject_id: Unset | str | None
         if isinstance(self.subject_id, Unset):
             subject_id = UNSET
         else:
             subject_id = self.subject_id
 
-        requested_by: None | Unset | str
+        requested_by: Unset | str | None
         if isinstance(self.requested_by, Unset):
             requested_by = UNSET
         else:
             requested_by = self.requested_by
 
-        decided_by: None | Unset | str
+        decided_by: Unset | str | None
         if isinstance(self.decided_by, Unset):
             decided_by = UNSET
         else:
             decided_by = self.decided_by
 
-        decided_at: None | Unset | str
+        decided_at: Unset | str | None
         if isinstance(self.decided_at, Unset):
             decided_at = UNSET
         else:
             decided_at = self.decided_at
 
-        result: None | Unset | dict[str, Any]
+        result: Unset | dict[str, Any] | None
         if isinstance(self.result, Unset):
             result = UNSET
         elif isinstance(self.result, RegistryPersonaApprovalResultType0):

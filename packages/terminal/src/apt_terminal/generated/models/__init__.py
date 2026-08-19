@@ -37,6 +37,13 @@ from .archived_workspace_type import ArchivedWorkspaceType
 from .auth_method_setting import AuthMethodSetting
 from .auth_result import AuthResult
 from .auth_user_method import AuthUserMethod
+from .billing_account import BillingAccount
+from .billing_ack import BillingAck
+from .billing_claim_request import BillingClaimRequest
+from .billing_claim_result import BillingClaimResult
+from .billing_price_option import BillingPriceOption
+from .billing_redrive_result import BillingRedriveResult
+from .billing_resend_claim import BillingResendClaim
 from .bookmark import Bookmark
 from .bucket_access_group import BucketAccessGroup
 from .bucket_access_group_detail import BucketAccessGroupDetail
@@ -287,6 +294,8 @@ from .get_auth_slug_available_slug_response_200_reason import (
     GetAuthSlugAvailableSlugResponse200Reason,
 )
 from .get_auth_tokens_scopes_response_200 import GetAuthTokensScopesResponse200
+from .get_billing_offers_id_response_200 import GetBillingOffersIdResponse200
+from .get_billing_offers_response_200_item import GetBillingOffersResponse200Item
 from .get_billing_subscription_tiers_id_response_200 import GetBillingSubscriptionTiersIdResponse200
 from .get_billing_subscription_tiers_response_200_item import (
     GetBillingSubscriptionTiersResponse200Item,
@@ -397,6 +406,10 @@ from .get_content_urls_id_response_200 import GetContentUrlsIdResponse200
 from .get_content_urls_response_200_item import GetContentUrlsResponse200Item
 from .get_customer_customers_id_response_200 import GetCustomerCustomersIdResponse200
 from .get_customer_customers_response_200_item import GetCustomerCustomersResponse200Item
+from .get_customer_transfer_preview_response_200 import GetCustomerTransferPreviewResponse200
+from .get_customer_transfer_preview_response_200_conflicts_item import (
+    GetCustomerTransferPreviewResponse200ConflictsItem,
+)
 from .get_discussion_topics_id_posts_response_200 import GetDiscussionTopicsIdPostsResponse200
 from .get_discussion_topics_response_200 import GetDiscussionTopicsResponse200
 from .get_document_blocks_id_response_200 import GetDocumentBlocksIdResponse200
@@ -767,27 +780,30 @@ from .get_usage_usage_counters_scope_principal_id_period_start_response_200 impo
 from .get_usage_usage_events_id_response_200 import GetUsageUsageEventsIdResponse200
 from .get_usage_usage_events_response_200_item import GetUsageUsageEventsResponse200Item
 from .get_workspaces_slug_members_response_200 import GetWorkspacesSlugMembersResponse200
-from .integration_action_request_type_0 import IntegrationActionRequestType0
-from .integration_action_request_type_1_media_item import IntegrationActionRequestType1MediaItem
-from .integration_action_request_type_2 import IntegrationActionRequestType2
-from .integration_action_request_type_3 import IntegrationActionRequestType3
-from .integration_action_request_type_4_media_item import IntegrationActionRequestType4MediaItem
-from .integration_action_request_type_5_fields import IntegrationActionRequestType5Fields
-from .integration_action_request_type_6 import IntegrationActionRequestType6
-from .integration_action_request_type_7 import IntegrationActionRequestType7
-from .integration_action_request_type_8 import IntegrationActionRequestType8
+from .integration_action_broadcast import IntegrationActionBroadcast
+from .integration_action_broadcast_send import IntegrationActionBroadcastSend
+from .integration_action_comment import IntegrationActionComment
+from .integration_action_fields import IntegrationActionFields
+from .integration_action_media_item import IntegrationActionMediaItem
+from .integration_action_post import IntegrationActionPost
 from .integration_action_result import IntegrationActionResult
 from .integration_action_result_status import IntegrationActionResultStatus
-from .integration_connect_request_type_0 import IntegrationConnectRequestType0
-from .integration_connect_request_type_0_type import IntegrationConnectRequestType0Type
-from .integration_connect_request_type_1_fields import IntegrationConnectRequestType1Fields
-from .integration_connect_request_type_1_type import IntegrationConnectRequestType1Type
-from .integration_connect_request_type_2 import IntegrationConnectRequestType2
-from .integration_connect_request_type_2_type import IntegrationConnectRequestType2Type
-from .integration_connect_request_type_3 import IntegrationConnectRequestType3
-from .integration_connect_request_type_3_type import IntegrationConnectRequestType3Type
-from .integration_connect_request_type_4 import IntegrationConnectRequestType4
-from .integration_connect_request_type_4_type import IntegrationConnectRequestType4Type
+from .integration_action_send import IntegrationActionSend
+from .integration_action_sms import IntegrationActionSms
+from .integration_action_submit import IntegrationActionSubmit
+from .integration_action_subscribe import IntegrationActionSubscribe
+from .integration_action_unsubscribe import IntegrationActionUnsubscribe
+from .integration_connect_api_key import IntegrationConnectApiKey
+from .integration_connect_api_key_type import IntegrationConnectApiKeyType
+from .integration_connect_app_password import IntegrationConnectAppPassword
+from .integration_connect_app_password_type import IntegrationConnectAppPasswordType
+from .integration_connect_fields import IntegrationConnectFields
+from .integration_connect_o_auth import IntegrationConnectOAuth
+from .integration_connect_o_auth_instance import IntegrationConnectOAuthInstance
+from .integration_connect_o_auth_instance_type import IntegrationConnectOAuthInstanceType
+from .integration_connect_o_auth_type import IntegrationConnectOAuthType
+from .integration_connect_plaid_link import IntegrationConnectPlaidLink
+from .integration_connect_plaid_link_type import IntegrationConnectPlaidLinkType
 from .integration_connection import IntegrationConnection
 from .integration_connection_sync_settings_type_0 import IntegrationConnectionSyncSettingsType0
 from .integration_global_config import IntegrationGlobalConfig
@@ -863,6 +879,7 @@ from .patch_access_personas_id_tools_tool_name_response_200 import (
 from .patch_access_roles_id_body import PatchAccessRolesIdBody
 from .patch_access_roles_id_body_default_for import PatchAccessRolesIdBodyDefaultFor
 from .patch_auth_me_body import PatchAuthMeBody
+from .patch_auth_me_body_profile_visibility import PatchAuthMeBodyProfileVisibility
 from .patch_auth_methods_method_body import PatchAuthMethodsMethodBody
 from .patch_bucket_access_groups_group_id_body import PatchBucketAccessGroupsGroupIdBody
 from .patch_ecosystem_namespaces_id_body import PatchEcosystemNamespacesIdBody
@@ -1105,6 +1122,8 @@ from .post_auth_register_body import PostAuthRegisterBody
 from .post_auth_register_response_201 import PostAuthRegisterResponse201
 from .post_auth_tokens_body import PostAuthTokensBody
 from .post_auth_user_methods_body import PostAuthUserMethodsBody
+from .post_billing_offers_body import PostBillingOffersBody
+from .post_billing_offers_response_201 import PostBillingOffersResponse201
 from .post_billing_subscription_tiers_body import PostBillingSubscriptionTiersBody
 from .post_billing_subscription_tiers_response_201 import PostBillingSubscriptionTiersResponse201
 from .post_billing_subscriptions_body import PostBillingSubscriptionsBody
@@ -1217,6 +1236,12 @@ from .post_customer_refresh_body import PostCustomerRefreshBody
 from .post_customer_register_body import PostCustomerRegisterBody
 from .post_customer_resolve_body import PostCustomerResolveBody
 from .post_customer_revoke_body import PostCustomerRevokeBody
+from .post_customer_transfer_body import PostCustomerTransferBody
+from .post_customer_transfer_response_200 import PostCustomerTransferResponse200
+from .post_customer_transfer_response_200_conflicts_item import (
+    PostCustomerTransferResponse200ConflictsItem,
+)
+from .post_customer_transfer_response_200_moved import PostCustomerTransferResponse200Moved
 from .post_discussion_topics_body import PostDiscussionTopicsBody
 from .post_discussion_topics_id_posts_body import PostDiscussionTopicsIdPostsBody
 from .post_document_blocks_body import PostDocumentBlocksBody
@@ -1697,6 +1722,7 @@ from .post_storage_uploads_body import PostStorageUploadsBody
 from .post_system_audit_events_body import PostSystemAuditEventsBody
 from .post_system_audit_events_response_201 import PostSystemAuditEventsResponse201
 from .post_system_feature_flags_body import PostSystemFeatureFlagsBody
+from .post_system_reserved_identifiers_release_body import PostSystemReservedIdentifiersReleaseBody
 from .post_system_server_bag_body import PostSystemServerBagBody
 from .post_team_members_body import PostTeamMembersBody
 from .post_team_members_personas_body import PostTeamMembersPersonasBody
@@ -1761,16 +1787,14 @@ from .project_template_body_statuses_item import ProjectTemplateBodyStatusesItem
 from .project_template_body_statuses_item_category import ProjectTemplateBodyStatusesItemCategory
 from .project_template_kind import ProjectTemplateKind
 from .project_template_owner_kind import ProjectTemplateOwnerKind
-from .provider_connection_spec_type_0_auth import ProviderConnectionSpecType0Auth
-from .provider_connection_spec_type_0_auth_scheme import ProviderConnectionSpecType0AuthScheme
-from .provider_connection_spec_type_0_auth_type import ProviderConnectionSpecType0AuthType
-from .provider_connection_spec_type_0_default_query import ProviderConnectionSpecType0DefaultQuery
-from .provider_connection_spec_type_0_extra_headers import ProviderConnectionSpecType0ExtraHeaders
-from .provider_connection_spec_type_0_header_vars_item import (
-    ProviderConnectionSpecType0HeaderVarsItem,
-)
+from .provider_connection_auth import ProviderConnectionAuth
+from .provider_connection_auth_scheme import ProviderConnectionAuthScheme
+from .provider_connection_auth_type import ProviderConnectionAuthType
+from .provider_connection_header_var import ProviderConnectionHeaderVar
+from .provider_connection_spec_type_0 import ProviderConnectionSpecType0
 from .provider_connection_spec_type_0_spec_version import ProviderConnectionSpecType0SpecVersion
-from .provider_connection_spec_type_0_url_vars_item import ProviderConnectionSpecType0UrlVarsItem
+from .provider_connection_string_map import ProviderConnectionStringMap
+from .provider_connection_url_var import ProviderConnectionUrlVar
 from .provider_template import ProviderTemplate
 from .provider_template_list import ProviderTemplateList
 from .provider_template_modalities_type_0_item import ProviderTemplateModalitiesType0Item
@@ -1823,6 +1847,7 @@ from .public_registry_summary import PublicRegistrySummary
 from .public_social_link import PublicSocialLink
 from .public_user_profile import PublicUserProfile
 from .public_user_search_hit import PublicUserSearchHit
+from .public_user_search_hit_kind import PublicUserSearchHitKind
 from .put_access_assignments_body import PutAccessAssignmentsBody
 from .put_access_assignments_body_subject_kind import PutAccessAssignmentsBodySubjectKind
 from .put_access_personas_id_user_tools_body import PutAccessPersonasIdUserToolsBody
@@ -1845,6 +1870,8 @@ from .put_auth_ecosystems_ecosystem_id_admin_notes_response_200 import (
     PutAuthEcosystemsEcosystemIdAdminNotesResponse200,
 )
 from .put_auth_user_methods_id_body import PutAuthUserMethodsIdBody
+from .put_billing_offers_id_body import PutBillingOffersIdBody
+from .put_billing_offers_id_response_200 import PutBillingOffersIdResponse200
 from .put_billing_subscription_tiers_id_body import PutBillingSubscriptionTiersIdBody
 from .put_billing_subscription_tiers_id_response_200 import PutBillingSubscriptionTiersIdResponse200
 from .put_billing_subscriptions_id_body import PutBillingSubscriptionsIdBody
@@ -2279,6 +2306,11 @@ from .registry_section import RegistrySection
 from .registry_submission_policy import RegistrySubmissionPolicy
 from .registry_user_actable_persona import RegistryUserActablePersona
 from .registry_visibility import RegistryVisibility
+from .release_result import ReleaseResult
+from .release_result_reason import ReleaseResultReason
+from .reserved_identifier import ReservedIdentifier
+from .reserved_identifier_page import ReservedIdentifierPage
+from .reserved_identifier_reason import ReservedIdentifierReason
 from .rotate_key_result import RotateKeyResult
 from .search_discussion_post_result import SearchDiscussionPostResult
 from .search_discussion_topic_result import SearchDiscussionTopicResult
@@ -2297,6 +2329,8 @@ from .storage_download import StorageDownload
 from .storage_presigned_upload import StoragePresignedUpload
 from .storage_quota_exceeded import StorageQuotaExceeded
 from .string_list import StringList
+from .stripe_webhook_event import StripeWebhookEvent
+from .stripe_webhook_event_data import StripeWebhookEventData
 from .subject_sheet import SubjectSheet
 from .subject_sheet_badges_item import SubjectSheetBadgesItem
 from .subject_sheet_stats import SubjectSheetStats
@@ -2344,6 +2378,7 @@ from .usage_summary_row_kind import UsageSummaryRowKind
 from .usage_summary_row_scope import UsageSummaryRowScope
 from .user import User
 from .user_block import UserBlock
+from .user_profile_visibility import UserProfileVisibility
 from .work_item import WorkItem
 from .work_item_assignee_kind_type_1 import WorkItemAssigneeKindType1
 from .work_item_assignee_kind_type_2_type_1 import WorkItemAssigneeKindType2Type1
@@ -2401,6 +2436,13 @@ __all__ = (
     "AuthMethodSetting",
     "AuthResult",
     "AuthUserMethod",
+    "BillingAccount",
+    "BillingAck",
+    "BillingClaimRequest",
+    "BillingClaimResult",
+    "BillingPriceOption",
+    "BillingRedriveResult",
+    "BillingResendClaim",
     "Bookmark",
     "BucketAccessGroup",
     "BucketAccessGroupDetail",
@@ -2603,6 +2645,8 @@ __all__ = (
     "GetAuthSlugAvailableSlugResponse200",
     "GetAuthSlugAvailableSlugResponse200Reason",
     "GetAuthTokensScopesResponse200",
+    "GetBillingOffersIdResponse200",
+    "GetBillingOffersResponse200Item",
     "GetBillingSubscriptionTiersIdResponse200",
     "GetBillingSubscriptionTiersResponse200Item",
     "GetBillingSubscriptionsIdResponse200",
@@ -2685,6 +2729,8 @@ __all__ = (
     "GetContentUrlsResponse200Item",
     "GetCustomerCustomersIdResponse200",
     "GetCustomerCustomersResponse200Item",
+    "GetCustomerTransferPreviewResponse200",
+    "GetCustomerTransferPreviewResponse200ConflictsItem",
     "GetDiscussionTopicsIdPostsResponse200",
     "GetDiscussionTopicsResponse200",
     "GetDocumentBlocksIdResponse200",
@@ -2893,27 +2939,30 @@ __all__ = (
     "GetUsageUsageEventsIdResponse200",
     "GetUsageUsageEventsResponse200Item",
     "GetWorkspacesSlugMembersResponse200",
-    "IntegrationActionRequestType0",
-    "IntegrationActionRequestType1MediaItem",
-    "IntegrationActionRequestType2",
-    "IntegrationActionRequestType3",
-    "IntegrationActionRequestType4MediaItem",
-    "IntegrationActionRequestType5Fields",
-    "IntegrationActionRequestType6",
-    "IntegrationActionRequestType7",
-    "IntegrationActionRequestType8",
+    "IntegrationActionBroadcast",
+    "IntegrationActionBroadcastSend",
+    "IntegrationActionComment",
+    "IntegrationActionFields",
+    "IntegrationActionMediaItem",
+    "IntegrationActionPost",
     "IntegrationActionResult",
     "IntegrationActionResultStatus",
-    "IntegrationConnectRequestType0",
-    "IntegrationConnectRequestType0Type",
-    "IntegrationConnectRequestType1Fields",
-    "IntegrationConnectRequestType1Type",
-    "IntegrationConnectRequestType2",
-    "IntegrationConnectRequestType2Type",
-    "IntegrationConnectRequestType3",
-    "IntegrationConnectRequestType3Type",
-    "IntegrationConnectRequestType4",
-    "IntegrationConnectRequestType4Type",
+    "IntegrationActionSend",
+    "IntegrationActionSms",
+    "IntegrationActionSubmit",
+    "IntegrationActionSubscribe",
+    "IntegrationActionUnsubscribe",
+    "IntegrationConnectApiKey",
+    "IntegrationConnectApiKeyType",
+    "IntegrationConnectAppPassword",
+    "IntegrationConnectAppPasswordType",
+    "IntegrationConnectFields",
+    "IntegrationConnectOAuth",
+    "IntegrationConnectOAuthInstance",
+    "IntegrationConnectOAuthInstanceType",
+    "IntegrationConnectOAuthType",
+    "IntegrationConnectPlaidLink",
+    "IntegrationConnectPlaidLinkType",
     "IntegrationConnection",
     "IntegrationConnectionSyncSettingsType0",
     "IntegrationGlobalConfig",
@@ -2985,6 +3034,7 @@ __all__ = (
     "PatchAccessRolesIdBody",
     "PatchAccessRolesIdBodyDefaultFor",
     "PatchAuthMeBody",
+    "PatchAuthMeBodyProfileVisibility",
     "PatchAuthMethodsMethodBody",
     "PatchBucketAccessGroupsGroupIdBody",
     "PatchEcosystemNamespacesIdBody",
@@ -3129,6 +3179,8 @@ __all__ = (
     "PostAuthRegisterResponse201",
     "PostAuthTokensBody",
     "PostAuthUserMethodsBody",
+    "PostBillingOffersBody",
+    "PostBillingOffersResponse201",
     "PostBillingSubscriptionTiersBody",
     "PostBillingSubscriptionTiersResponse201",
     "PostBillingSubscriptionsBody",
@@ -3221,6 +3273,10 @@ __all__ = (
     "PostCustomerRegisterBody",
     "PostCustomerResolveBody",
     "PostCustomerRevokeBody",
+    "PostCustomerTransferBody",
+    "PostCustomerTransferResponse200",
+    "PostCustomerTransferResponse200ConflictsItem",
+    "PostCustomerTransferResponse200Moved",
     "PostDiscussionTopicsBody",
     "PostDiscussionTopicsIdPostsBody",
     "PostDocumentBlocksBody",
@@ -3503,6 +3559,7 @@ __all__ = (
     "PostSystemAuditEventsBody",
     "PostSystemAuditEventsResponse201",
     "PostSystemFeatureFlagsBody",
+    "PostSystemReservedIdentifiersReleaseBody",
     "PostSystemServerBagBody",
     "PostTeamMembersBody",
     "PostTeamMembersPersonasBody",
@@ -3567,14 +3624,14 @@ __all__ = (
     "ProjectTemplateBodyStatusesItemCategory",
     "ProjectTemplateKind",
     "ProjectTemplateOwnerKind",
-    "ProviderConnectionSpecType0Auth",
-    "ProviderConnectionSpecType0AuthScheme",
-    "ProviderConnectionSpecType0AuthType",
-    "ProviderConnectionSpecType0DefaultQuery",
-    "ProviderConnectionSpecType0ExtraHeaders",
-    "ProviderConnectionSpecType0HeaderVarsItem",
+    "ProviderConnectionAuth",
+    "ProviderConnectionAuthScheme",
+    "ProviderConnectionAuthType",
+    "ProviderConnectionHeaderVar",
+    "ProviderConnectionSpecType0",
     "ProviderConnectionSpecType0SpecVersion",
-    "ProviderConnectionSpecType0UrlVarsItem",
+    "ProviderConnectionStringMap",
+    "ProviderConnectionUrlVar",
     "ProviderTemplate",
     "ProviderTemplateList",
     "ProviderTemplateModalitiesType0Item",
@@ -3627,6 +3684,7 @@ __all__ = (
     "PublicSocialLink",
     "PublicUserProfile",
     "PublicUserSearchHit",
+    "PublicUserSearchHitKind",
     "PutAccessAssignmentsBody",
     "PutAccessAssignmentsBodySubjectKind",
     "PutAccessPersonasIdUserToolsBody",
@@ -3645,6 +3703,8 @@ __all__ = (
     "PutAudienceTemplatesIdResponse200",
     "PutAuthEcosystemsEcosystemIdAdminNotesResponse200",
     "PutAuthUserMethodsIdBody",
+    "PutBillingOffersIdBody",
+    "PutBillingOffersIdResponse200",
     "PutBillingSubscriptionTiersIdBody",
     "PutBillingSubscriptionTiersIdResponse200",
     "PutBillingSubscriptionsIdBody",
@@ -3927,6 +3987,11 @@ __all__ = (
     "RegistrySubmissionPolicy",
     "RegistryUserActablePersona",
     "RegistryVisibility",
+    "ReleaseResult",
+    "ReleaseResultReason",
+    "ReservedIdentifier",
+    "ReservedIdentifierPage",
+    "ReservedIdentifierReason",
     "RotateKeyResult",
     "SearchDiscussionPostResult",
     "SearchDiscussionTopicResult",
@@ -3945,6 +4010,8 @@ __all__ = (
     "StoragePresignedUpload",
     "StorageQuotaExceeded",
     "StringList",
+    "StripeWebhookEvent",
+    "StripeWebhookEventData",
     "SubjectSheet",
     "SubjectSheetBadgesItem",
     "SubjectSheetStats",
@@ -3992,6 +4059,7 @@ __all__ = (
     "UsageSummaryRowScope",
     "User",
     "UserBlock",
+    "UserProfileVisibility",
     "WorkItem",
     "WorkItemAssigneeKindType1",
     "WorkItemAssigneeKindType2Type1",

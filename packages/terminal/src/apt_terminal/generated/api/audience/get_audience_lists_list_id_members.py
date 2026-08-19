@@ -15,6 +15,7 @@ from ...types import Response
 def _get_kwargs(
     list_id: str,
 ) -> dict[str, Any]:
+
     _kwargs: dict[str, Any] = {
         "method": "get",
         "url": f"/audience/lists/{list_id}/members",

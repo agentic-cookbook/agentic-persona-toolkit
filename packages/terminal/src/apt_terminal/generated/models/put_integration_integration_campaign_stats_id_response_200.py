@@ -106,40 +106,40 @@ class PutIntegrationIntegrationCampaignStatsIdResponse200:
 
         external_id = self.external_id
 
-        name: None | str
+        name: str | None
         name = self.name
 
-        subject: None | str
+        subject: str | None
         subject = self.subject
 
-        status: None | str
+        status: str | None
         status = self.status
 
-        sent_at: None | str
+        sent_at: str | None
         sent_at = self.sent_at
 
-        recipients: None | int
+        recipients: int | None
         recipients = self.recipients
 
-        opens: None | int
+        opens: int | None
         opens = self.opens
 
-        unique_opens: None | int
+        unique_opens: int | None
         unique_opens = self.unique_opens
 
-        clicks: None | int
+        clicks: int | None
         clicks = self.clicks
 
-        unique_clicks: None | int
+        unique_clicks: int | None
         unique_clicks = self.unique_clicks
 
-        bounces: None | int
+        bounces: int | None
         bounces = self.bounces
 
-        unsubscribes: None | int
+        unsubscribes: int | None
         unsubscribes = self.unsubscribes
 
-        raw: None | bool | dict[str, Any] | float | list[Any] | str
+        raw: bool | dict[str, Any] | float | list[Any] | str | None
         if isinstance(self.raw, PutIntegrationIntegrationCampaignStatsIdResponse200RawType0Type1):
             raw = self.raw.to_dict()
         elif isinstance(self.raw, list):
@@ -150,7 +150,7 @@ class PutIntegrationIntegrationCampaignStatsIdResponse200:
 
         is_deleted = self.is_deleted
 
-        deleted_at: None | str
+        deleted_at: str | None
         deleted_at = self.deleted_at
 
         created_at = self.created_at
@@ -159,7 +159,7 @@ class PutIntegrationIntegrationCampaignStatsIdResponse200:
 
         sync_version = self.sync_version
 
-        sync_stamped_at: None | str
+        sync_stamped_at: str | None
         sync_stamped_at = self.sync_stamped_at
 
         sync_txid = self.sync_txid

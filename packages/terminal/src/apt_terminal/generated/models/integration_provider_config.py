@@ -67,14 +67,14 @@ class IntegrationProviderConfig:
 
         name = self.name
 
-        rdid: None | str
+        rdid: str | None
         rdid = self.rdid
 
         config = self.config.to_dict()
 
         has_secret = self.has_secret
 
-        updated_by: None | Unset | str
+        updated_by: Unset | str | None
         if isinstance(self.updated_by, Unset):
             updated_by = UNSET
         else:
@@ -84,7 +84,7 @@ class IntegrationProviderConfig:
 
         updated_at = self.updated_at
 
-        deliverability_webhook: None | Unset | dict[str, Any]
+        deliverability_webhook: Unset | dict[str, Any] | None
         if isinstance(self.deliverability_webhook, Unset):
             deliverability_webhook = UNSET
         elif isinstance(

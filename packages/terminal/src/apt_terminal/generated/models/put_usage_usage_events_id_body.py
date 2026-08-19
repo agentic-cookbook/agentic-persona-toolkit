@@ -38,7 +38,7 @@ class PutUsageUsageEventsIdBody:
 
         principal_id = self.principal_id
 
-        ecosystem_id: None | Unset | str
+        ecosystem_id: Unset | str | None
         if isinstance(self.ecosystem_id, Unset):
             ecosystem_id = UNSET
         else:

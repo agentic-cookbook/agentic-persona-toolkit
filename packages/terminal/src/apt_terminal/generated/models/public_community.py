@@ -36,7 +36,7 @@ class PublicCommunity:
 
         is_public = self.is_public
 
-        description: None | Unset | str
+        description: Unset | str | None
         if isinstance(self.description, Unset):
             description = UNSET
         else:

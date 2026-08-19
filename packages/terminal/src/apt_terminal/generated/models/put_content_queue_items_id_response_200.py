@@ -62,12 +62,12 @@ class PutContentQueueItemsIdResponse200:
 
         customer_id = self.customer_id
 
-        deleted_at: None | str
+        deleted_at: str | None
         deleted_at = self.deleted_at
 
         queue_id = self.queue_id
 
-        payload: None | bool | dict[str, Any] | float | list[Any] | str
+        payload: bool | dict[str, Any] | float | list[Any] | str | None
         if isinstance(self.payload, PutContentQueueItemsIdResponse200PayloadType1):
             payload = self.payload.to_dict()
         elif isinstance(self.payload, list):
@@ -80,20 +80,20 @@ class PutContentQueueItemsIdResponse200:
 
         enqueued_at = self.enqueued_at
 
-        dequeued_at: None | str
+        dequeued_at: str | None
         dequeued_at = self.dequeued_at
 
-        acked_at: None | str
+        acked_at: str | None
         acked_at = self.acked_at
 
-        nacked_at: None | str
+        nacked_at: str | None
         nacked_at = self.nacked_at
 
         updated_at = self.updated_at
 
         sync_version = self.sync_version
 
-        sync_stamped_at: None | str
+        sync_stamped_at: str | None
         sync_stamped_at = self.sync_stamped_at
 
         sync_txid = self.sync_txid

@@ -14,6 +14,7 @@ def _get_kwargs(
     subject_type: str,
     subject_id: str,
 ) -> dict[str, Any]:
+
     _kwargs: dict[str, Any] = {
         "method": "get",
         "url": f"/gamification/subjects/{subject_type}/{subject_id}",

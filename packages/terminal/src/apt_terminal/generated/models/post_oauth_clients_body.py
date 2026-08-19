@@ -38,7 +38,7 @@ class PostOauthClientsBody:
         if not isinstance(self.allowed_return_origins, Unset):
             allowed_return_origins = self.allowed_return_origins
 
-        jwt_audience: None | Unset | str
+        jwt_audience: Unset | str | None
         if isinstance(self.jwt_audience, Unset):
             jwt_audience = UNSET
         else:

@@ -44,7 +44,7 @@ class PutBucketBucketsIdBody:
 
         ecosystem_id = self.ecosystem_id
 
-        parent_id: None | Unset | str
+        parent_id: Unset | str | None
         if isinstance(self.parent_id, Unset):
             parent_id = UNSET
         else:
@@ -56,7 +56,7 @@ class PutBucketBucketsIdBody:
 
         kind = self.kind
 
-        metadata: None | Unset | bool | dict[str, Any] | float | list[Any] | str
+        metadata: Unset | bool | dict[str, Any] | float | list[Any] | str | None
         if isinstance(self.metadata, Unset):
             metadata = UNSET
         elif isinstance(self.metadata, PutBucketBucketsIdBodyMetadataType0Type1):

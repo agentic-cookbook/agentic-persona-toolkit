@@ -52,7 +52,7 @@ class PostEcosystemEcosystemsBody:
 
         region = self.region
 
-        dedicated_db_connection_id: None | Unset | str
+        dedicated_db_connection_id: Unset | str | None
         if isinstance(self.dedicated_db_connection_id, Unset):
             dedicated_db_connection_id = UNSET
         else:
@@ -64,19 +64,19 @@ class PostEcosystemEcosystemsBody:
 
         is_infrastructure = self.is_infrastructure
 
-        namespace_id: None | Unset | str
+        namespace_id: Unset | str | None
         if isinstance(self.namespace_id, Unset):
             namespace_id = UNSET
         else:
             namespace_id = self.namespace_id
 
-        parent_id: None | Unset | str
+        parent_id: Unset | str | None
         if isinstance(self.parent_id, Unset):
             parent_id = UNSET
         else:
             parent_id = self.parent_id
 
-        archived_at: None | Unset | str
+        archived_at: Unset | str | None
         if isinstance(self.archived_at, Unset):
             archived_at = UNSET
         else:

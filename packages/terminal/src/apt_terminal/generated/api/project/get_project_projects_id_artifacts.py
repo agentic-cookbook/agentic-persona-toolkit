@@ -20,6 +20,7 @@ def _get_kwargs(
     *,
     direction: Unset | GetProjectProjectsIdArtifactsDirection = UNSET,
 ) -> dict[str, Any]:
+
     params: dict[str, Any] = {}
 
     json_direction: Unset | str = UNSET

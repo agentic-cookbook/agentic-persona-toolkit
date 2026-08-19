@@ -32,13 +32,13 @@ class PostOwnershipTransferResponse200:
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        id: None | Unset | str
+        id: Unset | str | None
         if isinstance(self.id, Unset):
             id = UNSET
         else:
             id = self.id
 
-        previous_id: None | Unset | str
+        previous_id: Unset | str | None
         if isinstance(self.previous_id, Unset):
             previous_id = UNSET
         else:

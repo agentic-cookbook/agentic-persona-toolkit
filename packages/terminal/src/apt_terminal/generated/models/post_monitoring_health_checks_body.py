@@ -34,19 +34,19 @@ class PostMonitoringHealthChecksBody:
 
         checked_at = self.checked_at
 
-        response_time_ms: None | Unset | int
+        response_time_ms: Unset | int | None
         if isinstance(self.response_time_ms, Unset):
             response_time_ms = UNSET
         else:
             response_time_ms = self.response_time_ms
 
-        status_code: None | Unset | int
+        status_code: Unset | int | None
         if isinstance(self.status_code, Unset):
             status_code = UNSET
         else:
             status_code = self.status_code
 
-        error_message: None | Unset | str
+        error_message: Unset | str | None
         if isinstance(self.error_message, Unset):
             error_message = UNSET
         else:

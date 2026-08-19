@@ -38,7 +38,7 @@ class PostBillingSubscriptionsBody:
 
         source = self.source
 
-        expires_at: None | Unset | str
+        expires_at: Unset | str | None
         if isinstance(self.expires_at, Unset):
             expires_at = UNSET
         else:

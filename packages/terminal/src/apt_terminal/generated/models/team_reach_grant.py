@@ -44,19 +44,19 @@ class TeamReachGrant:
 
         granted_at = self.granted_at
 
-        granted_by: None | Unset | str
+        granted_by: Unset | str | None
         if isinstance(self.granted_by, Unset):
             granted_by = UNSET
         else:
             granted_by = self.granted_by
 
-        team_name: None | Unset | str
+        team_name: Unset | str | None
         if isinstance(self.team_name, Unset):
             team_name = UNSET
         else:
             team_name = self.team_name
 
-        team_slug: None | Unset | str
+        team_slug: Unset | str | None
         if isinstance(self.team_slug, Unset):
             team_slug = UNSET
         else:

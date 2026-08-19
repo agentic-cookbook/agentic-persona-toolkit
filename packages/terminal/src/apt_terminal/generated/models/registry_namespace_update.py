@@ -24,10 +24,10 @@ class RegistryNamespaceUpdate:
     def to_dict(self) -> dict[str, Any]:
         id = self.id
 
-        slug: None | str
+        slug: str | None
         slug = self.slug
 
-        name: None | str
+        name: str | None
         name = self.name
 
         field_dict: dict[str, Any] = {}

@@ -38,7 +38,7 @@ class CatalogSyncRun:
 
         ok = self.ok
 
-        detail: None | Unset | dict[str, Any]
+        detail: Unset | dict[str, Any] | None
         if isinstance(self.detail, Unset):
             detail = UNSET
         elif isinstance(self.detail, CatalogSyncRunDetailType0):

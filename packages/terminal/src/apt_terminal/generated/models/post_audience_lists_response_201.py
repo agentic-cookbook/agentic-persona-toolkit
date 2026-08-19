@@ -54,27 +54,27 @@ class PostAudienceListsResponse201:
 
         owner_id = self.owner_id
 
-        created_by: None | str
+        created_by: str | None
         created_by = self.created_by
 
         name = self.name
 
         slug = self.slug
 
-        description: None | str
+        description: str | None
         description = self.description
 
         public_key = self.public_key
 
         status = self.status
 
-        welcome_template_id: None | str
+        welcome_template_id: str | None
         welcome_template_id = self.welcome_template_id
 
-        welcome_back_template_id: None | str
+        welcome_back_template_id: str | None
         welcome_back_template_id = self.welcome_back_template_id
 
-        from_name: None | str
+        from_name: str | None
         from_name = self.from_name
 
         is_deleted = self.is_deleted

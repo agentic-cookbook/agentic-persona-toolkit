@@ -50,7 +50,7 @@ class PostUsageUsageEventsBody:
 
         occurred_at = self.occurred_at
 
-        ecosystem_id: None | Unset | str
+        ecosystem_id: Unset | str | None
         if isinstance(self.ecosystem_id, Unset):
             ecosystem_id = UNSET
         else:

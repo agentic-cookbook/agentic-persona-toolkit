@@ -55,7 +55,7 @@ class AccessAssignment:
 
         role_name = self.role_name
 
-        granted_by: None | Unset | str
+        granted_by: Unset | str | None
         if isinstance(self.granted_by, Unset):
             granted_by = UNSET
         else:

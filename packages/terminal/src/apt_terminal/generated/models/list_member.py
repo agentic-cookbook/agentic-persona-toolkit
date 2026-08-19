@@ -53,10 +53,10 @@ class ListMember:
 
         contact_id = self.contact_id
 
-        email: None | str
+        email: str | None
         email = self.email
 
-        name: None | str
+        name: str | None
         name = self.name
 
         delivery_status = self.delivery_status.value
@@ -65,15 +65,15 @@ class ListMember:
 
         status = self.status.value
 
-        consent_source_url: None | str
+        consent_source_url: str | None
         consent_source_url = self.consent_source_url
 
         consent_at = self.consent_at
 
-        unsubscribed_at: None | str
+        unsubscribed_at: str | None
         unsubscribed_at = self.unsubscribed_at
 
-        resubscribed_at: None | str
+        resubscribed_at: str | None
         resubscribed_at = self.resubscribed_at
 
         unsubscribe_count = self.unsubscribe_count

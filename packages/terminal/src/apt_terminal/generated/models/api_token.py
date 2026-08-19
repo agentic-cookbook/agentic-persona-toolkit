@@ -41,13 +41,13 @@ class ApiToken:
 
         created_at = self.created_at
 
-        expires_at: None | str
+        expires_at: str | None
         expires_at = self.expires_at
 
-        last_used_at: None | str
+        last_used_at: str | None
         last_used_at = self.last_used_at
 
-        scope: None | Unset | list[str]
+        scope: Unset | list[str] | None
         if isinstance(self.scope, Unset):
             scope = UNSET
         elif isinstance(self.scope, list):

@@ -84,7 +84,7 @@ class PublicRegistryEntryDetail:
 
         summary = self.summary
 
-        photo_attachment_id: None | str
+        photo_attachment_id: str | None
         photo_attachment_id = self.photo_attachment_id
 
         provider_type = self.provider_type.value
@@ -99,7 +99,7 @@ class PublicRegistryEntryDetail:
 
         region_code = self.region_code
 
-        geo: None | dict[str, Any]
+        geo: dict[str, Any] | None
         if isinstance(self.geo, PublicRegistryEntryDetailGeoType0):
             geo = self.geo.to_dict()
         else:

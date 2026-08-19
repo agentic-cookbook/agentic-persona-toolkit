@@ -29,7 +29,7 @@ class MarkdownCategoryNode:
 
         name = self.name
 
-        parent_id: None | str
+        parent_id: str | None
         parent_id = self.parent_id
 
         sort_order = self.sort_order

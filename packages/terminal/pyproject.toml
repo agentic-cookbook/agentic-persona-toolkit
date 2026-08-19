@@ -23,7 +23,20 @@ dev = [
     "pytest>=8.0",
     "pytest-cov>=5.0",
     "respx>=0.21",
-    "ruff>=0.5",
+    # Pinned for the SAME reason the generator below is, and it took a 1,342-file diff to
+    # notice: ruff is not merely this package's linter, it is the last stage of code
+    # GENERATION. `openapi-python-client-config.yaml` runs `ruff check --fix` and
+    # `ruff format .` as post-hooks, so the committed tree under
+    # `src/apt_terminal/generated/` is ruff's output, not the generator's. A range let two
+    # regenerations on two machines disagree about it: 0.13.3 kept a blank line after a
+    # function signature that an earlier ruff removed, and rewrote 900-odd `None | str`
+    # unions to `str | None`. Nothing about that is wrong — and none of it is reviewable
+    # either, because it buries the handful of lines a route change actually produced.
+    #
+    # Bump it deliberately and regenerate in the same commit, exactly as for the generator.
+    # `--exit-zero` on the check hook stays regardless: it defends against a new ruff RULE
+    # failing generation, which is a different failure from this one.
+    "ruff==0.13.3",
     "mypy>=1.10",
     # Pinned (like the swift generator's --branch pin) so `pnpm gen` is reproducible:
     # an unpinned range reformats the whole generated tree whenever the installed

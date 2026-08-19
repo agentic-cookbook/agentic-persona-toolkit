@@ -77,7 +77,7 @@ class GetPersonaMemoryMemoriesResponse200Item:
 
         customer_id = self.customer_id
 
-        deleted_at: None | str
+        deleted_at: str | None
         deleted_at = self.deleted_at
 
         persona_id = str(self.persona_id)
@@ -92,15 +92,15 @@ class GetPersonaMemoryMemoriesResponse200Item:
 
         body = self.body
 
-        subject_table: None | str
+        subject_table: str | None
         subject_table = self.subject_table
 
-        subject_id: None | str
+        subject_id: str | None
         subject_id = self.subject_id
 
         status = self.status
 
-        supersedes_id: None | str
+        supersedes_id: str | None
         supersedes_id = self.supersedes_id
 
         source = self.source
@@ -109,25 +109,25 @@ class GetPersonaMemoryMemoriesResponse200Item:
 
         tags = self.tags
 
-        valid_from: None | str
+        valid_from: str | None
         valid_from = self.valid_from
 
-        valid_to: None | str
+        valid_to: str | None
         valid_to = self.valid_to
 
         recall_count = self.recall_count
 
-        last_recalled_at: None | str
+        last_recalled_at: str | None
         last_recalled_at = self.last_recalled_at
 
-        embedding: None | list[float]
+        embedding: list[float] | None
         if isinstance(self.embedding, list):
             embedding = self.embedding
 
         else:
             embedding = self.embedding
 
-        embedding_model: None | str
+        embedding_model: str | None
         embedding_model = self.embedding_model
 
         created_at = self.created_at
@@ -136,7 +136,7 @@ class GetPersonaMemoryMemoriesResponse200Item:
 
         sync_version = self.sync_version
 
-        sync_stamped_at: None | str
+        sync_stamped_at: str | None
         sync_stamped_at = self.sync_stamped_at
 
         sync_txid = self.sync_txid

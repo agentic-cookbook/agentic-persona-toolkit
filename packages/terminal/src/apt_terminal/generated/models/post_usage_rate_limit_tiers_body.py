@@ -52,25 +52,25 @@ class PostUsageRateLimitTiersBody:
 
         rate_refill_seconds = self.rate_refill_seconds
 
-        quota_requests: None | Unset | int
+        quota_requests: Unset | int | None
         if isinstance(self.quota_requests, Unset):
             quota_requests = UNSET
         else:
             quota_requests = self.quota_requests
 
-        quota_bytes: None | Unset | int
+        quota_bytes: Unset | int | None
         if isinstance(self.quota_bytes, Unset):
             quota_bytes = UNSET
         else:
             quota_bytes = self.quota_bytes
 
-        quota_tokens: None | Unset | int
+        quota_tokens: Unset | int | None
         if isinstance(self.quota_tokens, Unset):
             quota_tokens = UNSET
         else:
             quota_tokens = self.quota_tokens
 
-        quota_cost_micros: None | Unset | int
+        quota_cost_micros: Unset | int | None
         if isinstance(self.quota_cost_micros, Unset):
             quota_cost_micros = UNSET
         else:

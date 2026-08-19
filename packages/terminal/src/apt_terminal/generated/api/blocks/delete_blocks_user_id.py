@@ -12,6 +12,7 @@ from ...types import Response
 def _get_kwargs(
     user_id: str,
 ) -> dict[str, Any]:
+
     _kwargs: dict[str, Any] = {
         "method": "delete",
         "url": f"/blocks/{user_id}",

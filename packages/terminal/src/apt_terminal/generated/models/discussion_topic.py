@@ -79,37 +79,37 @@ class DiscussionTopic:
 
         customer_id = self.customer_id
 
-        category_id: None | Unset | str
+        category_id: Unset | str | None
         if isinstance(self.category_id, Unset):
             category_id = UNSET
         else:
             category_id = self.category_id
 
-        answered_post_id: None | Unset | str
+        answered_post_id: Unset | str | None
         if isinstance(self.answered_post_id, Unset):
             answered_post_id = UNSET
         else:
             answered_post_id = self.answered_post_id
 
-        excerpt: None | Unset | str
+        excerpt: Unset | str | None
         if isinstance(self.excerpt, Unset):
             excerpt = UNSET
         else:
             excerpt = self.excerpt
 
-        author_name: None | Unset | str
+        author_name: Unset | str | None
         if isinstance(self.author_name, Unset):
             author_name = UNSET
         else:
             author_name = self.author_name
 
-        author_slug: None | Unset | str
+        author_slug: Unset | str | None
         if isinstance(self.author_slug, Unset):
             author_slug = UNSET
         else:
             author_slug = self.author_slug
 
-        author_avatar_url: None | Unset | str
+        author_avatar_url: Unset | str | None
         if isinstance(self.author_avatar_url, Unset):
             author_avatar_url = UNSET
         else:

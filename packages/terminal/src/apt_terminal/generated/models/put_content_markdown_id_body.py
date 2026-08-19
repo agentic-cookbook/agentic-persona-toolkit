@@ -36,7 +36,7 @@ class PutContentMarkdownIdBody:
     def to_dict(self) -> dict[str, Any]:
         content = self.content
 
-        category: None | Unset | str
+        category: Unset | str | None
         if isinstance(self.category, Unset):
             category = UNSET
         else:

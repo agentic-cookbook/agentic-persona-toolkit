@@ -52,12 +52,12 @@ class PutContentEventsIdResponse200:
 
         customer_id = self.customer_id
 
-        deleted_at: None | str
+        deleted_at: str | None
         deleted_at = self.deleted_at
 
         type_ = self.type_
 
-        payload: None | bool | dict[str, Any] | float | list[Any] | str
+        payload: bool | dict[str, Any] | float | list[Any] | str | None
         if isinstance(self.payload, PutContentEventsIdResponse200PayloadType1):
             payload = self.payload.to_dict()
         elif isinstance(self.payload, list):
@@ -72,7 +72,7 @@ class PutContentEventsIdResponse200:
 
         sync_version = self.sync_version
 
-        sync_stamped_at: None | str
+        sync_stamped_at: str | None
         sync_stamped_at = self.sync_stamped_at
 
         sync_txid = self.sync_txid

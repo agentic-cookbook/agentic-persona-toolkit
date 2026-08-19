@@ -52,7 +52,7 @@ class RegistryAgentMcpServer:
 
         updated_at = self.updated_at
 
-        created_by: None | Unset | str
+        created_by: Unset | str | None
         if isinstance(self.created_by, Unset):
             created_by = UNSET
         else:

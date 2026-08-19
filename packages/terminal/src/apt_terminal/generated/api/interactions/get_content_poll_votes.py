@@ -14,6 +14,7 @@ def _get_kwargs(
     *,
     poll_id: str,
 ) -> dict[str, Any]:
+
     params: dict[str, Any] = {}
 
     params["pollId"] = poll_id

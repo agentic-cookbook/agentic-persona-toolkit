@@ -34,7 +34,7 @@ class PublicOrgProfile:
 
         display_name = self.display_name
 
-        description: None | str
+        description: str | None
         description = self.description
 
         created_at = self.created_at

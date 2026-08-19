@@ -50,7 +50,7 @@ class PutGamificationRealmsEcosystemIdConfigBody:
         if not isinstance(self.surfaces, Unset):
             surfaces = self.surfaces.to_dict()
 
-        seasons: None | Unset | dict[str, Any]
+        seasons: Unset | dict[str, Any] | None
         if isinstance(self.seasons, Unset):
             seasons = UNSET
         elif isinstance(self.seasons, GamificationSeasonsType0):

@@ -37,7 +37,7 @@ class IntegrationActionResult:
 
         action_log_id = self.action_log_id
 
-        external_id: None | str
+        external_id: str | None
         external_id = self.external_id
 
         deduped = self.deduped

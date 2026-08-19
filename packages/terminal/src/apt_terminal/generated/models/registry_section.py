@@ -60,7 +60,7 @@ class RegistrySection:
 
         sync_version = self.sync_version
 
-        deleted_at: None | Unset | str
+        deleted_at: Unset | str | None
         if isinstance(self.deleted_at, Unset):
             deleted_at = UNSET
         else:

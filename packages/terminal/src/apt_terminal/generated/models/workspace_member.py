@@ -34,13 +34,13 @@ class WorkspaceMember:
 
         added_at = self.added_at
 
-        email: None | Unset | str
+        email: Unset | str | None
         if isinstance(self.email, Unset):
             email = UNSET
         else:
             email = self.email
 
-        display_name: None | Unset | str
+        display_name: Unset | str | None
         if isinstance(self.display_name, Unset):
             display_name = UNSET
         else:

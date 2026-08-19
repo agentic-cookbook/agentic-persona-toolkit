@@ -85,10 +85,10 @@ class PostIntegrationIntegrationAudiencesResponse201:
 
         name = self.name
 
-        member_count: None | int
+        member_count: int | None
         member_count = self.member_count
 
-        raw: None | bool | dict[str, Any] | float | list[Any] | str
+        raw: bool | dict[str, Any] | float | list[Any] | str | None
         if isinstance(self.raw, PostIntegrationIntegrationAudiencesResponse201RawType0Type1):
             raw = self.raw.to_dict()
         elif isinstance(self.raw, list):
@@ -99,7 +99,7 @@ class PostIntegrationIntegrationAudiencesResponse201:
 
         is_deleted = self.is_deleted
 
-        deleted_at: None | str
+        deleted_at: str | None
         deleted_at = self.deleted_at
 
         created_at = self.created_at
@@ -108,7 +108,7 @@ class PostIntegrationIntegrationAudiencesResponse201:
 
         sync_version = self.sync_version
 
-        sync_stamped_at: None | str
+        sync_stamped_at: str | None
         sync_stamped_at = self.sync_stamped_at
 
         sync_txid = self.sync_txid

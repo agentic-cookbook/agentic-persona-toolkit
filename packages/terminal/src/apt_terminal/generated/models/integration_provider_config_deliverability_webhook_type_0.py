@@ -30,7 +30,7 @@ class IntegrationProviderConfigDeliverabilityWebhookType0:
 
         secret_header = self.secret_header
 
-        secret: None | str
+        secret: str | None
         secret = self.secret
 
         instruction = self.instruction

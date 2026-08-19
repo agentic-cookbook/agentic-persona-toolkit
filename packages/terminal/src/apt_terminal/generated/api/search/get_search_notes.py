@@ -14,6 +14,7 @@ def _get_kwargs(
     *,
     q: str,
 ) -> dict[str, Any]:
+
     params: dict[str, Any] = {}
 
     params["q"] = q

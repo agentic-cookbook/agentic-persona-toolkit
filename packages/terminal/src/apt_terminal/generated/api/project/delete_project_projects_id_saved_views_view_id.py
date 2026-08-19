@@ -13,6 +13,7 @@ def _get_kwargs(
     id: str,
     view_id: str,
 ) -> dict[str, Any]:
+
     _kwargs: dict[str, Any] = {
         "method": "delete",
         "url": f"/project/projects/{id}/saved-views/{view_id}",

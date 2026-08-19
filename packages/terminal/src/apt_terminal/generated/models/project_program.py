@@ -74,25 +74,25 @@ class ProjectProgram:
 
         customer_id = self.customer_id
 
-        start_date: None | Unset | str
+        start_date: Unset | str | None
         if isinstance(self.start_date, Unset):
             start_date = UNSET
         else:
             start_date = self.start_date
 
-        target_date: None | Unset | str
+        target_date: Unset | str | None
         if isinstance(self.target_date, Unset):
             target_date = UNSET
         else:
             target_date = self.target_date
 
-        created_by: None | Unset | str
+        created_by: Unset | str | None
         if isinstance(self.created_by, Unset):
             created_by = UNSET
         else:
             created_by = self.created_by
 
-        deleted_at: None | Unset | str
+        deleted_at: Unset | str | None
         if isinstance(self.deleted_at, Unset):
             deleted_at = UNSET
         else:

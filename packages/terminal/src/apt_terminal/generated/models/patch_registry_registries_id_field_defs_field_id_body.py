@@ -65,7 +65,7 @@ class PatchRegistryRegistriesIdFieldDefsFieldIdBody:
         if not isinstance(self.visibility, Unset):
             visibility = self.visibility.value
 
-        show_if: None | Unset | dict[str, Any]
+        show_if: Unset | dict[str, Any] | None
         if isinstance(self.show_if, Unset):
             show_if = UNSET
         elif isinstance(self.show_if, PatchRegistryRegistriesIdFieldDefsFieldIdBodyShowIfType0):

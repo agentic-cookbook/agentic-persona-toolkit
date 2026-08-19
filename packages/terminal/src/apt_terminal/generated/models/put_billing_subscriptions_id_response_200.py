@@ -50,10 +50,10 @@ class PutBillingSubscriptionsIdResponse200:
 
         started_at = self.started_at
 
-        expires_at: None | str
+        expires_at: str | None
         expires_at = self.expires_at
 
-        assigned_by: None | str
+        assigned_by: str | None
         assigned_by = self.assigned_by
 
         created_at = self.created_at

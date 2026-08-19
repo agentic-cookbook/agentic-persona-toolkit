@@ -29,7 +29,7 @@ class PostProjectProjectsIdMilestonesBody:
 
         description = self.description
 
-        target_date: None | Unset | str
+        target_date: Unset | str | None
         if isinstance(self.target_date, Unset):
             target_date = UNSET
         else:

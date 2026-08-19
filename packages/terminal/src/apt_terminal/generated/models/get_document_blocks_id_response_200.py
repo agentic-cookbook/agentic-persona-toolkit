@@ -52,7 +52,7 @@ class GetDocumentBlocksIdResponse200:
 
         customer_id = self.customer_id
 
-        deleted_at: None | str
+        deleted_at: str | None
         deleted_at = self.deleted_at
 
         ecosystem_id = self.ecosystem_id
@@ -71,12 +71,12 @@ class GetDocumentBlocksIdResponse200:
 
         is_deleted = self.is_deleted
 
-        last_op_id: None | str
+        last_op_id: str | None
         last_op_id = self.last_op_id
 
         sync_version = self.sync_version
 
-        sync_stamped_at: None | str
+        sync_stamped_at: str | None
         sync_stamped_at = self.sync_stamped_at
 
         sync_txid = self.sync_txid

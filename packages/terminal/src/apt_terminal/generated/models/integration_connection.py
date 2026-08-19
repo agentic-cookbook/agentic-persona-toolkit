@@ -69,19 +69,19 @@ class IntegrationConnection:
 
         created_at = self.created_at
 
-        last_sync_at: None | Unset | str
+        last_sync_at: Unset | str | None
         if isinstance(self.last_sync_at, Unset):
             last_sync_at = UNSET
         else:
             last_sync_at = self.last_sync_at
 
-        last_error: None | Unset | str
+        last_error: Unset | str | None
         if isinstance(self.last_error, Unset):
             last_error = UNSET
         else:
             last_error = self.last_error
 
-        sync_settings: None | Unset | dict[str, Any]
+        sync_settings: Unset | dict[str, Any] | None
         if isinstance(self.sync_settings, Unset):
             sync_settings = UNSET
         elif isinstance(self.sync_settings, IntegrationConnectionSyncSettingsType0):

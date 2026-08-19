@@ -86,13 +86,13 @@ class GamificationRealmBadge:
 
         point_value = self.point_value
 
-        stat_key: None | Unset | str
+        stat_key: Unset | str | None
         if isinstance(self.stat_key, Unset):
             stat_key = UNSET
         else:
             stat_key = self.stat_key
 
-        comparator: None | Unset | str
+        comparator: Unset | str | None
         if isinstance(self.comparator, Unset):
             comparator = UNSET
         elif (
@@ -104,19 +104,19 @@ class GamificationRealmBadge:
         else:
             comparator = self.comparator
 
-        threshold: None | Unset | int
+        threshold: Unset | int | None
         if isinstance(self.threshold, Unset):
             threshold = UNSET
         else:
             threshold = self.threshold
 
-        badge_line: None | Unset | str
+        badge_line: Unset | str | None
         if isinstance(self.badge_line, Unset):
             badge_line = UNSET
         else:
             badge_line = self.badge_line
 
-        tier: None | Unset | str
+        tier: Unset | str | None
         if isinstance(self.tier, Unset):
             tier = UNSET
         elif (
@@ -132,13 +132,13 @@ class GamificationRealmBadge:
 
         active = self.active
 
-        subject_type: None | Unset | str
+        subject_type: Unset | str | None
         if isinstance(self.subject_type, Unset):
             subject_type = UNSET
         else:
             subject_type = self.subject_type
 
-        ecosystem_id: None | Unset | str
+        ecosystem_id: Unset | str | None
         if isinstance(self.ecosystem_id, Unset):
             ecosystem_id = UNSET
         else:

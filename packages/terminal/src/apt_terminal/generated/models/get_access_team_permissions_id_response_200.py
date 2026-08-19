@@ -34,7 +34,7 @@ class GetAccessTeamPermissionsIdResponse200:
 
         permission = self.permission
 
-        granted_by: None | str
+        granted_by: str | None
         granted_by = self.granted_by
 
         granted_at = self.granted_at

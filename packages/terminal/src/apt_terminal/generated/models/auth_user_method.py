@@ -36,7 +36,7 @@ class AuthUserMethod:
 
         provider = self.provider
 
-        provider_id: None | str
+        provider_id: str | None
         provider_id = self.provider_id
 
         has_credential = self.has_credential

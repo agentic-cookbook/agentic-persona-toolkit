@@ -40,7 +40,7 @@ class CommunityMember:
 
         updated_at = self.updated_at
 
-        bio: None | Unset | str
+        bio: Unset | str | None
         if isinstance(self.bio, Unset):
             bio = UNSET
         else:

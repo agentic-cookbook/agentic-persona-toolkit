@@ -16,6 +16,7 @@ def _get_kwargs(
     slug: Unset | str = UNSET,
     depth: Unset | str = UNSET,
 ) -> dict[str, Any]:
+
     params: dict[str, Any] = {}
 
     params["game_id"] = game_id

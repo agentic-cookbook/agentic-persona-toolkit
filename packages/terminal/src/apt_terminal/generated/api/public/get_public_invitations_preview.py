@@ -13,6 +13,7 @@ def _get_kwargs(
     *,
     token: str,
 ) -> dict[str, Any]:
+
     params: dict[str, Any] = {}
 
     params["token"] = token

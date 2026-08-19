@@ -61,25 +61,25 @@ class ProviderTemplate:
 
         base_url = self.base_url
 
-        documentation_url: None | str
+        documentation_url: str | None
         documentation_url = self.documentation_url
 
-        status_url: None | str
+        status_url: str | None
         status_url = self.status_url
 
-        connection_spec: None | dict[str, Any]
+        connection_spec: dict[str, Any] | None
         if isinstance(self.connection_spec, ProviderConnectionSpecType0):
             connection_spec = self.connection_spec.to_dict()
         else:
             connection_spec = self.connection_spec
 
-        available_via: None | dict[str, Any]
+        available_via: dict[str, Any] | None
         if isinstance(self.available_via, TemplateAvailableViaType0):
             available_via = self.available_via.to_dict()
         else:
             available_via = self.available_via
 
-        modalities: None | list[str]
+        modalities: list[str] | None
         if isinstance(self.modalities, list):
             modalities = []
             for modalities_type_0_item_data in self.modalities:

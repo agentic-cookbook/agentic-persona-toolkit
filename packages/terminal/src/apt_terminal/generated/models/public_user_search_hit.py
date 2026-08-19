@@ -4,6 +4,8 @@ from typing import Any, TypeVar, cast
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
+from ..models.public_user_search_hit_kind import PublicUserSearchHitKind
+
 T = TypeVar("T", bound="PublicUserSearchHit")
 
 
@@ -14,21 +16,25 @@ class PublicUserSearchHit:
         slug (str):
         display_name (Union[None, str]):
         avatar_url (Union[None, str]):
+        kind (PublicUserSearchHitKind):
     """
 
     slug: str
     display_name: None | str
     avatar_url: None | str
+    kind: PublicUserSearchHitKind
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         slug = self.slug
 
-        display_name: None | str
+        display_name: str | None
         display_name = self.display_name
 
-        avatar_url: None | str
+        avatar_url: str | None
         avatar_url = self.avatar_url
+
+        kind = self.kind.value
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
@@ -37,6 +43,7 @@ class PublicUserSearchHit:
                 "slug": slug,
                 "displayName": display_name,
                 "avatarUrl": avatar_url,
+                "kind": kind,
             }
         )
 
@@ -61,10 +68,13 @@ class PublicUserSearchHit:
 
         avatar_url = _parse_avatar_url(d.pop("avatarUrl"))
 
+        kind = PublicUserSearchHitKind(d.pop("kind"))
+
         public_user_search_hit = cls(
             slug=slug,
             display_name=display_name,
             avatar_url=avatar_url,
+            kind=kind,
         )
 
         public_user_search_hit.additional_properties = d

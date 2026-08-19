@@ -50,25 +50,25 @@ class PostIntegrationIntegrationPagesBody:
 
         title = self.title
 
-        url: None | Unset | str
+        url: Unset | str | None
         if isinstance(self.url, Unset):
             url = UNSET
         else:
             url = self.url
 
-        icon: None | Unset | str
+        icon: Unset | str | None
         if isinstance(self.icon, Unset):
             icon = UNSET
         else:
             icon = self.icon
 
-        parent_type: None | Unset | str
+        parent_type: Unset | str | None
         if isinstance(self.parent_type, Unset):
             parent_type = UNSET
         else:
             parent_type = self.parent_type
 
-        parent_id: None | Unset | str
+        parent_id: Unset | str | None
         if isinstance(self.parent_id, Unset):
             parent_id = UNSET
         else:
@@ -76,7 +76,7 @@ class PostIntegrationIntegrationPagesBody:
 
         is_archived = self.is_archived
 
-        last_edited_at: None | Unset | str
+        last_edited_at: Unset | str | None
         if isinstance(self.last_edited_at, Unset):
             last_edited_at = UNSET
         else:

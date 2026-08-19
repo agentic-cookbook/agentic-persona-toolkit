@@ -13,6 +13,7 @@ def _get_kwargs(
     id: str,
     mid: str,
 ) -> dict[str, Any]:
+
     _kwargs: dict[str, Any] = {
         "method": "delete",
         "url": f"/chat/conversations/{id}/messages/{mid}",

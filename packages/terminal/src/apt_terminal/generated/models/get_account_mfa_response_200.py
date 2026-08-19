@@ -54,7 +54,7 @@ class GetAccountMfaResponse200:
 
         recovery_remaining = self.recovery_remaining
 
-        preferred_method: None | str
+        preferred_method: str | None
         if (
             isinstance(self.preferred_method, GetAccountMfaResponse200PreferredMethodType1)
             or isinstance(self.preferred_method, GetAccountMfaResponse200PreferredMethodType2Type1)

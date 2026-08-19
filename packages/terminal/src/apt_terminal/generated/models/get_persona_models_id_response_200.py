@@ -48,10 +48,10 @@ class GetPersonaModelsIdResponse200:
 
         name = self.name
 
-        description: None | str
+        description: str | None
         description = self.description
 
-        metadata: None | bool | dict[str, Any] | float | list[Any] | str
+        metadata: bool | dict[str, Any] | float | list[Any] | str | None
         if isinstance(self.metadata, GetPersonaModelsIdResponse200MetadataType0Type1):
             metadata = self.metadata.to_dict()
         elif isinstance(self.metadata, list):
@@ -62,7 +62,7 @@ class GetPersonaModelsIdResponse200:
 
         source = self.source
 
-        last_synced_at: None | str
+        last_synced_at: str | None
         last_synced_at = self.last_synced_at
 
         created_at = self.created_at

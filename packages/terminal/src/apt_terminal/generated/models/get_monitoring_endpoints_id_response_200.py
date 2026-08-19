@@ -60,7 +60,7 @@ class GetMonitoringEndpointsIdResponse200:
 
         expected_status = self.expected_status
 
-        expected_body_contains: None | str
+        expected_body_contains: str | None
         expected_body_contains = self.expected_body_contains
 
         timeout_ms = self.timeout_ms

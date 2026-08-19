@@ -34,7 +34,7 @@ class PublicPaper:
 
         title = self.title
 
-        category: None | str
+        category: str | None
         category = self.category
 
         tags = self.tags

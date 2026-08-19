@@ -64,7 +64,7 @@ class PutProjectTasksIdResponse200:
 
         customer_id = self.customer_id
 
-        deleted_at: None | str
+        deleted_at: str | None
         deleted_at = self.deleted_at
 
         ecosystem_id = self.ecosystem_id
@@ -77,29 +77,29 @@ class PutProjectTasksIdResponse200:
 
         title = self.title
 
-        description: None | str
+        description: str | None
         description = self.description
 
         is_completed = self.is_completed
 
         priority = self.priority
 
-        due_date: None | str
+        due_date: str | None
         due_date = self.due_date
 
-        due_datetime: None | str
+        due_datetime: str | None
         due_datetime = self.due_datetime
 
-        external_project_id: None | str
+        external_project_id: str | None
         external_project_id = self.external_project_id
 
-        external_project_name: None | str
+        external_project_name: str | None
         external_project_name = self.external_project_name
 
-        labels: None | str
+        labels: str | None
         labels = self.labels
 
-        url: None | str
+        url: str | None
         url = self.url
 
         is_deleted = self.is_deleted
@@ -110,7 +110,7 @@ class PutProjectTasksIdResponse200:
 
         sync_version = self.sync_version
 
-        sync_stamped_at: None | str
+        sync_stamped_at: str | None
         sync_stamped_at = self.sync_stamped_at
 
         sync_txid = self.sync_txid

@@ -38,7 +38,7 @@ class PostAudienceListsBody:
 
         ecosystem_id = self.ecosystem_id
 
-        description: None | Unset | str
+        description: Unset | str | None
         if isinstance(self.description, Unset):
             description = UNSET
         else:
@@ -46,19 +46,19 @@ class PostAudienceListsBody:
 
         status = self.status
 
-        welcome_template_id: None | Unset | str
+        welcome_template_id: Unset | str | None
         if isinstance(self.welcome_template_id, Unset):
             welcome_template_id = UNSET
         else:
             welcome_template_id = self.welcome_template_id
 
-        welcome_back_template_id: None | Unset | str
+        welcome_back_template_id: Unset | str | None
         if isinstance(self.welcome_back_template_id, Unset):
             welcome_back_template_id = UNSET
         else:
             welcome_back_template_id = self.welcome_back_template_id
 
-        from_name: None | Unset | str
+        from_name: Unset | str | None
         if isinstance(self.from_name, Unset):
             from_name = UNSET
         else:

@@ -1,0 +1,247 @@
+from collections.abc import Mapping
+from typing import Any, TypeVar, cast
+
+from attrs import define as _attrs_define
+from attrs import field as _attrs_field
+
+from ..types import UNSET, Unset
+
+T = TypeVar("T", bound="BillingAccount")
+
+
+@_attrs_define
+class BillingAccount:
+    """
+    Attributes:
+        id (str):
+        offer_id (str):
+        status (str):
+        created_at (str):
+        stripe_customer_id (Union[None, Unset, str]):
+        stripe_checkout_session_id (Union[None, Unset, str]):
+        stripe_subscription_id (Union[None, Unset, str]):
+        payer_email (Union[None, Unset, str]):
+        current_period_end (Union[None, Unset, str]):
+        lapsed_at (Union[None, Unset, str]):
+        claimed_customer_id (Union[None, Unset, str]):
+        claimed_at (Union[None, Unset, str]):
+    """
+
+    id: str
+    offer_id: str
+    status: str
+    created_at: str
+    stripe_customer_id: None | Unset | str = UNSET
+    stripe_checkout_session_id: None | Unset | str = UNSET
+    stripe_subscription_id: None | Unset | str = UNSET
+    payer_email: None | Unset | str = UNSET
+    current_period_end: None | Unset | str = UNSET
+    lapsed_at: None | Unset | str = UNSET
+    claimed_customer_id: None | Unset | str = UNSET
+    claimed_at: None | Unset | str = UNSET
+    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
+
+    def to_dict(self) -> dict[str, Any]:
+        id = self.id
+
+        offer_id = self.offer_id
+
+        status = self.status
+
+        created_at = self.created_at
+
+        stripe_customer_id: Unset | str | None
+        if isinstance(self.stripe_customer_id, Unset):
+            stripe_customer_id = UNSET
+        else:
+            stripe_customer_id = self.stripe_customer_id
+
+        stripe_checkout_session_id: Unset | str | None
+        if isinstance(self.stripe_checkout_session_id, Unset):
+            stripe_checkout_session_id = UNSET
+        else:
+            stripe_checkout_session_id = self.stripe_checkout_session_id
+
+        stripe_subscription_id: Unset | str | None
+        if isinstance(self.stripe_subscription_id, Unset):
+            stripe_subscription_id = UNSET
+        else:
+            stripe_subscription_id = self.stripe_subscription_id
+
+        payer_email: Unset | str | None
+        if isinstance(self.payer_email, Unset):
+            payer_email = UNSET
+        else:
+            payer_email = self.payer_email
+
+        current_period_end: Unset | str | None
+        if isinstance(self.current_period_end, Unset):
+            current_period_end = UNSET
+        else:
+            current_period_end = self.current_period_end
+
+        lapsed_at: Unset | str | None
+        if isinstance(self.lapsed_at, Unset):
+            lapsed_at = UNSET
+        else:
+            lapsed_at = self.lapsed_at
+
+        claimed_customer_id: Unset | str | None
+        if isinstance(self.claimed_customer_id, Unset):
+            claimed_customer_id = UNSET
+        else:
+            claimed_customer_id = self.claimed_customer_id
+
+        claimed_at: Unset | str | None
+        if isinstance(self.claimed_at, Unset):
+            claimed_at = UNSET
+        else:
+            claimed_at = self.claimed_at
+
+        field_dict: dict[str, Any] = {}
+        field_dict.update(self.additional_properties)
+        field_dict.update(
+            {
+                "id": id,
+                "offerId": offer_id,
+                "status": status,
+                "createdAt": created_at,
+            }
+        )
+        if stripe_customer_id is not UNSET:
+            field_dict["stripeCustomerId"] = stripe_customer_id
+        if stripe_checkout_session_id is not UNSET:
+            field_dict["stripeCheckoutSessionId"] = stripe_checkout_session_id
+        if stripe_subscription_id is not UNSET:
+            field_dict["stripeSubscriptionId"] = stripe_subscription_id
+        if payer_email is not UNSET:
+            field_dict["payerEmail"] = payer_email
+        if current_period_end is not UNSET:
+            field_dict["currentPeriodEnd"] = current_period_end
+        if lapsed_at is not UNSET:
+            field_dict["lapsedAt"] = lapsed_at
+        if claimed_customer_id is not UNSET:
+            field_dict["claimedCustomerId"] = claimed_customer_id
+        if claimed_at is not UNSET:
+            field_dict["claimedAt"] = claimed_at
+
+        return field_dict
+
+    @classmethod
+    def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
+        d = dict(src_dict)
+        id = d.pop("id")
+
+        offer_id = d.pop("offerId")
+
+        status = d.pop("status")
+
+        created_at = d.pop("createdAt")
+
+        def _parse_stripe_customer_id(data: object) -> None | Unset | str:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(None | Unset | str, data)
+
+        stripe_customer_id = _parse_stripe_customer_id(d.pop("stripeCustomerId", UNSET))
+
+        def _parse_stripe_checkout_session_id(data: object) -> None | Unset | str:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(None | Unset | str, data)
+
+        stripe_checkout_session_id = _parse_stripe_checkout_session_id(
+            d.pop("stripeCheckoutSessionId", UNSET)
+        )
+
+        def _parse_stripe_subscription_id(data: object) -> None | Unset | str:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(None | Unset | str, data)
+
+        stripe_subscription_id = _parse_stripe_subscription_id(d.pop("stripeSubscriptionId", UNSET))
+
+        def _parse_payer_email(data: object) -> None | Unset | str:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(None | Unset | str, data)
+
+        payer_email = _parse_payer_email(d.pop("payerEmail", UNSET))
+
+        def _parse_current_period_end(data: object) -> None | Unset | str:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(None | Unset | str, data)
+
+        current_period_end = _parse_current_period_end(d.pop("currentPeriodEnd", UNSET))
+
+        def _parse_lapsed_at(data: object) -> None | Unset | str:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(None | Unset | str, data)
+
+        lapsed_at = _parse_lapsed_at(d.pop("lapsedAt", UNSET))
+
+        def _parse_claimed_customer_id(data: object) -> None | Unset | str:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(None | Unset | str, data)
+
+        claimed_customer_id = _parse_claimed_customer_id(d.pop("claimedCustomerId", UNSET))
+
+        def _parse_claimed_at(data: object) -> None | Unset | str:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(None | Unset | str, data)
+
+        claimed_at = _parse_claimed_at(d.pop("claimedAt", UNSET))
+
+        billing_account = cls(
+            id=id,
+            offer_id=offer_id,
+            status=status,
+            created_at=created_at,
+            stripe_customer_id=stripe_customer_id,
+            stripe_checkout_session_id=stripe_checkout_session_id,
+            stripe_subscription_id=stripe_subscription_id,
+            payer_email=payer_email,
+            current_period_end=current_period_end,
+            lapsed_at=lapsed_at,
+            claimed_customer_id=claimed_customer_id,
+            claimed_at=claimed_at,
+        )
+
+        billing_account.additional_properties = d
+        return billing_account
+
+    @property
+    def additional_keys(self) -> list[str]:
+        return list(self.additional_properties.keys())
+
+    def __getitem__(self, key: str) -> Any:
+        return self.additional_properties[key]
+
+    def __setitem__(self, key: str, value: Any) -> None:
+        self.additional_properties[key] = value
+
+    def __delitem__(self, key: str) -> None:
+        del self.additional_properties[key]
+
+    def __contains__(self, key: str) -> bool:
+        return key in self.additional_properties

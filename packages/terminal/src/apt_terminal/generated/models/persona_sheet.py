@@ -60,7 +60,7 @@ class PersonaSheet:
 
         level = self.level
 
-        level_title: None | str
+        level_title: str | None
         level_title = self.level_title
 
         xp_into_level = self.xp_into_level

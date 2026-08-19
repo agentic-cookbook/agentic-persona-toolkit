@@ -19,6 +19,7 @@ def _get_kwargs(
     status: Unset | GetNotificationsStatus = GetNotificationsStatus.INBOX,
     read: Unset | bool = UNSET,
 ) -> dict[str, Any]:
+
     params: dict[str, Any] = {}
 
     params["page"] = page

@@ -92,7 +92,7 @@ class MarkdownDocumentSummary:
 
         updated_at = self.updated_at
 
-        frontmatter: None | Unset | dict[str, Any]
+        frontmatter: Unset | dict[str, Any] | None
         if isinstance(self.frontmatter, Unset):
             frontmatter = UNSET
         elif isinstance(self.frontmatter, MarkdownDocumentSummaryFrontmatterType0):
@@ -100,19 +100,19 @@ class MarkdownDocumentSummary:
         else:
             frontmatter = self.frontmatter
 
-        category: None | Unset | str
+        category: Unset | str | None
         if isinstance(self.category, Unset):
             category = UNSET
         else:
             category = self.category
 
-        public_route: None | Unset | str
+        public_route: Unset | str | None
         if isinstance(self.public_route, Unset):
             public_route = UNSET
         else:
             public_route = self.public_route
 
-        latest_version_id: None | Unset | str
+        latest_version_id: Unset | str | None
         if isinstance(self.latest_version_id, Unset):
             latest_version_id = UNSET
         else:

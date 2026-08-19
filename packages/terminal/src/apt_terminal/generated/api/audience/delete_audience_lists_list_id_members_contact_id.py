@@ -16,6 +16,7 @@ def _get_kwargs(
     list_id: str,
     contact_id: str,
 ) -> dict[str, Any]:
+
     _kwargs: dict[str, Any] = {
         "method": "delete",
         "url": f"/audience/lists/{list_id}/members/{contact_id}",

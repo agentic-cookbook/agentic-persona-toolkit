@@ -48,7 +48,7 @@ class GetMonitoringSiteGroupsIdResponse200:
 
         slug = self.slug
 
-        description: None | str
+        description: str | None
         description = self.description
 
         retention_days = self.retention_days

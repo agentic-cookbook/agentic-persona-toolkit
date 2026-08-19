@@ -16,6 +16,7 @@ def _get_kwargs(
     id: str,
     milestone_id: str,
 ) -> dict[str, Any]:
+
     _kwargs: dict[str, Any] = {
         "method": "delete",
         "url": f"/project/projects/{id}/milestones/{milestone_id}",

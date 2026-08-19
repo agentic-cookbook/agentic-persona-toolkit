@@ -42,12 +42,12 @@ class PutContentListsIdResponse200:
 
         customer_id = self.customer_id
 
-        deleted_at: None | str
+        deleted_at: str | None
         deleted_at = self.deleted_at
 
         name = self.name
 
-        description: None | str
+        description: str | None
         description = self.description
 
         created_at = self.created_at
@@ -56,7 +56,7 @@ class PutContentListsIdResponse200:
 
         sync_version = self.sync_version
 
-        sync_stamped_at: None | str
+        sync_stamped_at: str | None
         sync_stamped_at = self.sync_stamped_at
 
         sync_txid = self.sync_txid

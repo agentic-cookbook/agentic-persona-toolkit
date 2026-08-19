@@ -40,7 +40,7 @@ class GetUsageUsageEventsIdResponse200:
 
         principal_id = self.principal_id
 
-        ecosystem_id: None | str
+        ecosystem_id: str | None
         ecosystem_id = self.ecosystem_id
 
         route = self.route

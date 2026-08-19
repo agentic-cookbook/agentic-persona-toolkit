@@ -14,6 +14,7 @@ def _get_kwargs(
     owner_slug: str,
     persona_slug: str,
 ) -> dict[str, Any]:
+
     _kwargs: dict[str, Any] = {
         "method": "get",
         "url": f"/public/orgs/{owner_slug}/personas/{persona_slug}",

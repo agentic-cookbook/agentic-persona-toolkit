@@ -75,37 +75,37 @@ class Notification:
 
         updated_at = self.updated_at
 
-        actor_id: None | Unset | str
+        actor_id: Unset | str | None
         if isinstance(self.actor_id, Unset):
             actor_id = UNSET
         else:
             actor_id = self.actor_id
 
-        entity_kind: None | Unset | str
+        entity_kind: Unset | str | None
         if isinstance(self.entity_kind, Unset):
             entity_kind = UNSET
         else:
             entity_kind = self.entity_kind
 
-        entity_id: None | Unset | str
+        entity_id: Unset | str | None
         if isinstance(self.entity_id, Unset):
             entity_id = UNSET
         else:
             entity_id = self.entity_id
 
-        body: None | Unset | str
+        body: Unset | str | None
         if isinstance(self.body, Unset):
             body = UNSET
         else:
             body = self.body
 
-        dedupe_key: None | Unset | str
+        dedupe_key: Unset | str | None
         if isinstance(self.dedupe_key, Unset):
             dedupe_key = UNSET
         else:
             dedupe_key = self.dedupe_key
 
-        read_at: None | Unset | str
+        read_at: Unset | str | None
         if isinstance(self.read_at, Unset):
             read_at = UNSET
         else:

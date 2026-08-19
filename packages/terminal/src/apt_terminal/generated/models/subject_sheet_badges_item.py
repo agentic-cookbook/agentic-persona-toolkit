@@ -42,12 +42,12 @@ class SubjectSheetBadgesItem:
 
         tier = self.tier
 
-        badge_line: None | str
+        badge_line: str | None
         badge_line = self.badge_line
 
         awarded_at = self.awarded_at
 
-        rarity_pct: None | float
+        rarity_pct: float | None
         rarity_pct = self.rarity_pct
 
         field_dict: dict[str, Any] = {}

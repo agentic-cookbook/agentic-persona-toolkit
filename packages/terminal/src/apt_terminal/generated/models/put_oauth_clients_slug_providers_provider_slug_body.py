@@ -22,13 +22,13 @@ class PutOauthClientsSlugProvidersProviderSlugBody:
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        client_id_override: None | Unset | str
+        client_id_override: Unset | str | None
         if isinstance(self.client_id_override, Unset):
             client_id_override = UNSET
         else:
             client_id_override = self.client_id_override
 
-        client_secret_override: None | Unset | str
+        client_secret_override: Unset | str | None
         if isinstance(self.client_secret_override, Unset):
             client_secret_override = UNSET
         else:

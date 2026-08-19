@@ -22,7 +22,7 @@ class PostProjectIterationsIdRolloverResponse200:
     def to_dict(self) -> dict[str, Any]:
         moved = self.moved
 
-        to_iteration_id: None | str
+        to_iteration_id: str | None
         to_iteration_id = self.to_iteration_id
 
         field_dict: dict[str, Any] = {}

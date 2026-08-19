@@ -40,7 +40,7 @@ class SearchDiscussionTopicResult:
 
         created_at = self.created_at
 
-        category_id: None | Unset | str
+        category_id: Unset | str | None
         if isinstance(self.category_id, Unset):
             category_id = UNSET
         else:

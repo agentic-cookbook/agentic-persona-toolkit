@@ -59,37 +59,37 @@ class PostPersonaMemoryFactsBody:
 
         scope = self.scope
 
-        memory_id: None | Unset | str
+        memory_id: Unset | str | None
         if isinstance(self.memory_id, Unset):
             memory_id = UNSET
         else:
             memory_id = self.memory_id
 
-        subject_table: None | Unset | str
+        subject_table: Unset | str | None
         if isinstance(self.subject_table, Unset):
             subject_table = UNSET
         else:
             subject_table = self.subject_table
 
-        subject_id: None | Unset | str
+        subject_id: Unset | str | None
         if isinstance(self.subject_id, Unset):
             subject_id = UNSET
         else:
             subject_id = self.subject_id
 
-        object_table: None | Unset | str
+        object_table: Unset | str | None
         if isinstance(self.object_table, Unset):
             object_table = UNSET
         else:
             object_table = self.object_table
 
-        object_id: None | Unset | str
+        object_id: Unset | str | None
         if isinstance(self.object_id, Unset):
             object_id = UNSET
         else:
             object_id = self.object_id
 
-        object_value: None | Unset | str
+        object_value: Unset | str | None
         if isinstance(self.object_value, Unset):
             object_value = UNSET
         else:
@@ -99,13 +99,13 @@ class PostPersonaMemoryFactsBody:
 
         confidence = self.confidence
 
-        valid_from: None | Unset | str
+        valid_from: Unset | str | None
         if isinstance(self.valid_from, Unset):
             valid_from = UNSET
         else:
             valid_from = self.valid_from
 
-        valid_to: None | Unset | str
+        valid_to: Unset | str | None
         if isinstance(self.valid_to, Unset):
             valid_to = UNSET
         else:
@@ -113,7 +113,7 @@ class PostPersonaMemoryFactsBody:
 
         status = self.status
 
-        supersedes_id: None | Unset | str
+        supersedes_id: Unset | str | None
         if isinstance(self.supersedes_id, Unset):
             supersedes_id = UNSET
         else:

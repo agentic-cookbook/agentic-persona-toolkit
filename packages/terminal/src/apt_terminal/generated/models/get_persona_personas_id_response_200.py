@@ -82,7 +82,7 @@ class GetPersonaPersonasIdResponse200:
 
         id = self.id
 
-        user_id: None | str
+        user_id: str | None
         user_id = self.user_id
 
         owner_kind = self.owner_kind
@@ -93,34 +93,34 @@ class GetPersonaPersonasIdResponse200:
 
         name = self.name
 
-        description: None | str
+        description: str | None
         description = self.description
 
         visibility = self.visibility
 
         model = self.model
 
-        service_id: None | str
+        service_id: str | None
         service_id = self.service_id
 
-        app_id: None | str
+        app_id: str | None
         app_id = self.app_id
 
-        avatar_attachment_id: None | str
+        avatar_attachment_id: str | None
         avatar_attachment_id = self.avatar_attachment_id
 
         model_prompt = self.model_prompt
 
-        voice: None | str
+        voice: str | None
         voice = self.voice
 
-        character: None | str
+        character: str | None
         character = self.character
 
-        examples: None | str
+        examples: str | None
         examples = self.examples
 
-        canned_chat: None | bool | dict[str, Any] | float | list[Any] | str
+        canned_chat: bool | dict[str, Any] | float | list[Any] | str | None
         if isinstance(self.canned_chat, GetPersonaPersonasIdResponse200CannedChatType0Type1):
             canned_chat = self.canned_chat.to_dict()
         elif isinstance(self.canned_chat, list):
@@ -129,7 +129,7 @@ class GetPersonaPersonasIdResponse200:
         else:
             canned_chat = self.canned_chat
 
-        chat_status: None | bool | dict[str, Any] | float | list[Any] | str
+        chat_status: bool | dict[str, Any] | float | list[Any] | str | None
         if isinstance(self.chat_status, GetPersonaPersonasIdResponse200ChatStatusType0Type1):
             chat_status = self.chat_status.to_dict()
         elif isinstance(self.chat_status, list):
@@ -142,13 +142,13 @@ class GetPersonaPersonasIdResponse200:
 
         updated_at = self.updated_at
 
-        owned_ecosystem_id: None | Unset | str
+        owned_ecosystem_id: Unset | str | None
         if isinstance(self.owned_ecosystem_id, Unset):
             owned_ecosystem_id = UNSET
         else:
             owned_ecosystem_id = self.owned_ecosystem_id
 
-        corpus_ecosystem_id: None | Unset | str
+        corpus_ecosystem_id: Unset | str | None
         if isinstance(self.corpus_ecosystem_id, Unset):
             corpus_ecosystem_id = UNSET
         else:

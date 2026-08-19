@@ -20,6 +20,7 @@ def _get_kwargs(
     service_type: Unset | str = UNSET,
     scopes: Unset | str = UNSET,
 ) -> dict[str, Any]:
+
     params: dict[str, Any] = {}
 
     params["ecosystemId"] = ecosystem_id

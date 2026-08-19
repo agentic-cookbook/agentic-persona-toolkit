@@ -37,7 +37,7 @@ class PostPersonaPersonasIdTokensBody:
 
         name = self.name
 
-        expires_at: None | Unset | str
+        expires_at: Unset | str | None
         if isinstance(self.expires_at, Unset):
             expires_at = UNSET
         elif isinstance(self.expires_at, datetime.datetime):

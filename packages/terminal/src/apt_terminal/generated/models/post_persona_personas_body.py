@@ -74,7 +74,7 @@ class PostPersonaPersonasBody:
 
         model_prompt = self.model_prompt
 
-        description: None | Unset | str
+        description: Unset | str | None
         if isinstance(self.description, Unset):
             description = UNSET
         else:
@@ -82,43 +82,43 @@ class PostPersonaPersonasBody:
 
         visibility = self.visibility
 
-        service_id: None | Unset | str
+        service_id: Unset | str | None
         if isinstance(self.service_id, Unset):
             service_id = UNSET
         else:
             service_id = self.service_id
 
-        app_id: None | Unset | str
+        app_id: Unset | str | None
         if isinstance(self.app_id, Unset):
             app_id = UNSET
         else:
             app_id = self.app_id
 
-        avatar_attachment_id: None | Unset | str
+        avatar_attachment_id: Unset | str | None
         if isinstance(self.avatar_attachment_id, Unset):
             avatar_attachment_id = UNSET
         else:
             avatar_attachment_id = self.avatar_attachment_id
 
-        voice: None | Unset | str
+        voice: Unset | str | None
         if isinstance(self.voice, Unset):
             voice = UNSET
         else:
             voice = self.voice
 
-        character: None | Unset | str
+        character: Unset | str | None
         if isinstance(self.character, Unset):
             character = UNSET
         else:
             character = self.character
 
-        examples: None | Unset | str
+        examples: Unset | str | None
         if isinstance(self.examples, Unset):
             examples = UNSET
         else:
             examples = self.examples
 
-        canned_chat: None | Unset | bool | dict[str, Any] | float | list[Any] | str
+        canned_chat: Unset | bool | dict[str, Any] | float | list[Any] | str | None
         if isinstance(self.canned_chat, Unset):
             canned_chat = UNSET
         elif isinstance(self.canned_chat, PostPersonaPersonasBodyCannedChatType0Type1):
@@ -129,7 +129,7 @@ class PostPersonaPersonasBody:
         else:
             canned_chat = self.canned_chat
 
-        chat_status: None | Unset | bool | dict[str, Any] | float | list[Any] | str
+        chat_status: Unset | bool | dict[str, Any] | float | list[Any] | str | None
         if isinstance(self.chat_status, Unset):
             chat_status = UNSET
         elif isinstance(self.chat_status, PostPersonaPersonasBodyChatStatusType0Type1):

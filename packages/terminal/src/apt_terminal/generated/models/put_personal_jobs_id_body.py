@@ -42,7 +42,7 @@ class PutPersonalJobsIdBody:
 
         start_date = self.start_date
 
-        end_date: None | Unset | str
+        end_date: Unset | str | None
         if isinstance(self.end_date, Unset):
             end_date = UNSET
         else:

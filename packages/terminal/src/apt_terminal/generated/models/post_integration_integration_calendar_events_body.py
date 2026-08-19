@@ -64,31 +64,31 @@ class PostIntegrationIntegrationCalendarEventsBody:
 
         external_id = self.external_id
 
-        description: None | Unset | str
+        description: Unset | str | None
         if isinstance(self.description, Unset):
             description = UNSET
         else:
             description = self.description
 
-        start_time: None | Unset | str
+        start_time: Unset | str | None
         if isinstance(self.start_time, Unset):
             start_time = UNSET
         else:
             start_time = self.start_time
 
-        end_time: None | Unset | str
+        end_time: Unset | str | None
         if isinstance(self.end_time, Unset):
             end_time = UNSET
         else:
             end_time = self.end_time
 
-        start_date: None | Unset | str
+        start_date: Unset | str | None
         if isinstance(self.start_date, Unset):
             start_date = UNSET
         else:
             start_date = self.start_date
 
-        end_date: None | Unset | str
+        end_date: Unset | str | None
         if isinstance(self.end_date, Unset):
             end_date = UNSET
         else:
@@ -96,25 +96,25 @@ class PostIntegrationIntegrationCalendarEventsBody:
 
         is_all_day = self.is_all_day
 
-        location: None | Unset | str
+        location: Unset | str | None
         if isinstance(self.location, Unset):
             location = UNSET
         else:
             location = self.location
 
-        connection_id: None | Unset | str
+        connection_id: Unset | str | None
         if isinstance(self.connection_id, Unset):
             connection_id = UNSET
         else:
             connection_id = self.connection_id
 
-        calendar_name: None | Unset | str
+        calendar_name: Unset | str | None
         if isinstance(self.calendar_name, Unset):
             calendar_name = UNSET
         else:
             calendar_name = self.calendar_name
 
-        calendar_color: None | Unset | str
+        calendar_color: Unset | str | None
         if isinstance(self.calendar_color, Unset):
             calendar_color = UNSET
         else:
@@ -122,31 +122,31 @@ class PostIntegrationIntegrationCalendarEventsBody:
 
         status = self.status
 
-        organizer: None | Unset | str
+        organizer: Unset | str | None
         if isinstance(self.organizer, Unset):
             organizer = UNSET
         else:
             organizer = self.organizer
 
-        attendees: None | Unset | str
+        attendees: Unset | str | None
         if isinstance(self.attendees, Unset):
             attendees = UNSET
         else:
             attendees = self.attendees
 
-        reminders: None | Unset | str
+        reminders: Unset | str | None
         if isinstance(self.reminders, Unset):
             reminders = UNSET
         else:
             reminders = self.reminders
 
-        url: None | Unset | str
+        url: Unset | str | None
         if isinstance(self.url, Unset):
             url = UNSET
         else:
             url = self.url
 
-        ai_extraction: None | Unset | str
+        ai_extraction: Unset | str | None
         if isinstance(self.ai_extraction, Unset):
             ai_extraction = UNSET
         else:

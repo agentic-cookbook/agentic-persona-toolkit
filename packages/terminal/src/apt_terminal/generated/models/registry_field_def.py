@@ -96,7 +96,7 @@ class RegistryFieldDef:
 
         sync_version = self.sync_version
 
-        show_if: None | Unset | dict[str, Any]
+        show_if: Unset | dict[str, Any] | None
         if isinstance(self.show_if, Unset):
             show_if = UNSET
         elif isinstance(self.show_if, RegistryFieldDefShowIfType0):
@@ -104,7 +104,7 @@ class RegistryFieldDef:
         else:
             show_if = self.show_if
 
-        deleted_at: None | Unset | str
+        deleted_at: Unset | str | None
         if isinstance(self.deleted_at, Unset):
             deleted_at = UNSET
         else:

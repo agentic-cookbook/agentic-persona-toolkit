@@ -58,13 +58,13 @@ class PutIntegrationIntegrationFinancialTransactionsIdBody:
 
         account_id = self.account_id
 
-        account_name: None | Unset | str
+        account_name: Unset | str | None
         if isinstance(self.account_name, Unset):
             account_name = UNSET
         else:
             account_name = self.account_name
 
-        institution_name: None | Unset | str
+        institution_name: Unset | str | None
         if isinstance(self.institution_name, Unset):
             institution_name = UNSET
         else:
@@ -76,19 +76,19 @@ class PutIntegrationIntegrationFinancialTransactionsIdBody:
 
         name = self.name
 
-        merchant_name: None | Unset | str
+        merchant_name: Unset | str | None
         if isinstance(self.merchant_name, Unset):
             merchant_name = UNSET
         else:
             merchant_name = self.merchant_name
 
-        category: None | Unset | str
+        category: Unset | str | None
         if isinstance(self.category, Unset):
             category = UNSET
         else:
             category = self.category
 
-        category_detailed: None | Unset | str
+        category_detailed: Unset | str | None
         if isinstance(self.category_detailed, Unset):
             category_detailed = UNSET
         else:
@@ -96,7 +96,7 @@ class PutIntegrationIntegrationFinancialTransactionsIdBody:
 
         transaction_date = self.transaction_date
 
-        authorized_date: None | Unset | str
+        authorized_date: Unset | str | None
         if isinstance(self.authorized_date, Unset):
             authorized_date = UNSET
         else:
@@ -104,7 +104,7 @@ class PutIntegrationIntegrationFinancialTransactionsIdBody:
 
         pending = self.pending
 
-        logo_url: None | Unset | str
+        logo_url: Unset | str | None
         if isinstance(self.logo_url, Unset):
             logo_url = UNSET
         else:

@@ -70,37 +70,37 @@ class MessagingLogEntry:
 
         created_at = self.created_at
 
-        deleted_at: None | Unset | str
+        deleted_at: Unset | str | None
         if isinstance(self.deleted_at, Unset):
             deleted_at = UNSET
         else:
             deleted_at = self.deleted_at
 
-        subject: None | Unset | str
+        subject: Unset | str | None
         if isinstance(self.subject, Unset):
             subject = UNSET
         else:
             subject = self.subject
 
-        template_id: None | Unset | str
+        template_id: Unset | str | None
         if isinstance(self.template_id, Unset):
             template_id = UNSET
         else:
             template_id = self.template_id
 
-        provider_id: None | Unset | str
+        provider_id: Unset | str | None
         if isinstance(self.provider_id, Unset):
             provider_id = UNSET
         else:
             provider_id = self.provider_id
 
-        error_message: None | Unset | str
+        error_message: Unset | str | None
         if isinstance(self.error_message, Unset):
             error_message = UNSET
         else:
             error_message = self.error_message
 
-        sent_by: None | Unset | str
+        sent_by: Unset | str | None
         if isinstance(self.sent_by, Unset):
             sent_by = UNSET
         else:

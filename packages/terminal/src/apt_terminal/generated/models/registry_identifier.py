@@ -30,7 +30,7 @@ class RegistryIdentifier:
 
         entity_id = self.entity_id
 
-        created_by: None | str
+        created_by: str | None
         created_by = self.created_by
 
         field_dict: dict[str, Any] = {}

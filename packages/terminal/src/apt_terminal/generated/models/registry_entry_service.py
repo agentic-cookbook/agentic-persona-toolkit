@@ -78,19 +78,19 @@ class RegistryEntryService:
 
         sync_version = self.sync_version
 
-        price_min: None | Unset | int
+        price_min: Unset | int | None
         if isinstance(self.price_min, Unset):
             price_min = UNSET
         else:
             price_min = self.price_min
 
-        price_max: None | Unset | int
+        price_max: Unset | int | None
         if isinstance(self.price_max, Unset):
             price_max = UNSET
         else:
             price_max = self.price_max
 
-        deleted_at: None | Unset | str
+        deleted_at: Unset | str | None
         if isinstance(self.deleted_at, Unset):
             deleted_at = UNSET
         else:

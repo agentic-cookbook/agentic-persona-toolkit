@@ -14,6 +14,7 @@ def _get_kwargs(
     registry_slug: str,
     entry_slug: str,
 ) -> dict[str, Any]:
+
     _kwargs: dict[str, Any] = {
         "method": "get",
         "url": f"/registries/{registry_slug}/entries/{entry_slug}",
@@ -67,7 +68,7 @@ def sync_detailed(
     *,
     client: AuthenticatedClient,
 ) -> Response[Any | Error | PublicRegistryEntryResponse]:
-    """Get one entry as a signed-in viewer (public + authenticated fields)
+    """Get one entry as a signed-in viewer (public + authenticated fields, 'hub' rows)
 
     Args:
         registry_slug (str):
@@ -99,7 +100,7 @@ def sync(
     *,
     client: AuthenticatedClient,
 ) -> Any | Error | PublicRegistryEntryResponse | None:
-    """Get one entry as a signed-in viewer (public + authenticated fields)
+    """Get one entry as a signed-in viewer (public + authenticated fields, 'hub' rows)
 
     Args:
         registry_slug (str):
@@ -126,7 +127,7 @@ async def asyncio_detailed(
     *,
     client: AuthenticatedClient,
 ) -> Response[Any | Error | PublicRegistryEntryResponse]:
-    """Get one entry as a signed-in viewer (public + authenticated fields)
+    """Get one entry as a signed-in viewer (public + authenticated fields, 'hub' rows)
 
     Args:
         registry_slug (str):
@@ -156,7 +157,7 @@ async def asyncio(
     *,
     client: AuthenticatedClient,
 ) -> Any | Error | PublicRegistryEntryResponse | None:
-    """Get one entry as a signed-in viewer (public + authenticated fields)
+    """Get one entry as a signed-in viewer (public + authenticated fields, 'hub' rows)
 
     Args:
         registry_slug (str):

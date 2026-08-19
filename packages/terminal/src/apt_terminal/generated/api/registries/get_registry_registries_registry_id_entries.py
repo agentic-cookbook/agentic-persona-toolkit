@@ -21,6 +21,7 @@ def _get_kwargs(
     status: Unset | GetRegistryRegistriesRegistryIdEntriesStatus = UNSET,
     workspace: Unset | str = UNSET,
 ) -> dict[str, Any]:
+
     params: dict[str, Any] = {}
 
     json_status: Unset | str = UNSET

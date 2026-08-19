@@ -13,6 +13,7 @@ def _get_kwargs(
     *,
     client_id: str,
 ) -> dict[str, Any]:
+
     params: dict[str, Any] = {}
 
     params["clientId"] = client_id
