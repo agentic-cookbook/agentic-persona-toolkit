@@ -1,6 +1,7 @@
 /**
  * "This field is not a credential" — a copy of `@agentic-toolkit/ui/lib/autofill`,
- * which is the list of record. Keep the two in step.
+ * which is the list of record. `frontend/tools/verify_autofill_copies.py` in the
+ * adh repo is what keeps them in step.
  *
  * This site is its own workspace and does not depend on the UI kit, so the
  * attributes are repeated here rather than imported. Each vendor reads its own
