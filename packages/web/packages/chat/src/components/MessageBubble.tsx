@@ -43,6 +43,7 @@ export function MessageBubble({
     message.isPersona ? 'pc-persona' : 'pc-user',
     isSelected ? 'pc-message-selected' : '',
     message.isStreaming ? 'pc-message-streaming' : '',
+    message.failure ? 'pc-message-failed' : '',
   ]
     .filter(Boolean)
     .join(' ')
@@ -67,6 +68,11 @@ export function MessageBubble({
         <div className="pc-text">{message.text}</div>
         {message.content && message.content.length > 0 && (
           <RichContent items={message.content} />
+        )}
+        {message.failure && (
+          <div className="pc-failure" role="alert">
+            {message.failure}
+          </div>
         )}
         <div className="pc-time">{formatTime(message.timestamp)}</div>
       </div>

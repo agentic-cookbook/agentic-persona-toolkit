@@ -168,6 +168,27 @@ export class DefaultOrchestrator implements Orchestrator {
     this.notify({ kind: 'pendingPermissionsChanged' })
   }
 
+  /**
+   * Apply an event as though it had arrived from the backend. Not part of the
+   * portable contract — TS-runtime convenience, like
+   * `presentPermissionPrompt`.
+   *
+   * This exists for lines the persona speaks that no backend produced: a
+   * scripted welcome, an intro ritual typed in character by character. Those
+   * are genuinely persona utterances and belong in the transcript, but there
+   * is no request behind them, so `send` is the wrong door and inventing a
+   * second transcript beside `messages` is worse — the view-model would stop
+   * being the one place the UI reads from.
+   *
+   * Expressing a scripted line as `draftUpdated` … `messageReceived` rather
+   * than as a bespoke "inject" API is what keeps it identical to a streamed
+   * reply everywhere downstream, including in a backend that never learns such
+   * lines exist.
+   */
+  deliver(event: InboundEvent): void {
+    this.handleEvent(event)
+  }
+
   private async runEventLoop(): Promise<void> {
     const iterable = this.backend.inboundEvents
     this.iterator = iterable[Symbol.asyncIterator]()

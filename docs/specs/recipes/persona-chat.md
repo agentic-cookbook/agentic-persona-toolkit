@@ -227,6 +227,21 @@ matter, and a recipe composes ingredients rather than restating shared
 infrastructure.
 **Approved**: pending
 
+**Decision**: Tool activity does not survive the turn that produced it.
+**Rationale**: `activeCommands` is a live channel, cleared when the draft
+clears, so a committed message carries no record of what the persona did to
+produce it. This is the contract's shape, not an oversight — a command is
+something in progress, and `Message` is immutable. The web control's earlier
+behaviour differed: it kept tool pills on the committed bubble, and the legacy
+`ChatBackend` adapter still does, by writing a frozen record into the message's
+own payload. So the two paths currently disagree about history, which is the
+part that needs a decision rather than a default. Resolving it means either
+teaching `Message` a completed-invocations field (contract change, all
+platforms) or accepting that tool activity is ephemeral and the adapter's
+record is a compatibility shim with an expiry date. `pc-009` pins only the live
+behaviour, which both paths agree on.
+**Approved**: pending
+
 ## Compliance
 
 | Check | Status | Category |

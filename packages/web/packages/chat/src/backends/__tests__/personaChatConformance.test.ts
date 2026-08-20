@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import type { InboundEvent } from '../../contract/backend/InboundEvent'
 import { PersonaChatBackend, type TurnStatus } from '../PersonaChatBackend'
+import { hangingSse, sse, truncatedSse } from './sse'
 
 /**
  * Conformance vectors for the `persona-chat-coordinator` ingredient.
@@ -11,51 +12,6 @@ import { PersonaChatBackend, type TurnStatus } from '../PersonaChatBackend'
  * These were each observed failing for their stated reason before being
  * trusted. A vector that has never failed has proved nothing.
  */
-
-/** Build an SSE body from `[event, data]` pairs. */
-function sse(blocks: Array<[string, unknown]>): ReadableStream<Uint8Array> {
-  const encoder = new TextEncoder()
-  return new ReadableStream({
-    start(controller) {
-      for (const [event, data] of blocks) {
-        controller.enqueue(encoder.encode(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`))
-      }
-      controller.close()
-    },
-  })
-}
-
-/** A stream that emits, then hangs until aborted — for cancellation vectors. */
-function hangingSse(blocks: Array<[string, unknown]>, signal: AbortSignal): ReadableStream<Uint8Array> {
-  const encoder = new TextEncoder()
-  return new ReadableStream({
-    start(controller) {
-      for (const [event, data] of blocks) {
-        controller.enqueue(encoder.encode(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`))
-      }
-      signal.addEventListener('abort', () => controller.error(new Error('aborted')), { once: true })
-    },
-  })
-}
-
-/** A stream that emits, then dies without `done` — a truncated reply. */
-function truncatedSse(blocks: Array<[string, unknown]>): ReadableStream<Uint8Array> {
-  const encoder = new TextEncoder()
-  let i = 0
-  // Pull-based: erroring from start() would discard the queued chunks, so
-  // the tokens would never reach the coordinator at all.
-  return new ReadableStream({
-    pull(controller) {
-      const block = blocks[i++]
-      if (!block) {
-        controller.error(new Error('connection lost'))
-        return
-      }
-      const [event, data] = block
-      controller.enqueue(encoder.encode(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`))
-    },
-  })
-}
 
 interface Call {
   readonly path: string

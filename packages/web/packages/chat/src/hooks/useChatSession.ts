@@ -1,18 +1,45 @@
-import { useState, useCallback, useMemo, useRef, useEffect } from 'react'
-import type { Dispatch, SetStateAction } from 'react'
+import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
+import type { Backend } from '../contract/backend/Backend'
+import type { ChatStateObserver } from '../contract/chat/ChatStateObserver'
+import type { Participant } from '../contract/participants/Participant'
+import { ChatBackendAdapter } from '../backends/ChatBackendAdapter'
 import type { ChatBackend } from '../backends/types'
-import type {
-  ChatParticipant,
-  ChatMessage,
-  ChatResponse,
-  ToolCallInfo,
-} from '../types'
+import { draftMessageID, projectMessages } from '../projection/toChatMessages'
+import { DefaultOrchestrator } from '../runtime/DefaultOrchestrator'
+import { InMemoryPermissionStore } from '../runtime/InMemoryPermissionStore'
+import type { ChatMessage, ChatParticipant } from '../types'
 
 export interface UseChatSessionOptions {
-  backend: ChatBackend
+  /**
+   * Either transport. A contract `Backend` — the portable one, which
+   * `PersonaChatBackend` implements — is driven directly. A `ChatBackend`,
+   * this package's original web-only interface, is adapted onto the same
+   * events by `ChatBackendAdapter`. The hook itself speaks neither: it reads
+   * an orchestrator and calls `submitMessage`.
+   */
+  backend?: ChatBackend | Backend
+  /**
+   * An orchestrator to render, instead of one built from `backend`. Pass the
+   * same instance to two surfaces and they show one conversation — a phone
+   * pane and a desktop pane, say — with `inboundEvents` still consumed exactly
+   * once, by the orchestrator rather than by either surface.
+   *
+   * Its lifetime belongs to whoever created it: the hook neither starts a
+   * conversation on it nor tears its backend down, and `welcomeMessage` is
+   * ignored, since the second surface to mount would otherwise say hello again
+   * into a conversation already underway.
+   */
+  orchestrator?: DefaultOrchestrator
   persona: ChatParticipant
   user?: ChatParticipant
   welcomeMessage?: string
+  /**
+   * Identifies the persona in the transcript. Only worth setting alongside a
+   * contract backend that stamps its events with a particular id — a persona
+   * slug, say — so scripted lines from `say` are attributed to the same
+   * participant the backend's replies are.
+   */
+  personaID?: string
 }
 
 export interface ChatSession {
@@ -28,247 +55,314 @@ export interface ChatSession {
   selectMessage: (index: number) => void
 }
 
-function createMessage(
-  sender: ChatParticipant,
-  text: string,
-  isPersona: boolean,
-  response?: Exclude<ChatResponse, string>,
-): ChatMessage {
+const LOCAL_PARTICIPANT_ID = 'local'
+const DEFAULT_PERSONA_ID = 'persona'
+const DEFAULT_USER: ChatParticipant = { name: 'You', avatar: 'Y' }
+
+function isContractBackend(backend: ChatBackend | Backend): backend is Backend {
+  return 'inboundEvents' in backend
+}
+
+function toParticipant(
+  id: string,
+  display: ChatParticipant,
+  kind: 'user' | 'persona',
+): Participant {
   return {
-    id: crypto.randomUUID(),
-    sender,
-    text,
-    content: response?.content,
-    popover: response?.popover,
-    timestamp: new Date(),
-    isPersona,
+    id,
+    displayName: display.name,
+    address: id,
+    kinds: new Set([kind]),
+    conversationState: 'joined',
   }
 }
 
-async function consumeStream(
-  backend: ChatBackend,
-  text: string,
-  history: ChatMessage[],
-  persona: ChatParticipant,
-  setMessages: Dispatch<SetStateAction<ChatMessage[]>>,
-  setIsTyping: Dispatch<SetStateAction<boolean>>,
-): Promise<void> {
-  const placeholderId = crypto.randomUUID()
-  let placeholderInserted = false
+/**
+ * Everything one mounted chat owns: the orchestrator, the backend behind it,
+ * and the first-seen clock the projection needs.
+ */
+interface Session {
+  readonly orchestrator: DefaultOrchestrator
+  readonly personaID: string
+  /** False when the orchestrator was handed in, and its lifetime is not ours. */
+  readonly owned: boolean
+  project(): ChatMessage[]
+  destroyBackend(): void
+}
 
-  const ensurePlaceholder = () => {
-    if (placeholderInserted) return
-    placeholderInserted = true
-    setIsTyping(false)
-    setMessages((prev) => [
-      ...prev,
-      {
-        id: placeholderId,
-        sender: persona,
-        text: '',
+function createSession(options: {
+  backend?: ChatBackend | Backend
+  orchestrator?: DefaultOrchestrator
+  persona: ChatParticipant
+  user: ChatParticipant
+  personaID: string
+  welcomeMessage?: string
+}): Session {
+  const { personaID } = options
+  if (options.orchestrator) return adoptSession(options.orchestrator, options, personaID)
+  const raw = options.backend
+  if (!raw) {
+    throw new Error('useChatSession needs either a backend or an orchestrator.')
+  }
+  const parts = {
+    persona: options.persona,
+    user: options.user,
+    localParticipantID: LOCAL_PARTICIPANT_ID,
+  }
+
+  // A clock for what the contract does not date: an unacknowledged message,
+  // and every draft. First sight wins and is then held, because projection
+  // runs on every render and a fresh `new Date()` would walk the displayed
+  // times forward across the whole transcript on each pass.
+  const stamps = new Map<string, Date>()
+  const stampFor = (key: string): Date => {
+    const existing = stamps.get(key)
+    if (existing) return existing
+    const now = new Date()
+    stamps.set(key, now)
+    return now
+  }
+
+  // Assigned immediately below. The adapter only reads it from inside a
+  // callback the orchestrator itself triggers, so it is always set by then.
+  let orchestrator: DefaultOrchestrator
+
+  const backend: Backend = isContractBackend(raw)
+    ? raw
+    : new ChatBackendAdapter(raw, {
+        personaID,
+        history: () => project(),
+      })
+
+  orchestrator = new DefaultOrchestrator({
+    conversationID: crypto.randomUUID(),
+    localParticipantID: LOCAL_PARTICIPANT_ID,
+    initialParticipants: [
+      toParticipant(LOCAL_PARTICIPANT_ID, options.user, 'user'),
+      toParticipant(personaID, options.persona, 'persona'),
+    ],
+    commands: [],
+    observingHooks: [],
+    gatingHooks: [],
+    permissionStore: new InMemoryPermissionStore(),
+    backend,
+    display: {
+      showAvatars: true,
+      showReadReceipts: false,
+      showTypingIndicators: true,
+      allowJoining: false,
+      allowDeparting: false,
+      reducedMotion: false,
+    },
+  })
+
+  function project(): ChatMessage[] {
+    // A draft's clock starts when the draft does. Dropping the entry once the
+    // draft is gone is what keeps the next reply from inheriting the previous
+    // one's timestamp.
+    for (const key of [...stamps.keys()]) {
+      if (!key.startsWith('draft:')) continue
+      if (orchestrator.activeDrafts.some((d) => draftMessageID(d.participantID) === key)) continue
+      stamps.delete(key)
+    }
+    return projectMessages(orchestrator, parts, stampFor)
+  }
+
+  if (options.welcomeMessage) {
+    // A welcome is a line the persona says, so it enters the transcript the
+    // way every other persona line does. Delivered before `start()`, which
+    // means it is already there on the first render rather than arriving as an
+    // update the frame after.
+    orchestrator.deliver({
+      kind: 'messageReceived',
+      message: {
+        localID: crypto.randomUUID(),
+        senderID: personaID,
+        text: options.welcomeMessage,
         timestamp: new Date(),
-        isPersona: true,
-        isStreaming: true,
+        attachments: [],
+        deliveryStatus: { kind: 'delivered' },
       },
-    ])
+    })
   }
 
-  const updatePlaceholder = (mutator: (msg: ChatMessage) => ChatMessage) => {
-    setMessages((prev) =>
-      prev.map((m) => (m.id === placeholderId ? mutator(m) : m)),
-    )
+  return {
+    orchestrator,
+    personaID,
+    owned: true,
+    project,
+    destroyBackend(): void {
+      // Closing the backend ends the orchestrator's event loop on its own —
+      // the inbound stream completes — so there is no separate `stop()` here.
+      ;(raw as { destroy?: () => void }).destroy?.()
+    },
   }
+}
 
-  const completeToolCall = (
-    toolCalls: ToolCallInfo[] | undefined,
-    name: string,
-    ok: boolean,
-    result: string,
-  ): ToolCallInfo[] => {
-    const list = toolCalls ?? []
-    // Update the most recent 'started' entry with this name.
-    for (let i = list.length - 1; i >= 0; i--) {
-      const entry = list[i]
-      if (entry && entry.name === name && entry.status === 'started') {
-        const next = [...list]
-        next[i] = {
-          ...entry,
-          status: ok ? 'completed' : 'failed',
-          ok,
-          result,
-        }
-        return next
+/**
+ * A session over an orchestrator someone else owns. The projection state — the
+ * first-seen clock — is still per-surface, because it describes what THIS
+ * surface has drawn, not what the conversation contains.
+ */
+function adoptSession(
+  orchestrator: DefaultOrchestrator,
+  options: { persona: ChatParticipant; user: ChatParticipant },
+  personaID: string,
+): Session {
+  const parts = {
+    persona: options.persona,
+    user: options.user,
+    localParticipantID: LOCAL_PARTICIPANT_ID,
+  }
+  const stamps = new Map<string, Date>()
+  const stampFor = (key: string): Date => {
+    const existing = stamps.get(key)
+    if (existing) return existing
+    const now = new Date()
+    stamps.set(key, now)
+    return now
+  }
+  return {
+    orchestrator,
+    personaID,
+    owned: false,
+    project(): ChatMessage[] {
+      for (const key of [...stamps.keys()]) {
+        if (!key.startsWith('draft:')) continue
+        if (orchestrator.activeDrafts.some((d) => draftMessageID(d.participantID) === key)) continue
+        stamps.delete(key)
       }
-    }
-    // No matching started — append synthetic completed entry.
-    return [
-      ...list,
-      {
-        name,
-        arguments: '',
-        status: ok ? 'completed' : 'failed',
-        ok,
-        result,
-      },
-    ]
-  }
-
-  try {
-    const stream = backend.sendMessageStream!(text, history)
-    for await (const event of stream) {
-      ensurePlaceholder()
-      switch (event.type) {
-        case 'token':
-          updatePlaceholder((m) => ({ ...m, text: m.text + event.text }))
-          break
-        case 'tool_call_started':
-          updatePlaceholder((m) => ({
-            ...m,
-            toolCalls: [
-              ...(m.toolCalls ?? []),
-              {
-                name: event.name,
-                arguments: event.arguments,
-                status: 'started',
-              },
-            ],
-          }))
-          break
-        case 'tool_call_completed':
-          updatePlaceholder((m) => ({
-            ...m,
-            toolCalls: completeToolCall(m.toolCalls, event.name, event.ok, event.result),
-          }))
-          break
-        case 'content':
-          updatePlaceholder((m) => ({ ...m, content: event.items }))
-          break
-        case 'popover':
-          updatePlaceholder((m) => ({ ...m, popover: event.data }))
-          break
-        case 'error':
-          updatePlaceholder((m) => ({
-            ...m,
-            text: m.text || event.message,
-            isStreaming: false,
-          }))
-          return
-        case 'done':
-          updatePlaceholder((m) => ({ ...m, isStreaming: false }))
-          return
-      }
-    }
-    // Stream ended without 'done' — clear streaming flag anyway.
-    if (placeholderInserted) {
-      updatePlaceholder((m) => ({ ...m, isStreaming: false }))
-    }
-  } finally {
-    setIsTyping(false)
+      return projectMessages(orchestrator, parts, stampFor)
+    },
+    destroyBackend(): void {
+      // Not ours to close.
+    },
   }
 }
 
 export function useChatSession(options: UseChatSessionOptions): ChatSession {
-  const { backend, persona, user = { name: 'You', avatar: 'Y' } } = options
+  const {
+    backend,
+    orchestrator,
+    persona,
+    user = DEFAULT_USER,
+    welcomeMessage,
+    personaID = DEFAULT_PERSONA_ID,
+  } = options
 
-  const [messages, setMessages] = useState<ChatMessage[]>(() => {
-    if (options.welcomeMessage) {
-      return [createMessage(persona, options.welcomeMessage, true)]
-    }
-    return []
-  })
-  const [isTyping, setIsTyping] = useState(false)
+  const sessionRef = useRef<Session | null>(null)
+  const [version, bump] = useReducer((n: number): number => n + 1, 0)
+
+  // Built once and kept, the way the transcript used to be `useState`. A
+  // session rebuilt when `backend` changes identity would look reasonable and
+  // be a trap: `backend={new MockBackend()}` written inline in a render — which
+  // is how the modes are demoed — hands back a new object every pass, and the
+  // conversation would reset on each one. A backend swapped mid-conversation is
+  // not a thing the modes do; a re-rendered parent is.
+  if (sessionRef.current === null) {
+    sessionRef.current = createSession({
+      backend,
+      orchestrator,
+      persona,
+      user,
+      personaID,
+      welcomeMessage,
+    })
+  }
+  const session = sessionRef.current
+
   const [selectedIndex, setSelectedIndex] = useState(-1)
 
-  const queueRef = useRef<string[]>([])
-  const processingRef = useRef(false)
-  const messagesRef = useRef(messages)
-  messagesRef.current = messages
   // Every line `say` has in flight, held as the function that LANDS it: stop the typing timer,
   // put the whole line in the message, resolve. A line types at one character per ~40ms and the
-  // promise resolves on the last one, so a caller that leaves mid-line — a route change, a test
-  // returning — otherwise leaves the rest of the chain scheduled against a component that is
-  // gone. Landing rather than merely cancelling is what makes teardown survivable for a caller
-  // that AWAITS the line; see the cleanup at the bottom of this hook.
+  // promise resolves on the last one, so a caller that leaves mid-line — a route change, or a
+  // test returning — otherwise leaves the rest of the chain scheduled against a component that
+  // is gone. Landing rather than merely cancelling is what makes teardown survivable for a
+  // caller that AWAITS the line; see the cleanup at the bottom of this hook.
   const pendingLinesRef = useRef<Set<() => void>>(new Set())
 
-  const processQueue = useCallback(async () => {
-    if (processingRef.current || queueRef.current.length === 0) return
-    processingRef.current = true
-
-    while (queueRef.current.length > 0) {
-      const text = queueRef.current.shift()!
-      setIsTyping(true)
-
-      try {
-        if (backend.sendMessageStream) {
-          await consumeStream(backend, text, messagesRef.current, persona, setMessages, setIsTyping)
-        } else {
-          const response = await backend.sendMessage(text, messagesRef.current)
-          setIsTyping(false)
-
-          if (typeof response === 'string') {
-            setMessages((prev) => [...prev, createMessage(persona, response, true)])
-          } else {
-            setMessages((prev) => [
-              ...prev,
-              createMessage(persona, response.text || '', true, response),
-            ])
-          }
-        }
-      } catch {
-        setIsTyping(false)
-        setMessages((prev) => [
-          ...prev,
-          createMessage(persona, "Sorry, something went wrong. Let's try again.", true),
-        ])
-      }
+  // The session outlives this effect, so Strict Mode's mount → cleanup → mount
+  // finds the same orchestrator and the same transcript on the second pass —
+  // which is the point. Only the subscription and the backend are torn down,
+  // exactly as they were when the hook owned transport directly.
+  useEffect(() => {
+    const observer: ChatStateObserver = { chatDidUpdate: (): void => bump() }
+    session.orchestrator.addObserver(observer)
+    if (session.owned) session.orchestrator.start()
+    return () => {
+      session.orchestrator.removeObserver(observer)
+      session.destroyBackend()
     }
+  }, [session])
 
-    processingRef.current = false
-  }, [backend, persona])
+  const messages = useMemo(
+    () => session.project(),
+    // `version` is the subscription: it ticks on every `ChatUpdate`, which is
+    // the only thing that can change what a projection returns.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [session, version],
+  )
+
+  /**
+   * Derived, not tracked. The persona is "typing" exactly when the last thing
+   * said was ours and nothing has started coming back — no draft open, no
+   * reply committed. A flag set on send and cleared on first token says the
+   * same thing while being able to disagree with the transcript; this cannot.
+   */
+  const isTyping = useMemo(() => {
+    if (session.orchestrator.activeDrafts.length > 0) return false
+    const last = session.orchestrator.messages[session.orchestrator.messages.length - 1]
+    return last !== undefined && last.senderID === LOCAL_PARTICIPANT_ID
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session, version])
 
   const sendMessage = useCallback(
     (text: string) => {
       const trimmed = text.trim()
       if (!trimmed) return
-
-      setMessages((prev) => [...prev, createMessage(user, trimmed, false)])
-      queueRef.current.push(trimmed)
-      processQueue()
+      // The orchestrator reports a failed submit as an `error` update and
+      // rethrows for callers that await it. This one does not await, so the
+      // rejection is caught here rather than left to surface as an unhandled
+      // one.
+      void session.orchestrator.submitMessage(trimmed, []).catch(() => {})
     },
-    [user, processQueue],
+    [session],
   )
 
   // The persona speaks a line unprompted, typed in letter-by-letter (a scripted
   // message, not a reply). Resolves when the whole line has landed.
+  //
+  // Expressed as the events a streamed reply would produce — a draft that
+  // grows, then an immutable message — so nothing downstream has to know the
+  // difference. `messageReceived` clears the sender's draft on arrival, which
+  // is why no `draftCleared` follows.
   const say = useCallback(
     (text: string): Promise<void> => {
-      const id = crypto.randomUUID()
-      setMessages((prev) => [
-        ...prev,
-        {
-          id,
-          sender: persona,
-          text: '',
-          timestamp: new Date(),
-          isPersona: true,
-          isStreaming: true,
-        },
-      ])
+      const { orchestrator, personaID: speakerID } = session
+      const localID = crypto.randomUUID()
+      const startedAt = new Date()
       const pending = pendingLinesRef.current
       return new Promise<void>((resolve) => {
         let i = 0
         let timer: ReturnType<typeof setTimeout> | undefined
         // The end of the line, however it is reached: typed to the last character, or cut short
-        // by teardown with no time left to type. Both want the same three things, and writing
+        // by teardown with no time left to type. Both want the same three things, and committing
         // the full `text` rather than the slice reached so far is what keeps a cut-short line a
         // whole sentence instead of a fragment frozen mid-word.
         const land = (): void => {
           if (timer !== undefined) clearTimeout(timer)
           pending.delete(land)
-          setMessages((prev) =>
-            prev.map((m) => (m.id === id ? { ...m, text, isStreaming: false } : m)),
-          )
+          orchestrator.deliver({
+            kind: 'messageReceived',
+            message: {
+              localID,
+              senderID: speakerID,
+              text,
+              timestamp: startedAt,
+              attachments: [],
+              deliveryStatus: { kind: 'delivered' },
+            },
+          })
           resolve()
         }
         const step = (): void => {
@@ -277,15 +371,19 @@ export function useChatSession(options: UseChatSessionOptions): ChatSession {
             land()
             return
           }
-          const slice = text.slice(0, i)
-          setMessages((prev) => prev.map((m) => (m.id === id ? { ...m, text: slice } : m)))
+          orchestrator.deliver({
+            kind: 'draftUpdated',
+            participantID: speakerID,
+            text: text.slice(0, i),
+            attachments: [],
+          })
           timer = setTimeout(step, 26 + Math.random() * 28)
         }
         pending.add(land)
         timer = setTimeout(step, 0)
       })
     },
-    [persona],
+    [session],
   )
 
   const selectMessage = useCallback(
@@ -296,12 +394,6 @@ export function useChatSession(options: UseChatSessionOptions): ChatSession {
     },
     [messages.length],
   )
-
-  useEffect(() => {
-    return () => {
-      backend.destroy?.()
-    }
-  }, [backend])
 
   // Unmount only — an empty dependency list, unlike the effect above, because a new `backend`
   // is no reason to cut a line off mid-word.
@@ -317,9 +409,9 @@ export function useChatSession(options: UseChatSessionOptions): ChatSession {
   // stuck at an await with no way to find out.
   //
   // Landing is the honest version of the same intent. Nothing is scheduled past teardown (the
-  // timers are still cleared, which is what the test below pins), a real unmount's setMessages
-  // is a no-op React ignores, and a caller that is still there — Strict Mode's second mount —
-  // finds its line whole and carries on.
+  // timers are still cleared, which is what the test below pins), a real unmount's delivery
+  // reaches an orchestrator no one is reading, and a caller that is still there — Strict Mode's
+  // second mount — finds its line whole and carries on.
   useEffect(() => {
     const pending = pendingLinesRef.current
     return () => {
