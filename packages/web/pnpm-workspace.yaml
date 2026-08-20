@@ -1,2 +1,10 @@
 packages:
   - './packages/*'
+
+# Security floors for transitive/auto-installed peers (vite + esbuild arrive as
+# peers of vitest). Mirrored in package.json's "pnpm.overrides" because pnpm 9
+# — the version pinned in packageManager — reads it there, while pnpm 10+ reads
+# it here. Drop an entry once vitest resolves that package above the floor.
+overrides:
+  vite: ^8.0.16
+  esbuild: ^0.28.1
