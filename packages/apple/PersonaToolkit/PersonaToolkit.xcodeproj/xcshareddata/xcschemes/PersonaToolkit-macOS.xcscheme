@@ -21,6 +21,20 @@
                ReferencedContainer = "container:PersonaToolkit.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "NO"
+            buildForProfiling = "NO"
+            buildForArchiving = "NO"
+            buildForAnalyzing = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "590653D88E5C6FA0FA3B5706"
+               BuildableName = "PersonaToolkitTests-macOS.xctest"
+               BlueprintName = "PersonaToolkitTests-macOS"
+               ReferencedContainer = "container:PersonaToolkit.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
       </BuildActionEntries>
    </BuildAction>
    <TestAction
@@ -39,7 +53,20 @@
          </BuildableReference>
       </MacroExpansion>
       <Testables>
+         <TestableReference
+            skipped = "NO"
+            parallelizable = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "590653D88E5C6FA0FA3B5706"
+               BuildableName = "PersonaToolkitTests-macOS.xctest"
+               BlueprintName = "PersonaToolkitTests-macOS"
+               ReferencedContainer = "container:PersonaToolkit.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
       </Testables>
+      <CommandLineArguments>
+      </CommandLineArguments>
    </TestAction>
    <LaunchAction
       buildConfiguration = "Debug"

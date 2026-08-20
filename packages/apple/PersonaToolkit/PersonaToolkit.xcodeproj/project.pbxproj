@@ -9,9 +9,11 @@
 /* Begin PBXBuildFile section */
 		00051DFF7C1BB7D1AA236587 /* Backend.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90042F96026EA0A3B57630BD /* Backend.swift */; };
 		001F845D0C0465E3A62539F4 /* AttachmentSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2A3999E1F92415C975AE1E0 /* AttachmentSource.swift */; };
+		01B4119F61910AFE61B9962F /* PersonaChatCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B77A7C69FC9FFCFE586976C /* PersonaChatCoordinator.swift */; };
 		0292CB3801E5485DA2742F03 /* Message.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D1E23E8605D62C98D9F8E92 /* Message.swift */; };
 		04AF061B6F4A82E509B8BEC4 /* ObservingHook.swift in Sources */ = {isa = PBXBuildFile; fileRef = D65BA42497F76BBCFE63A8BF /* ObservingHook.swift */; };
 		0AC9019D803CDA7596AC35EE /* ObservingHook.swift in Sources */ = {isa = PBXBuildFile; fileRef = D65BA42497F76BBCFE63A8BF /* ObservingHook.swift */; };
+		0DFF1A2BEA38C67A87E221E4 /* PersonaChatCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B77A7C69FC9FFCFE586976C /* PersonaChatCoordinator.swift */; };
 		0E7D3462FB71E851668432DE /* InlineDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD6BE54519C987558A1046C5 /* InlineDocument.swift */; };
 		0FC31A842F55581559BC527B /* ActiveDraft.swift in Sources */ = {isa = PBXBuildFile; fileRef = 867F12D9E92BEEAC5C104B8F /* ActiveDraft.swift */; };
 		0FF90ACB1DB750C91003886D /* ReadReceipt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2ECEE63B8D032D86CA9E45A7 /* ReadReceipt.swift */; };
@@ -41,11 +43,14 @@
 		29BB3CDB53A6AB60182CDC12 /* GatingHook.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8EABA44CFDCB6E99BAAAD5E /* GatingHook.swift */; };
 		29E387085996B781DCDAAC63 /* Command.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1290751FF6377C47F6F6713C /* Command.swift */; };
 		2A0860E381B4222724DB4919 /* PermissionStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7FF6586C60B20F50C79459F /* PermissionStore.swift */; };
+		2A6FB7AFF9D558B4E84D94A8 /* TestSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CEC67A741BD73726FF4B84B /* TestSupport.swift */; };
 		2B2DAB6D14C34F0FE6203FF2 /* ParticipantKind.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1121BFAABC018A3919E2E110 /* ParticipantKind.swift */; };
 		2E4BC4C869CD22D14BC659DF /* Command.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1290751FF6377C47F6F6713C /* Command.swift */; };
 		30FEF3455C66FA76B7CEABA3 /* Conversation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D2BD2904642C1E5ED01CA92 /* Conversation.swift */; };
+		326FA02F2281D30F690A17D6 /* SSEParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A1306E4836DF96A8FB25C71 /* SSEParser.swift */; };
 		33D71CFF70DE63DC75BC7168 /* CommandInvoker.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1035B44C225DC505F5C35C4 /* CommandInvoker.swift */; };
 		33E42FE2C69C0CAB8BDF7E2D /* HookContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2795559B4470C730AEC086AE /* HookContext.swift */; };
+		360B493C44DFD34F312BE138 /* PersonaToolkit-macOS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DB745189443BDAE3EF71178A /* PersonaToolkit-macOS.framework */; };
 		36CDC20913A85F6C52B94344 /* ReadReceipt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2ECEE63B8D032D86CA9E45A7 /* ReadReceipt.swift */; };
 		38037C6F3490177AE0729206 /* Participant.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7372AB005D9D8611D0139D13 /* Participant.swift */; };
 		3803D3B1A35B52675130F4BC /* Participant.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7372AB005D9D8611D0139D13 /* Participant.swift */; };
@@ -64,12 +69,14 @@
 		468E139E894160E1158B9639 /* AttachmentSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2A3999E1F92415C975AE1E0 /* AttachmentSource.swift */; };
 		46E668F0AC4131DEBEBF86EA /* HookDecision.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E0E11E5FD699439B15DC234 /* HookDecision.swift */; };
 		48804EDA9C5DF9A6498CCB50 /* DisplayConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CFA16BBF754017ED4007EDB /* DisplayConfig.swift */; };
+		492A1692883A3B7E32B6D3D5 /* SSEParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A1306E4836DF96A8FB25C71 /* SSEParser.swift */; };
 		49E03D3252CF9E1BF4D83BC4 /* ParticipantKind.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1121BFAABC018A3919E2E110 /* ParticipantKind.swift */; };
 		4A2FDDC224A8684020A4E1D7 /* WidgetResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = EED54EA1E94CB4E0744FD242 /* WidgetResponse.swift */; };
 		4DD2ECB76C49153C845448A4 /* CommandInvoker.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1035B44C225DC505F5C35C4 /* CommandInvoker.swift */; };
 		4E8FF183A3C903FC75781CAD /* ChatUpdate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A66E68F1D0F329E558B85427 /* ChatUpdate.swift */; };
 		4FAEC38FBFCAFB3BCD39AD58 /* Conversation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D2BD2904642C1E5ED01CA92 /* Conversation.swift */; };
 		4FFD75BD41F26A5697C2650E /* PermissionDecision.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81D3FFD7CCA43EA2DAD99A1F /* PermissionDecision.swift */; };
+		517ABC99312C419889AA8A50 /* PersonaChatCoordinatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41B89D18C52A6A0396E2E523 /* PersonaChatCoordinatorTests.swift */; };
 		52E2F6A905470AB1952B529B /* ChatConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 995225CBB7D780C9BFCADAC5 /* ChatConfig.swift */; };
 		52FB4666A895EA3D22710CE0 /* GatingPoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E1B721109D7FF51E9219894 /* GatingPoint.swift */; };
 		53AB05D14E3D3B169A613370 /* ChatViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F4D7F180977E0FB09A55650 /* ChatViewModel.swift */; };
@@ -86,7 +93,9 @@
 		5F55F347550819E0745C46D8 /* MediaType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D80C17F67ED332CA45F9AAF /* MediaType.swift */; };
 		6026A7687EFBEA9EAF48730A /* MessageDeliveryStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4584E17462FDB634B4624B0F /* MessageDeliveryStatus.swift */; };
 		611541076F46E7F0891D5AA0 /* InteractiveWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 958443F3DE998F78B153119B /* InteractiveWidget.swift */; };
+		62725EE510AE0865573C9804 /* PersonaChatCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B77A7C69FC9FFCFE586976C /* PersonaChatCoordinator.swift */; };
 		629FD7E04935629B5A041BC7 /* GatingHook.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8EABA44CFDCB6E99BAAAD5E /* GatingHook.swift */; };
+		6339B841D5E774F9457617D8 /* PersonaChatCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B77A7C69FC9FFCFE586976C /* PersonaChatCoordinator.swift */; };
 		645B3BE1A4AAF2AEBCA960F1 /* InboundEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FB708D42FDF82A36E068603 /* InboundEvent.swift */; };
 		67C8C19FA9288CD6EAB688FA /* CommandResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04DEF49A331C636CB0608857 /* CommandResult.swift */; };
 		680C791656D9C92C27C77BD7 /* InlineDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD6BE54519C987558A1046C5 /* InlineDocument.swift */; };
@@ -94,6 +103,7 @@
 		696764752E8580D66964D27F /* ParticipantConversationState.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7721CBED8B72DDCACBD3F58 /* ParticipantConversationState.swift */; };
 		6C5F23615A0909B2E1AB9CBC /* ObservingPoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF9F469C27C8EC353BC91C96 /* ObservingPoint.swift */; };
 		6D144AD8E8532AB10C7EA3F7 /* Orchestrator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75707EE1213832217898627D /* Orchestrator.swift */; };
+		6F7373464284352028ED9EBC /* PersonaToolkit-macOS.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = DB745189443BDAE3EF71178A /* PersonaToolkit-macOS.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		704DBBB2ACA8D78579804F23 /* CommandResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04DEF49A331C636CB0608857 /* CommandResult.swift */; };
 		7156F09EAC9724C94261315C /* CommandInvocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0F80B06F809E005407631B5 /* CommandInvocation.swift */; };
 		71D3E7D7131D4DEEEBB18E8F /* AttachmentSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2A3999E1F92415C975AE1E0 /* AttachmentSource.swift */; };
@@ -104,6 +114,7 @@
 		78AB02D27755F5381110F668 /* ObservingHook.swift in Sources */ = {isa = PBXBuildFile; fileRef = D65BA42497F76BBCFE63A8BF /* ObservingHook.swift */; };
 		79C104AAE3E1267E63B346A7 /* ChatStateObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 265155732EA6EAF128AA798F /* ChatStateObserver.swift */; };
 		7CE5094A2BC2D5410924D2E9 /* ObservingPoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF9F469C27C8EC353BC91C96 /* ObservingPoint.swift */; };
+		7E759D7A77908B4E14E2AA1C /* PersonaChatCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B77A7C69FC9FFCFE586976C /* PersonaChatCoordinator.swift */; };
 		7F6B50A2E5EB226743F3868C /* ParticipantConversationState.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7721CBED8B72DDCACBD3F58 /* ParticipantConversationState.swift */; };
 		7F84C2AC310728AC39B0D548 /* AttachmentPresentation.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEDB81BBE7117ECA308E8621 /* AttachmentPresentation.swift */; };
 		806570859154E86D14BE7657 /* WidgetResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = EED54EA1E94CB4E0744FD242 /* WidgetResponse.swift */; };
@@ -131,6 +142,7 @@
 		9645B47DCC4902BCAE3AB4C6 /* DisplayConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CFA16BBF754017ED4007EDB /* DisplayConfig.swift */; };
 		9658DDBCCEDED84AC491A82E /* Backend.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90042F96026EA0A3B57630BD /* Backend.swift */; };
 		9686D0F69189BAB4C13DBC69 /* ObservingHook.swift in Sources */ = {isa = PBXBuildFile; fileRef = D65BA42497F76BBCFE63A8BF /* ObservingHook.swift */; };
+		96CFCC58A4A942F15F58196D /* SSEParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A1306E4836DF96A8FB25C71 /* SSEParser.swift */; };
 		97B83B82960EECFA8923CA2D /* InboundEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FB708D42FDF82A36E068603 /* InboundEvent.swift */; };
 		9895EED19A2DFF3250362D88 /* HookContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2795559B4470C730AEC086AE /* HookContext.swift */; };
 		9A856D300A84370A8E5E95D4 /* Tool.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31C80B696A35C53C5E84B71 /* Tool.swift */; };
@@ -179,6 +191,7 @@
 		DAE496849465FE7EA47A4219 /* Permission.swift in Sources */ = {isa = PBXBuildFile; fileRef = A35B7A2E6F2C77BD471E0753 /* Permission.swift */; };
 		DCBE4500208C7B24B37E2343 /* MediaType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D80C17F67ED332CA45F9AAF /* MediaType.swift */; };
 		DCEF46AB9E2C89BEEB44A305 /* ChatUpdate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A66E68F1D0F329E558B85427 /* ChatUpdate.swift */; };
+		DDF33BCCAC240AA5699EC698 /* SSEParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A1306E4836DF96A8FB25C71 /* SSEParser.swift */; };
 		DF9D04AD2CF6899B956E92E2 /* Message.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D1E23E8605D62C98D9F8E92 /* Message.swift */; };
 		E1506E81488C7D69FF3ED4DE /* Attachment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 328E69FF27FE21CCA90AF924 /* Attachment.swift */; };
 		E1D4A2DDC8DFC7A154CFC4E5 /* Participant.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7372AB005D9D8611D0139D13 /* Participant.swift */; };
@@ -201,8 +214,33 @@
 		F8BE1570A9D34F6B85056E05 /* ObservingPoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF9F469C27C8EC353BC91C96 /* ObservingPoint.swift */; };
 		F96E99949B684BF6A2F879E1 /* HookDecision.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E0E11E5FD699439B15DC234 /* HookDecision.swift */; };
 		F975427F31A89B7CD3503298 /* PermissionPrompt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A7D667DE419C0AF7EF69A65 /* PermissionPrompt.swift */; };
+		FA781423900A13B03077DB46 /* SSEParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A1306E4836DF96A8FB25C71 /* SSEParser.swift */; };
 		FD780D91872B2F4D417AC1E0 /* ChatStateObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 265155732EA6EAF128AA798F /* ChatStateObserver.swift */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		4B40AA5515F288E9240B1F0E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 603BECE51C44C5726A39CC88 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 08FF15C05FC615D83054E547;
+			remoteInfo = "PersonaToolkit-macOS";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		AE6D1543EDA5F18DB43D4065 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				6F7373464284352028ED9EBC /* PersonaToolkit-macOS.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		04DEF49A331C636CB0608857 /* CommandResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandResult.swift; sourceTree = "<group>"; };
@@ -210,12 +248,15 @@
 		0F4D7F180977E0FB09A55650 /* ChatViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatViewModel.swift; sourceTree = "<group>"; };
 		1121BFAABC018A3919E2E110 /* ParticipantKind.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticipantKind.swift; sourceTree = "<group>"; };
 		1290751FF6377C47F6F6713C /* Command.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Command.swift; sourceTree = "<group>"; };
+		1A2C8202D682E3CAFB46F25A /* PersonaToolkitTests-macOS.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "PersonaToolkitTests-macOS.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		1D80C17F67ED332CA45F9AAF /* MediaType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaType.swift; sourceTree = "<group>"; };
 		265155732EA6EAF128AA798F /* ChatStateObserver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatStateObserver.swift; sourceTree = "<group>"; };
 		2795559B4470C730AEC086AE /* HookContext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HookContext.swift; sourceTree = "<group>"; };
+		2B77A7C69FC9FFCFE586976C /* PersonaChatCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersonaChatCoordinator.swift; sourceTree = "<group>"; };
 		2ECEE63B8D032D86CA9E45A7 /* ReadReceipt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadReceipt.swift; sourceTree = "<group>"; };
 		328E69FF27FE21CCA90AF924 /* Attachment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Attachment.swift; sourceTree = "<group>"; };
 		3CFA16BBF754017ED4007EDB /* DisplayConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DisplayConfig.swift; sourceTree = "<group>"; };
+		41B89D18C52A6A0396E2E523 /* PersonaChatCoordinatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersonaChatCoordinatorTests.swift; sourceTree = "<group>"; };
 		4551248E1B2EB05DDA7194A3 /* Skill.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Skill.swift; sourceTree = "<group>"; };
 		4584E17462FDB634B4624B0F /* MessageDeliveryStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageDeliveryStatus.swift; sourceTree = "<group>"; };
 		6A31526DB0250AE7ADC39A67 /* PersonaToolkit-iOS.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = "PersonaToolkit-iOS.framework"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -223,10 +264,12 @@
 		6FB708D42FDF82A36E068603 /* InboundEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InboundEvent.swift; sourceTree = "<group>"; };
 		7372AB005D9D8611D0139D13 /* Participant.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Participant.swift; sourceTree = "<group>"; };
 		75707EE1213832217898627D /* Orchestrator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Orchestrator.swift; sourceTree = "<group>"; };
+		7CEC67A741BD73726FF4B84B /* TestSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestSupport.swift; sourceTree = "<group>"; };
 		7D1E23E8605D62C98D9F8E92 /* Message.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Message.swift; sourceTree = "<group>"; };
 		7E1B721109D7FF51E9219894 /* GatingPoint.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GatingPoint.swift; sourceTree = "<group>"; };
 		81D3FFD7CCA43EA2DAD99A1F /* PermissionDecision.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionDecision.swift; sourceTree = "<group>"; };
 		867F12D9E92BEEAC5C104B8F /* ActiveDraft.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActiveDraft.swift; sourceTree = "<group>"; };
+		8A1306E4836DF96A8FB25C71 /* SSEParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SSEParser.swift; sourceTree = "<group>"; };
 		8A7D667DE419C0AF7EF69A65 /* PermissionPrompt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionPrompt.swift; sourceTree = "<group>"; };
 		8DCDE34330F80973EDF38AB3 /* PersonaToolkit-watchOS.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = "PersonaToolkit-watchOS.framework"; sourceTree = BUILT_PRODUCTS_DIR; };
 		90042F96026EA0A3B57630BD /* Backend.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Backend.swift; sourceTree = "<group>"; };
@@ -250,6 +293,17 @@
 		F0F80B06F809E005407631B5 /* CommandInvocation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandInvocation.swift; sourceTree = "<group>"; };
 		F7721CBED8B72DDCACBD3F58 /* ParticipantConversationState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticipantConversationState.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		32397BDCDB5867FF3BBC7741 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				360B493C44DFD34F312BE138 /* PersonaToolkit-macOS.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
 		2579B242D826B323A36E8364 /* Commands */ = {
@@ -284,6 +338,7 @@
 				AB6046E30D76A3B274B8AA81 /* Chat */,
 				2579B242D826B323A36E8364 /* Commands */,
 				B4D315D0EEAD700052558234 /* Configuration */,
+				7A18910568D297D62EACE39E /* Coordinator */,
 				8F9F02C47895F92766911A90 /* Hooks */,
 				44CEB4ADBD3EE07CEAE15BA4 /* Media */,
 				3663B9EFDB5C19C82D00124E /* Messages */,
@@ -353,10 +408,20 @@
 			path = Attachments;
 			sourceTree = "<group>";
 		};
+		7A18910568D297D62EACE39E /* Coordinator */ = {
+			isa = PBXGroup;
+			children = (
+				2B77A7C69FC9FFCFE586976C /* PersonaChatCoordinator.swift */,
+				8A1306E4836DF96A8FB25C71 /* SSEParser.swift */,
+			);
+			path = Coordinator;
+			sourceTree = "<group>";
+		};
 		7C1E26BD282B33A65A6D49BD = {
 			isa = PBXGroup;
 			children = (
 				323528F7F223B4A660CCB425 /* Sources */,
+				CD7A07F16FADC3AB54057BAA /* Tests */,
 				8C36775C2CE31CC3486BDCFA /* Products */,
 			);
 			sourceTree = "<group>";
@@ -369,6 +434,7 @@
 				AA3089824319B7B4673A2A1A /* PersonaToolkit-tvOS.framework */,
 				B343424C1FA16BE61F5425E7 /* PersonaToolkit-visionOS.framework */,
 				8DCDE34330F80973EDF38AB3 /* PersonaToolkit-watchOS.framework */,
+				1A2C8202D682E3CAFB46F25A /* PersonaToolkitTests-macOS.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -384,6 +450,15 @@
 				EF9F469C27C8EC353BC91C96 /* ObservingPoint.swift */,
 			);
 			path = Hooks;
+			sourceTree = "<group>";
+		};
+		A7C26BA0A94055D5D8B329F9 /* PersonaToolkitTests */ = {
+			isa = PBXGroup;
+			children = (
+				41B89D18C52A6A0396E2E523 /* PersonaChatCoordinatorTests.swift */,
+				7CEC67A741BD73726FF4B84B /* TestSupport.swift */,
+			);
+			path = PersonaToolkitTests;
 			sourceTree = "<group>";
 		};
 		AB6046E30D76A3B274B8AA81 /* Chat */ = {
@@ -404,6 +479,14 @@
 				3CFA16BBF754017ED4007EDB /* DisplayConfig.swift */,
 			);
 			path = Configuration;
+			sourceTree = "<group>";
+		};
+		CD7A07F16FADC3AB54057BAA /* Tests */ = {
+			isa = PBXGroup;
+			children = (
+				A7C26BA0A94055D5D8B329F9 /* PersonaToolkitTests */,
+			);
+			path = Tests;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -460,6 +543,26 @@
 			productReference = B343424C1FA16BE61F5425E7 /* PersonaToolkit-visionOS.framework */;
 			productType = "com.apple.product-type.framework";
 		};
+		590653D88E5C6FA0FA3B5706 /* PersonaToolkitTests-macOS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B6664E3EFF4B201B97A632FA /* Build configuration list for PBXNativeTarget "PersonaToolkitTests-macOS" */;
+			buildPhases = (
+				3BE05D36A7AE543D3AE1747F /* Sources */,
+				32397BDCDB5867FF3BBC7741 /* Frameworks */,
+				AE6D1543EDA5F18DB43D4065 /* Embed Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				B4D2260C80373974A58AFCEE /* PBXTargetDependency */,
+			);
+			name = "PersonaToolkitTests-macOS";
+			packageProductDependencies = (
+			);
+			productName = "PersonaToolkitTests-macOS";
+			productReference = 1A2C8202D682E3CAFB46F25A /* PersonaToolkitTests-macOS.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		D465D29E144A622FBECD080E /* PersonaToolkit-watchOS */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 0F9E38C38AAD18183EBDFA12 /* Build configuration list for PBXNativeTarget "PersonaToolkit-watchOS" */;
@@ -502,10 +605,9 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 1430;
-				TargetAttributes = {
-				};
 			};
 			buildConfigurationList = A71D8DC89FDAB034E303F316 /* Build configuration list for PBXProject "PersonaToolkit" */;
+			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -515,7 +617,6 @@
 			mainGroup = 7C1E26BD282B33A65A6D49BD;
 			minimizedProjectReferenceProxies = 1;
 			preferredProjectObjectVersion = 77;
-			productRefGroup = 8C36775C2CE31CC3486BDCFA /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -524,6 +625,7 @@
 				045C9AD9239BB066F6F22C93 /* PersonaToolkit-tvOS */,
 				47F44DDB04F4B88FFA15455C /* PersonaToolkit-visionOS */,
 				D465D29E144A622FBECD080E /* PersonaToolkit-watchOS */,
+				590653D88E5C6FA0FA3B5706 /* PersonaToolkitTests-macOS */,
 			);
 		};
 /* End PBXProject section */
@@ -568,10 +670,21 @@
 				B23DD5FEC963D899C78E2B63 /* PermissionDecision.swift in Sources */,
 				A4128C25A4753C59F0F0A7F9 /* PermissionPrompt.swift in Sources */,
 				59860BF9770D24CB5B49BDF2 /* PermissionStore.swift in Sources */,
+				62725EE510AE0865573C9804 /* PersonaChatCoordinator.swift in Sources */,
 				F5BA8EECAE508663A88A8D60 /* ReadReceipt.swift in Sources */,
+				DDF33BCCAC240AA5699EC698 /* SSEParser.swift in Sources */,
 				8D24E9FE14E64D11C3E40652 /* Skill.swift in Sources */,
 				227C21D5618D715FEBF09959 /* Tool.swift in Sources */,
 				8D0E382ECCC14557B7A272D3 /* WidgetResponse.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3BE05D36A7AE543D3AE1747F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				517ABC99312C419889AA8A50 /* PersonaChatCoordinatorTests.swift in Sources */,
+				2A6FB7AFF9D558B4E84D94A8 /* TestSupport.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -614,7 +727,9 @@
 				9083A61C40C9FE97A2E98B97 /* PermissionDecision.swift in Sources */,
 				2701F892BFB624CC5F9552F2 /* PermissionPrompt.swift in Sources */,
 				2A0860E381B4222724DB4919 /* PermissionStore.swift in Sources */,
+				0DFF1A2BEA38C67A87E221E4 /* PersonaChatCoordinator.swift in Sources */,
 				771A84884961ED3DF9A9A34D /* ReadReceipt.swift in Sources */,
+				FA781423900A13B03077DB46 /* SSEParser.swift in Sources */,
 				4314BCD552DF45B9C306195C /* Skill.swift in Sources */,
 				5E4F4FE207AFD9A17809165C /* Tool.swift in Sources */,
 				C9AED84C9E9339CC8647BB9A /* WidgetResponse.swift in Sources */,
@@ -660,7 +775,9 @@
 				F4AC0F825F894C82291E28F4 /* PermissionDecision.swift in Sources */,
 				F975427F31A89B7CD3503298 /* PermissionPrompt.swift in Sources */,
 				F33314DEAD073EB3483F94A1 /* PermissionStore.swift in Sources */,
+				01B4119F61910AFE61B9962F /* PersonaChatCoordinator.swift in Sources */,
 				36CDC20913A85F6C52B94344 /* ReadReceipt.swift in Sources */,
+				492A1692883A3B7E32B6D3D5 /* SSEParser.swift in Sources */,
 				8FEB07730AC45F0C20ECDE0F /* Skill.swift in Sources */,
 				9A856D300A84370A8E5E95D4 /* Tool.swift in Sources */,
 				C7C3D66F78A0FD33D27B296D /* WidgetResponse.swift in Sources */,
@@ -706,7 +823,9 @@
 				4FFD75BD41F26A5697C2650E /* PermissionDecision.swift in Sources */,
 				BE79884734141401EEAE220A /* PermissionPrompt.swift in Sources */,
 				E2F2BF6A78E560C123097589 /* PermissionStore.swift in Sources */,
+				7E759D7A77908B4E14E2AA1C /* PersonaChatCoordinator.swift in Sources */,
 				0FF90ACB1DB750C91003886D /* ReadReceipt.swift in Sources */,
+				96CFCC58A4A942F15F58196D /* SSEParser.swift in Sources */,
 				B369D4E692EEE0593F5D08A7 /* Skill.swift in Sources */,
 				154F0BEF15D0074AF514DD47 /* Tool.swift in Sources */,
 				806570859154E86D14BE7657 /* WidgetResponse.swift in Sources */,
@@ -752,7 +871,9 @@
 				87D276DDC63281C904136E7C /* PermissionDecision.swift in Sources */,
 				1D772B911D18647873169D67 /* PermissionPrompt.swift in Sources */,
 				238CCEAD87D0D759AE7C9396 /* PermissionStore.swift in Sources */,
+				6339B841D5E774F9457617D8 /* PersonaChatCoordinator.swift in Sources */,
 				12A0F27169F4A586F13B8E61 /* ReadReceipt.swift in Sources */,
+				326FA02F2281D30F690A17D6 /* SSEParser.swift in Sources */,
 				58D1DA8E2C758E792E99C598 /* Skill.swift in Sources */,
 				B5C1F546D7161A306FA21467 /* Tool.swift in Sources */,
 				4A2FDDC224A8684020A4E1D7 /* WidgetResponse.swift in Sources */,
@@ -760,6 +881,14 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		B4D2260C80373974A58AFCEE /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 08FF15C05FC615D83054E547 /* PersonaToolkit-macOS */;
+			targetProxy = 4B40AA5515F288E9240B1F0E /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		02F1A74C73992A7E8629A579 /* Release */ = {
@@ -855,6 +984,22 @@
 				XROS_DEPLOYMENT_TARGET = 1.0;
 			};
 			name = Debug;
+		};
+		330B5E150DE074B91B90AE03 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.mikefullerton.PersonaToolkit.tests.macos;
+				SDKROOT = macosx;
+			};
+			name = Release;
 		};
 		332DADCD721A84D95CA8B8F9 /* Release */ = {
 			isa = XCBuildConfiguration;
@@ -1119,6 +1264,22 @@
 			};
 			name = Debug;
 		};
+		FE55CEE09325107318DFCF4F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.mikefullerton.PersonaToolkit.tests.macos;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -1163,6 +1324,15 @@
 			buildConfigurations = (
 				6760711EBCC7D72FF1845EF8 /* Debug */,
 				D34415591990DF82797CF94B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		B6664E3EFF4B201B97A632FA /* Build configuration list for PBXNativeTarget "PersonaToolkitTests-macOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				FE55CEE09325107318DFCF4F /* Debug */,
+				330B5E150DE074B91B90AE03 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;

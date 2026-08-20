@@ -3,7 +3,7 @@ id: 412B845B-7496-4347-A710-1BD29325C1BE
 title: "Persona Chat Coordinator"
 domain: agenticdevelopertoolkit://ingredients/chat/persona-chat-coordinator
 type: ingredient
-version: 1.0.0
+version: 1.1.0
 status: draft
 language: en
 created: 2026-08-20
@@ -126,8 +126,10 @@ knowledge and must not acquire any.
   coordinator MUST own its own cancellation handle rather than binding directly
   to a caller-supplied one, so that `destroy` remains authoritative when a caller
   signal is also present.
-- **ci-forward-caller-signal**: A caller-supplied cancellation signal MUST also
-  cancel the in-flight turn, including when it is already cancelled at call time.
+- **ci-no-reuse-after-destroy**: Once destroyed, a coordinator is spent. A
+  subsequent `send` MUST fail immediately and MUST NOT reach the network, so a
+  caller that keeps a stale reference gets an error rather than a turn whose
+  events nothing is listening for.
 
 ### Status
 
@@ -173,7 +175,7 @@ control can announce turn progress; announcement is the control's concern.
 | pcc-012 | ci-error-terminal | Tokens then `error` | `messageFailed`, no `messageReceived` |
 | pcc-013 | ci-in-band-errors | HTTP 200 with `error` event | Treated as failure |
 | pcc-014 | ci-destroy-authoritative | `destroy` mid-stream | Request cancelled, `draftCleared`, no `messageReceived` |
-| pcc-015 | ci-forward-caller-signal | Already-cancelled signal passed to `send` | Turn cancelled immediately |
+| pcc-015 | ci-no-reuse-after-destroy | `send` after `destroy` | Throws; no request issued |
 | pcc-016 | ci-status-out-of-band | `status` event, phase `retrying` | Status sink receives retry phase; no `InboundEvent` emitted |
 
 Each vector MUST be observed failing for its stated reason before it is trusted.
@@ -324,3 +326,4 @@ rule. The real fix is an invocation id on the wire, which is an adh change.
 | Version | Date | Author | Summary |
 |---------|------|--------|---------|
 | 1.0.0 | 2026-08-20 | Mike Fullerton | Initial creation |
+| 1.1.0 | 2026-08-20 | Mike Fullerton | Replaced `ci-forward-caller-signal` with `ci-no-reuse-after-destroy`. The original requirement was unimplementable as written: `Backend.send` takes no cancellation signal, so there is no caller signal to forward. `ci-destroy-authoritative` already carries the cancellation guarantee; what was untested was the state a destroyed coordinator is left in. Re-pointed `pcc-015` accordingly. |

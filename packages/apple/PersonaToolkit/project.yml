@@ -29,6 +29,18 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.mikefullerton.PersonaToolkit.lib.macos
         PRODUCT_NAME: PersonaToolkit
 
+  PersonaToolkitTests-macOS:
+    type: bundle.unit-test
+    platform: macOS
+    sources:
+      - path: Tests
+    dependencies:
+      - target: PersonaToolkit-macOS
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.mikefullerton.PersonaToolkit.tests.macos
+        GENERATE_INFOPLIST_FILE: YES
+
   PersonaToolkit-iOS:
     type: framework
     platform: iOS
@@ -76,6 +88,11 @@ schemes:
     build:
       targets:
         PersonaToolkit-macOS: all
+        PersonaToolkitTests-macOS: [test]
+    test:
+      config: Debug
+      targets:
+        - PersonaToolkitTests-macOS
     run:
       config: Debug
   PersonaToolkit-iOS:

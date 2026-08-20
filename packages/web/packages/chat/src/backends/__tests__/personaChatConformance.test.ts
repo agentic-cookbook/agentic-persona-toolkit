@@ -281,12 +281,18 @@ describe('persona-chat-coordinator conformance', () => {
 
     f.backend.destroy()
     expect(seen!.aborted).toBe(true)
+
+    // The half-written draft is retracted on the way out, and the fragment
+    // the persona had produced so far is not committed as its answer.
+    const rest = await f.drained()
+    expect(rest.map((e) => e.kind)).toEqual(['draftCleared'])
   })
 
-  it('pcc-015 ci-forward-caller-signal: reuse after destroy fails fast', async () => {
+  it('pcc-015 ci-no-reuse-after-destroy: reuse after destroy fails fast', async () => {
     const f = fixture(() => sse(hello))
     f.backend.destroy()
     await expect(f.backend.send('hi', [])).rejects.toThrow(/destroyed/i)
+    expect(f.calls).toEqual([])
   })
 
   it('pcc-016 ci-status-out-of-band: a retry drives status, never the transcript', async () => {

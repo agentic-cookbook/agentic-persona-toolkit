@@ -127,6 +127,10 @@ export class PersonaChatBackend implements Backend {
   destroy(): void {
     this.destroyed = true
     this.controller?.abort()
+    // Emitted here rather than left to the aborted turn's own cleanup: the
+    // abort unwinds asynchronously, and the queue closes on the next line.
+    // A surface holding a half-written draft would otherwise keep it forever.
+    this.queue.push({ kind: 'draftCleared', participantID: this.participantID })
     this.queue.close()
   }
 
