@@ -3,7 +3,7 @@ id: 412B845B-7496-4347-A710-1BD29325C1BE
 title: "Persona Chat Coordinator"
 domain: agenticdevelopertoolkit://ingredients/chat/persona-chat-coordinator
 type: ingredient
-version: 1.1.0
+version: 1.2.0
 status: draft
 language: en
 created: 2026-08-20
@@ -268,11 +268,19 @@ level. It MUST NOT persist message content locally.
   `AsyncBytes.lines` collapses blank lines, which SSE uses as its block
   separator, so a line splitter that preserves them is required.
 
-- **Kotlin / Compose (Android)** — `inboundEvents` is a cold `Flow<InboundEvent>`.
-  Cancellation is the enclosing coroutine scope. Planned; not yet implemented.
+- **Kotlin / Compose (Android)** — `inboundEvents` is a `Flow<InboundEvent>`
+  backed by `Channel(UNLIMITED).receiveAsFlow()`. It is a push source, so it must
+  not be a cold `Flow` — a cold one restarts its producer per collector, which
+  would start a second conversation. Cancellation is a coordinator-owned
+  `CoroutineScope`, not the caller's. Planned; see
+  `docs/planning/ports/android-coordinator.md`.
 
-- **Windows** — `inboundEvents` is an `IAsyncEnumerable<InboundEvent>`.
-  Cancellation is `CancellationToken`. Planned; not yet implemented.
+- **Windows** — `inboundEvents` is an `IAsyncEnumerable<InboundEvent>` over a
+  `Channel<InboundEvent>`. Cancellation is a coordinator-owned
+  `CancellationTokenSource`; `send` takes no `CancellationToken`, because the
+  contract has no signal parameter to forward. `HttpClient` must be called with
+  `HttpCompletionOption.ResponseHeadersRead` or nothing streams. Planned; see
+  `docs/planning/ports/windows-coordinator.md`.
 
 ## Design Decisions
 
@@ -326,4 +334,5 @@ rule. The real fix is an invocation id on the wire, which is an adh change.
 | Version | Date | Author | Summary |
 |---------|------|--------|---------|
 | 1.0.0 | 2026-08-20 | Mike Fullerton | Initial creation |
+| 1.2.0 | 2026-08-20 | Mike Fullerton | Rewrote the Kotlin and Windows platform notes to match the port plans in `docs/planning/ports/`. The Kotlin note called for a cold `Flow`, which cannot express a push source; the Windows note called for `CancellationToken`, which the contract has no parameter to carry. |
 | 1.1.0 | 2026-08-20 | Mike Fullerton | Replaced `ci-forward-caller-signal` with `ci-no-reuse-after-destroy`. The original requirement was unimplementable as written: `Backend.send` takes no cancellation signal, so there is no caller signal to forward. `ci-destroy-authoritative` already carries the cancellation guarantee; what was untested was the state a destroyed coordinator is left in. Re-pointed `pcc-015` accordingly. |

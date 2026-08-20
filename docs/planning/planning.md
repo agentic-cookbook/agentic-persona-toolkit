@@ -37,9 +37,17 @@ here.
    not a redesign.
 4. **The coordinator package does not exist yet.** It is what M1 builds.
 
-## Open decision (paused — "let's circle back")
+## Settled decision — A1
 
-How is orchestration split between the registry and the coordinator?
+**Chosen: A1.** The registry and storage are both folded into the adh monorepo
+(`~/Development/projects/adh/adh`), which removes A2's main argument — there is
+no cross-service credential to avoid when the two services are one. adh
+orchestrates; the coordinator relays.
+
+The two options are kept below as written at the time, because the ingredient
+spec's Design Decisions reference the trade-off.
+
+### How it was split (historical)
 
 ### Option A1 — Registry orchestrates, coordinator is thin
 
@@ -72,11 +80,16 @@ milestones arrive.
 **Cons:** two browser-side network paths per turn; coordinator must handle
 streaming choreography itself.
 
-### Tentative recommendation
+### Why A1 won
 
-A2 — keeps the services decoupled and consolidates orchestration so it can be
-reused by later platform ports. Pending user confirmation before proceeding to
-spec.
+A2's whole case was decoupling: neither service holding a credential to the
+other. Folding the registry and storage into one deployment made that a
+non-issue, and A1's one-round-trip-per-turn and zero-backend-required
+properties survived. The cost — a thin coordinator — turned out to be the
+point: three of the four platform ports are a few hundred lines each precisely
+because there is nothing to orchestrate client-side.
+
+Specified in `docs/specs/ingredients/persona-chat-coordinator.md`.
 
 ## Milestones
 
@@ -87,7 +100,7 @@ spec.
 | M3 | A Claude skill (or set of skills) for creating personas. A skill that populates persona info into the registry. | Builds on the registry contract M1 establishes. |
 | M4 | A whimsical name + bio generator. | Pure feature add. The bones of this work started life as `personacreator`. |
 | M5 | Absorb `personacreator` (Python lib + Claude skill) into this repo. | Coordinate with that project's owner; not blocking. |
-| M6 | Apple, Windows, and Android coordinator ports. | Wait until the web shape proves out in M1–M3. |
+| M6 | Apple, Windows, and Android coordinator ports. | Apple shipped. Windows and Android are planned in [`ports/`](ports/) and not started. |
 
 ## Test bed
 
@@ -101,11 +114,16 @@ storage.
 
 ## Next steps
 
-1. User decides A1 vs A2 (or proposes a third).
-2. Spec is written to `docs/superpowers/specs/YYYY-MM-DD-m1-design.md` and
-   reviewed.
-3. Implementation plan via `superpowers:writing-plans`.
-4. Implementation.
+1. ~~User decides A1 vs A2.~~ Settled: A1.
+2. ~~Spec.~~ Written as an ingredient
+   (`docs/specs/ingredients/persona-chat-coordinator.md`) and a recipe
+   (`docs/specs/recipes/persona-chat.md`) rather than a dated design doc, so
+   each platform port derives from the same conformance vectors.
+3. ~~TypeScript and Swift implementations.~~ Both ship, both proved against the
+   vectors by mutation testing.
+4. Switch `learntruefacts/sites/main` off the vendored toolkit and onto a real
+   apt dependency — the remaining M1 success criterion.
+5. Windows and Android ports, per [`ports/`](ports/).
 
 ## See also
 

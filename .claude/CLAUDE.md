@@ -10,7 +10,12 @@ README: [`README.md`](../README.md).
 
 ## Ecosystem map
 
-- **`~/Development/projects/agenticregistry`** — registry service. Has
+- **`~/Development/projects/adh/adh`** — the monorepo the registry and
+  storage are now folded into, and the chat backend the coordinator talks
+  to. Chat API at `backend/src/adh/src/routes/chat.ts`; prompt assembly and
+  provider calls at `llm/service.ts`; history at `llm/persistence.ts`.
+- **`~/Development/projects/agenticregistry`** — registry service, now
+  folded into adh. Has
   per-user persona services (Anthropic / OpenAI / Gemini), provider
   integrations at `web/backend/src/lib/providers/`, persona records with
   `slug`, `modelPrompt`, `voice`, `character`, `examples`, `serviceId`,
@@ -31,8 +36,9 @@ README: [`README.md`](../README.md).
 ## M1 scope (the only milestone designed so far)
 
 1. Relocate `agentic-web-toolkit/packages/features/chat/` into this repo.
-2. Build the coordinator package — the glue between the chat UI's
-   `ChatBackend` interface and the registry + storage pair.
+2. Build the coordinator package — the glue between the chat UI's `Backend`
+   contract and adh's chat API. Done: `PersonaChatBackend` (TypeScript) and
+   `PersonaChatCoordinator` (Swift).
 3. Switch `learntruefacts/sites/main/` from the vendored toolkit to a real
    apt dependency.
 
@@ -41,20 +47,22 @@ persona-authoring skills, registry population skills, a whimsical name/bio
 generator, absorbing `personacreator`, and Apple/Windows/Android coordinator
 ports. Each gets its own design spec when its turn comes.
 
-## Open architectural decision (paused)
+## Settled: A1 — the server orchestrates, the client relays
 
-Where does chat orchestration live?
+Chat orchestration lives in adh (`~/Development/projects/adh/adh`, which
+folds in both the registry and storage). adh resolves the persona, assembles
+the prompt, reads and writes history, calls the provider, and streams the
+reply as SSE. The coordinator holds no history, no credentials, and no
+prompt.
 
-- **A1** — registry orchestrates a `POST /api/personas/:slug/chat` endpoint
-  that handles persona lookup, history read/write to storage, and provider
-  call. Coordinator is a thin client.
-- **A2** — registry exposes a stateless `POST /api/personas/:slug/complete`.
-  Coordinator package implements `ChatBackend`, reads history from storage,
-  calls registry's `complete`, writes the new turn back to storage.
+The clearest evidence is in the contract itself: `Backend.send` receives only
+the new message. There is no history parameter anywhere, because history is
+not the client's to carry. Do not add one.
 
-A2 was the tentative recommendation in brainstorming, not yet confirmed by
-the user. **Do not write the design spec or scaffold the coordinator package
-until the user picks one.** This is the brainstorming HARD-GATE.
+Specified in `docs/specs/ingredients/persona-chat-coordinator.md`
+(`ci-no-history`) and `docs/specs/recipes/persona-chat.md`. Shipped in
+TypeScript and Swift; Windows and Android are planned in
+`docs/planning/ports/`.
 
 ## Tech stack
 
@@ -75,8 +83,8 @@ there. See `AGENTS.md` at the repo root for the layout map.
 | Web (TS) | `packages/web/` | `package.json` (pnpm workspace) |
 | Apple | `packages/apple/` | `Package.swift` + `project.yml` |
 | Terminal (Python) | `packages/terminal/` | `pyproject.toml` |
-| Android | `packages/android/` | (TBD, placeholder) |
-| Windows | `packages/windows/` | (TBD, placeholder) |
+| Android | `packages/android/` | (Gradle — planned, see `docs/planning/ports/`) |
+| Windows | `packages/windows/` | (`.csproj` — planned, see `docs/planning/ports/`) |
 | Demo site | `websites/demo/` | `package.json` |
 
 ## Web workspace: `packages/web/`
@@ -131,9 +139,12 @@ cd packages/web && pnpm test
 - Follow the user's global instructions (see `~/.claude/CLAUDE.md`):
   Python over Bash for scripts, no `git add -A`, commit only what was
   touched in the session, ask before pull/merge/rebase/etc.
-- The chat package's HTTP contract is fixed by what already exists: POST
-  `{ message, history }` and either return `{ reply: string }` or stream
-  `ChatStreamEvent` values. Do not redesign that.
+- The chat package's wire contract is adh's: POST `{ message }` to a
+  conversation, response is an SSE stream (`open`, `token`,
+  `tool_call_started`, `tool_call_completed`, `done`, `error`, plus
+  out-of-band `status`). No history on the wire — see the A1 section above.
+  The older `{ message, history }` / `ChatStreamEvent` shape survives only in
+  `ChatBackendAdapter`, for callers not yet migrated.
 - `learntruefacts` is the test bed. New apt features must demonstrate
   themselves in `learntruefacts/sites/main` before being considered done.
 

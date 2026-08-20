@@ -17,8 +17,8 @@ system** — its conventional manifest file lives there.
 | Web (TS) | `packages/web/` | `package.json` (pnpm workspace) | active |
 | Apple | `packages/apple/` | `Package.swift` + `project.yml` | active |
 | Terminal (Python) | `packages/terminal/` | `pyproject.toml` | active |
-| Android | `packages/android/` | (TBD) | placeholder |
-| Windows | `packages/windows/` | (TBD) | placeholder |
+| Android | `packages/android/` | (Gradle, planned) | [port plan](docs/planning/ports/android-coordinator.md) |
+| Windows | `packages/windows/` | (`.csproj`, planned) | [port plan](docs/planning/ports/windows-coordinator.md) |
 | Demo site | `websites/demo/` | `package.json` | active |
 
 The web platform is a pnpm workspace; its libraries live under
