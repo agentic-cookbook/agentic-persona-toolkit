@@ -1,6 +1,7 @@
 import type { Attachment } from '../attachments/Attachment'
 import type { InteractiveWidget } from '../attachments/InteractiveWidget'
 import type { WidgetResponse } from '../attachments/WidgetResponse'
+import type { ActiveCommand } from '../commands/ActiveCommand'
 import type { Command } from '../commands/Command'
 import type { Conversation } from '../messages/Conversation'
 import type { Message } from '../messages/Message'
@@ -36,6 +37,14 @@ export interface ChatViewModel {
    * themselves.
    */
   readonly activeDrafts: ReadonlyArray<ActiveDraft>
+
+  /**
+   * Commands invoked during the current turn, running or finished.
+   * Cleared when the invoking participant's turn ends. Command activity
+   * is its own channel — it never appears in `messages` or in an
+   * `ActiveDraft`.
+   */
+  readonly activeCommands: ReadonlyArray<ActiveCommand>
 
   addObserver(observer: ChatStateObserver): void
   removeObserver(observer: ChatStateObserver): void

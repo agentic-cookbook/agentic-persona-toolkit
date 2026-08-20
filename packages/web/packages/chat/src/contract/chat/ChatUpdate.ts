@@ -4,6 +4,7 @@ export type ChatUpdate =
   | { readonly kind: 'typingChanged' }
   | { readonly kind: 'readMarkersChanged' }
   | { readonly kind: 'activeDraftsChanged' }
+  | { readonly kind: 'activeCommandsChanged' }
   | { readonly kind: 'pendingPermissionsChanged' }
   | { readonly kind: 'pendingWidgetsChanged' }
   | { readonly kind: 'displayConfigChanged' }

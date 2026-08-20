@@ -6,6 +6,7 @@ import type { InboundEvent } from '../contract/backend/InboundEvent'
 import type { ActiveDraft } from '../contract/chat/ActiveDraft'
 import type { ChatStateObserver } from '../contract/chat/ChatStateObserver'
 import type { ChatUpdate } from '../contract/chat/ChatUpdate'
+import type { ActiveCommand } from '../contract/commands/ActiveCommand'
 import type { Command } from '../contract/commands/Command'
 import type { ChatConfig } from '../contract/configuration/ChatConfig'
 import type { DisplayConfig } from '../contract/configuration/DisplayConfig'
@@ -38,6 +39,7 @@ export class DefaultOrchestrator implements Orchestrator {
   typingParticipants: ReadonlyArray<string> = []
   readMarkers: ReadonlyArray<ReadReceipt> = []
   activeDrafts: ReadonlyArray<ActiveDraft> = []
+  activeCommands: ReadonlyArray<ActiveCommand> = []
 
   readonly permissionStore: PermissionStore
 
@@ -244,7 +246,32 @@ export class DefaultOrchestrator implements Orchestrator {
 
       case 'draftCleared':
         this.clearDraftFor(event.participantID)
+        this.clearCommandsFor(event.participantID)
         return
+
+      case 'commandInvoked':
+        this.activeCommands = [
+          ...this.activeCommands,
+          { participantID: event.participantID, invocation: event.invocation },
+        ]
+        this.notify({ kind: 'activeCommandsChanged' })
+        return
+
+      case 'commandCompleted': {
+        const idx = this.activeCommands.findIndex(
+          (c) => c.invocation.id === event.result.invocationID,
+        )
+        // A result for an invocation we never saw is dropped rather than
+        // synthesised — inventing the invocation would put a command in the
+        // UI with no arguments to show.
+        const open = this.activeCommands[idx]
+        if (!open) return
+        const copy = this.activeCommands.slice()
+        copy[idx] = { ...open, result: event.result }
+        this.activeCommands = copy
+        this.notify({ kind: 'activeCommandsChanged' })
+        return
+      }
 
       case 'participantJoined': {
         const existing = this.participants.findIndex((p) => p.id === event.participant.id)
@@ -312,6 +339,17 @@ export class DefaultOrchestrator implements Orchestrator {
     if (!this.activeDrafts.some((d) => d.participantID === participantID)) return
     this.activeDrafts = this.activeDrafts.filter((d) => d.participantID !== participantID)
     this.notify({ kind: 'activeDraftsChanged' })
+  }
+
+  /**
+   * Command activity belongs to the turn that produced it. When the turn
+   * ends, anything still running is dropped rather than left pinned in the
+   * UI forever.
+   */
+  private clearCommandsFor(participantID: string): void {
+    if (!this.activeCommands.some((c) => c.participantID === participantID)) return
+    this.activeCommands = this.activeCommands.filter((c) => c.participantID !== participantID)
+    this.notify({ kind: 'activeCommandsChanged' })
   }
 
   private upsertReadMarker(participantID: string, upToMessageID: string, at: Date): void {

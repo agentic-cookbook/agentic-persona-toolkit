@@ -22,6 +22,7 @@ export type { ReadReceipt } from './messages/ReadReceipt'
 export type { Backend } from './backend/Backend'
 export type { InboundEvent } from './backend/InboundEvent'
 
+export type { ActiveCommand } from './commands/ActiveCommand'
 export type { Command } from './commands/Command'
 export type { CommandInvocation } from './commands/CommandInvocation'
 export type { CommandInvoker } from './commands/CommandInvoker'
