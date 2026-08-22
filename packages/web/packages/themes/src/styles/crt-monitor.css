@@ -421,9 +421,14 @@ body::after {
     inset 0 0 90px -30px rgba(0, 255, 65, 0.18);
 }
 
-/* The roll bar — one bright band drifting down the tube, the way a CRT slightly
- * out of sync with its source shows. Drawn inside the chat so the chat's own
- * `overflow: hidden` and radius clip it to the screen. */
+/* The roll bar — one band drifting down the tube, the way a CRT slightly out of
+ * sync with its source shows. Drawn inside the chat so the chat's own
+ * `overflow: hidden` and radius clip it to the screen.
+ *
+ * Both stops are at HALF the strength they started at. A roll bar is a defect
+ * being quoted, not an effect: at the point where a reader notices the sweep
+ * they are watching the furniture instead of the transcript, and the band has
+ * to cross the text to be seen at all. Barely-there is the whole brief. */
 .persona-chat::after {
   content: '';
   position: absolute;
@@ -435,8 +440,8 @@ body::after {
   z-index: 4;
   background: linear-gradient(to bottom,
     transparent,
-    rgba(0, 255, 65, 0.05) 42%,
-    rgba(255, 255, 255, 0.035) 55%,
+    rgba(0, 255, 65, 0.025) 42%,
+    rgba(255, 255, 255, 0.017) 55%,
     transparent);
   animation: crt-roll 8.5s linear infinite;
 }
