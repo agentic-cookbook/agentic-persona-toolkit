@@ -38,30 +38,55 @@
   /* Dingy moulded plastic — the grey-green of a case that has been in service
    * for twenty years under fluorescent light. The grime layers on the cabinet
    * do the rest; a clean gradient in these colours just looks like a mistake. */
-  --crt-shell: #6d6b5c;
-  --crt-shell-hi: #9a9784;
-  --crt-shell-lo: #3a382e;
-  --crt-grime: rgba(28, 22, 10, 0.5);
-  --crt-brass: #c69a5c;
-  --crt-brass-lit: #e9c78f;
-  --crt-brass-dim: rgba(198, 154, 92, 0.5);
-  --crt-bezel-x: 40px;
-  --crt-bezel-top: 34px;
+  --crt-shell: #4c4a3c;
+  --crt-shell-hi: #5a5748;
+  --crt-shell-lo: #2f2c20;
+  --crt-grime: rgba(20, 16, 6, 0.62);
+  --crt-brass: #6f6042;
+  --crt-brass-lit: #877554;
+  --crt-brass-dim: rgba(141, 122, 85, 0.5);
+  --crt-bezel-x: 18px;
+  --crt-bezel-top: 16px;
   /* The bottom bezel holds the switch box, and is what the glass overlay is
    * inset by — one number doing both jobs, so the glass lands on the screen
    * without either measurement having to know about the other. */
-  --crt-bezel-bottom: 78px;
+  --crt-bezel-bottom: 58px;
   /* The switch box in the bottom bezel, and how far it floats off the cabinet's
    * bottom edge. Everything else down there measures against these two. */
-  --crt-switch-h: 34px;
-  --crt-switch-drop: 12px;
-  --crt-shell-radius: 26px;
+  --crt-switch-h: 30px;
+  --crt-switch-drop: 8px;
+  --crt-shell-radius: 18px;
   /* Elliptical, and in PERCENT: a picture tube is a section of a sphere, so its
    * corners round in proportion to the glass rather than at some fixed radius,
    * and they round more vertically than horizontally on a wide screen. The two
    * elements that wear this — the chat and the glass overlay — have the same
    * box, so one token resolves to the same curve on both. */
-  --crt-screen-radius: 6% / 13%;
+  /* The tube face. Both numbers are LENGTHS, not percentages, and that is the
+   * whole lesson: a percentage radius scales with the box, so on a composer
+   * that is six times wider than it is tall the corners swallow the edges and
+   * the screen comes out an ellipse. Curvature is a property of the glass, not
+   * of the aspect ratio.
+   *
+   * `--crt-screen-radius` is the fallback silhouette — rounded corners, straight
+   * edges. `--crt-screen-shape` is the real one, for browsers with CSS Shapes 2:
+   * every edge is one arc that sits 12px inside the box at the corners and
+   * reaches within 2px of it at the middle, so the face bows the way a tube's
+   * does. The control points sit OUTSIDE the box on purpose — a clip cannot
+   * paint past the element, so the overshoot is what flattens the middle of
+   * each edge against the true edge instead of leaving it rounded. */
+  --crt-screen-radius: 30px / 26px;
+  --crt-screen-shape: shape(
+    from 34px 12px,
+    curve to calc(100% - 34px) 12px with 50% -8px,
+    curve to calc(100% - 12px) 34px with calc(100% - 14px) 14px,
+    curve to calc(100% - 12px) calc(100% - 34px) with calc(100% + 8px) 50%,
+    curve to calc(100% - 34px) calc(100% - 12px) with calc(100% - 14px) calc(100% - 14px),
+    curve to 34px calc(100% - 12px) with 50% calc(100% + 8px),
+    curve to 12px calc(100% - 34px) with 14px calc(100% - 14px),
+    curve to 12px 34px with -8px 50%,
+    curve to 34px 12px with 14px 14px,
+    close
+  );
 
   /* The speaker gutter. `--crt-gutter` is the whole column: icon plus the space
    * after it, and it is what both bubbles are indented by, so the two speakers
@@ -70,18 +95,14 @@
    * the bitmap stops being crisp. */
   --crt-avatar-size: 24px;
   --crt-gutter: 34px;
-  /* How far the glass bows the text in. See "The curve of the glass" below —
-   * this is the float's full width, of which everything past `--crt-gutter` is
-   * the visible bow. */
-  --crt-bow: 58px;
-  /* A tube is a fixed piece of glass, so the screen is a fixed size and the
-   * transcript scrolls inside it rather than the cabinet growing. That is also
-   * what makes the bow possible: the float that carries the arc is `height:
-   * 100%`, and a percentage height needs an ancestor height to resolve against
-   * — against an auto-height transcript it collapses to nothing and the text
-   * comes out flat. */
-  --crt-screen-h: 250px;
   --crt-avatar: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%208%208'%3E%3Cpath%20d='M2%200h4v1H2zM1%201h6v1H1zM0%202h8v1H0zM0%203h2v1H0zM3%203h2v1H3zM6%203h2v1H6zM0%204h8v1H0zM0%205h2v1H0zM6%205h2v1H6zM1%206h6v1H1zM2%207h4v1H2z'%20fill='%23fff'/%3E%3C/svg%3E");
+
+  /* Clearance from the tube's edge to the first character. The screen's corners
+   * are cut by `--crt-screen-shape`, so a row sitting at the box's own edge
+   * would run under the curve at the top and bottom of the column; this is what
+   * keeps the prompt and the send glyph out from under the glass. It belongs to
+   * the geometry above and moves with it. */
+  --crt-screen-pad: 30px;
   --crt-scanline: rgba(0, 0, 0, 0.26);
 
   /* The activity lamp, idle. `:scope:has()` below swaps both while the persona
@@ -153,7 +174,7 @@ body {
   box-sizing: border-box;
   position: relative;
   padding: var(--crt-bezel-top) var(--crt-bezel-x) var(--crt-bezel-bottom);
-  border: 1px solid rgba(198, 154, 92, 0.4);
+  border: 1px solid rgba(0, 0, 0, 0.55);
   border-radius: var(--crt-shell-radius);
   color: var(--color-text-primary);
   font-family: var(--font-mono);
@@ -183,16 +204,16 @@ body {
     radial-gradient(120% 60% at 62% 104%, rgba(12, 14, 8, 0.5) 0%, transparent 66%),
     /* grime: moulding grain, two angles so it never reads as stripes */
     repeating-linear-gradient(114deg, rgba(0, 0, 0, 0.05) 0 1px, transparent 1px 4px),
-    repeating-linear-gradient(23deg, rgba(255, 255, 255, 0.028) 0 1px, transparent 1px 7px),
-    linear-gradient(158deg, var(--crt-shell-hi) 0%, var(--crt-shell) 44%, var(--crt-shell-lo) 100%);
+    repeating-linear-gradient(23deg, rgba(255, 255, 255, 0.018) 0 1px, transparent 1px 7px),
+    linear-gradient(172deg, var(--crt-shell-hi) 0%, var(--crt-shell) 38%, var(--crt-shell-lo) 100%);
   box-shadow:
-    0 0 130px -40px rgba(0, 255, 65, 0.5),
-    0 0 46px -14px rgba(0, 255, 65, 0.18),
-    0 26px 60px -28px rgba(0, 0, 0, 0.9),
+    0 0 110px -46px rgba(0, 255, 65, 0.32),
+    0 0 40px -18px rgba(0, 255, 65, 0.1),
+    0 22px 54px -30px rgba(0, 0, 0, 0.9),
     /* the shell's own edges dirty first — a dark ring inside the silhouette */
-    inset 0 0 44px -6px rgba(0, 0, 0, 0.55),
-    inset 0 1px 0 rgba(255, 255, 255, 0.13),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.65);
+    inset 0 0 52px -4px rgba(0, 0, 0, 0.65),
+    inset 0 1px 0 rgba(255, 255, 255, 0.035),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.6);
 }
 
 /* The switch box: a recessed panel screwed into the bottom bezel, carrying a
@@ -262,23 +283,31 @@ body::before {
     0 1px 0 rgba(255, 255, 255, 0.09);
 }
 
-/* Lit: the persona is thinking or the reply is still arriving. `.pc-typing` is
- * not in the DOM at all when idle, so `:has()` on it is a real signal rather
- * than a class someone has to remember to clear.
+/* Lit: the persona is thinking or the reply is still arriving.
+ *
+ * NOT `:has(.pc-typing)` — that is the status ROW, and a host that configures
+ * status words keeps it on screen in every phase (idle, running, settled), so
+ * it says "there is a status line", not "the machine is busy". The three
+ * selectors below are the three shapes the busy state actually takes:
+ * `.pc-thinking` without `--done` (the running or speaking line), `.pc-dots`
+ * (the fallback the library renders when no words are configured, which exists
+ * only while a reply is in flight), and a message still streaming in.
  *
  * The values are set statically AND animated. The static set is what actually
  * guarantees a lit lamp: these are unregistered custom properties — the whole
  * theme is wrapped in `@scope` by the host, and `@property` is invalid there —
  * so the keyframes below interpolate discretely, which is the flicker we want
  * but is also the part a browser is likeliest not to support. */
-body:has(.pc-typing),
+body:has(.pc-thinking:not(.pc-thinking--done)),
+body:has(.pc-dots),
 body:has(.pc-message-streaming) {
   --crt-lamp-core: #ffcf72;
   --crt-lamp-mid: rgba(255, 176, 39, 0.55);
   --crt-lamp-halo: rgba(255, 176, 39, 0.22);
 }
 
-body:has(.pc-typing)::before,
+body:has(.pc-thinking:not(.pc-thinking--done))::before,
+body:has(.pc-dots)::before,
 body:has(.pc-message-streaming)::before {
   animation: crt-activity 1.1s steps(1, end) infinite;
 }
@@ -305,11 +334,12 @@ body::after {
   position: absolute;
   inset: var(--crt-bezel-top) var(--crt-bezel-x) var(--crt-bezel-bottom);
   border-radius: var(--crt-screen-radius);
+  clip-path: var(--crt-screen-shape);
   pointer-events: none;
   z-index: 6;
   background-image:
-    linear-gradient(133deg, rgba(255, 255, 255, 0.075) 0%, rgba(255, 255, 255, 0.02) 20%, transparent 44%),
-    radial-gradient(112% 122% at 50% 50%, transparent 40%, rgba(0, 0, 0, 0.66) 100%),
+    linear-gradient(133deg, rgba(255, 255, 255, 0.028) 0%, rgba(255, 255, 255, 0.008) 18%, transparent 38%),
+    radial-gradient(102% 118% at 50% 48%, transparent 30%, rgba(0, 0, 0, 0.5) 70%, rgba(0, 0, 0, 0.94) 100%),
     repeating-linear-gradient(to bottom, var(--crt-scanline) 0 1px, transparent 1px 3px);
   animation: crt-flicker 6.1s steps(1) infinite;
 }
@@ -339,9 +369,10 @@ body::after {
   line-height: 1.5;
   border: none;
   border-radius: var(--crt-screen-radius);
+  clip-path: var(--crt-screen-shape);
   box-shadow:
     /* the brass retaining ring the glass sits in, sunk in a dark groove */
-    0 0 0 1px rgba(198, 154, 92, 0.5),
+    0 0 0 1px rgba(126, 100, 58, 0.45),
     0 0 0 4px rgba(0, 0, 0, 0.5),
     /* phosphor bloom spilling onto the bezel */
     0 0 34px -6px rgba(0, 255, 65, 0.28),
@@ -401,97 +432,37 @@ body::after {
 }
 /* The lamp keeps its lit colours — those are set on the element itself, not by
  * the animation — and stops pulsing. Still a state indicator, no motion. */
-body:has(.pc-typing)::before,
+body:has(.pc-thinking:not(.pc-thinking--done))::before,
+body:has(.pc-dots)::before,
 body:has(.pc-message-streaming)::before {
   animation: none;
 }
 }
 
-/* === The curve of the glass ===
- *
- * A picture tube is a section of a sphere, so its lines are shortest where the
- * glass turns away — at the top and the bottom of the screen — and run widest
- * across the middle. `shape-outside` on a float is the only thing in CSS that
- * bends text per LINE rather than per box, so the transcript grows a float down
- * its left edge whose right boundary is that arc, and the lines wrap to it.
- *
- * That costs the transcript its flex layout: floats do nothing to flex items.
- * `gap` becomes a margin between siblings, and the base rule's
- * `justify-content: flex-end` is simply lost — harmless here, because the
- * transcript is sized by its content on the one surface this ships to, so
- * there is no slack for it to push messages down through. `.pc-bubble` gives
- * up `width: fit-content` as well: a shrink-to-fit box sizes itself to dodge
- * the float wholesale instead of wrapping its lines to it.
- *
- * The bow only bites where the float reaches PAST the icon gutter, since that
- * is where the line boxes already begin. So `--crt-bow` is the whole float and
- * `--crt-bow - --crt-gutter` is the visible arc — 24px of it, about three
- * columns, which is as much as a real tube bends before it looks like a fault. */
-.persona-chat .pc-transcript {
-  display: block;
-  height: var(--crt-screen-h);
-}
-
-.persona-chat .pc-transcript > * + * {
-  margin-top: 12px;
-}
-
-.persona-chat .pc-transcript::before {
-  content: '';
-  float: left;
-  width: var(--crt-bow);
-  height: 100%;
-  shape-outside: polygon(
-    0 0, 100% 0,
-    86% 11%, 71% 26%, 61% 40%,
-    59% 50%,
-    61% 60%, 71% 74%, 86% 89%,
-    100% 100%, 0 100%
-  );
-}
-
-.persona-chat .pc-message {
-  display: block;
-  width: auto;
-}
-
-/* The arc is a fixed number of pixels, so on a phone it eats a much larger share
- * of the line than it does on a desktop. Trim it there — the curve still reads,
- * and three of a phone's forty columns is a lot to spend on it.
- *
- * Flush left for the same reason as the reduced-motion block below: the host's
- * `:root` rewrite is line-anchored and skips an indented selector. */
-@media (max-width: 560px) {
-:root {
-  --crt-bow: 48px;
-}
-}
-
 /* === Who is speaking ===
  *
- * One column, two speakers, and a gutter down the left that holds the speaker's
- * icon. A terminal has one column; a right-aligned bubble is a messenger's
+ * One column, two speakers, and a gutter down the left holding the speaker's
+ * mark. A terminal has one column; a right-aligned bubble is a messenger's
  * idiom and would read as a different machine.
  *
- * Both bubbles are pushed in by the full gutter, and the icon is hung back OUT
- * of it with a negative `text-indent` — so the icon sits at column 0, the first
- * line of text starts at the gutter, and wrapped lines land under the first
- * character rather than under the icon. `margin-left` and not `padding-left`:
- * a consuming site sets `padding: 0` on `.pc-bubble` at equal specificity, and
- * that tie is decided by stylesheet order rather than by intent.
+ * The gutter is PADDING on `.pc-message`, not a margin on the bubble, and the
+ * mark is positioned into it. Three things fall out of that and all three are
+ * the reason for it. Wrapped lines land under the first character with no
+ * negative `text-indent` to undo. The speaker WITHOUT a mark keeps the same
+ * left edge for free, so an empty gutter reads as "you". And the status line
+ * above the input — which the chat library renders as a `.pc-message` with no
+ * avatar — sits on that edge too, without a rule of its own.
  *
- * The user gets the same indent and NO icon, so both speakers' text shares one
- * left edge and the gutter reads as "who said it" — empty means you. */
-.persona-chat .pc-message .pc-bubble {
-  display: block;
-  width: auto;
-  margin-left: var(--crt-gutter);
-  max-width: none;
+ * The mark itself is `.pc-avatar`, which the library renders for every message
+ * (empty when that sender has none) and `base.css` hides. Nothing here is a
+ * pseudo-element standing in for a missing node. */
+.persona-chat .pc-message {
+  justify-content: flex-start;
+  padding-left: var(--crt-gutter);
 }
 
 .persona-chat .pc-message.pc-persona .pc-bubble {
   color: var(--pc-persona-text);
-  text-indent: calc(-1 * var(--crt-gutter));
   text-shadow: 0 0 7px rgba(0, 255, 65, 0.32);
 }
 
@@ -501,22 +472,27 @@ body:has(.pc-message-streaming)::before {
   text-shadow: 0 0 7px rgba(170, 255, 170, 0.45);
 }
 
-/* The speaker's icon: an 8×8 bitmap, scaled by a whole number so every source
- * pixel lands on an integer box and nothing softens. It is a MASK rather than
- * an image so the phosphor colour stays a token — the icon is lit by the same
- * green as the text, and glows with it.
+/* The speaker's mark: an 8×8 bitmap, scaled by a whole number so every source
+ * pixel lands on an integer box and nothing softens. A MASK rather than an
+ * image, so the phosphor colour stays a token — the mark is lit by the same
+ * green as the text and glows with it.
  *
- * `--crt-avatar` is the seam for the multi-participant case: a host that wants
- * a second speaker's face overrides that one variable on that speaker's
- * message, and everything else here still holds. */
-.persona-chat .pc-message.pc-persona .pc-bubble::before {
-  content: '';
-  display: inline-block;
+ * `font-size: 0` because the library puts the participant's `avatar` string in
+ * here (a letter, in its default user). On this surface a speaker is a face
+ * burned into the tube, not a monogram, so the text is suppressed and the mask
+ * is the picture. A host that wants a different face per participant overrides
+ * `--crt-avatar` on that speaker's message; everything else here still holds.
+ *
+ * `:empty` is the speaker with no mark. The box stays — the gutter is padding,
+ * so it is there either way — and simply paints nothing. */
+.persona-chat .pc-avatar {
+  display: block;
+  position: absolute;
+  left: 0;
+  top: 0.1em;
   width: var(--crt-avatar-size);
   height: var(--crt-avatar-size);
-  margin-right: calc(var(--crt-gutter) - var(--crt-avatar-size));
-  vertical-align: -0.42em;
-  text-indent: 0;
+  font-size: 0;
   background-color: var(--ost-green);
   -webkit-mask-image: var(--crt-avatar);
   mask-image: var(--crt-avatar);
@@ -527,12 +503,63 @@ body:has(.pc-message-streaming)::before {
   filter: drop-shadow(0 0 6px var(--ost-green-soft));
 }
 
-/* The typing indicator is a persona message whose only content is `.pc-dots`,
- * a flex container — block-level, so the icon would sit on a line above it
- * instead of beside it. Inline-flex puts the two on one line. */
-.persona-chat .pc-typing .pc-dots {
-  display: inline-flex;
-  vertical-align: middle;
+.persona-chat .pc-avatar:empty {
+  background-color: transparent;
+  filter: none;
+}
+
+/* === The status line ===
+ *
+ * Always on, and never wearing a speaker's face. It is the machine reporting on
+ * itself — the same thing the lamp on the switch box is doing — so it gets the
+ * spinner glyph the chat library ships for it and no avatar, and it is dimmer
+ * and smaller than anything anyone said. Sitting one line above the input, on
+ * the transcript's left edge, it reads as the bottom line of the screen. */
+.persona-chat .pc-thinking {
+  font-size: 0.82em;
+  letter-spacing: 0.06em;
+  text-transform: lowercase;
+  color: var(--ost-green);
+  text-shadow: 0 0 6px rgba(0, 255, 65, 0.3);
+}
+
+.persona-chat .pc-thinking--done {
+  color: rgba(0, 255, 65, 0.42);
+  text-shadow: none;
+}
+
+/* The settled line's elapsed time is metadata about metadata — one step further
+ * back again. */
+.persona-chat .pc-thinking-for {
+  opacity: 0.7;
+}
+
+/* === Rows on the screen ===
+ *
+ * Where the three bands sit inside the tube. The theme states this rather than
+ * the site: the numbers are a consequence of `--crt-screen-shape`, and a site
+ * that overrides them is compensating for a curve it cannot see.
+ *
+ * The transcript's bottom padding is nearly nothing on purpose — the last thing
+ * said should sit directly above the status line, and the status line directly
+ * above the prompt, the way a terminal fills from the bottom. The status line
+ * gets the screen clearance PLUS the speaker gutter as one value, because it is
+ * the one `.pc-message` outside the transcript and so cannot inherit the
+ * transcript's padding the way every other row does. */
+.persona-chat .pc-transcript {
+  padding: 20px var(--crt-screen-pad) 4px;
+  gap: 10px;
+}
+
+/* base.css collapses the padding while there is nothing to show; restated a
+ * class deeper because the rule above is a class more specific than base's
+ * `:empty` and would otherwise hold 20px open on an empty screen. */
+.persona-chat .pc-transcript:empty {
+  padding: 8px 0 0;
+}
+
+.persona-chat > .pc-typing {
+  padding: 0 var(--crt-screen-pad) 4px calc(var(--crt-screen-pad) + var(--crt-gutter));
 }
 
 .persona-chat .pc-persona .pc-sender { color: var(--pc-persona-name); }
@@ -553,6 +580,8 @@ body:has(.pc-message-streaming)::before {
 .persona-chat .pc-input-area {
   border-top: none;
   background: var(--pc-input-bg);
+  padding: 2px var(--crt-screen-pad) 20px;
+  gap: 10px;
 }
 
 .persona-chat .pc-input {
