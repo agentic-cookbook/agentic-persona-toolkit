@@ -138,7 +138,17 @@
    * a hole rather than a fill, nothing is painted behind the screen, which is
    * what lets the tube stay see-through. */
   --crt-bw: 2px;
-  --crt-ring: rgba(0, 255, 65, 0.34);
+  /* Grey, not phosphor. A green ring is the tube's own light leaking out past
+   * the glass, which puts the brightest thing on the surface at its OUTER edge
+   * — the eye lands on the frame and works inward to the text. The ring is
+   * HARDWARE: the bezel's inner lip, catching whatever light is in the room.
+   * Neutral and dim, it does the one job an outline has, which is to say where
+   * the glass stops, and then gets out of the way.
+   *
+   * It is a hair green-shifted rather than a true neutral. A pure grey next to
+   * a green field reads faintly magenta by simultaneous contrast; pulling it a
+   * few points toward the phosphor cancels that without it reading as lit. */
+  --crt-ring: rgba(150, 162, 152, 0.32);
 
   --crt-screen-shape: shape(
     from 50% 0%,
@@ -299,17 +309,33 @@
    * (0,3,0) — so a consuming site has to restate it a class deeper to have it
    * apply at all, and learntruefacts does. Both read this, so neither can drift
    * from the other, and the `❯` the site prints in front of the field reads it
-   * too. Larger than the transcript on purpose: the line being typed is the
-   * only one on screen that is still being written — but stated as a STEP off
-   * the transcript rather than as its own number, because what says "still
-   * being written" is the difference and not the size. Six pixels of it made
-   * the prompt a second typeface on the screen; two is a difference you feel
-   * without seeing it, and it survives the transcript being retuned. */
-  --crt-entry-size: calc(var(--crt-type-size) + 2px);
+   * too. It reads the transcript's size EXACTLY, and the step it used to carry
+   * is gone. The step was two pixels off a 16px transcript, which was a
+   * difference you felt without seeing it; off a 19px transcript the same two
+   * pixels put the prompt visibly out of scale with everything above it — the
+   * line being typed stopped being the same terminal and became a caption.
+   *
+   * What made the step worth having is still on the line: `--crt-entry-weight`
+   * says "this one is still being written" with ink instead of with size, and
+   * ink is the safer axis, because it does not change how much of the tube the
+   * prompt occupies when the transcript is retuned. That is the reason this is
+   * still an alias rather than being deleted — the tie to the transcript is
+   * what is being stated, and a rule reading `--crt-type-size` directly would
+   * lose the two other stylesheets that have to agree with it. */
+  --crt-entry-size: var(--crt-type-size);
   /* VT323 ships one weight, so this is a synthesised bold and that is the point:
    * a hair more ink on the line being typed, without it changing size or font
    * against the transcript above it. */
   --crt-entry-weight: 600;
+
+  /* Air ABOVE the status line, which is how it gets closer to the prompt.
+   * There are three bands in the tube and only two gaps between them, so the
+   * status line belongs to whichever gap is smaller. Left even it belonged to
+   * neither: it floated mid-screen, reading as a third participant rather than
+   * as the machine annotating the line you are about to send. The fix is not to
+   * push it down — nothing below it will move — but to open the gap above, and
+   * the space comes out of the scrollback, which has somewhere to put it. */
+  --crt-status-gap: 24px;
   /* The scanlines, and their PITCH is a legibility number, not just a texture
    * one. The dark band is a whole pixel however wide the gap is, so a 3px pitch
    * takes a third of every horizontal stroke away — and at this size a stroke
@@ -760,7 +786,13 @@ body::after {
 }
 
 .persona-chat > .pc-typing {
-  padding: 0 var(--crt-screen-pad) 4px;
+  /* No bottom padding, and a line box barely taller than its own text: both
+   * gaps here are mostly LEADING, so tightening the leading is what actually
+   * moves the status onto the prompt. `--crt-status-gap` then buys the
+   * separation back on the other side. */
+  padding: 0 var(--crt-screen-pad);
+  margin-top: var(--crt-status-gap);
+  line-height: 1.1;
 }
 
 .persona-chat .pc-persona .pc-sender { color: var(--pc-persona-name); }
