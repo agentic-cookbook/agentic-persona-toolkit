@@ -51,6 +51,23 @@ export interface ChatSession {
    * Resolves once the whole line has landed. Useful for scripted intros.
    */
   say: (text: string) => Promise<void>
+  /**
+   * The same thing, for a line whose text arrives in pieces.
+   *
+   * `say` owns both the words and their timing: it takes a finished string and
+   * types it at a cadence baked into this hook. That is right for a scripted
+   * intro and wrong for anything whose pacing is the point — a caller imitating
+   * a token stream, or one genuinely reading from a socket, wants the timing to
+   * be its own and the transcript plumbing to be ours.
+   *
+   * Each chunk appends to a draft; the message commits when the iterable is
+   * done. Resolves then, and — like `say` — teardown mid-line commits what has
+   * arrived rather than dropping it, so an awaiting caller is never left
+   * hanging. Unlike `say` that partial line really is partial: there is no
+   * finished string to substitute, which is the honest outcome for a stream
+   * that stopped.
+   */
+  sayStream: (chunks: AsyncIterable<string>) => Promise<void>
   selectedIndex: number
   selectMessage: (index: number) => void
 }
@@ -273,7 +290,7 @@ export function useChatSession(options: UseChatSessionOptions): ChatSession {
 
   const [selectedIndex, setSelectedIndex] = useState(-1)
 
-  // Every line `say` has in flight, held as the function that LANDS it: stop the typing timer,
+  // Every line `say` or `sayStream` has in flight, held as the function that LANDS it: stop the timer,
   // put the whole line in the message, resolve. A line types at one character per ~40ms and the
   // promise resolves on the last one, so a caller that leaves mid-line — a route change, or a
   // test returning — otherwise leaves the rest of the chain scheduled against a component that
@@ -386,6 +403,61 @@ export function useChatSession(options: UseChatSessionOptions): ChatSession {
     [session],
   )
 
+  // The streaming sibling of `say`. Same two events in the same order — a draft
+  // that grows, then an immutable message — with the caller driving the clock.
+  //
+  // The `landed` flag, rather than reusing `say`'s pattern of clearing a timer:
+  // there is no timer here to cancel. The only thing teardown can do to a
+  // for-await loop is let it discover on its next tick that the line is already
+  // committed, so the loop checks and returns instead of delivering a draft
+  // update into a torn-down orchestrator.
+  const sayStream = useCallback(
+    (chunks: AsyncIterable<string>): Promise<void> => {
+      const { orchestrator, personaID: speakerID } = session
+      const localID = crypto.randomUUID()
+      const startedAt = new Date()
+      const pending = pendingLinesRef.current
+      let text = ''
+      let landed = false
+
+      const land = (): void => {
+        if (landed) return
+        landed = true
+        pending.delete(land)
+        orchestrator.deliver({
+          kind: 'messageReceived',
+          message: {
+            localID,
+            senderID: speakerID,
+            text,
+            timestamp: startedAt,
+            attachments: [],
+            deliveryStatus: { kind: 'delivered' },
+          },
+        })
+      }
+      pending.add(land)
+
+      return (async () => {
+        try {
+          for await (const chunk of chunks) {
+            if (landed) return
+            text += chunk
+            orchestrator.deliver({
+              kind: 'draftUpdated',
+              participantID: speakerID,
+              text,
+              attachments: [],
+            })
+          }
+        } finally {
+          land()
+        }
+      })()
+    },
+    [session],
+  )
+
   const selectMessage = useCallback(
     (index: number) => {
       if (index >= -1 && index < messages.length) {
@@ -422,7 +494,15 @@ export function useChatSession(options: UseChatSessionOptions): ChatSession {
   }, [])
 
   return useMemo(
-    () => ({ messages, isTyping, sendMessage, say, selectedIndex, selectMessage }),
-    [messages, isTyping, sendMessage, say, selectedIndex, selectMessage],
+    () => ({
+      messages,
+      isTyping,
+      sendMessage,
+      say,
+      sayStream,
+      selectedIndex,
+      selectMessage,
+    }),
+    [messages, isTyping, sendMessage, say, sayStream, selectedIndex, selectMessage],
   )
 }
