@@ -46,12 +46,12 @@ class EcosystemSigninApp:
 
         default_ecosystem_id = self.default_ecosystem_id
 
-        jwt_audience: str | None
+        jwt_audience: None | str
         jwt_audience = self.jwt_audience
 
         is_internal = self.is_internal
 
-        app_token_prefix: str | None
+        app_token_prefix: None | str
         app_token_prefix = self.app_token_prefix
 
         github_enabled = self.github_enabled

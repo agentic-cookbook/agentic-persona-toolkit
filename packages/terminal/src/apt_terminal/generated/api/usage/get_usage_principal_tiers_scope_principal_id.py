@@ -16,7 +16,6 @@ def _get_kwargs(
     scope: str,
     principal_id: str,
 ) -> dict[str, Any]:
-
     _kwargs: dict[str, Any] = {
         "method": "get",
         "url": f"/usage/principal-tiers/{scope}/{principal_id}",

@@ -58,7 +58,7 @@ class GameHolding:
 
         updated_at = self.updated_at
 
-        data: Unset | dict[str, Any] | None
+        data: None | Unset | dict[str, Any]
         if isinstance(self.data, Unset):
             data = UNSET
         elif isinstance(self.data, GameHoldingDataType0):

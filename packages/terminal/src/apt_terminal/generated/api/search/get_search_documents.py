@@ -15,7 +15,6 @@ def _get_kwargs(
     q: str,
     limit: Unset | int = 20,
 ) -> dict[str, Any]:
-
     params: dict[str, Any] = {}
 
     params["q"] = q

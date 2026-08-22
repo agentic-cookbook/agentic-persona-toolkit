@@ -130,13 +130,13 @@ class GetIntegrationIntegrationAudienceContactsResponse200Item:
 
         status = self.status
 
-        first_name: str | None
+        first_name: None | str
         first_name = self.first_name
 
-        last_name: str | None
+        last_name: None | str
         last_name = self.last_name
 
-        tags: bool | dict[str, Any] | float | list[Any] | str | None
+        tags: None | bool | dict[str, Any] | float | list[Any] | str
         if isinstance(
             self.tags, GetIntegrationIntegrationAudienceContactsResponse200ItemTagsType0Type1
         ):
@@ -147,7 +147,7 @@ class GetIntegrationIntegrationAudienceContactsResponse200Item:
         else:
             tags = self.tags
 
-        fields: bool | dict[str, Any] | float | list[Any] | str | None
+        fields: None | bool | dict[str, Any] | float | list[Any] | str
         if isinstance(
             self.fields, GetIntegrationIntegrationAudienceContactsResponse200ItemFieldsType0Type1
         ):
@@ -158,10 +158,10 @@ class GetIntegrationIntegrationAudienceContactsResponse200Item:
         else:
             fields = self.fields
 
-        subscribed_at: str | None
+        subscribed_at: None | str
         subscribed_at = self.subscribed_at
 
-        raw: bool | dict[str, Any] | float | list[Any] | str | None
+        raw: None | bool | dict[str, Any] | float | list[Any] | str
         if isinstance(
             self.raw, GetIntegrationIntegrationAudienceContactsResponse200ItemRawType0Type1
         ):
@@ -174,7 +174,7 @@ class GetIntegrationIntegrationAudienceContactsResponse200Item:
 
         is_deleted = self.is_deleted
 
-        deleted_at: str | None
+        deleted_at: None | str
         deleted_at = self.deleted_at
 
         created_at = self.created_at
@@ -183,7 +183,7 @@ class GetIntegrationIntegrationAudienceContactsResponse200Item:
 
         sync_version = self.sync_version
 
-        sync_stamped_at: str | None
+        sync_stamped_at: None | str
         sync_stamped_at = self.sync_stamped_at
 
         sync_txid = self.sync_txid

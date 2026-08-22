@@ -53,13 +53,13 @@ class GameInstance:
 
         depth = self.depth
 
-        slot: Unset | str | None
+        slot: None | Unset | str
         if isinstance(self.slot, Unset):
             slot = UNSET
         else:
             slot = self.slot
 
-        data: Unset | dict[str, Any] | None
+        data: None | Unset | dict[str, Any]
         if isinstance(self.data, Unset):
             data = UNSET
         elif isinstance(self.data, GameInstanceDataType0):

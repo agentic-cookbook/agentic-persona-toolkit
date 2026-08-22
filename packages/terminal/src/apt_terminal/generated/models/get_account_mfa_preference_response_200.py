@@ -35,7 +35,7 @@ class GetAccountMfaPreferenceResponse200:
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        preferred_method: str | None
+        preferred_method: None | str
         if (
             isinstance(
                 self.preferred_method, GetAccountMfaPreferenceResponse200PreferredMethodType1

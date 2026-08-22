@@ -35,7 +35,7 @@ class EcosystemAuthSettingsUpdate:
 
         login_enabled = self.login_enabled
 
-        allowed_providers: Unset | list[str] | None
+        allowed_providers: None | Unset | list[str]
         if isinstance(self.allowed_providers, Unset):
             allowed_providers = UNSET
         elif isinstance(self.allowed_providers, list):

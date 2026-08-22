@@ -107,19 +107,19 @@ class PutIntegrationIntegrationAudienceContactsIdBody:
 
         status = self.status
 
-        first_name: Unset | str | None
+        first_name: None | Unset | str
         if isinstance(self.first_name, Unset):
             first_name = UNSET
         else:
             first_name = self.first_name
 
-        last_name: Unset | str | None
+        last_name: None | Unset | str
         if isinstance(self.last_name, Unset):
             last_name = UNSET
         else:
             last_name = self.last_name
 
-        tags: Unset | bool | dict[str, Any] | float | list[Any] | str | None
+        tags: None | Unset | bool | dict[str, Any] | float | list[Any] | str
         if isinstance(self.tags, Unset):
             tags = UNSET
         elif isinstance(self.tags, PutIntegrationIntegrationAudienceContactsIdBodyTagsType0Type1):
@@ -130,7 +130,7 @@ class PutIntegrationIntegrationAudienceContactsIdBody:
         else:
             tags = self.tags
 
-        fields: Unset | bool | dict[str, Any] | float | list[Any] | str | None
+        fields: None | Unset | bool | dict[str, Any] | float | list[Any] | str
         if isinstance(self.fields, Unset):
             fields = UNSET
         elif isinstance(
@@ -143,13 +143,13 @@ class PutIntegrationIntegrationAudienceContactsIdBody:
         else:
             fields = self.fields
 
-        subscribed_at: Unset | str | None
+        subscribed_at: None | Unset | str
         if isinstance(self.subscribed_at, Unset):
             subscribed_at = UNSET
         else:
             subscribed_at = self.subscribed_at
 
-        raw: Unset | bool | dict[str, Any] | float | list[Any] | str | None
+        raw: None | Unset | bool | dict[str, Any] | float | list[Any] | str
         if isinstance(self.raw, Unset):
             raw = UNSET
         elif isinstance(self.raw, PutIntegrationIntegrationAudienceContactsIdBodyRawType0Type1):

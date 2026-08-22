@@ -14,7 +14,6 @@ def _get_kwargs(
     client_id: str,
     return_: str,
 ) -> dict[str, Any]:
-
     params: dict[str, Any] = {}
 
     params["clientId"] = client_id

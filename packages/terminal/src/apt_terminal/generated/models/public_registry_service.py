@@ -41,10 +41,10 @@ class PublicRegistryService:
 
         pricing_model = self.pricing_model.value
 
-        price_min: int | None
+        price_min: None | int
         price_min = self.price_min
 
-        price_max: int | None
+        price_max: None | int
         price_max = self.price_max
 
         currency = self.currency

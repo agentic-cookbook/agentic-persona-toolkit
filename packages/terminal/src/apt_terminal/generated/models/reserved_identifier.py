@@ -41,7 +41,7 @@ class ReservedIdentifier:
 
         reason = self.reason.value
 
-        held_since: str | None
+        held_since: None | str
         held_since = self.held_since
 
         releasable = self.releasable

@@ -42,13 +42,13 @@ class PostOauthClientsResponse201Client:
 
         is_internal = self.is_internal
 
-        default_ecosystem_id: Unset | str | None
+        default_ecosystem_id: None | Unset | str
         if isinstance(self.default_ecosystem_id, Unset):
             default_ecosystem_id = UNSET
         else:
             default_ecosystem_id = self.default_ecosystem_id
 
-        app_token_prefix: Unset | str | None
+        app_token_prefix: None | Unset | str
         if isinstance(self.app_token_prefix, Unset):
             app_token_prefix = UNSET
         else:

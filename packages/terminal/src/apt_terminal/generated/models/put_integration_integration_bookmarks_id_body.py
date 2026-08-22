@@ -58,37 +58,37 @@ class PutIntegrationIntegrationBookmarksIdBody:
 
         url = self.url
 
-        excerpt: Unset | str | None
+        excerpt: None | Unset | str
         if isinstance(self.excerpt, Unset):
             excerpt = UNSET
         else:
             excerpt = self.excerpt
 
-        note: Unset | str | None
+        note: None | Unset | str
         if isinstance(self.note, Unset):
             note = UNSET
         else:
             note = self.note
 
-        tags: Unset | str | None
+        tags: None | Unset | str
         if isinstance(self.tags, Unset):
             tags = UNSET
         else:
             tags = self.tags
 
-        image_url: Unset | str | None
+        image_url: None | Unset | str
         if isinstance(self.image_url, Unset):
             image_url = UNSET
         else:
             image_url = self.image_url
 
-        collection_id: Unset | str | None
+        collection_id: None | Unset | str
         if isinstance(self.collection_id, Unset):
             collection_id = UNSET
         else:
             collection_id = self.collection_id
 
-        collection_name: Unset | str | None
+        collection_name: None | Unset | str
         if isinstance(self.collection_name, Unset):
             collection_name = UNSET
         else:
@@ -96,7 +96,7 @@ class PutIntegrationIntegrationBookmarksIdBody:
 
         is_favorite = self.is_favorite
 
-        external_created_at: Unset | str | None
+        external_created_at: None | Unset | str
         if isinstance(self.external_created_at, Unset):
             external_created_at = UNSET
         else:

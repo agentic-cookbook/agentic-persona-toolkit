@@ -42,7 +42,7 @@ class PutMonitoringEndpointsIdBody:
 
         expected_status = self.expected_status
 
-        expected_body_contains: Unset | str | None
+        expected_body_contains: None | Unset | str
         if isinstance(self.expected_body_contains, Unset):
             expected_body_contains = UNSET
         else:

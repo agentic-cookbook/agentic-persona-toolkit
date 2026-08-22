@@ -56,24 +56,24 @@ class AccessAuditEntry:
 
         actor_id = self.actor_id
 
-        actor_email: str | None
+        actor_email: None | str
         actor_email = self.actor_email
 
         action = self.action
 
-        subject_kind: str | None
+        subject_kind: None | str
         subject_kind = self.subject_kind
 
-        subject_id: str | None
+        subject_id: None | str
         subject_id = self.subject_id
 
-        target_feature: str | None
+        target_feature: None | str
         target_feature = self.target_feature
 
-        target_item_id: str | None
+        target_item_id: None | str
         target_item_id = self.target_item_id
 
-        role_id: str | None
+        role_id: None | str
         role_id = self.role_id
 
         before = self.before

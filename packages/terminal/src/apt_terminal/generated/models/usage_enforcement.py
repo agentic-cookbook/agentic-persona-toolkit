@@ -58,10 +58,10 @@ class UsageEnforcement:
 
         source = self.source.value
 
-        env_override: bool | None
+        env_override: None | bool
         env_override = self.env_override
 
-        flag: dict[str, Any] | None
+        flag: None | dict[str, Any]
         if isinstance(self.flag, UsageEnforcementFlagType0):
             flag = self.flag.to_dict()
         else:
@@ -77,10 +77,10 @@ class UsageEnforcement:
 
         event_retention_days = self.event_retention_days
 
-        visitor_global_daily_token_budget: int | None
+        visitor_global_daily_token_budget: None | int
         visitor_global_daily_token_budget = self.visitor_global_daily_token_budget
 
-        visitor_global_daily_cost_micros: int | None
+        visitor_global_daily_cost_micros: None | int
         visitor_global_daily_cost_micros = self.visitor_global_daily_cost_micros
 
         visitor_turn_token_reserve = self.visitor_turn_token_reserve

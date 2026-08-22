@@ -58,37 +58,37 @@ class PostIntegrationIntegrationMediaItemsBody:
 
         ecosystem_id = self.ecosystem_id
 
-        artist: Unset | str | None
+        artist: None | Unset | str
         if isinstance(self.artist, Unset):
             artist = UNSET
         else:
             artist = self.artist
 
-        album: Unset | str | None
+        album: None | Unset | str
         if isinstance(self.album, Unset):
             album = UNSET
         else:
             album = self.album
 
-        image_url: Unset | str | None
+        image_url: None | Unset | str
         if isinstance(self.image_url, Unset):
             image_url = UNSET
         else:
             image_url = self.image_url
 
-        external_url: Unset | str | None
+        external_url: None | Unset | str
         if isinstance(self.external_url, Unset):
             external_url = UNSET
         else:
             external_url = self.external_url
 
-        duration_ms: Unset | int | None
+        duration_ms: None | Unset | int
         if isinstance(self.duration_ms, Unset):
             duration_ms = UNSET
         else:
             duration_ms = self.duration_ms
 
-        popularity: Unset | int | None
+        popularity: None | Unset | int
         if isinstance(self.popularity, Unset):
             popularity = UNSET
         else:
@@ -96,7 +96,7 @@ class PostIntegrationIntegrationMediaItemsBody:
 
         is_saved = self.is_saved
 
-        last_played_at: Unset | str | None
+        last_played_at: None | Unset | str
         if isinstance(self.last_played_at, Unset):
             last_played_at = UNSET
         else:

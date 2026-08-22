@@ -42,10 +42,10 @@ class PublicUserProfile:
     def to_dict(self) -> dict[str, Any]:
         slug = self.slug
 
-        display_name: str | None
+        display_name: None | str
         display_name = self.display_name
 
-        avatar_url: str | None
+        avatar_url: None | str
         avatar_url = self.avatar_url
 
         created_at = self.created_at

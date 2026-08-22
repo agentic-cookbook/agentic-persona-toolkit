@@ -33,7 +33,7 @@ class PutDiscussionTopicsIdBody:
 
         is_locked = self.is_locked
 
-        answered_post_id: Unset | str | None
+        answered_post_id: None | Unset | str
         if isinstance(self.answered_post_id, Unset):
             answered_post_id = UNSET
         else:

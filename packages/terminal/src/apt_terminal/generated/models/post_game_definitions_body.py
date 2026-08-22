@@ -58,7 +58,7 @@ class PostGameDefinitionsBody:
 
         ecosystem_id = self.ecosystem_id
 
-        description: Unset | str | None
+        description: None | Unset | str
         if isinstance(self.description, Unset):
             description = UNSET
         else:
@@ -68,7 +68,7 @@ class PostGameDefinitionsBody:
 
         sort_order = self.sort_order
 
-        data: Unset | bool | dict[str, Any] | float | list[Any] | str | None
+        data: None | Unset | bool | dict[str, Any] | float | list[Any] | str
         if isinstance(self.data, Unset):
             data = UNSET
         elif isinstance(self.data, PostGameDefinitionsBodyDataType0Type1):

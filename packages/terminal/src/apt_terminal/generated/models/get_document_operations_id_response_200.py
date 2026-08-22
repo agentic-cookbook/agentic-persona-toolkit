@@ -52,12 +52,12 @@ class GetDocumentOperationsIdResponse200:
 
         document_id = self.document_id
 
-        block_id: str | None
+        block_id: None | str
         block_id = self.block_id
 
         customer_id = self.customer_id
 
-        deleted_at: str | None
+        deleted_at: None | str
         deleted_at = self.deleted_at
 
         ecosystem_id = self.ecosystem_id
@@ -72,17 +72,17 @@ class GetDocumentOperationsIdResponse200:
 
         created_at = self.created_at
 
-        undo_group_id: str | None
+        undo_group_id: None | str
         undo_group_id = self.undo_group_id
 
-        inverse_of_op_id: str | None
+        inverse_of_op_id: None | str
         inverse_of_op_id = self.inverse_of_op_id
 
         updated_at = self.updated_at
 
         sync_version = self.sync_version
 
-        sync_stamped_at: str | None
+        sync_stamped_at: None | str
         sync_stamped_at = self.sync_stamped_at
 
         sync_txid = self.sync_txid

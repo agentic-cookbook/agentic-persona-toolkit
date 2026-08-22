@@ -35,7 +35,7 @@ class PersonaBootstrapAuth:
 
         subject = self.subject.to_dict()
 
-        expires_at: str | None
+        expires_at: None | str
         expires_at = self.expires_at
 
         scope = self.scope

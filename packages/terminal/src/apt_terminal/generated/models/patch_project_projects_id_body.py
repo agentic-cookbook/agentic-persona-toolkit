@@ -77,7 +77,7 @@ class PatchProjectProjectsIdBody:
 
         color = self.color
 
-        archived_at: Unset | str | None
+        archived_at: None | Unset | str
         if isinstance(self.archived_at, Unset):
             archived_at = UNSET
         else:
@@ -97,13 +97,13 @@ class PatchProjectProjectsIdBody:
 
         key_prefix = self.key_prefix
 
-        start_date: Unset | str | None
+        start_date: None | Unset | str
         if isinstance(self.start_date, Unset):
             start_date = UNSET
         else:
             start_date = self.start_date
 
-        target_date: Unset | str | None
+        target_date: None | Unset | str
         if isinstance(self.target_date, Unset):
             target_date = UNSET
         else:
@@ -113,13 +113,13 @@ class PatchProjectProjectsIdBody:
         if not isinstance(self.lead_kind, Unset):
             lead_kind = self.lead_kind.value
 
-        lead_id: Unset | str | None
+        lead_id: None | Unset | str
         if isinstance(self.lead_id, Unset):
             lead_id = UNSET
         else:
             lead_id = self.lead_id
 
-        program_id: Unset | str | None
+        program_id: None | Unset | str
         if isinstance(self.program_id, Unset):
             program_id = UNSET
         else:

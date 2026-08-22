@@ -38,7 +38,7 @@ class PutDocumentOperationsIdBody:
     def to_dict(self) -> dict[str, Any]:
         document_id = self.document_id
 
-        block_id: Unset | str | None
+        block_id: None | Unset | str
         if isinstance(self.block_id, Unset):
             block_id = UNSET
         else:
@@ -54,13 +54,13 @@ class PutDocumentOperationsIdBody:
 
         op_payload = self.op_payload
 
-        undo_group_id: Unset | str | None
+        undo_group_id: None | Unset | str
         if isinstance(self.undo_group_id, Unset):
             undo_group_id = UNSET
         else:
             undo_group_id = self.undo_group_id
 
-        inverse_of_op_id: Unset | str | None
+        inverse_of_op_id: None | Unset | str
         if isinstance(self.inverse_of_op_id, Unset):
             inverse_of_op_id = UNSET
         else:

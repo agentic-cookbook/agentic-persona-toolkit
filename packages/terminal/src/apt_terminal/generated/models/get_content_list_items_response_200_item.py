@@ -54,14 +54,14 @@ class GetContentListItemsResponse200Item:
 
         customer_id = self.customer_id
 
-        deleted_at: str | None
+        deleted_at: None | str
         deleted_at = self.deleted_at
 
         list_id = self.list_id
 
         position = self.position
 
-        value: bool | dict[str, Any] | float | list[Any] | str | None
+        value: None | bool | dict[str, Any] | float | list[Any] | str
         if isinstance(self.value, GetContentListItemsResponse200ItemValueType1):
             value = self.value.to_dict()
         elif isinstance(self.value, list):
@@ -76,7 +76,7 @@ class GetContentListItemsResponse200Item:
 
         sync_version = self.sync_version
 
-        sync_stamped_at: str | None
+        sync_stamped_at: None | str
         sync_stamped_at = self.sync_stamped_at
 
         sync_txid = self.sync_txid

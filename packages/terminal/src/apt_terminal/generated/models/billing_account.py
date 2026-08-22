@@ -50,49 +50,49 @@ class BillingAccount:
 
         created_at = self.created_at
 
-        stripe_customer_id: Unset | str | None
+        stripe_customer_id: None | Unset | str
         if isinstance(self.stripe_customer_id, Unset):
             stripe_customer_id = UNSET
         else:
             stripe_customer_id = self.stripe_customer_id
 
-        stripe_checkout_session_id: Unset | str | None
+        stripe_checkout_session_id: None | Unset | str
         if isinstance(self.stripe_checkout_session_id, Unset):
             stripe_checkout_session_id = UNSET
         else:
             stripe_checkout_session_id = self.stripe_checkout_session_id
 
-        stripe_subscription_id: Unset | str | None
+        stripe_subscription_id: None | Unset | str
         if isinstance(self.stripe_subscription_id, Unset):
             stripe_subscription_id = UNSET
         else:
             stripe_subscription_id = self.stripe_subscription_id
 
-        payer_email: Unset | str | None
+        payer_email: None | Unset | str
         if isinstance(self.payer_email, Unset):
             payer_email = UNSET
         else:
             payer_email = self.payer_email
 
-        current_period_end: Unset | str | None
+        current_period_end: None | Unset | str
         if isinstance(self.current_period_end, Unset):
             current_period_end = UNSET
         else:
             current_period_end = self.current_period_end
 
-        lapsed_at: Unset | str | None
+        lapsed_at: None | Unset | str
         if isinstance(self.lapsed_at, Unset):
             lapsed_at = UNSET
         else:
             lapsed_at = self.lapsed_at
 
-        claimed_customer_id: Unset | str | None
+        claimed_customer_id: None | Unset | str
         if isinstance(self.claimed_customer_id, Unset):
             claimed_customer_id = UNSET
         else:
             claimed_customer_id = self.claimed_customer_id
 
-        claimed_at: Unset | str | None
+        claimed_at: None | Unset | str
         if isinstance(self.claimed_at, Unset):
             claimed_at = UNSET
         else:

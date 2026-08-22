@@ -52,31 +52,31 @@ class PutIntegrationIntegrationSocialNotificationsIdBody:
 
         notification_type = self.notification_type
 
-        title: Unset | str | None
+        title: None | Unset | str
         if isinstance(self.title, Unset):
             title = UNSET
         else:
             title = self.title
 
-        body: Unset | str | None
+        body: None | Unset | str
         if isinstance(self.body, Unset):
             body = UNSET
         else:
             body = self.body
 
-        author_handle: Unset | str | None
+        author_handle: None | Unset | str
         if isinstance(self.author_handle, Unset):
             author_handle = UNSET
         else:
             author_handle = self.author_handle
 
-        author_display_name: Unset | str | None
+        author_display_name: None | Unset | str
         if isinstance(self.author_display_name, Unset):
             author_display_name = UNSET
         else:
             author_display_name = self.author_display_name
 
-        item_url: Unset | str | None
+        item_url: None | Unset | str
         if isinstance(self.item_url, Unset):
             item_url = UNSET
         else:
@@ -84,7 +84,7 @@ class PutIntegrationIntegrationSocialNotificationsIdBody:
 
         is_read = self.is_read
 
-        external_created_at: Unset | str | None
+        external_created_at: None | Unset | str
         if isinstance(self.external_created_at, Unset):
             external_created_at = UNSET
         else:

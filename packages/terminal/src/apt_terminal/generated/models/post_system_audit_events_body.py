@@ -32,19 +32,19 @@ class PostSystemAuditEventsBody:
     def to_dict(self) -> dict[str, Any]:
         event_type = self.event_type
 
-        ecosystem_id: Unset | str | None
+        ecosystem_id: None | Unset | str
         if isinstance(self.ecosystem_id, Unset):
             ecosystem_id = UNSET
         else:
             ecosystem_id = self.ecosystem_id
 
-        developer_id: Unset | str | None
+        developer_id: None | Unset | str
         if isinstance(self.developer_id, Unset):
             developer_id = UNSET
         else:
             developer_id = self.developer_id
 
-        actor_user_id: Unset | str | None
+        actor_user_id: None | Unset | str
         if isinstance(self.actor_user_id, Unset):
             actor_user_id = UNSET
         else:

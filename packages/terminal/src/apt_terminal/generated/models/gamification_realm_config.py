@@ -45,7 +45,7 @@ class GamificationRealmConfig:
 
         surfaces = self.surfaces.to_dict()
 
-        seasons: dict[str, Any] | None
+        seasons: None | dict[str, Any]
         if isinstance(self.seasons, GamificationSeasonsType0):
             seasons = self.seasons.to_dict()
         else:

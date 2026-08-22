@@ -130,13 +130,13 @@ class PostIntegrationIntegrationAudienceContactsResponse201:
 
         status = self.status
 
-        first_name: str | None
+        first_name: None | str
         first_name = self.first_name
 
-        last_name: str | None
+        last_name: None | str
         last_name = self.last_name
 
-        tags: bool | dict[str, Any] | float | list[Any] | str | None
+        tags: None | bool | dict[str, Any] | float | list[Any] | str
         if isinstance(
             self.tags, PostIntegrationIntegrationAudienceContactsResponse201TagsType0Type1
         ):
@@ -147,7 +147,7 @@ class PostIntegrationIntegrationAudienceContactsResponse201:
         else:
             tags = self.tags
 
-        fields: bool | dict[str, Any] | float | list[Any] | str | None
+        fields: None | bool | dict[str, Any] | float | list[Any] | str
         if isinstance(
             self.fields, PostIntegrationIntegrationAudienceContactsResponse201FieldsType0Type1
         ):
@@ -158,10 +158,10 @@ class PostIntegrationIntegrationAudienceContactsResponse201:
         else:
             fields = self.fields
 
-        subscribed_at: str | None
+        subscribed_at: None | str
         subscribed_at = self.subscribed_at
 
-        raw: bool | dict[str, Any] | float | list[Any] | str | None
+        raw: None | bool | dict[str, Any] | float | list[Any] | str
         if isinstance(self.raw, PostIntegrationIntegrationAudienceContactsResponse201RawType0Type1):
             raw = self.raw.to_dict()
         elif isinstance(self.raw, list):
@@ -172,7 +172,7 @@ class PostIntegrationIntegrationAudienceContactsResponse201:
 
         is_deleted = self.is_deleted
 
-        deleted_at: str | None
+        deleted_at: None | str
         deleted_at = self.deleted_at
 
         created_at = self.created_at
@@ -181,7 +181,7 @@ class PostIntegrationIntegrationAudienceContactsResponse201:
 
         sync_version = self.sync_version
 
-        sync_stamped_at: str | None
+        sync_stamped_at: None | str
         sync_stamped_at = self.sync_stamped_at
 
         sync_txid = self.sync_txid

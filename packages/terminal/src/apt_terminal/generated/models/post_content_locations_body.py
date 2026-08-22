@@ -50,7 +50,7 @@ class PostContentLocationsBody:
 
         start_date = self.start_date
 
-        end_date: Unset | str | None
+        end_date: None | Unset | str
         if isinstance(self.end_date, Unset):
             end_date = UNSET
         else:

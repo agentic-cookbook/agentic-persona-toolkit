@@ -64,7 +64,7 @@ class GetProjectTasksResponse200Item:
 
         customer_id = self.customer_id
 
-        deleted_at: str | None
+        deleted_at: None | str
         deleted_at = self.deleted_at
 
         ecosystem_id = self.ecosystem_id
@@ -77,29 +77,29 @@ class GetProjectTasksResponse200Item:
 
         title = self.title
 
-        description: str | None
+        description: None | str
         description = self.description
 
         is_completed = self.is_completed
 
         priority = self.priority
 
-        due_date: str | None
+        due_date: None | str
         due_date = self.due_date
 
-        due_datetime: str | None
+        due_datetime: None | str
         due_datetime = self.due_datetime
 
-        external_project_id: str | None
+        external_project_id: None | str
         external_project_id = self.external_project_id
 
-        external_project_name: str | None
+        external_project_name: None | str
         external_project_name = self.external_project_name
 
-        labels: str | None
+        labels: None | str
         labels = self.labels
 
-        url: str | None
+        url: None | str
         url = self.url
 
         is_deleted = self.is_deleted
@@ -110,7 +110,7 @@ class GetProjectTasksResponse200Item:
 
         sync_version = self.sync_version
 
-        sync_stamped_at: str | None
+        sync_stamped_at: None | str
         sync_stamped_at = self.sync_stamped_at
 
         sync_txid = self.sync_txid

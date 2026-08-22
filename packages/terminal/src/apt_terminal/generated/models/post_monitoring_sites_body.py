@@ -32,7 +32,7 @@ class PostMonitoringSitesBody:
 
         slug = self.slug
 
-        description: Unset | str | None
+        description: None | Unset | str
         if isinstance(self.description, Unset):
             description = UNSET
         else:

@@ -42,12 +42,12 @@ class PersonaSheetBadgesItem:
 
         tier = self.tier
 
-        badge_line: str | None
+        badge_line: None | str
         badge_line = self.badge_line
 
         awarded_at = self.awarded_at
 
-        rarity_pct: float | None
+        rarity_pct: None | float
         rarity_pct = self.rarity_pct
 
         field_dict: dict[str, Any] = {}

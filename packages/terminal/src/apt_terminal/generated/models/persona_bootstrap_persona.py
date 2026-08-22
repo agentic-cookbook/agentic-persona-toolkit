@@ -33,10 +33,10 @@ class PersonaBootstrapPersona:
 
         name = self.name
 
-        description: str | None
+        description: None | str
         description = self.description
 
-        avatar_url: str | None
+        avatar_url: None | str
         avatar_url = self.avatar_url
 
         field_dict: dict[str, Any] = {}

@@ -13,7 +13,6 @@ def _get_kwargs(
     id: str,
     client_id: str,
 ) -> dict[str, Any]:
-
     _kwargs: dict[str, Any] = {
         "method": "delete",
         "url": f"/ecosystem/signin-apps/{id}/{client_id}",

@@ -18,7 +18,6 @@ def _get_kwargs(
     page: Unset | str = UNSET,
     page_size: Unset | str = UNSET,
 ) -> dict[str, Any]:
-
     params: dict[str, Any] = {}
 
     params["subjectType"] = subject_type

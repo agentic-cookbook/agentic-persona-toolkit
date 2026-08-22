@@ -24,7 +24,7 @@ class PostProcessingJobsIdFailResponse200:
     def to_dict(self) -> dict[str, Any]:
         will_retry = self.will_retry
 
-        run_at: Unset | str | None
+        run_at: None | Unset | str
         if isinstance(self.run_at, Unset):
             run_at = UNSET
         else:

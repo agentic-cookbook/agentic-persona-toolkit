@@ -40,7 +40,7 @@ class PostContentListItemsBody:
 
         position = self.position
 
-        value: bool | dict[str, Any] | float | list[Any] | str | None
+        value: None | bool | dict[str, Any] | float | list[Any] | str
         if isinstance(self.value, PostContentListItemsBodyValueType1):
             value = self.value.to_dict()
         elif isinstance(self.value, list):

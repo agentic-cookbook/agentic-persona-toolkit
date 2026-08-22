@@ -58,31 +58,31 @@ class ProjectActivity:
 
         created_at = self.created_at
 
-        work_item_id: Unset | str | None
+        work_item_id: None | Unset | str
         if isinstance(self.work_item_id, Unset):
             work_item_id = UNSET
         else:
             work_item_id = self.work_item_id
 
-        actor_kind: Unset | str | None
+        actor_kind: None | Unset | str
         if isinstance(self.actor_kind, Unset):
             actor_kind = UNSET
         else:
             actor_kind = self.actor_kind
 
-        actor_id: Unset | str | None
+        actor_id: None | Unset | str
         if isinstance(self.actor_id, Unset):
             actor_id = UNSET
         else:
             actor_id = self.actor_id
 
-        actor_label: Unset | str | None
+        actor_label: None | Unset | str
         if isinstance(self.actor_label, Unset):
             actor_label = UNSET
         else:
             actor_label = self.actor_label
 
-        detail: Unset | dict[str, Any] | None
+        detail: None | Unset | dict[str, Any]
         if isinstance(self.detail, Unset):
             detail = UNSET
         elif isinstance(self.detail, ProjectActivityDetailType0):

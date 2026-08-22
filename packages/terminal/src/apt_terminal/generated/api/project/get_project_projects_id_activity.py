@@ -17,7 +17,6 @@ def _get_kwargs(
     before: Unset | str = UNSET,
     before_id: Unset | str = UNSET,
 ) -> dict[str, Any]:
-
     params: dict[str, Any] = {}
 
     params["limit"] = limit

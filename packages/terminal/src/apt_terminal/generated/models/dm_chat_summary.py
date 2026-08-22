@@ -35,7 +35,7 @@ class DmChatSummary:
 
         other_user_id = self.other_user_id
 
-        last_message: dict[str, Any] | None
+        last_message: None | dict[str, Any]
         if isinstance(self.last_message, DmMessagePreviewType0):
             last_message = self.last_message.to_dict()
         else:

@@ -64,10 +64,10 @@ class PendingUser:
 
         name = self.name
 
-        email: str | None
+        email: None | str
         email = self.email
 
-        phone: str | None
+        phone: None | str
         phone = self.phone
 
         status = self.status.value
@@ -76,28 +76,28 @@ class PendingUser:
 
         invited_count = self.invited_count
 
-        last_request_at: str | None
+        last_request_at: None | str
         last_request_at = self.last_request_at
 
-        last_invite_sent_at: str | None
+        last_invite_sent_at: None | str
         last_invite_sent_at = self.last_invite_sent_at
 
         first_requested_at = self.first_requested_at
 
-        last_source: str | None
+        last_source: None | str
         last_source = self.last_source
 
-        last_note: str | None
+        last_note: None | str
         last_note = self.last_note
 
-        accepted_customer_id: str | None
+        accepted_customer_id: None | str
         accepted_customer_id = self.accepted_customer_id
 
         created_at = self.created_at
 
         updated_at = self.updated_at
 
-        contact_id: Unset | str | None
+        contact_id: None | Unset | str
         if isinstance(self.contact_id, Unset):
             contact_id = UNSET
         else:

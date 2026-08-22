@@ -81,73 +81,73 @@ class PostIntegrationIntegrationCampaignStatsBody:
 
         ecosystem_id = self.ecosystem_id
 
-        name: Unset | str | None
+        name: None | Unset | str
         if isinstance(self.name, Unset):
             name = UNSET
         else:
             name = self.name
 
-        subject: Unset | str | None
+        subject: None | Unset | str
         if isinstance(self.subject, Unset):
             subject = UNSET
         else:
             subject = self.subject
 
-        status: Unset | str | None
+        status: None | Unset | str
         if isinstance(self.status, Unset):
             status = UNSET
         else:
             status = self.status
 
-        sent_at: Unset | str | None
+        sent_at: None | Unset | str
         if isinstance(self.sent_at, Unset):
             sent_at = UNSET
         else:
             sent_at = self.sent_at
 
-        recipients: Unset | int | None
+        recipients: None | Unset | int
         if isinstance(self.recipients, Unset):
             recipients = UNSET
         else:
             recipients = self.recipients
 
-        opens: Unset | int | None
+        opens: None | Unset | int
         if isinstance(self.opens, Unset):
             opens = UNSET
         else:
             opens = self.opens
 
-        unique_opens: Unset | int | None
+        unique_opens: None | Unset | int
         if isinstance(self.unique_opens, Unset):
             unique_opens = UNSET
         else:
             unique_opens = self.unique_opens
 
-        clicks: Unset | int | None
+        clicks: None | Unset | int
         if isinstance(self.clicks, Unset):
             clicks = UNSET
         else:
             clicks = self.clicks
 
-        unique_clicks: Unset | int | None
+        unique_clicks: None | Unset | int
         if isinstance(self.unique_clicks, Unset):
             unique_clicks = UNSET
         else:
             unique_clicks = self.unique_clicks
 
-        bounces: Unset | int | None
+        bounces: None | Unset | int
         if isinstance(self.bounces, Unset):
             bounces = UNSET
         else:
             bounces = self.bounces
 
-        unsubscribes: Unset | int | None
+        unsubscribes: None | Unset | int
         if isinstance(self.unsubscribes, Unset):
             unsubscribes = UNSET
         else:
             unsubscribes = self.unsubscribes
 
-        raw: Unset | bool | dict[str, Any] | float | list[Any] | str | None
+        raw: None | Unset | bool | dict[str, Any] | float | list[Any] | str
         if isinstance(self.raw, Unset):
             raw = UNSET
         elif isinstance(self.raw, PostIntegrationIntegrationCampaignStatsBodyRawType0Type1):

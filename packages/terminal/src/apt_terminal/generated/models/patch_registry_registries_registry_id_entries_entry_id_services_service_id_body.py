@@ -54,13 +54,13 @@ class PatchRegistryRegistriesRegistryIdEntriesEntryIdServicesServiceIdBody:
         if not isinstance(self.pricing_model, Unset):
             pricing_model = self.pricing_model.value
 
-        price_min: Unset | int | None
+        price_min: None | Unset | int
         if isinstance(self.price_min, Unset):
             price_min = UNSET
         else:
             price_min = self.price_min
 
-        price_max: Unset | int | None
+        price_max: None | Unset | int
         if isinstance(self.price_max, Unset):
             price_max = UNSET
         else:

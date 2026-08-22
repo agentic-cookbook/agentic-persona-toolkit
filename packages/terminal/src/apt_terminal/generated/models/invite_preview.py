@@ -27,13 +27,13 @@ class InvitePreview:
     def to_dict(self) -> dict[str, Any]:
         state = self.state.value
 
-        ecosystem_name: Unset | str | None
+        ecosystem_name: None | Unset | str
         if isinstance(self.ecosystem_name, Unset):
             ecosystem_name = UNSET
         else:
             ecosystem_name = self.ecosystem_name
 
-        masked_destination: Unset | str | None
+        masked_destination: None | Unset | str
         if isinstance(self.masked_destination, Unset):
             masked_destination = UNSET
         else:

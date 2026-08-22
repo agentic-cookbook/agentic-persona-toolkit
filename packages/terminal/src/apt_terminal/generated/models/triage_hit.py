@@ -71,7 +71,7 @@ class TriageHit:
 
         item_number = self.item_number
 
-        created_by: Unset | str | None
+        created_by: None | Unset | str
         if isinstance(self.created_by, Unset):
             created_by = UNSET
         else:

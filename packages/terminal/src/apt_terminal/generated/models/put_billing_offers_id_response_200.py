@@ -64,22 +64,22 @@ class PutBillingOffersIdResponse200:
 
         name = self.name
 
-        description: str | None
+        description: None | str
         description = self.description
 
         purpose = self.purpose
 
         stripe_price_id = self.stripe_price_id
 
-        stripe_product_id: str | None
+        stripe_product_id: None | str
         stripe_product_id = self.stripe_product_id
 
         collection_method = self.collection_method
 
-        days_until_due: int | None
+        days_until_due: None | int
         days_until_due = self.days_until_due
 
-        grants_ecosystem_id: str | None
+        grants_ecosystem_id: None | str
         grants_ecosystem_id = self.grants_ecosystem_id
 
         lapse_action = self.lapse_action
@@ -92,7 +92,7 @@ class PutBillingOffersIdResponse200:
 
         updated_at = self.updated_at
 
-        deleted_at: str | None
+        deleted_at: None | str
         deleted_at = self.deleted_at
 
         field_dict: dict[str, Any] = {}

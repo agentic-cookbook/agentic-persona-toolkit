@@ -36,19 +36,19 @@ class BillingPriceOption:
 
         currency = self.currency
 
-        product_name: Unset | str | None
+        product_name: None | Unset | str
         if isinstance(self.product_name, Unset):
             product_name = UNSET
         else:
             product_name = self.product_name
 
-        unit_amount: Unset | int | None
+        unit_amount: None | Unset | int
         if isinstance(self.unit_amount, Unset):
             unit_amount = UNSET
         else:
             unit_amount = self.unit_amount
 
-        interval: Unset | str | None
+        interval: None | Unset | str
         if isinstance(self.interval, Unset):
             interval = UNSET
         else:

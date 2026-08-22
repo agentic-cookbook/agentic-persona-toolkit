@@ -17,7 +17,6 @@ def _get_kwargs(
     entity_type: Unset | str = UNSET,
     limit: Unset | str = UNSET,
 ) -> dict[str, Any]:
-
     params: dict[str, Any] = {}
 
     params["q"] = q

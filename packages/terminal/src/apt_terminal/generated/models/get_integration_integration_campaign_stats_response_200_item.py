@@ -106,40 +106,40 @@ class GetIntegrationIntegrationCampaignStatsResponse200Item:
 
         external_id = self.external_id
 
-        name: str | None
+        name: None | str
         name = self.name
 
-        subject: str | None
+        subject: None | str
         subject = self.subject
 
-        status: str | None
+        status: None | str
         status = self.status
 
-        sent_at: str | None
+        sent_at: None | str
         sent_at = self.sent_at
 
-        recipients: int | None
+        recipients: None | int
         recipients = self.recipients
 
-        opens: int | None
+        opens: None | int
         opens = self.opens
 
-        unique_opens: int | None
+        unique_opens: None | int
         unique_opens = self.unique_opens
 
-        clicks: int | None
+        clicks: None | int
         clicks = self.clicks
 
-        unique_clicks: int | None
+        unique_clicks: None | int
         unique_clicks = self.unique_clicks
 
-        bounces: int | None
+        bounces: None | int
         bounces = self.bounces
 
-        unsubscribes: int | None
+        unsubscribes: None | int
         unsubscribes = self.unsubscribes
 
-        raw: bool | dict[str, Any] | float | list[Any] | str | None
+        raw: None | bool | dict[str, Any] | float | list[Any] | str
         if isinstance(self.raw, GetIntegrationIntegrationCampaignStatsResponse200ItemRawType0Type1):
             raw = self.raw.to_dict()
         elif isinstance(self.raw, list):
@@ -150,7 +150,7 @@ class GetIntegrationIntegrationCampaignStatsResponse200Item:
 
         is_deleted = self.is_deleted
 
-        deleted_at: str | None
+        deleted_at: None | str
         deleted_at = self.deleted_at
 
         created_at = self.created_at
@@ -159,7 +159,7 @@ class GetIntegrationIntegrationCampaignStatsResponse200Item:
 
         sync_version = self.sync_version
 
-        sync_stamped_at: str | None
+        sync_stamped_at: None | str
         sync_stamped_at = self.sync_stamped_at
 
         sync_txid = self.sync_txid

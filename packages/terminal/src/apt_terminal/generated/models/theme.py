@@ -36,7 +36,7 @@ class Theme:
 
         label = self.label
 
-        based_on: str | None
+        based_on: None | str
         based_on = self.based_on
 
         data = self.data.to_dict()

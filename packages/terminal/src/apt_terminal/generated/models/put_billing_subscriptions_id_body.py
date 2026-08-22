@@ -38,7 +38,7 @@ class PutBillingSubscriptionsIdBody:
 
         started_at = self.started_at
 
-        expires_at: Unset | str | None
+        expires_at: None | Unset | str
         if isinstance(self.expires_at, Unset):
             expires_at = UNSET
         else:

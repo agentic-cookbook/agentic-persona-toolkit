@@ -38,19 +38,19 @@ class PostCustomerCustomersBody:
     def to_dict(self) -> dict[str, Any]:
         ecosystem_id = self.ecosystem_id
 
-        external_id: Unset | str | None
+        external_id: None | Unset | str
         if isinstance(self.external_id, Unset):
             external_id = UNSET
         else:
             external_id = self.external_id
 
-        email: Unset | str | None
+        email: None | Unset | str
         if isinstance(self.email, Unset):
             email = UNSET
         else:
             email = self.email
 
-        display_name: Unset | str | None
+        display_name: None | Unset | str
         if isinstance(self.display_name, Unset):
             display_name = UNSET
         else:
@@ -64,7 +64,7 @@ class PostCustomerCustomersBody:
 
         token_version = self.token_version
 
-        preferred_mfa_method: Unset | str | None
+        preferred_mfa_method: None | Unset | str
         if isinstance(self.preferred_mfa_method, Unset):
             preferred_mfa_method = UNSET
         else:

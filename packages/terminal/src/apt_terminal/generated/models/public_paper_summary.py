@@ -30,7 +30,7 @@ class PublicPaperSummary:
 
         title = self.title
 
-        category: str | None
+        category: None | str
         category = self.category
 
         tags = self.tags

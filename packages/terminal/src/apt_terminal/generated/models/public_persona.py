@@ -62,33 +62,33 @@ class PublicPersona:
 
         name = self.name
 
-        description: str | None
+        description: None | str
         description = self.description
 
         model_prompt = self.model_prompt
 
-        provider: str | None
+        provider: None | str
         provider = self.provider
 
         model = self.model
 
-        avatar_url: str | None
+        avatar_url: None | str
         avatar_url = self.avatar_url
 
-        voice: str | None
+        voice: None | str
         voice = self.voice
 
-        character: str | None
+        character: None | str
         character = self.character
 
-        examples: str | None
+        examples: None | str
         examples = self.examples
 
         visibility = self.visibility.value
 
         created_at = self.created_at
 
-        owner: dict[str, Any] | None
+        owner: None | dict[str, Any]
         if isinstance(self.owner, PublicOwnerType0):
             owner = self.owner.to_dict()
         else:
@@ -96,7 +96,7 @@ class PublicPersona:
 
         demo_enabled = self.demo_enabled
 
-        chat_status: Unset | dict[str, Any] | None
+        chat_status: None | Unset | dict[str, Any]
         if isinstance(self.chat_status, Unset):
             chat_status = UNSET
         elif isinstance(self.chat_status, PublicPersonaChatStatusType0):

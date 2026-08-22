@@ -64,7 +64,7 @@ class GetIntegrationIntegrationBookmarksResponse200Item:
 
         customer_id = self.customer_id
 
-        deleted_at: str | None
+        deleted_at: None | str
         deleted_at = self.deleted_at
 
         ecosystem_id = self.ecosystem_id
@@ -79,29 +79,29 @@ class GetIntegrationIntegrationBookmarksResponse200Item:
 
         url = self.url
 
-        excerpt: str | None
+        excerpt: None | str
         excerpt = self.excerpt
 
-        note: str | None
+        note: None | str
         note = self.note
 
-        tags: str | None
+        tags: None | str
         tags = self.tags
 
-        image_url: str | None
+        image_url: None | str
         image_url = self.image_url
 
-        collection_id: str | None
+        collection_id: None | str
         collection_id = self.collection_id
 
-        collection_name: str | None
+        collection_name: None | str
         collection_name = self.collection_name
 
         is_favorite = self.is_favorite
 
         is_deleted = self.is_deleted
 
-        external_created_at: str | None
+        external_created_at: None | str
         external_created_at = self.external_created_at
 
         created_at = self.created_at
@@ -110,7 +110,7 @@ class GetIntegrationIntegrationBookmarksResponse200Item:
 
         sync_version = self.sync_version
 
-        sync_stamped_at: str | None
+        sync_stamped_at: None | str
         sync_stamped_at = self.sync_stamped_at
 
         sync_txid = self.sync_txid

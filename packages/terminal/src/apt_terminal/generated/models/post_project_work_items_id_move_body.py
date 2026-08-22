@@ -26,13 +26,13 @@ class PostProjectWorkItemsIdMoveBody:
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        after_id: Unset | str | None
+        after_id: None | Unset | str
         if isinstance(self.after_id, Unset):
             after_id = UNSET
         else:
             after_id = self.after_id
 
-        before_id: Unset | str | None
+        before_id: None | Unset | str
         if isinstance(self.before_id, Unset):
             before_id = UNSET
         else:

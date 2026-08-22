@@ -32,7 +32,7 @@ class CommunityProfile:
 
         avatar_url = self.avatar_url
 
-        display_name: Unset | str | None
+        display_name: None | Unset | str
         if isinstance(self.display_name, Unset):
             display_name = UNSET
         else:

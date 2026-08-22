@@ -14,7 +14,6 @@ def _get_kwargs(
     slug: str,
     route: str,
 ) -> dict[str, Any]:
-
     _kwargs: dict[str, Any] = {
         "method": "get",
         "url": f"/public/users/{slug}/papers/{route}",

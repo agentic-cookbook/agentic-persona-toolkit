@@ -28,7 +28,7 @@ class PostAuthTokensBody:
     def to_dict(self) -> dict[str, Any]:
         name = self.name
 
-        expires_at: Unset | str | None
+        expires_at: None | Unset | str
         if isinstance(self.expires_at, Unset):
             expires_at = UNSET
         elif isinstance(self.expires_at, datetime.datetime):

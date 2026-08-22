@@ -64,13 +64,13 @@ class CommunityCategory:
 
         updated_at = self.updated_at
 
-        description: Unset | str | None
+        description: None | Unset | str
         if isinstance(self.description, Unset):
             description = UNSET
         else:
             description = self.description
 
-        color: Unset | str | None
+        color: None | Unset | str
         if isinstance(self.color, Unset):
             color = UNSET
         else:
@@ -78,7 +78,7 @@ class CommunityCategory:
 
         discussion_count = self.discussion_count
 
-        last_activity_at: Unset | str | None
+        last_activity_at: None | Unset | str
         if isinstance(self.last_activity_at, Unset):
             last_activity_at = UNSET
         else:

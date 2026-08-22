@@ -62,7 +62,7 @@ class PutIntegrationIntegrationItemsIdBody:
 
         title = self.title
 
-        body: Unset | str | None
+        body: None | Unset | str
         if isinstance(self.body, Unset):
             body = UNSET
         else:
@@ -72,31 +72,31 @@ class PutIntegrationIntegrationItemsIdBody:
 
         repo_full_name = self.repo_full_name
 
-        repo_url: Unset | str | None
+        repo_url: None | Unset | str
         if isinstance(self.repo_url, Unset):
             repo_url = UNSET
         else:
             repo_url = self.repo_url
 
-        item_url: Unset | str | None
+        item_url: None | Unset | str
         if isinstance(self.item_url, Unset):
             item_url = UNSET
         else:
             item_url = self.item_url
 
-        number: Unset | int | None
+        number: None | Unset | int
         if isinstance(self.number, Unset):
             number = UNSET
         else:
             number = self.number
 
-        labels: Unset | str | None
+        labels: None | Unset | str
         if isinstance(self.labels, Unset):
             labels = UNSET
         else:
             labels = self.labels
 
-        assignees: Unset | str | None
+        assignees: None | Unset | str
         if isinstance(self.assignees, Unset):
             assignees = UNSET
         else:
@@ -104,19 +104,19 @@ class PutIntegrationIntegrationItemsIdBody:
 
         is_read = self.is_read
 
-        notification_reason: Unset | str | None
+        notification_reason: None | Unset | str
         if isinstance(self.notification_reason, Unset):
             notification_reason = UNSET
         else:
             notification_reason = self.notification_reason
 
-        external_created_at: Unset | str | None
+        external_created_at: None | Unset | str
         if isinstance(self.external_created_at, Unset):
             external_created_at = UNSET
         else:
             external_created_at = self.external_created_at
 
-        external_updated_at: Unset | str | None
+        external_updated_at: None | Unset | str
         if isinstance(self.external_updated_at, Unset):
             external_updated_at = UNSET
         else:

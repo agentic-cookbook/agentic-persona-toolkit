@@ -14,7 +14,6 @@ def _get_kwargs(
     *,
     access_token: Unset | str = UNSET,
 ) -> dict[str, Any]:
-
     params: dict[str, Any] = {}
 
     params["access_token"] = access_token

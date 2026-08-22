@@ -37,7 +37,7 @@ class SignupListPublic:
     def to_dict(self) -> dict[str, Any]:
         name = self.name
 
-        description: str | None
+        description: None | str
         description = self.description
 
         status = self.status.value

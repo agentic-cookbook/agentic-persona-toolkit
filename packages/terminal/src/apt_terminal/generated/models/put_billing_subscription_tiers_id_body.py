@@ -30,7 +30,7 @@ class PutBillingSubscriptionTiersIdBody:
 
         name = self.name
 
-        description: Unset | str | None
+        description: None | Unset | str
         if isinstance(self.description, Unset):
             description = UNSET
         else:

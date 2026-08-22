@@ -20,7 +20,7 @@ class PostProjectIterationsIdRolloverBody:
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        to_iteration_id: str | None
+        to_iteration_id: None | str
         to_iteration_id = self.to_iteration_id
 
         field_dict: dict[str, Any] = {}

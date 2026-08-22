@@ -164,3 +164,73 @@ def test_empty_list_renders_none(tmp_path):
     res = runner.invoke(app, ["list"])
     assert res.exit_code == 0, res.output
     assert "(none)" in res.output
+
+
+# --- enum coercion -------------------------------------------------------------------
+#
+# The generated body models are plain attrs classes with no converters, so before
+# `coerce_enums` a `--set provider_kind=openai` stored the STRING and the command died later
+# inside generated `to_dict()` with `AttributeError: 'str' object has no attribute 'value'`.
+# These pin the coercion and, just as importantly, the error the user gets when the value is
+# not a member — the old path could only crash.
+
+
+def _services_body():
+    from apt_terminal.generated.models.post_persona_services_body import (
+        PostPersonaServicesBody,
+    )
+
+    return PostPersonaServicesBody
+
+
+def test_build_body_coerces_a_string_into_the_declared_enum():
+    body = crud.build_body(_services_body(), [
+        "name=svc", "provider_kind=openai", "base_url=https://o.test",
+    ])
+    from apt_terminal.generated.models.post_persona_services_body_provider_kind import (
+        PostPersonaServicesBodyProviderKind,
+    )
+
+    assert body.provider_kind is PostPersonaServicesBodyProviderKind.OPENAI
+
+
+def test_a_coerced_body_serializes_instead_of_raising():
+    # The regression itself: the failure was never at construction, it was here.
+    body = crud.build_body(_services_body(), [
+        "name=svc", "provider_kind=openai", "base_url=https://o.test",
+    ])
+    assert body.to_dict()["providerKind"] == "openai"
+
+
+def test_build_body_names_the_field_and_the_choices_for_a_bad_enum_value():
+    with pytest.raises(AptError) as exc:
+        crud.build_body(_services_body(), [
+            "name=svc", "provider_kind=nope", "base_url=https://o.test",
+        ])
+    msg = str(exc.value)
+    assert "provider_kind" in msg
+    assert "openai" in msg
+
+
+def test_build_body_leaves_a_non_enum_field_alone():
+    body = crud.build_body(_services_body(), [
+        "name=svc", "provider_kind=openai", "base_url=https://o.test",
+    ])
+    assert body.name == "svc"
+
+
+def test_enum_type_looks_through_a_union_but_not_an_ambiguous_one():
+    import enum
+
+    class A(enum.Enum):
+        X = "x"
+
+    class B(enum.Enum):
+        Y = "y"
+
+    assert crud.enum_type(A) is A
+    # An optional enum is still an enum as far as a --set value is concerned.
+    assert crud.enum_type(A | None) is A
+    assert crud.enum_type(str) is None
+    # Two enums in one union would make the coercion a guess, so it declines.
+    assert crud.enum_type(A | B) is None

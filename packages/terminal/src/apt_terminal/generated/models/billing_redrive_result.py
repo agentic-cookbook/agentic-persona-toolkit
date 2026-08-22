@@ -42,7 +42,7 @@ class BillingRedriveResult:
 
         failed = self.failed
 
-        next_offset: int | None
+        next_offset: None | int
         next_offset = self.next_offset
 
         field_dict: dict[str, Any] = {}

@@ -38,7 +38,7 @@ class PatchOauthClientsSlugBody:
         if not isinstance(self.allowed_return_origins, Unset):
             allowed_return_origins = self.allowed_return_origins
 
-        jwt_audience: Unset | str | None
+        jwt_audience: None | Unset | str
         if isinstance(self.jwt_audience, Unset):
             jwt_audience = UNSET
         else:

@@ -61,19 +61,19 @@ class PostOauthProvidersBody:
         if not isinstance(self.scopes, Unset):
             scopes = self.scopes
 
-        authorize_url: Unset | str | None
+        authorize_url: None | Unset | str
         if isinstance(self.authorize_url, Unset):
             authorize_url = UNSET
         else:
             authorize_url = self.authorize_url
 
-        token_url: Unset | str | None
+        token_url: None | Unset | str
         if isinstance(self.token_url, Unset):
             token_url = UNSET
         else:
             token_url = self.token_url
 
-        userinfo_url: Unset | str | None
+        userinfo_url: None | Unset | str
         if isinstance(self.userinfo_url, Unset):
             userinfo_url = UNSET
         else:

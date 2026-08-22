@@ -60,7 +60,7 @@ class GetIntegrationIntegrationSocialNotificationsIdResponse200:
 
         customer_id = self.customer_id
 
-        deleted_at: str | None
+        deleted_at: None | str
         deleted_at = self.deleted_at
 
         ecosystem_id = self.ecosystem_id
@@ -73,26 +73,26 @@ class GetIntegrationIntegrationSocialNotificationsIdResponse200:
 
         notification_type = self.notification_type
 
-        title: str | None
+        title: None | str
         title = self.title
 
-        body: str | None
+        body: None | str
         body = self.body
 
-        author_handle: str | None
+        author_handle: None | str
         author_handle = self.author_handle
 
-        author_display_name: str | None
+        author_display_name: None | str
         author_display_name = self.author_display_name
 
-        item_url: str | None
+        item_url: None | str
         item_url = self.item_url
 
         is_read = self.is_read
 
         is_deleted = self.is_deleted
 
-        external_created_at: str | None
+        external_created_at: None | str
         external_created_at = self.external_created_at
 
         created_at = self.created_at
@@ -101,7 +101,7 @@ class GetIntegrationIntegrationSocialNotificationsIdResponse200:
 
         sync_version = self.sync_version
 
-        sync_stamped_at: str | None
+        sync_stamped_at: None | str
         sync_stamped_at = self.sync_stamped_at
 
         sync_txid = self.sync_txid

@@ -34,13 +34,13 @@ class PostContentPollsBody:
 
         ecosystem_id = self.ecosystem_id
 
-        host_kind: Unset | str | None
+        host_kind: None | Unset | str
         if isinstance(self.host_kind, Unset):
             host_kind = UNSET
         else:
             host_kind = self.host_kind
 
-        host_id: Unset | str | None
+        host_id: None | Unset | str
         if isinstance(self.host_id, Unset):
             host_id = UNSET
         else:
@@ -48,7 +48,7 @@ class PostContentPollsBody:
 
         allow_multiple = self.allow_multiple
 
-        expires_at: Unset | str | None
+        expires_at: None | Unset | str
         if isinstance(self.expires_at, Unset):
             expires_at = UNSET
         else:

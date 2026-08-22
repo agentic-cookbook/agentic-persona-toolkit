@@ -40,13 +40,13 @@ class PutPersonaModelsIdBody:
 
         name = self.name
 
-        description: Unset | str | None
+        description: None | Unset | str
         if isinstance(self.description, Unset):
             description = UNSET
         else:
             description = self.description
 
-        metadata: Unset | bool | dict[str, Any] | float | list[Any] | str | None
+        metadata: None | Unset | bool | dict[str, Any] | float | list[Any] | str
         if isinstance(self.metadata, Unset):
             metadata = UNSET
         elif isinstance(self.metadata, PutPersonaModelsIdBodyMetadataType0Type1):

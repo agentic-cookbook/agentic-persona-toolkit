@@ -32,10 +32,10 @@ class TargetDescriptor:
 
         title = self.title
 
-        subtitle: str | None
+        subtitle: None | str
         subtitle = self.subtitle
 
-        url: str | None
+        url: None | str
         url = self.url
 
         field_dict: dict[str, Any] = {}

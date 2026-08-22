@@ -26,7 +26,7 @@ class PresenceView:
 
         online = self.online
 
-        last_seen_at: str | None
+        last_seen_at: None | str
         last_seen_at = self.last_seen_at
 
         field_dict: dict[str, Any] = {}

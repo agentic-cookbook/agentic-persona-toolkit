@@ -32,7 +32,7 @@ class VisitorMessage:
 
         content = self.content
 
-        tool_name: str | None
+        tool_name: None | str
         tool_name = self.tool_name
 
         created_at = self.created_at

@@ -159,13 +159,13 @@ class RegistryEntry:
 
         sync_version = self.sync_version
 
-        photo_attachment_id: Unset | str | None
+        photo_attachment_id: None | Unset | str
         if isinstance(self.photo_attachment_id, Unset):
             photo_attachment_id = UNSET
         else:
             photo_attachment_id = self.photo_attachment_id
 
-        geo: Unset | dict[str, Any] | None
+        geo: None | Unset | dict[str, Any]
         if isinstance(self.geo, Unset):
             geo = UNSET
         elif isinstance(self.geo, RegistryEntryGeoType0):
@@ -173,13 +173,13 @@ class RegistryEntry:
         else:
             geo = self.geo
 
-        published_at: Unset | str | None
+        published_at: None | Unset | str
         if isinstance(self.published_at, Unset):
             published_at = UNSET
         else:
             published_at = self.published_at
 
-        deleted_at: Unset | str | None
+        deleted_at: None | Unset | str
         if isinstance(self.deleted_at, Unset):
             deleted_at = UNSET
         else:

@@ -26,7 +26,7 @@ class PersonaDemoPreviewDiagnostic:
     def to_dict(self) -> dict[str, Any]:
         severity = self.severity.value
 
-        line: int | None
+        line: None | int
         line = self.line
 
         message = self.message

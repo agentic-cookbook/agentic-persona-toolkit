@@ -26,7 +26,7 @@ class PublicRegistryEntryResponseRegistry:
 
         name = self.name
 
-        bound_site_id: str | None
+        bound_site_id: None | str
         bound_site_id = self.bound_site_id
 
         field_dict: dict[str, Any] = {}

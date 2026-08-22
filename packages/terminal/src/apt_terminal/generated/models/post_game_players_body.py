@@ -38,7 +38,7 @@ class PostGamePlayersBody:
 
         ecosystem_id = self.ecosystem_id
 
-        character_avatar_url: Unset | str | None
+        character_avatar_url: None | Unset | str
         if isinstance(self.character_avatar_url, Unset):
             character_avatar_url = UNSET
         else:

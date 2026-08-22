@@ -38,7 +38,7 @@ class PutAudienceListsIdBody:
 
         slug = self.slug
 
-        description: Unset | str | None
+        description: None | Unset | str
         if isinstance(self.description, Unset):
             description = UNSET
         else:
@@ -46,19 +46,19 @@ class PutAudienceListsIdBody:
 
         status = self.status
 
-        welcome_template_id: Unset | str | None
+        welcome_template_id: None | Unset | str
         if isinstance(self.welcome_template_id, Unset):
             welcome_template_id = UNSET
         else:
             welcome_template_id = self.welcome_template_id
 
-        welcome_back_template_id: Unset | str | None
+        welcome_back_template_id: None | Unset | str
         if isinstance(self.welcome_back_template_id, Unset):
             welcome_back_template_id = UNSET
         else:
             welcome_back_template_id = self.welcome_back_template_id
 
-        from_name: Unset | str | None
+        from_name: None | Unset | str
         if isinstance(self.from_name, Unset):
             from_name = UNSET
         else:

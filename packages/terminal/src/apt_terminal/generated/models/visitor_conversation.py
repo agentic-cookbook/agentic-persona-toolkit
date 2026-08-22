@@ -40,10 +40,10 @@ class VisitorConversation:
 
         model = self.model
 
-        persona_slug: str | None
+        persona_slug: None | str
         persona_slug = self.persona_slug
 
-        persona_id: str | None
+        persona_id: None | str
         persona_id = self.persona_id
 
         state = self.state.value

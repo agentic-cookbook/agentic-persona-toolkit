@@ -16,7 +16,6 @@ def _get_kwargs(
     *,
     kind: Unset | GetProjectWorkItemsIdRelationsKind = UNSET,
 ) -> dict[str, Any]:
-
     params: dict[str, Any] = {}
 
     json_kind: Unset | str = UNSET

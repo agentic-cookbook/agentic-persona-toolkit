@@ -34,7 +34,7 @@ class PostContentEventsBody:
 
         type_ = self.type_
 
-        payload: bool | dict[str, Any] | float | list[Any] | str | None
+        payload: None | bool | dict[str, Any] | float | list[Any] | str
         if isinstance(self.payload, PostContentEventsBodyPayloadType1):
             payload = self.payload.to_dict()
         elif isinstance(self.payload, list):

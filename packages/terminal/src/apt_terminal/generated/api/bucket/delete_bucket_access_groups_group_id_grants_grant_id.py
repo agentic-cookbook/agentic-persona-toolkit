@@ -13,7 +13,6 @@ def _get_kwargs(
     group_id: str,
     grant_id: str,
 ) -> dict[str, Any]:
-
     _kwargs: dict[str, Any] = {
         "method": "delete",
         "url": f"/bucket/access-groups/{group_id}/grants/{grant_id}",

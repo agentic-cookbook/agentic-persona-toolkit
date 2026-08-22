@@ -55,7 +55,7 @@ class ProjectComment:
 
         created_at = self.created_at
 
-        parent_id: Unset | str | None
+        parent_id: None | Unset | str
         if isinstance(self.parent_id, Unset):
             parent_id = UNSET
         else:
@@ -65,19 +65,19 @@ class ProjectComment:
         if not isinstance(self.author_kind, Unset):
             author_kind = self.author_kind.value
 
-        author_id: Unset | str | None
+        author_id: None | Unset | str
         if isinstance(self.author_id, Unset):
             author_id = UNSET
         else:
             author_id = self.author_id
 
-        author_label: Unset | str | None
+        author_label: None | Unset | str
         if isinstance(self.author_label, Unset):
             author_label = UNSET
         else:
             author_label = self.author_label
 
-        edited_at: Unset | str | None
+        edited_at: None | Unset | str
         if isinstance(self.edited_at, Unset):
             edited_at = UNSET
         else:

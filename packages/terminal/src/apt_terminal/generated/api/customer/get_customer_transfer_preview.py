@@ -17,7 +17,6 @@ def _get_kwargs(
     user_ids: str,
     target: str,
 ) -> dict[str, Any]:
-
     params: dict[str, Any] = {}
 
     params["userIds"] = user_ids

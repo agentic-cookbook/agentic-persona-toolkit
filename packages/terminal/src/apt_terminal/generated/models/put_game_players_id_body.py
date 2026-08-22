@@ -34,7 +34,7 @@ class PutGamePlayersIdBody:
 
         game_id = self.game_id
 
-        character_avatar_url: Unset | str | None
+        character_avatar_url: None | Unset | str
         if isinstance(self.character_avatar_url, Unset):
             character_avatar_url = UNSET
         else:

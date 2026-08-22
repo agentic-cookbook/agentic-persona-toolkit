@@ -54,7 +54,7 @@ class Announcement:
 
         updated_at = self.updated_at
 
-        sent_at: str | None
+        sent_at: None | str
         sent_at = self.sent_at
 
         total_recipients = self.total_recipients

@@ -29,7 +29,7 @@ class DmMessagePreviewType0:
     def to_dict(self) -> dict[str, Any]:
         id = self.id
 
-        sender_participant_id: str | None
+        sender_participant_id: None | str
         sender_participant_id = self.sender_participant_id
 
         body = self.body

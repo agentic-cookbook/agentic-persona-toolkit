@@ -52,31 +52,31 @@ class PutContentUrlsIdBody:
 
         canonical_url_hash = self.canonical_url_hash
 
-        title: Unset | str | None
+        title: None | Unset | str
         if isinstance(self.title, Unset):
             title = UNSET
         else:
             title = self.title
 
-        description: Unset | str | None
+        description: None | Unset | str
         if isinstance(self.description, Unset):
             description = UNSET
         else:
             description = self.description
 
-        note: Unset | str | None
+        note: None | Unset | str
         if isinstance(self.note, Unset):
             note = UNSET
         else:
             note = self.note
 
-        preview_storage_key: Unset | str | None
+        preview_storage_key: None | Unset | str
         if isinstance(self.preview_storage_key, Unset):
             preview_storage_key = UNSET
         else:
             preview_storage_key = self.preview_storage_key
 
-        preview_url: Unset | str | None
+        preview_url: None | Unset | str
         if isinstance(self.preview_url, Unset):
             preview_url = UNSET
         else:
@@ -84,13 +84,13 @@ class PutContentUrlsIdBody:
 
         preview_status = self.preview_status
 
-        preview_error: Unset | str | None
+        preview_error: None | Unset | str
         if isinstance(self.preview_error, Unset):
             preview_error = UNSET
         else:
             preview_error = self.preview_error
 
-        preview_generated_at: Unset | str | None
+        preview_generated_at: None | Unset | str
         if isinstance(self.preview_generated_at, Unset):
             preview_generated_at = UNSET
         else:

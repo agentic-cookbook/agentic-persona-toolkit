@@ -50,7 +50,7 @@ class GetMonitoringSitesIdResponse200:
 
         slug = self.slug
 
-        description: str | None
+        description: None | str
         description = self.description
 
         display_order = self.display_order

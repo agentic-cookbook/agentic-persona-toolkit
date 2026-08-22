@@ -58,7 +58,7 @@ class AiProcessingWebhookEndpointCreated:
 
         secret = self.secret
 
-        description: Unset | str | None
+        description: None | Unset | str
         if isinstance(self.description, Unset):
             description = UNSET
         else:

@@ -44,7 +44,7 @@ class PostDocumentBlocksBody:
 
         content_meta = self.content_meta
 
-        last_op_id: Unset | str | None
+        last_op_id: None | Unset | str
         if isinstance(self.last_op_id, Unset):
             last_op_id = UNSET
         else:

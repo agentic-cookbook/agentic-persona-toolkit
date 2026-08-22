@@ -13,7 +13,6 @@ def _get_kwargs(
     id: str,
     token_id: str,
 ) -> dict[str, Any]:
-
     _kwargs: dict[str, Any] = {
         "method": "delete",
         "url": f"/persona/personas/{id}/tokens/{token_id}",

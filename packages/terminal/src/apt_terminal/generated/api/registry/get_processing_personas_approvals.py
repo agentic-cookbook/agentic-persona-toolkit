@@ -16,7 +16,6 @@ def _get_kwargs(
     *,
     status: Unset | str = UNSET,
 ) -> dict[str, Any]:
-
     params: dict[str, Any] = {}
 
     params["status"] = status

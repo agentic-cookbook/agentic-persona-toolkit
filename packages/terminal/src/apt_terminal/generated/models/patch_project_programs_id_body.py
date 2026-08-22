@@ -36,13 +36,13 @@ class PatchProjectProgramsIdBody:
 
         color = self.color
 
-        start_date: Unset | str | None
+        start_date: None | Unset | str
         if isinstance(self.start_date, Unset):
             start_date = UNSET
         else:
             start_date = self.start_date
 
-        target_date: Unset | str | None
+        target_date: None | Unset | str
         if isinstance(self.target_date, Unset):
             target_date = UNSET
         else:

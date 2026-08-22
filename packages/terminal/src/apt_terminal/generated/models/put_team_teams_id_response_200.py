@@ -46,7 +46,7 @@ class PutTeamTeamsIdResponse200:
 
         description = self.description
 
-        created_by: str | None
+        created_by: None | str
         created_by = self.created_by
 
         created_at = self.created_at

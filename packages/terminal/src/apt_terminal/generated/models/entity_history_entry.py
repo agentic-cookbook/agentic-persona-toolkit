@@ -51,15 +51,15 @@ class EntityHistoryEntry:
 
         subject_id = self.subject_id
 
-        actor_id: str | None
+        actor_id: None | str
         actor_id = self.actor_id
 
-        actor_label: str | None
+        actor_label: None | str
         actor_label = self.actor_label
 
         action = self.action
 
-        detail: dict[str, Any] | None
+        detail: None | dict[str, Any]
         if isinstance(self.detail, EntityHistoryEntryDetailType0):
             detail = self.detail.to_dict()
         else:

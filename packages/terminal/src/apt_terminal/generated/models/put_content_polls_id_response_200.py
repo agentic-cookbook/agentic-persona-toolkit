@@ -46,22 +46,22 @@ class PutContentPollsIdResponse200:
 
         customer_id = self.customer_id
 
-        deleted_at: str | None
+        deleted_at: None | str
         deleted_at = self.deleted_at
 
         ecosystem_id = self.ecosystem_id
 
-        host_kind: str | None
+        host_kind: None | str
         host_kind = self.host_kind
 
-        host_id: str | None
+        host_id: None | str
         host_id = self.host_id
 
         question = self.question
 
         allow_multiple = self.allow_multiple
 
-        expires_at: str | None
+        expires_at: None | str
         expires_at = self.expires_at
 
         created_at = self.created_at
@@ -70,7 +70,7 @@ class PutContentPollsIdResponse200:
 
         sync_version = self.sync_version
 
-        sync_stamped_at: str | None
+        sync_stamped_at: None | str
         sync_stamped_at = self.sync_stamped_at
 
         sync_txid = self.sync_txid

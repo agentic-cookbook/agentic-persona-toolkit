@@ -91,13 +91,13 @@ class GamificationCatalogBadge:
 
         source = self.source.value
 
-        stat_key: Unset | str | None
+        stat_key: None | Unset | str
         if isinstance(self.stat_key, Unset):
             stat_key = UNSET
         else:
             stat_key = self.stat_key
 
-        comparator: Unset | str | None
+        comparator: None | Unset | str
         if isinstance(self.comparator, Unset):
             comparator = UNSET
         elif (
@@ -109,19 +109,19 @@ class GamificationCatalogBadge:
         else:
             comparator = self.comparator
 
-        threshold: Unset | int | None
+        threshold: None | Unset | int
         if isinstance(self.threshold, Unset):
             threshold = UNSET
         else:
             threshold = self.threshold
 
-        badge_line: Unset | str | None
+        badge_line: None | Unset | str
         if isinstance(self.badge_line, Unset):
             badge_line = UNSET
         else:
             badge_line = self.badge_line
 
-        tier: Unset | str | None
+        tier: None | Unset | str
         if isinstance(self.tier, Unset):
             tier = UNSET
         elif (
@@ -137,13 +137,13 @@ class GamificationCatalogBadge:
 
         active = self.active
 
-        subject_type: Unset | str | None
+        subject_type: None | Unset | str
         if isinstance(self.subject_type, Unset):
             subject_type = UNSET
         else:
             subject_type = self.subject_type
 
-        ecosystem_id: Unset | str | None
+        ecosystem_id: None | Unset | str
         if isinstance(self.ecosystem_id, Unset):
             ecosystem_id = UNSET
         else:

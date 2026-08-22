@@ -45,21 +45,21 @@ class InvitationRequest:
 
         name = self.name
 
-        email: str | None
+        email: None | str
         email = self.email
 
-        phone: str | None
+        phone: None | str
         phone = self.phone
 
-        source: str | None
+        source: None | str
         source = self.source
 
-        note: str | None
+        note: None | str
         note = self.note
 
         created_at = self.created_at
 
-        user_number: int | None
+        user_number: None | int
         user_number = self.user_number
 
         field_dict: dict[str, Any] = {}

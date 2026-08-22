@@ -136,7 +136,7 @@ class Project:
 
         key_prefix = self.key_prefix
 
-        health: str | None
+        health: None | str
         if (
             isinstance(self.health, ProjectHealthType1)
             or isinstance(self.health, ProjectHealthType2Type1)
@@ -146,34 +146,34 @@ class Project:
         else:
             health = self.health
 
-        health_updated_at: str | None
+        health_updated_at: None | str
         health_updated_at = self.health_updated_at
 
-        deleted_at: Unset | str | None
+        deleted_at: None | Unset | str
         if isinstance(self.deleted_at, Unset):
             deleted_at = UNSET
         else:
             deleted_at = self.deleted_at
 
-        archived_at: Unset | str | None
+        archived_at: None | Unset | str
         if isinstance(self.archived_at, Unset):
             archived_at = UNSET
         else:
             archived_at = self.archived_at
 
-        start_date: Unset | str | None
+        start_date: None | Unset | str
         if isinstance(self.start_date, Unset):
             start_date = UNSET
         else:
             start_date = self.start_date
 
-        target_date: Unset | str | None
+        target_date: None | Unset | str
         if isinstance(self.target_date, Unset):
             target_date = UNSET
         else:
             target_date = self.target_date
 
-        lead_kind: Unset | str | None
+        lead_kind: None | Unset | str
         if isinstance(self.lead_kind, Unset):
             lead_kind = UNSET
         elif (
@@ -185,13 +185,13 @@ class Project:
         else:
             lead_kind = self.lead_kind
 
-        lead_id: Unset | str | None
+        lead_id: None | Unset | str
         if isinstance(self.lead_id, Unset):
             lead_id = UNSET
         else:
             lead_id = self.lead_id
 
-        program_id: Unset | str | None
+        program_id: None | Unset | str
         if isinstance(self.program_id, Unset):
             program_id = UNSET
         else:

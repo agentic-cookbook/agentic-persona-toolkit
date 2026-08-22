@@ -15,7 +15,6 @@ def _get_kwargs(
     workspace: Unset | str = UNSET,
     limit: Unset | int = 50,
 ) -> dict[str, Any]:
-
     params: dict[str, Any] = {}
 
     params["workspace"] = workspace

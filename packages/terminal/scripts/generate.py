@@ -11,7 +11,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
-import shutil
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -33,6 +33,32 @@ def interpreter() -> str:
     """
     venv = ROOT / ".venv" / "bin" / "python"
     return str(venv) if venv.exists() else sys.executable
+
+
+def hook_env() -> dict[str, str]:
+    """The environment the generator's POST-HOOKS run in, with the venv's bin first on PATH.
+
+    `interpreter()` above pins the generator itself, and that used to be the whole story —
+    but generation does not end when openapi-python-client returns. Its `post_hooks` are
+    shell commands (`ruff check --fix`, `ruff format .`), and a bare `ruff` resolves from
+    PATH, so the LAST stage of generation ran under whatever ruff the machine happened to
+    have installed rather than the `ruff==0.13.3` pyproject pins beside the generator.
+
+    That is not hypothetical: the committed tree under `src/apt_terminal/generated/` is
+    0.16.0 output while the venv holds 0.13.3, because a Homebrew ruff sat ahead of the
+    venv on PATH. The pin was real, the venv was correct, and the hook walked straight past
+    both — which is exactly the drift the pin exists to prevent, arriving through the one
+    door it did not cover.
+
+    Prepending the venv's bin closes it for every hook tool at once, so the config file can
+    go on naming plain `ruff` (it is also what the hook would resolve to inside an activated
+    venv, which is how anyone running this by hand would expect it to behave).
+    """
+    env = dict(os.environ)
+    bindir = ROOT / ".venv" / "bin"
+    if bindir.exists():
+        env["PATH"] = f"{bindir}{os.pathsep}{env.get('PATH', '')}"
+    return env
 
 
 def build_cmd(spec: Path) -> list[str]:
@@ -57,7 +83,7 @@ def main(argv=None) -> int:
     # --overwrite replaces OUT; ensure a clean parent dir exists.
     OUT_PARENT.mkdir(parents=True, exist_ok=True)
     print(f"$ {' '.join(build_cmd(spec))}")
-    subprocess.run(build_cmd(spec), check=True)
+    subprocess.run(build_cmd(spec), check=True, env=hook_env())
     print(f"generated client at {OUT}")
     return 0
 

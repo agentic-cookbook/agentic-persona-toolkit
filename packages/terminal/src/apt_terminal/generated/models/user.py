@@ -43,7 +43,7 @@ class User:
 
         avatar_url = self.avatar_url
 
-        slug: str | None
+        slug: None | str
         slug = self.slug
 
         public_profile_enabled = self.public_profile_enabled

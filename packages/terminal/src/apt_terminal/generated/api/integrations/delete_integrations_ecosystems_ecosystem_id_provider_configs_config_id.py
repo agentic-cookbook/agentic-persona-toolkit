@@ -13,7 +13,6 @@ def _get_kwargs(
     ecosystem_id: str,
     config_id: str,
 ) -> dict[str, Any]:
-
     _kwargs: dict[str, Any] = {
         "method": "delete",
         "url": f"/integrations/ecosystems/{ecosystem_id}/provider-configs/{config_id}",

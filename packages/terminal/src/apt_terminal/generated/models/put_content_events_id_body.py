@@ -40,7 +40,7 @@ class PutContentEventsIdBody:
 
         type_ = self.type_
 
-        payload: Unset | bool | dict[str, Any] | float | list[Any] | str | None
+        payload: None | Unset | bool | dict[str, Any] | float | list[Any] | str
         if isinstance(self.payload, Unset):
             payload = UNSET
         elif isinstance(self.payload, PutContentEventsIdBodyPayloadType1):

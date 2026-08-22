@@ -15,7 +15,6 @@ def _get_kwargs(
     cursor: Unset | str = UNSET,
     limit: Unset | int = 500,
 ) -> dict[str, Any]:
-
     params: dict[str, Any] = {}
 
     params["cursor"] = cursor

@@ -38,13 +38,13 @@ class BillingEvent:
 
         received_at = self.received_at
 
-        processed_at: Unset | str | None
+        processed_at: None | Unset | str
         if isinstance(self.processed_at, Unset):
             processed_at = UNSET
         else:
             processed_at = self.processed_at
 
-        error: Unset | str | None
+        error: None | Unset | str
         if isinstance(self.error, Unset):
             error = UNSET
         else:

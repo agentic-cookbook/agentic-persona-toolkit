@@ -74,16 +74,16 @@ class Invitation:
 
         expires_at = self.expires_at
 
-        accepted_at: str | None
+        accepted_at: None | str
         accepted_at = self.accepted_at
 
-        accepted_customer_id: str | None
+        accepted_customer_id: None | str
         accepted_customer_id = self.accepted_customer_id
 
-        message_log_id: str | None
+        message_log_id: None | str
         message_log_id = self.message_log_id
 
-        admin_note: str | None
+        admin_note: None | str
         admin_note = self.admin_note
 
         created_at = self.created_at

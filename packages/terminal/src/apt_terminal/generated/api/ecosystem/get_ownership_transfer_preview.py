@@ -25,7 +25,6 @@ def _get_kwargs(
     target: str,
     target_kind: Unset | GetOwnershipTransferPreviewTargetKind = UNSET,
 ) -> dict[str, Any]:
-
     params: dict[str, Any] = {}
 
     json_entity_type = entity_type.value

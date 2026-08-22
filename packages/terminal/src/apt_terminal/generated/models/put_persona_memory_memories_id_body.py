@@ -67,13 +67,13 @@ class PutPersonaMemoryMemoriesIdBody:
 
         body = self.body
 
-        subject_table: Unset | str | None
+        subject_table: None | Unset | str
         if isinstance(self.subject_table, Unset):
             subject_table = UNSET
         else:
             subject_table = self.subject_table
 
-        subject_id: Unset | str | None
+        subject_id: None | Unset | str
         if isinstance(self.subject_id, Unset):
             subject_id = UNSET
         else:
@@ -81,7 +81,7 @@ class PutPersonaMemoryMemoriesIdBody:
 
         status = self.status
 
-        supersedes_id: Unset | str | None
+        supersedes_id: None | Unset | str
         if isinstance(self.supersedes_id, Unset):
             supersedes_id = UNSET
         else:
@@ -95,13 +95,13 @@ class PutPersonaMemoryMemoriesIdBody:
         if not isinstance(self.tags, Unset):
             tags = self.tags
 
-        valid_from: Unset | str | None
+        valid_from: None | Unset | str
         if isinstance(self.valid_from, Unset):
             valid_from = UNSET
         else:
             valid_from = self.valid_from
 
-        valid_to: Unset | str | None
+        valid_to: None | Unset | str
         if isinstance(self.valid_to, Unset):
             valid_to = UNSET
         else:

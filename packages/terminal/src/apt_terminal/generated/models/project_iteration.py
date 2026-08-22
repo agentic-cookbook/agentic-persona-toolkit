@@ -79,13 +79,13 @@ class ProjectIteration:
 
         customer_id = self.customer_id
 
-        created_by: Unset | str | None
+        created_by: None | Unset | str
         if isinstance(self.created_by, Unset):
             created_by = UNSET
         else:
             created_by = self.created_by
 
-        deleted_at: Unset | str | None
+        deleted_at: None | Unset | str
         if isinstance(self.deleted_at, Unset):
             deleted_at = UNSET
         else:

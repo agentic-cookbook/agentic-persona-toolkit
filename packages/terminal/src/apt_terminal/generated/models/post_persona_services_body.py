@@ -47,7 +47,7 @@ class PostPersonaServicesBody:
 
         api_key = self.api_key
 
-        connection_spec: Unset | dict[str, Any] | None
+        connection_spec: None | Unset | dict[str, Any]
         if isinstance(self.connection_spec, Unset):
             connection_spec = UNSET
         elif isinstance(self.connection_spec, ProviderConnectionSpecType0):

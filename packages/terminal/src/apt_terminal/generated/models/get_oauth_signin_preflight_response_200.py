@@ -24,7 +24,7 @@ class GetOauthSigninPreflightResponse200:
     def to_dict(self) -> dict[str, Any]:
         allowed = self.allowed
 
-        reason: Unset | str | None
+        reason: None | Unset | str
         if isinstance(self.reason, Unset):
             reason = UNSET
         else:

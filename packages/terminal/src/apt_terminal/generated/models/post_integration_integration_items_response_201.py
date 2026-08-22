@@ -70,7 +70,7 @@ class PostIntegrationIntegrationItemsResponse201:
 
         customer_id = self.customer_id
 
-        deleted_at: str | None
+        deleted_at: None | str
         deleted_at = self.deleted_at
 
         ecosystem_id = self.ecosystem_id
@@ -83,39 +83,39 @@ class PostIntegrationIntegrationItemsResponse201:
 
         title = self.title
 
-        body: str | None
+        body: None | str
         body = self.body
 
         state = self.state
 
         repo_full_name = self.repo_full_name
 
-        repo_url: str | None
+        repo_url: None | str
         repo_url = self.repo_url
 
-        item_url: str | None
+        item_url: None | str
         item_url = self.item_url
 
-        number: int | None
+        number: None | int
         number = self.number
 
-        labels: str | None
+        labels: None | str
         labels = self.labels
 
-        assignees: str | None
+        assignees: None | str
         assignees = self.assignees
 
         is_read = self.is_read
 
-        notification_reason: str | None
+        notification_reason: None | str
         notification_reason = self.notification_reason
 
         is_deleted = self.is_deleted
 
-        external_created_at: str | None
+        external_created_at: None | str
         external_created_at = self.external_created_at
 
-        external_updated_at: str | None
+        external_updated_at: None | str
         external_updated_at = self.external_updated_at
 
         created_at = self.created_at
@@ -124,7 +124,7 @@ class PostIntegrationIntegrationItemsResponse201:
 
         sync_version = self.sync_version
 
-        sync_stamped_at: str | None
+        sync_stamped_at: None | str
         sync_stamped_at = self.sync_stamped_at
 
         sync_txid = self.sync_txid

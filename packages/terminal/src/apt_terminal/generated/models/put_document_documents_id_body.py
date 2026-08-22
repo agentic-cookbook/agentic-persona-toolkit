@@ -34,13 +34,13 @@ class PutDocumentDocumentsIdBody:
 
         doc_type = self.doc_type
 
-        last_op_id: Unset | str | None
+        last_op_id: None | Unset | str
         if isinstance(self.last_op_id, Unset):
             last_op_id = UNSET
         else:
             last_op_id = self.last_op_id
 
-        last_snapshot_id: Unset | str | None
+        last_snapshot_id: None | Unset | str
         if isinstance(self.last_snapshot_id, Unset):
             last_snapshot_id = UNSET
         else:

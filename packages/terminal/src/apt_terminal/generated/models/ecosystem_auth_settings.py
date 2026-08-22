@@ -30,7 +30,7 @@ class EcosystemAuthSettings:
 
         login_enabled = self.login_enabled
 
-        allowed_providers: list[str] | None
+        allowed_providers: None | list[str]
         if isinstance(self.allowed_providers, list):
             allowed_providers = self.allowed_providers
 

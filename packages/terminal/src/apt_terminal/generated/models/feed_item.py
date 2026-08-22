@@ -62,25 +62,25 @@ class FeedItem:
 
         created_at = self.created_at
 
-        deleted_at: Unset | str | None
+        deleted_at: None | Unset | str
         if isinstance(self.deleted_at, Unset):
             deleted_at = UNSET
         else:
             deleted_at = self.deleted_at
 
-        entity_id: Unset | str | None
+        entity_id: None | Unset | str
         if isinstance(self.entity_id, Unset):
             entity_id = UNSET
         else:
             entity_id = self.entity_id
 
-        actor_id: Unset | str | None
+        actor_id: None | Unset | str
         if isinstance(self.actor_id, Unset):
             actor_id = UNSET
         else:
             actor_id = self.actor_id
 
-        metadata: Unset | str | None
+        metadata: None | Unset | str
         if isinstance(self.metadata, Unset):
             metadata = UNSET
         else:

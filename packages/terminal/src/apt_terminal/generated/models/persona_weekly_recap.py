@@ -32,7 +32,7 @@ class PersonaWeeklyRecap:
 
         new_allies = self.new_allies
 
-        reflexes_delta_pct: float | None
+        reflexes_delta_pct: None | float
         reflexes_delta_pct = self.reflexes_delta_pct
 
         levels_gained = self.levels_gained

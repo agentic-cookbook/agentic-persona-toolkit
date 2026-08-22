@@ -36,7 +36,7 @@ class PostContentKeyValuePairsBody:
 
         key = self.key
 
-        value: bool | dict[str, Any] | float | list[Any] | str | None
+        value: None | bool | dict[str, Any] | float | list[Any] | str
         if isinstance(self.value, PostContentKeyValuePairsBodyValueType1):
             value = self.value.to_dict()
         elif isinstance(self.value, list):

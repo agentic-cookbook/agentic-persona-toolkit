@@ -40,7 +40,7 @@ class SearchDiscussionPostResult:
 
         rank = self.rank
 
-        body_document_id: Unset | str | None
+        body_document_id: None | Unset | str
         if isinstance(self.body_document_id, Unset):
             body_document_id = UNSET
         else:

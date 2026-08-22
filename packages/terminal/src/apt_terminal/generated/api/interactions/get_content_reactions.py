@@ -16,7 +16,6 @@ def _get_kwargs(
     target_id: Unset | str = UNSET,
     target_ids: Unset | str = UNSET,
 ) -> dict[str, Any]:
-
     params: dict[str, Any] = {}
 
     params["targetKind"] = target_kind

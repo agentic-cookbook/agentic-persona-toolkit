@@ -58,7 +58,7 @@ class GetEcosystemEcosystemsIdResponse200:
 
         region = self.region
 
-        dedicated_db_connection_id: str | None
+        dedicated_db_connection_id: None | str
         dedicated_db_connection_id = self.dedicated_db_connection_id
 
         primary_domain = self.primary_domain
@@ -73,13 +73,13 @@ class GetEcosystemEcosystemsIdResponse200:
 
         is_infrastructure = self.is_infrastructure
 
-        namespace_id: str | None
+        namespace_id: None | str
         namespace_id = self.namespace_id
 
-        parent_id: str | None
+        parent_id: None | str
         parent_id = self.parent_id
 
-        archived_at: str | None
+        archived_at: None | str
         archived_at = self.archived_at
 
         field_dict: dict[str, Any] = {}

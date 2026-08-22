@@ -16,7 +16,6 @@ def _get_kwargs(
     status: Unset | GetProcessingJobsStatus = UNSET,
     limit: Unset | int = UNSET,
 ) -> dict[str, Any]:
-
     params: dict[str, Any] = {}
 
     json_status: Unset | str = UNSET

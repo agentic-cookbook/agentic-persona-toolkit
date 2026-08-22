@@ -45,21 +45,21 @@ class TokenPrincipal:
 
         prefix = self.prefix
 
-        rdid: str | None
+        rdid: None | str
         rdid = self.rdid
 
-        bucket_rdid: str | None
+        bucket_rdid: None | str
         bucket_rdid = self.bucket_rdid
 
         created_at = self.created_at
 
-        expires_at: Unset | str | None
+        expires_at: None | Unset | str
         if isinstance(self.expires_at, Unset):
             expires_at = UNSET
         else:
             expires_at = self.expires_at
 
-        last_used_at: Unset | str | None
+        last_used_at: None | Unset | str
         if isinstance(self.last_used_at, Unset):
             last_used_at = UNSET
         else:

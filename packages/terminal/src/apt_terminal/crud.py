@@ -1,6 +1,9 @@
 from __future__ import annotations
 
+import enum
 import json
+import types
+import typing
 from collections.abc import Callable
 from typing import Annotated, Any
 
@@ -30,6 +33,62 @@ def parse_set(pairs: list[str]) -> dict[str, object]:
     return out
 
 
+def enum_type(annotation: object) -> type[enum.Enum] | None:
+    """The Enum a field accepts, or None if it does not accept one.
+
+    Looks through a union, because an optional enum arrives as `Unset | TheEnum` and is
+    still an enum as far as a `--set` value is concerned. A union naming more than one enum
+    would make the coercion ambiguous, so it is left alone rather than guessed at.
+    """
+    if isinstance(annotation, type) and issubclass(annotation, enum.Enum):
+        return annotation
+    if isinstance(annotation, types.UnionType) or typing.get_origin(annotation) is typing.Union:
+        found = [
+            arg
+            for arg in typing.get_args(annotation)
+            if isinstance(arg, type) and issubclass(arg, enum.Enum)
+        ]
+        if len(found) == 1:
+            return found[0]
+    return None
+
+
+def coerce_enums(model: type, kwargs: dict[str, object]) -> dict[str, object]:
+    """Turn `--set` strings into the Enum members the generated models declare.
+
+    The generated body models are plain attrs classes with no converters, so a str lands in
+    an enum-typed field unchallenged and only detonates later, inside `to_dict()`, as
+    `AttributeError: 'str' object has no attribute 'value'` — pointing at generated code,
+    naming neither the field the user typed nor the values it would have accepted.
+
+    Coercing here makes the failure fail-fast and legible: it happens while we still know
+    which `--set` produced it, and the message can list the actual choices. Members are
+    matched BY VALUE (what the API speaks and what the user reads in the docs), falling back
+    to the member NAME so that a value the generator had to mangle into an identifier is
+    still typeable.
+    """
+    out = dict(kwargs)
+    for field in attrs.fields(model):
+        want = enum_type(field.type)
+        if want is None or field.name not in out:
+            continue
+        given = out[field.name]
+        if isinstance(given, want):
+            continue
+        try:
+            out[field.name] = want(given)
+            continue
+        except ValueError:
+            pass
+        by_name = getattr(want, given, None) if isinstance(given, str) else None
+        if isinstance(by_name, want):
+            out[field.name] = by_name
+            continue
+        choices = ", ".join(str(member.value) for member in want)
+        raise AptError(f"invalid value for {field.name}: {given!r}. allowed: {choices}")
+    return out
+
+
 def build_body(model: type, pairs: list[str]) -> object:
     try:
         known = {f.name for f in attrs.fields(model)}
@@ -40,6 +99,7 @@ def build_body(model: type, pairs: list[str]) -> object:
     if unknown:
         allowed = ", ".join(sorted(known - {"additional_properties"}))
         raise AptError(f"unknown field(s): {', '.join(sorted(unknown))}. allowed: {allowed}")
+    kwargs = coerce_enums(model, kwargs)
     try:
         return model(**kwargs)
     except TypeError as exc:

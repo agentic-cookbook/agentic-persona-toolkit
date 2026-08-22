@@ -14,7 +14,6 @@ def _get_kwargs(
     principal_id: str,
     period_start: str,
 ) -> dict[str, Any]:
-
     _kwargs: dict[str, Any] = {
         "method": "delete",
         "url": f"/usage/usage-counters/{scope}/{principal_id}/{period_start}",

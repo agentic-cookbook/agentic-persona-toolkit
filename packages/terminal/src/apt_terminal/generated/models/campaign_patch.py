@@ -37,7 +37,7 @@ class CampaignPatch:
 
         text_body = self.text_body
 
-        from_name: Unset | str | None
+        from_name: None | Unset | str
         if isinstance(self.from_name, Unset):
             from_name = UNSET
         else:

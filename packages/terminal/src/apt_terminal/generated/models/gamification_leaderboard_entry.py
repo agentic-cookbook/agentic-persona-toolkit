@@ -38,13 +38,13 @@ class GamificationLeaderboardEntry:
 
         total_points = self.total_points
 
-        name: Unset | str | None
+        name: None | Unset | str
         if isinstance(self.name, Unset):
             name = UNSET
         else:
             name = self.name
 
-        level: Unset | str | None
+        level: None | Unset | str
         if isinstance(self.level, Unset):
             level = UNSET
         else:

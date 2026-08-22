@@ -38,7 +38,7 @@ class PostPersonaMemoryBlocksBody:
 
         name = self.name
 
-        content: bool | dict[str, Any] | float | list[Any] | str | None
+        content: None | bool | dict[str, Any] | float | list[Any] | str
         if isinstance(self.content, PostPersonaMemoryBlocksBodyContentType1):
             content = self.content.to_dict()
         elif isinstance(self.content, list):
@@ -49,7 +49,7 @@ class PostPersonaMemoryBlocksBody:
 
         ecosystem_id = self.ecosystem_id
 
-        size_limit: Unset | int | None
+        size_limit: None | Unset | int
         if isinstance(self.size_limit, Unset):
             size_limit = UNSET
         else:

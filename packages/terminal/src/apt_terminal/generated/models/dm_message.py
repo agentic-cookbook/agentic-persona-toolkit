@@ -39,7 +39,7 @@ class DmMessage:
 
         chat_id = self.chat_id
 
-        sender_participant_id: str | None
+        sender_participant_id: None | str
         sender_participant_id = self.sender_participant_id
 
         sender_user_id = self.sender_user_id

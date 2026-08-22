@@ -13,7 +13,6 @@ from ...types import Response
 def _get_kwargs(
     category: str,
 ) -> dict[str, Any]:
-
     _kwargs: dict[str, Any] = {
         "method": "get",
         "url": f"/notifications/preferences/{category}",

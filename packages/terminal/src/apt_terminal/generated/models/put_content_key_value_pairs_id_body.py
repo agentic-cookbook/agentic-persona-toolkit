@@ -40,7 +40,7 @@ class PutContentKeyValuePairsIdBody:
 
         key = self.key
 
-        value: Unset | bool | dict[str, Any] | float | list[Any] | str | None
+        value: None | Unset | bool | dict[str, Any] | float | list[Any] | str
         if isinstance(self.value, Unset):
             value = UNSET
         elif isinstance(self.value, PutContentKeyValuePairsIdBodyValueType1):

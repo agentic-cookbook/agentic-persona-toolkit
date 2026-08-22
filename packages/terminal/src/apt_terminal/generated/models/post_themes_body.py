@@ -36,7 +36,7 @@ class PostThemesBody:
 
         data = self.data.to_dict()
 
-        based_on: Unset | str | None
+        based_on: None | Unset | str
         if isinstance(self.based_on, Unset):
             based_on = UNSET
         else:

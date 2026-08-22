@@ -16,7 +16,6 @@ def _get_kwargs(
     page: Unset | int = 1,
     page_size: Unset | int = 50,
 ) -> dict[str, Any]:
-
     params: dict[str, Any] = {}
 
     params["page"] = page

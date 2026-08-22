@@ -36,19 +36,19 @@ class PostPersonaSpecialInterestsBody:
 
         general = self.general
 
-        topical: Unset | str | None
+        topical: None | Unset | str
         if isinstance(self.topical, Unset):
             topical = UNSET
         else:
             topical = self.topical
 
-        specific: Unset | str | None
+        specific: None | Unset | str
         if isinstance(self.specific, Unset):
             specific = UNSET
         else:
             specific = self.specific
 
-        stances: Unset | str | None
+        stances: None | Unset | str
         if isinstance(self.stances, Unset):
             stances = UNSET
         else:

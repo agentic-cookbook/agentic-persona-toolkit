@@ -35,13 +35,13 @@ class GamePlayerPatch:
 
         slug = self.slug
 
-        character_name: Unset | str | None
+        character_name: None | Unset | str
         if isinstance(self.character_name, Unset):
             character_name = UNSET
         else:
             character_name = self.character_name
 
-        character_avatar_url: Unset | str | None
+        character_avatar_url: None | Unset | str
         if isinstance(self.character_avatar_url, Unset):
             character_avatar_url = UNSET
         else:

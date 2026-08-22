@@ -16,7 +16,6 @@ def _get_kwargs(
     subject_table: str,
     subject_id: str,
 ) -> dict[str, Any]:
-
     params: dict[str, Any] = {}
 
     params["subjectTable"] = subject_table

@@ -49,12 +49,12 @@ class DiscussionPost:
 
         topic_id = self.topic_id
 
-        parent_post_id: str | None
+        parent_post_id: None | str
         parent_post_id = self.parent_post_id
 
         post_number = self.post_number
 
-        body_document_id: str | None
+        body_document_id: None | str
         body_document_id = self.body_document_id
 
         created_at = self.created_at
@@ -67,7 +67,7 @@ class DiscussionPost:
 
         community_id = self.community_id
 
-        content: Unset | str | None
+        content: None | Unset | str
         if isinstance(self.content, Unset):
             content = UNSET
         else:
@@ -75,7 +75,7 @@ class DiscussionPost:
 
         is_deleted = self.is_deleted
 
-        deleted_at: Unset | str | None
+        deleted_at: None | Unset | str
         if isinstance(self.deleted_at, Unset):
             deleted_at = UNSET
         else:

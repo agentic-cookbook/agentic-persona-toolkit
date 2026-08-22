@@ -74,7 +74,7 @@ class BucketAccessGroupDetail:
             grants_item = grants_item_data.to_dict()
             grants.append(grants_item)
 
-        metadata: Unset | dict[str, Any] | None
+        metadata: None | Unset | dict[str, Any]
         if isinstance(self.metadata, Unset):
             metadata = UNSET
         elif isinstance(self.metadata, BucketAccessGroupMetadataType0):

@@ -15,7 +15,6 @@ from ...types import Response
 def _get_kwargs(
     connection_id: str,
 ) -> dict[str, Any]:
-
     _kwargs: dict[str, Any] = {
         "method": "delete",
         "url": f"/integrations/{connection_id}",

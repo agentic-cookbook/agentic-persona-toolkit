@@ -44,13 +44,13 @@ class Community:
 
         is_public = self.is_public
 
-        description: Unset | str | None
+        description: None | Unset | str
         if isinstance(self.description, Unset):
             description = UNSET
         else:
             description = self.description
 
-        settings: Unset | dict[str, Any] | None
+        settings: None | Unset | dict[str, Any]
         if isinstance(self.settings, Unset):
             settings = UNSET
         elif isinstance(self.settings, CommunitySettingsType0):

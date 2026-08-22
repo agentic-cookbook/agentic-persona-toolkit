@@ -13,7 +13,6 @@ def _get_kwargs(
     slug: str,
     provider_slug: str,
 ) -> dict[str, Any]:
-
     _kwargs: dict[str, Any] = {
         "method": "delete",
         "url": f"/oauth/clients/{slug}/providers/{provider_slug}",

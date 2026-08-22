@@ -56,7 +56,7 @@ class PublicRegistry:
 
         services_enabled = self.services_enabled
 
-        bound_site_id: str | None
+        bound_site_id: None | str
         bound_site_id = self.bound_site_id
 
         sections = []

@@ -58,16 +58,16 @@ class GetUsageRateLimitTiersIdResponse200:
 
         rate_refill_seconds = self.rate_refill_seconds
 
-        quota_requests: int | None
+        quota_requests: None | int
         quota_requests = self.quota_requests
 
-        quota_bytes: int | None
+        quota_bytes: None | int
         quota_bytes = self.quota_bytes
 
-        quota_tokens: int | None
+        quota_tokens: None | int
         quota_tokens = self.quota_tokens
 
-        quota_cost_micros: int | None
+        quota_cost_micros: None | int
         quota_cost_micros = self.quota_cost_micros
 
         quota_period_days = self.quota_period_days

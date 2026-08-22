@@ -56,7 +56,7 @@ class PostProjectTasksBody:
 
         ecosystem_id = self.ecosystem_id
 
-        description: Unset | str | None
+        description: None | Unset | str
         if isinstance(self.description, Unset):
             description = UNSET
         else:
@@ -66,37 +66,37 @@ class PostProjectTasksBody:
 
         priority = self.priority
 
-        due_date: Unset | str | None
+        due_date: None | Unset | str
         if isinstance(self.due_date, Unset):
             due_date = UNSET
         else:
             due_date = self.due_date
 
-        due_datetime: Unset | str | None
+        due_datetime: None | Unset | str
         if isinstance(self.due_datetime, Unset):
             due_datetime = UNSET
         else:
             due_datetime = self.due_datetime
 
-        external_project_id: Unset | str | None
+        external_project_id: None | Unset | str
         if isinstance(self.external_project_id, Unset):
             external_project_id = UNSET
         else:
             external_project_id = self.external_project_id
 
-        external_project_name: Unset | str | None
+        external_project_name: None | Unset | str
         if isinstance(self.external_project_name, Unset):
             external_project_name = UNSET
         else:
             external_project_name = self.external_project_name
 
-        labels: Unset | str | None
+        labels: None | Unset | str
         if isinstance(self.labels, Unset):
             labels = UNSET
         else:
             labels = self.labels
 
-        url: Unset | str | None
+        url: None | Unset | str
         if isinstance(self.url, Unset):
             url = UNSET
         else:

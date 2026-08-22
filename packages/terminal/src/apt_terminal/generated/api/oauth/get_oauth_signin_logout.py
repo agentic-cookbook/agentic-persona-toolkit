@@ -14,7 +14,6 @@ def _get_kwargs(
     client_id: Unset | str = UNSET,
     return_: Unset | str = UNSET,
 ) -> dict[str, Any]:
-
     params: dict[str, Any] = {}
 
     params["clientId"] = client_id

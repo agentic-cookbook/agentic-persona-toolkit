@@ -63,19 +63,19 @@ class PostPersonaProviderTemplatesBody:
 
         base_url = self.base_url
 
-        documentation_url: Unset | str | None
+        documentation_url: None | Unset | str
         if isinstance(self.documentation_url, Unset):
             documentation_url = UNSET
         else:
             documentation_url = self.documentation_url
 
-        status_url: Unset | str | None
+        status_url: None | Unset | str
         if isinstance(self.status_url, Unset):
             status_url = UNSET
         else:
             status_url = self.status_url
 
-        connection_spec: Unset | dict[str, Any] | None
+        connection_spec: None | Unset | dict[str, Any]
         if isinstance(self.connection_spec, Unset):
             connection_spec = UNSET
         elif isinstance(self.connection_spec, ProviderConnectionSpecType0):
@@ -83,7 +83,7 @@ class PostPersonaProviderTemplatesBody:
         else:
             connection_spec = self.connection_spec
 
-        sync_keys: Unset | dict[str, Any] | None
+        sync_keys: None | Unset | dict[str, Any]
         if isinstance(self.sync_keys, Unset):
             sync_keys = UNSET
         elif isinstance(self.sync_keys, TemplateSyncKeysType0):
@@ -91,7 +91,7 @@ class PostPersonaProviderTemplatesBody:
         else:
             sync_keys = self.sync_keys
 
-        available_via: Unset | dict[str, Any] | None
+        available_via: None | Unset | dict[str, Any]
         if isinstance(self.available_via, Unset):
             available_via = UNSET
         elif isinstance(self.available_via, TemplateAvailableViaType0):
@@ -99,7 +99,7 @@ class PostPersonaProviderTemplatesBody:
         else:
             available_via = self.available_via
 
-        modalities: Unset | list[str] | None
+        modalities: None | Unset | list[str]
         if isinstance(self.modalities, Unset):
             modalities = UNSET
         elif isinstance(self.modalities, list):

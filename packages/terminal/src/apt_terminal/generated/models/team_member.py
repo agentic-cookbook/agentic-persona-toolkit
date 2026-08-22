@@ -54,25 +54,25 @@ class TeamMember:
 
         added_at = self.added_at
 
-        email: Unset | str | None
+        email: None | Unset | str
         if isinstance(self.email, Unset):
             email = UNSET
         else:
             email = self.email
 
-        display_name: Unset | str | None
+        display_name: None | Unset | str
         if isinstance(self.display_name, Unset):
             display_name = UNSET
         else:
             display_name = self.display_name
 
-        persona_slug: Unset | str | None
+        persona_slug: None | Unset | str
         if isinstance(self.persona_slug, Unset):
             persona_slug = UNSET
         else:
             persona_slug = self.persona_slug
 
-        persona_name: Unset | str | None
+        persona_name: None | Unset | str
         if isinstance(self.persona_name, Unset):
             persona_name = UNSET
         else:

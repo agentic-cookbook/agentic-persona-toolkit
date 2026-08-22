@@ -90,13 +90,13 @@ class Registry:
 
         sync_version = self.sync_version
 
-        bound_site_id: Unset | str | None
+        bound_site_id: None | Unset | str
         if isinstance(self.bound_site_id, Unset):
             bound_site_id = UNSET
         else:
             bound_site_id = self.bound_site_id
 
-        deleted_at: Unset | str | None
+        deleted_at: None | Unset | str
         if isinstance(self.deleted_at, Unset):
             deleted_at = UNSET
         else:

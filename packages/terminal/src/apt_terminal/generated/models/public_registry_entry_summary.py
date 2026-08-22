@@ -53,7 +53,7 @@ class PublicRegistryEntrySummary:
 
         delivery_mode = self.delivery_mode.value
 
-        photo_attachment_id: str | None
+        photo_attachment_id: None | str
         photo_attachment_id = self.photo_attachment_id
 
         field_dict: dict[str, Any] = {}

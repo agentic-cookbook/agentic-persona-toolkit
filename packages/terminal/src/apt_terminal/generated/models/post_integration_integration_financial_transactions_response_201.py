@@ -68,7 +68,7 @@ class PostIntegrationIntegrationFinancialTransactionsResponse201:
 
         customer_id = self.customer_id
 
-        deleted_at: str | None
+        deleted_at: None | str
         deleted_at = self.deleted_at
 
         ecosystem_id = self.ecosystem_id
@@ -79,10 +79,10 @@ class PostIntegrationIntegrationFinancialTransactionsResponse201:
 
         account_id = self.account_id
 
-        account_name: str | None
+        account_name: None | str
         account_name = self.account_name
 
-        institution_name: str | None
+        institution_name: None | str
         institution_name = self.institution_name
 
         amount = self.amount
@@ -91,23 +91,23 @@ class PostIntegrationIntegrationFinancialTransactionsResponse201:
 
         name = self.name
 
-        merchant_name: str | None
+        merchant_name: None | str
         merchant_name = self.merchant_name
 
-        category: str | None
+        category: None | str
         category = self.category
 
-        category_detailed: str | None
+        category_detailed: None | str
         category_detailed = self.category_detailed
 
         transaction_date = self.transaction_date
 
-        authorized_date: str | None
+        authorized_date: None | str
         authorized_date = self.authorized_date
 
         pending = self.pending
 
-        logo_url: str | None
+        logo_url: None | str
         logo_url = self.logo_url
 
         is_deleted = self.is_deleted
@@ -118,7 +118,7 @@ class PostIntegrationIntegrationFinancialTransactionsResponse201:
 
         sync_version = self.sync_version
 
-        sync_stamped_at: str | None
+        sync_stamped_at: None | str
         sync_stamped_at = self.sync_stamped_at
 
         sync_txid = self.sync_txid

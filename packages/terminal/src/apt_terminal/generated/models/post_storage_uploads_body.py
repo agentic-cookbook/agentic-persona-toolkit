@@ -36,7 +36,7 @@ class PostStorageUploadsBody:
 
         owner_type = self.owner_type
 
-        ecosystem_id: Unset | str | None
+        ecosystem_id: None | Unset | str
         if isinstance(self.ecosystem_id, Unset):
             ecosystem_id = UNSET
         else:

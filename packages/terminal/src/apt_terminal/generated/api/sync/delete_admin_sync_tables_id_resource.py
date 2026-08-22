@@ -14,7 +14,6 @@ def _get_kwargs(
     id: str,
     resource: str,
 ) -> dict[str, Any]:
-
     _kwargs: dict[str, Any] = {
         "method": "delete",
         "url": f"/admin/sync/tables/{id}/{resource}",

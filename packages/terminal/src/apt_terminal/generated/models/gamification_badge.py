@@ -48,7 +48,7 @@ class GamificationBadge:
 
         point_value = self.point_value
 
-        subject_type: Unset | str | None
+        subject_type: None | Unset | str
         if isinstance(self.subject_type, Unset):
             subject_type = UNSET
         else:

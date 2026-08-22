@@ -32,19 +32,19 @@ class PutMonitoringHealthChecksIdBody:
 
         status = self.status
 
-        response_time_ms: Unset | int | None
+        response_time_ms: None | Unset | int
         if isinstance(self.response_time_ms, Unset):
             response_time_ms = UNSET
         else:
             response_time_ms = self.response_time_ms
 
-        status_code: Unset | int | None
+        status_code: None | Unset | int
         if isinstance(self.status_code, Unset):
             status_code = UNSET
         else:
             status_code = self.status_code
 
-        error_message: Unset | str | None
+        error_message: None | Unset | str
         if isinstance(self.error_message, Unset):
             error_message = UNSET
         else:

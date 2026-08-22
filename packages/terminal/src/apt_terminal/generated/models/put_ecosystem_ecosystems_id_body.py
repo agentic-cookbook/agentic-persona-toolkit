@@ -50,7 +50,7 @@ class PutEcosystemEcosystemsIdBody:
 
         region = self.region
 
-        dedicated_db_connection_id: Unset | str | None
+        dedicated_db_connection_id: None | Unset | str
         if isinstance(self.dedicated_db_connection_id, Unset):
             dedicated_db_connection_id = UNSET
         else:
@@ -62,19 +62,19 @@ class PutEcosystemEcosystemsIdBody:
 
         is_infrastructure = self.is_infrastructure
 
-        namespace_id: Unset | str | None
+        namespace_id: None | Unset | str
         if isinstance(self.namespace_id, Unset):
             namespace_id = UNSET
         else:
             namespace_id = self.namespace_id
 
-        parent_id: Unset | str | None
+        parent_id: None | Unset | str
         if isinstance(self.parent_id, Unset):
             parent_id = UNSET
         else:
             parent_id = self.parent_id
 
-        archived_at: Unset | str | None
+        archived_at: None | Unset | str
         if isinstance(self.archived_at, Unset):
             archived_at = UNSET
         else:

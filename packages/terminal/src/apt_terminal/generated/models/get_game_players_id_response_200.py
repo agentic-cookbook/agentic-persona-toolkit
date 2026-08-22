@@ -52,10 +52,10 @@ class GetGamePlayersIdResponse200:
 
         game_id = self.game_id
 
-        character_name: str | None
+        character_name: None | str
         character_name = self.character_name
 
-        character_avatar_url: str | None
+        character_avatar_url: None | str
         character_avatar_url = self.character_avatar_url
 
         visibility = self.visibility
@@ -68,12 +68,12 @@ class GetGamePlayersIdResponse200:
 
         updated_at = self.updated_at
 
-        deleted_at: str | None
+        deleted_at: None | str
         deleted_at = self.deleted_at
 
         sync_version = self.sync_version
 
-        sync_stamped_at: str | None
+        sync_stamped_at: None | str
         sync_stamped_at = self.sync_stamped_at
 
         sync_txid = self.sync_txid

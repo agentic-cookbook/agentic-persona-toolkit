@@ -60,13 +60,13 @@ class PostIntegrationIntegrationAudiencesBody:
 
         ecosystem_id = self.ecosystem_id
 
-        member_count: Unset | int | None
+        member_count: None | Unset | int
         if isinstance(self.member_count, Unset):
             member_count = UNSET
         else:
             member_count = self.member_count
 
-        raw: Unset | bool | dict[str, Any] | float | list[Any] | str | None
+        raw: None | Unset | bool | dict[str, Any] | float | list[Any] | str
         if isinstance(self.raw, Unset):
             raw = UNSET
         elif isinstance(self.raw, PostIntegrationIntegrationAudiencesBodyRawType0Type1):

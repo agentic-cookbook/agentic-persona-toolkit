@@ -50,7 +50,7 @@ class PutContentQueueItemsIdBody:
 
         queue_id = self.queue_id
 
-        payload: Unset | bool | dict[str, Any] | float | list[Any] | str | None
+        payload: None | Unset | bool | dict[str, Any] | float | list[Any] | str
         if isinstance(self.payload, Unset):
             payload = UNSET
         elif isinstance(self.payload, PutContentQueueItemsIdBodyPayloadType1):
@@ -65,19 +65,19 @@ class PutContentQueueItemsIdBody:
 
         enqueued_at = self.enqueued_at
 
-        dequeued_at: Unset | str | None
+        dequeued_at: None | Unset | str
         if isinstance(self.dequeued_at, Unset):
             dequeued_at = UNSET
         else:
             dequeued_at = self.dequeued_at
 
-        acked_at: Unset | str | None
+        acked_at: None | Unset | str
         if isinstance(self.acked_at, Unset):
             acked_at = UNSET
         else:
             acked_at = self.acked_at
 
-        nacked_at: Unset | str | None
+        nacked_at: None | Unset | str
         if isinstance(self.nacked_at, Unset):
             nacked_at = UNSET
         else:

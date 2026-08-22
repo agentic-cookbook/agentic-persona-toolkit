@@ -14,7 +14,6 @@ def _get_kwargs(
     *,
     team_id: str,
 ) -> dict[str, Any]:
-
     params: dict[str, Any] = {}
 
     params["teamId"] = team_id

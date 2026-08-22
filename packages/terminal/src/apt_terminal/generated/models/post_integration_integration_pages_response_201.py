@@ -58,7 +58,7 @@ class PostIntegrationIntegrationPagesResponse201:
 
         customer_id = self.customer_id
 
-        deleted_at: str | None
+        deleted_at: None | str
         deleted_at = self.deleted_at
 
         ecosystem_id = self.ecosystem_id
@@ -71,21 +71,21 @@ class PostIntegrationIntegrationPagesResponse201:
 
         object_type = self.object_type
 
-        url: str | None
+        url: None | str
         url = self.url
 
-        icon: str | None
+        icon: None | str
         icon = self.icon
 
-        parent_type: str | None
+        parent_type: None | str
         parent_type = self.parent_type
 
-        parent_id: str | None
+        parent_id: None | str
         parent_id = self.parent_id
 
         is_archived = self.is_archived
 
-        last_edited_at: str | None
+        last_edited_at: None | str
         last_edited_at = self.last_edited_at
 
         is_deleted = self.is_deleted
@@ -96,7 +96,7 @@ class PostIntegrationIntegrationPagesResponse201:
 
         sync_version = self.sync_version
 
-        sync_stamped_at: str | None
+        sync_stamped_at: None | str
         sync_stamped_at = self.sync_stamped_at
 
         sync_txid = self.sync_txid

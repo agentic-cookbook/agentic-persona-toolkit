@@ -16,7 +16,6 @@ def _get_kwargs(
     feature: Unset | str = UNSET,
     item_id: Unset | str = UNSET,
 ) -> dict[str, Any]:
-
     params: dict[str, Any] = {}
 
     params["workspace"] = workspace

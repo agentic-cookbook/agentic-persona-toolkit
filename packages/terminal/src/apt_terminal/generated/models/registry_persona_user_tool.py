@@ -31,7 +31,7 @@ class RegistryPersonaUserTool:
     def to_dict(self) -> dict[str, Any]:
         tool_name = self.tool_name
 
-        source: str | None
+        source: None | str
         source = self.source
 
         display_name = self.display_name

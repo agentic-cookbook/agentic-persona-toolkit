@@ -56,7 +56,7 @@ class PostBucketBucketsResponse201:
 
         ecosystem_id = self.ecosystem_id
 
-        parent_id: str | None
+        parent_id: None | str
         parent_id = self.parent_id
 
         name = self.name
@@ -65,7 +65,7 @@ class PostBucketBucketsResponse201:
 
         kind = self.kind
 
-        metadata: bool | dict[str, Any] | float | list[Any] | str | None
+        metadata: None | bool | dict[str, Any] | float | list[Any] | str
         if isinstance(self.metadata, PostBucketBucketsResponse201MetadataType0Type1):
             metadata = self.metadata.to_dict()
         elif isinstance(self.metadata, list):
@@ -78,12 +78,12 @@ class PostBucketBucketsResponse201:
 
         updated_at = self.updated_at
 
-        deleted_at: str | None
+        deleted_at: None | str
         deleted_at = self.deleted_at
 
         sync_version = self.sync_version
 
-        sync_stamped_at: str | None
+        sync_stamped_at: None | str
         sync_stamped_at = self.sync_stamped_at
 
         sync_txid = self.sync_txid

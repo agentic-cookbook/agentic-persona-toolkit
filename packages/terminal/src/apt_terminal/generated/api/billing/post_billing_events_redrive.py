@@ -15,7 +15,6 @@ def _get_kwargs(
     include_processed: Unset | str = UNSET,
     offset: Unset | str = UNSET,
 ) -> dict[str, Any]:
-
     params: dict[str, Any] = {}
 
     params["includeProcessed"] = include_processed

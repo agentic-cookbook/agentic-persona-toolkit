@@ -36,7 +36,7 @@ class PersonaSheetStats:
 
         tokens_out = self.tokens_out
 
-        avg_latency_ms: int | None
+        avg_latency_ms: None | int
         avg_latency_ms = self.avg_latency_ms
 
         days_active = self.days_active

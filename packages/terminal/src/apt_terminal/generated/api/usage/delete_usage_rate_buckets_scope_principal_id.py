@@ -13,7 +13,6 @@ def _get_kwargs(
     scope: str,
     principal_id: str,
 ) -> dict[str, Any]:
-
     _kwargs: dict[str, Any] = {
         "method": "delete",
         "url": f"/usage/rate-buckets/{scope}/{principal_id}",

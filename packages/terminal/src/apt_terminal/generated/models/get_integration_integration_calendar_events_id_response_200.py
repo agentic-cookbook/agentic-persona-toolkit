@@ -76,54 +76,54 @@ class GetIntegrationIntegrationCalendarEventsIdResponse200:
 
         title = self.title
 
-        description: str | None
+        description: None | str
         description = self.description
 
-        start_time: str | None
+        start_time: None | str
         start_time = self.start_time
 
-        end_time: str | None
+        end_time: None | str
         end_time = self.end_time
 
-        start_date: str | None
+        start_date: None | str
         start_date = self.start_date
 
-        end_date: str | None
+        end_date: None | str
         end_date = self.end_date
 
         is_all_day = self.is_all_day
 
-        location: str | None
+        location: None | str
         location = self.location
 
         source = self.source
 
         external_id = self.external_id
 
-        connection_id: str | None
+        connection_id: None | str
         connection_id = self.connection_id
 
-        calendar_name: str | None
+        calendar_name: None | str
         calendar_name = self.calendar_name
 
-        calendar_color: str | None
+        calendar_color: None | str
         calendar_color = self.calendar_color
 
         status = self.status
 
-        organizer: str | None
+        organizer: None | str
         organizer = self.organizer
 
-        attendees: str | None
+        attendees: None | str
         attendees = self.attendees
 
-        reminders: str | None
+        reminders: None | str
         reminders = self.reminders
 
-        url: str | None
+        url: None | str
         url = self.url
 
-        ai_extraction: str | None
+        ai_extraction: None | str
         ai_extraction = self.ai_extraction
 
         created_at = self.created_at
@@ -134,14 +134,14 @@ class GetIntegrationIntegrationCalendarEventsIdResponse200:
 
         customer_id = self.customer_id
 
-        deleted_at: str | None
+        deleted_at: None | str
         deleted_at = self.deleted_at
 
         ecosystem_id = self.ecosystem_id
 
         sync_version = self.sync_version
 
-        sync_stamped_at: str | None
+        sync_stamped_at: None | str
         sync_stamped_at = self.sync_stamped_at
 
         sync_txid = self.sync_txid

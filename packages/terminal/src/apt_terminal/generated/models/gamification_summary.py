@@ -47,7 +47,7 @@ class GamificationSummary:
             badges_item = badges_item_data.to_dict()
             badges.append(badges_item)
 
-        level: Unset | str | None
+        level: None | Unset | str
         if isinstance(self.level, Unset):
             level = UNSET
         else:

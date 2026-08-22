@@ -64,13 +64,13 @@ class PostIntegrationIntegrationFinancialTransactionsBody:
 
         ecosystem_id = self.ecosystem_id
 
-        account_name: Unset | str | None
+        account_name: None | Unset | str
         if isinstance(self.account_name, Unset):
             account_name = UNSET
         else:
             account_name = self.account_name
 
-        institution_name: Unset | str | None
+        institution_name: None | Unset | str
         if isinstance(self.institution_name, Unset):
             institution_name = UNSET
         else:
@@ -78,25 +78,25 @@ class PostIntegrationIntegrationFinancialTransactionsBody:
 
         currency = self.currency
 
-        merchant_name: Unset | str | None
+        merchant_name: None | Unset | str
         if isinstance(self.merchant_name, Unset):
             merchant_name = UNSET
         else:
             merchant_name = self.merchant_name
 
-        category: Unset | str | None
+        category: None | Unset | str
         if isinstance(self.category, Unset):
             category = UNSET
         else:
             category = self.category
 
-        category_detailed: Unset | str | None
+        category_detailed: None | Unset | str
         if isinstance(self.category_detailed, Unset):
             category_detailed = UNSET
         else:
             category_detailed = self.category_detailed
 
-        authorized_date: Unset | str | None
+        authorized_date: None | Unset | str
         if isinstance(self.authorized_date, Unset):
             authorized_date = UNSET
         else:
@@ -104,7 +104,7 @@ class PostIntegrationIntegrationFinancialTransactionsBody:
 
         pending = self.pending
 
-        logo_url: Unset | str | None
+        logo_url: None | Unset | str
         if isinstance(self.logo_url, Unset):
             logo_url = UNSET
         else:

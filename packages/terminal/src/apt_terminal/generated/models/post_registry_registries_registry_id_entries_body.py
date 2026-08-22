@@ -114,7 +114,7 @@ class PostRegistryRegistriesRegistryIdEntriesBody:
 
         summary = self.summary
 
-        photo_attachment_id: Unset | str | None
+        photo_attachment_id: None | Unset | str
         if isinstance(self.photo_attachment_id, Unset):
             photo_attachment_id = UNSET
         else:
@@ -136,7 +136,7 @@ class PostRegistryRegistriesRegistryIdEntriesBody:
 
         region_code = self.region_code
 
-        geo: Unset | dict[str, Any] | None
+        geo: None | Unset | dict[str, Any]
         if isinstance(self.geo, Unset):
             geo = UNSET
         elif isinstance(self.geo, PostRegistryRegistriesRegistryIdEntriesBodyGeoType0):

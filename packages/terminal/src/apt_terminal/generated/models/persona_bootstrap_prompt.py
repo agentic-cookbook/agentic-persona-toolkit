@@ -24,10 +24,10 @@ class PersonaBootstrapPrompt:
     def to_dict(self) -> dict[str, Any]:
         system = self.system
 
-        voice: str | None
+        voice: None | str
         voice = self.voice
 
-        character: str | None
+        character: None | str
         character = self.character
 
         field_dict: dict[str, Any] = {}

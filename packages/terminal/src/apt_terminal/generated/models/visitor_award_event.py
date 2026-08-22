@@ -34,7 +34,7 @@ class VisitorAwardEvent:
 
         xp_gained = self.xp_gained
 
-        leveled_up_to: int | None
+        leveled_up_to: None | int
         leveled_up_to = self.leveled_up_to
 
         field_dict: dict[str, Any] = {}

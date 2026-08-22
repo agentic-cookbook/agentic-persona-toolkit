@@ -61,7 +61,7 @@ class PatchProjectWorkItemsIdBody:
         if not isinstance(self.assignee_kind, Unset):
             assignee_kind = self.assignee_kind.value
 
-        assignee_id: Unset | str | None
+        assignee_id: None | Unset | str
         if isinstance(self.assignee_id, Unset):
             assignee_id = UNSET
         else:
@@ -69,13 +69,13 @@ class PatchProjectWorkItemsIdBody:
 
         priority = self.priority
 
-        start_date: Unset | str | None
+        start_date: None | Unset | str
         if isinstance(self.start_date, Unset):
             start_date = UNSET
         else:
             start_date = self.start_date
 
-        due_date: Unset | str | None
+        due_date: None | Unset | str
         if isinstance(self.due_date, Unset):
             due_date = UNSET
         else:
@@ -85,25 +85,25 @@ class PatchProjectWorkItemsIdBody:
         if not isinstance(self.labels, Unset):
             labels = self.labels
 
-        parent_id: Unset | str | None
+        parent_id: None | Unset | str
         if isinstance(self.parent_id, Unset):
             parent_id = UNSET
         else:
             parent_id = self.parent_id
 
-        iteration_id: Unset | str | None
+        iteration_id: None | Unset | str
         if isinstance(self.iteration_id, Unset):
             iteration_id = UNSET
         else:
             iteration_id = self.iteration_id
 
-        milestone_id: Unset | str | None
+        milestone_id: None | Unset | str
         if isinstance(self.milestone_id, Unset):
             milestone_id = UNSET
         else:
             milestone_id = self.milestone_id
 
-        estimate: Unset | int | None
+        estimate: None | Unset | int
         if isinstance(self.estimate, Unset):
             estimate = UNSET
         else:

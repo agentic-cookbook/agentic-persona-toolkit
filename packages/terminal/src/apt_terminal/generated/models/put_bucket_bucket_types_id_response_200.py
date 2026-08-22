@@ -68,7 +68,7 @@ class PutBucketBucketTypesIdResponse200:
 
         ref_mode = self.ref_mode
 
-        metadata: bool | dict[str, Any] | float | list[Any] | str | None
+        metadata: None | bool | dict[str, Any] | float | list[Any] | str
         if isinstance(self.metadata, PutBucketBucketTypesIdResponse200MetadataType0Type1):
             metadata = self.metadata.to_dict()
         elif isinstance(self.metadata, list):
@@ -81,12 +81,12 @@ class PutBucketBucketTypesIdResponse200:
 
         updated_at = self.updated_at
 
-        deleted_at: str | None
+        deleted_at: None | str
         deleted_at = self.deleted_at
 
         sync_version = self.sync_version
 
-        sync_stamped_at: str | None
+        sync_stamped_at: None | str
         sync_stamped_at = self.sync_stamped_at
 
         sync_txid = self.sync_txid

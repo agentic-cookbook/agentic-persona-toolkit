@@ -32,7 +32,7 @@ class GamificationLevel:
 
         sort_order = self.sort_order
 
-        subject_type: Unset | str | None
+        subject_type: None | Unset | str
         if isinstance(self.subject_type, Unset):
             subject_type = UNSET
         else:

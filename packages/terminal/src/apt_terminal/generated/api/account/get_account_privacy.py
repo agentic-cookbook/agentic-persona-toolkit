@@ -14,7 +14,6 @@ def _get_kwargs(
     *,
     target_table: Unset | str = UNSET,
 ) -> dict[str, Any]:
-
     params: dict[str, Any] = {}
 
     params["targetTable"] = target_table

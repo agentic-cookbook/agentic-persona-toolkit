@@ -102,49 +102,49 @@ class PersonaMemory:
 
         updated_at = self.updated_at
 
-        deleted_at: Unset | str | None
+        deleted_at: None | Unset | str
         if isinstance(self.deleted_at, Unset):
             deleted_at = UNSET
         else:
             deleted_at = self.deleted_at
 
-        subject_table: Unset | str | None
+        subject_table: None | Unset | str
         if isinstance(self.subject_table, Unset):
             subject_table = UNSET
         else:
             subject_table = self.subject_table
 
-        subject_id: Unset | str | None
+        subject_id: None | Unset | str
         if isinstance(self.subject_id, Unset):
             subject_id = UNSET
         else:
             subject_id = self.subject_id
 
-        supersedes_id: Unset | str | None
+        supersedes_id: None | Unset | str
         if isinstance(self.supersedes_id, Unset):
             supersedes_id = UNSET
         else:
             supersedes_id = self.supersedes_id
 
-        valid_from: Unset | str | None
+        valid_from: None | Unset | str
         if isinstance(self.valid_from, Unset):
             valid_from = UNSET
         else:
             valid_from = self.valid_from
 
-        valid_to: Unset | str | None
+        valid_to: None | Unset | str
         if isinstance(self.valid_to, Unset):
             valid_to = UNSET
         else:
             valid_to = self.valid_to
 
-        last_recalled_at: Unset | str | None
+        last_recalled_at: None | Unset | str
         if isinstance(self.last_recalled_at, Unset):
             last_recalled_at = UNSET
         else:
             last_recalled_at = self.last_recalled_at
 
-        embedding_model: Unset | str | None
+        embedding_model: None | Unset | str
         if isinstance(self.embedding_model, Unset):
             embedding_model = UNSET
         else:

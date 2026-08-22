@@ -58,7 +58,7 @@ class BucketAccessGroup:
 
         updated_at = self.updated_at
 
-        metadata: Unset | dict[str, Any] | None
+        metadata: None | Unset | dict[str, Any]
         if isinstance(self.metadata, Unset):
             metadata = UNSET
         elif isinstance(self.metadata, BucketAccessGroupMetadataType0):

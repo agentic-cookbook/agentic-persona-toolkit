@@ -90,31 +90,31 @@ class StorageAttachment:
 
         updated_at = self.updated_at
 
-        owner_id: Unset | str | None
+        owner_id: None | Unset | str
         if isinstance(self.owner_id, Unset):
             owner_id = UNSET
         else:
             owner_id = self.owner_id
 
-        width: Unset | int | None
+        width: None | Unset | int
         if isinstance(self.width, Unset):
             width = UNSET
         else:
             width = self.width
 
-        height: Unset | int | None
+        height: None | Unset | int
         if isinstance(self.height, Unset):
             height = UNSET
         else:
             height = self.height
 
-        duration_ms: Unset | int | None
+        duration_ms: None | Unset | int
         if isinstance(self.duration_ms, Unset):
             duration_ms = UNSET
         else:
             duration_ms = self.duration_ms
 
-        metadata: Unset | dict[str, Any] | None
+        metadata: None | Unset | dict[str, Any]
         if isinstance(self.metadata, Unset):
             metadata = UNSET
         elif isinstance(self.metadata, StorageAttachmentMetadataType0):
@@ -122,7 +122,7 @@ class StorageAttachment:
         else:
             metadata = self.metadata
 
-        deleted_at: Unset | str | None
+        deleted_at: None | Unset | str
         if isinstance(self.deleted_at, Unset):
             deleted_at = UNSET
         else:

@@ -15,7 +15,6 @@ def _get_kwargs(
     scope: Unset | GetSystemFeatureFlagsScope = UNSET,
     key: Unset | str = UNSET,
 ) -> dict[str, Any]:
-
     params: dict[str, Any] = {}
 
     json_scope: Unset | str = UNSET

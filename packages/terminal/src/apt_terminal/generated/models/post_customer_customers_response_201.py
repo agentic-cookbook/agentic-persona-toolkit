@@ -56,13 +56,13 @@ class PostCustomerCustomersResponse201:
 
         ecosystem_id = self.ecosystem_id
 
-        external_id: str | None
+        external_id: None | str
         external_id = self.external_id
 
-        email: str | None
+        email: None | str
         email = self.email
 
-        display_name: str | None
+        display_name: None | str
         display_name = self.display_name
 
         slug = self.slug
@@ -75,15 +75,15 @@ class PostCustomerCustomersResponse201:
 
         token_version = self.token_version
 
-        preferred_mfa_method: str | None
+        preferred_mfa_method: None | str
         preferred_mfa_method = self.preferred_mfa_method
 
         mfa_failed_attempts = self.mfa_failed_attempts
 
-        mfa_locked_until: str | None
+        mfa_locked_until: None | str
         mfa_locked_until = self.mfa_locked_until
 
-        deleted_at: str | None
+        deleted_at: None | str
         deleted_at = self.deleted_at
 
         created_at = self.created_at
@@ -92,7 +92,7 @@ class PostCustomerCustomersResponse201:
 
         sync_version = self.sync_version
 
-        sync_stamped_at: str | None
+        sync_stamped_at: None | str
         sync_stamped_at = self.sync_stamped_at
 
         sync_txid = self.sync_txid

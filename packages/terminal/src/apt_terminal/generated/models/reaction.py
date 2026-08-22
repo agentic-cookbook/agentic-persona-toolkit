@@ -48,7 +48,7 @@ class Reaction:
 
         created_at = self.created_at
 
-        deleted_at: Unset | str | None
+        deleted_at: None | Unset | str
         if isinstance(self.deleted_at, Unset):
             deleted_at = UNSET
         else:

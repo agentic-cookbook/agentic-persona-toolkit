@@ -30,13 +30,13 @@ class PostAuthUserMethodsBody:
 
         provider = self.provider
 
-        provider_id: Unset | str | None
+        provider_id: None | Unset | str
         if isinstance(self.provider_id, Unset):
             provider_id = UNSET
         else:
             provider_id = self.provider_id
 
-        credential: Unset | str | None
+        credential: None | Unset | str
         if isinstance(self.credential, Unset):
             credential = UNSET
         else:

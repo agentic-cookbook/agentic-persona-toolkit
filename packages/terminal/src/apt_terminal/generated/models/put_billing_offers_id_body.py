@@ -48,7 +48,7 @@ class PutBillingOffersIdBody:
 
         name = self.name
 
-        description: Unset | str | None
+        description: None | Unset | str
         if isinstance(self.description, Unset):
             description = UNSET
         else:
@@ -58,7 +58,7 @@ class PutBillingOffersIdBody:
 
         stripe_price_id = self.stripe_price_id
 
-        stripe_product_id: Unset | str | None
+        stripe_product_id: None | Unset | str
         if isinstance(self.stripe_product_id, Unset):
             stripe_product_id = UNSET
         else:
@@ -66,13 +66,13 @@ class PutBillingOffersIdBody:
 
         collection_method = self.collection_method
 
-        days_until_due: Unset | int | None
+        days_until_due: None | Unset | int
         if isinstance(self.days_until_due, Unset):
             days_until_due = UNSET
         else:
             days_until_due = self.days_until_due
 
-        grants_ecosystem_id: Unset | str | None
+        grants_ecosystem_id: None | Unset | str
         if isinstance(self.grants_ecosystem_id, Unset):
             grants_ecosystem_id = UNSET
         else:

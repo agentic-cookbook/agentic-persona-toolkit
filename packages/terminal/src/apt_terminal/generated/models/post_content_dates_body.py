@@ -46,7 +46,7 @@ class PostContentDatesBody:
 
         recurrence = self.recurrence
 
-        contact_id: Unset | str | None
+        contact_id: None | Unset | str
         if isinstance(self.contact_id, Unset):
             contact_id = UNSET
         else:

@@ -36,7 +36,7 @@ class GetBillingSubscriptionTiersResponse200Item:
 
         name = self.name
 
-        description: str | None
+        description: None | str
         description = self.description
 
         display_order = self.display_order

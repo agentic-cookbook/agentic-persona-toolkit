@@ -17,7 +17,6 @@ def _get_kwargs(
     as_type: str,
     as_id: str,
 ) -> dict[str, Any]:
-
     params: dict[str, Any] = {}
 
     params["asType"] = as_type

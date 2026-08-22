@@ -143,7 +143,7 @@ class IterationWorkItem:
 
         priority_scale = self.priority_scale.value
 
-        assignee_kind: Unset | str | None
+        assignee_kind: None | Unset | str
         if isinstance(self.assignee_kind, Unset):
             assignee_kind = UNSET
         elif (
@@ -155,61 +155,61 @@ class IterationWorkItem:
         else:
             assignee_kind = self.assignee_kind
 
-        assignee_id: Unset | str | None
+        assignee_id: None | Unset | str
         if isinstance(self.assignee_id, Unset):
             assignee_id = UNSET
         else:
             assignee_id = self.assignee_id
 
-        start_date: Unset | str | None
+        start_date: None | Unset | str
         if isinstance(self.start_date, Unset):
             start_date = UNSET
         else:
             start_date = self.start_date
 
-        due_date: Unset | str | None
+        due_date: None | Unset | str
         if isinstance(self.due_date, Unset):
             due_date = UNSET
         else:
             due_date = self.due_date
 
-        parent_id: Unset | str | None
+        parent_id: None | Unset | str
         if isinstance(self.parent_id, Unset):
             parent_id = UNSET
         else:
             parent_id = self.parent_id
 
-        iteration_id: Unset | str | None
+        iteration_id: None | Unset | str
         if isinstance(self.iteration_id, Unset):
             iteration_id = UNSET
         else:
             iteration_id = self.iteration_id
 
-        milestone_id: Unset | str | None
+        milestone_id: None | Unset | str
         if isinstance(self.milestone_id, Unset):
             milestone_id = UNSET
         else:
             milestone_id = self.milestone_id
 
-        estimate: Unset | int | None
+        estimate: None | Unset | int
         if isinstance(self.estimate, Unset):
             estimate = UNSET
         else:
             estimate = self.estimate
 
-        triaged_at: Unset | str | None
+        triaged_at: None | Unset | str
         if isinstance(self.triaged_at, Unset):
             triaged_at = UNSET
         else:
             triaged_at = self.triaged_at
 
-        created_by: Unset | str | None
+        created_by: None | Unset | str
         if isinstance(self.created_by, Unset):
             created_by = UNSET
         else:
             created_by = self.created_by
 
-        deleted_at: Unset | str | None
+        deleted_at: None | Unset | str
         if isinstance(self.deleted_at, Unset):
             deleted_at = UNSET
         else:

@@ -14,7 +14,6 @@ def _get_kwargs(
     registry_slug: str,
     entry_slug: str,
 ) -> dict[str, Any]:
-
     _kwargs: dict[str, Any] = {
         "method": "get",
         "url": f"/registries/{registry_slug}/entries/{entry_slug}",

@@ -49,19 +49,19 @@ class GamePlayer:
 
         updated_at = self.updated_at
 
-        character_name: Unset | str | None
+        character_name: None | Unset | str
         if isinstance(self.character_name, Unset):
             character_name = UNSET
         else:
             character_name = self.character_name
 
-        character_avatar_url: Unset | str | None
+        character_avatar_url: None | Unset | str
         if isinstance(self.character_avatar_url, Unset):
             character_avatar_url = UNSET
         else:
             character_avatar_url = self.character_avatar_url
 
-        last_played_at: Unset | str | None
+        last_played_at: None | Unset | str
         if isinstance(self.last_played_at, Unset):
             last_played_at = UNSET
         else:

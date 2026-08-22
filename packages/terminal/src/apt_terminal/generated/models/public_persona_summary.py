@@ -40,14 +40,14 @@ class PublicPersonaSummary:
 
         name = self.name
 
-        description: str | None
+        description: None | str
         description = self.description
 
         visibility = self.visibility.value
 
         created_at = self.created_at
 
-        owner: dict[str, Any] | None
+        owner: None | dict[str, Any]
         if isinstance(self.owner, PublicOwnerType0):
             owner = self.owner.to_dict()
         else:

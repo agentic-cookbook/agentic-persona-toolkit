@@ -15,7 +15,6 @@ def _get_kwargs(
     *,
     league: Unset | int = 0,
 ) -> dict[str, Any]:
-
     params: dict[str, Any] = {}
 
     params["league"] = league

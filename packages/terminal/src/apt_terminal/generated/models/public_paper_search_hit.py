@@ -56,15 +56,15 @@ class PublicPaperSearchHit:
 
         author = self.author.to_dict()
 
-        category: str | None
+        category: None | str
         category = self.category
 
         tags = self.tags
 
-        summary: str | None
+        summary: None | str
         summary = self.summary
 
-        evaluation: str | None
+        evaluation: None | str
         evaluation = self.evaluation
 
         snippet = self.snippet
