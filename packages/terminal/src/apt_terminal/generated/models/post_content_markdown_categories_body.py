@@ -14,21 +14,20 @@ class PostContentMarkdownCategoriesBody:
     """
     Attributes:
         name (str): The category name (unique per owner).
-        parent_id (Union[None, Unset, str]): Id of the category this one sits under. Omit or null for a root category.
+        parent_ids (Union[Unset, list[str]]): Ids of the categories this one sits under — any number, or none. Omit or
+            send [] for an unfiled category.
     """
 
     name: str
-    parent_id: None | Unset | str = UNSET
+    parent_ids: Unset | list[str] = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         name = self.name
 
-        parent_id: Unset | str | None
-        if isinstance(self.parent_id, Unset):
-            parent_id = UNSET
-        else:
-            parent_id = self.parent_id
+        parent_ids: Unset | list[str] = UNSET
+        if not isinstance(self.parent_ids, Unset):
+            parent_ids = self.parent_ids
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
@@ -37,8 +36,8 @@ class PostContentMarkdownCategoriesBody:
                 "name": name,
             }
         )
-        if parent_id is not UNSET:
-            field_dict["parentId"] = parent_id
+        if parent_ids is not UNSET:
+            field_dict["parentIds"] = parent_ids
 
         return field_dict
 
@@ -47,18 +46,11 @@ class PostContentMarkdownCategoriesBody:
         d = dict(src_dict)
         name = d.pop("name")
 
-        def _parse_parent_id(data: object) -> None | Unset | str:
-            if data is None:
-                return data
-            if isinstance(data, Unset):
-                return data
-            return cast(None | Unset | str, data)
-
-        parent_id = _parse_parent_id(d.pop("parentId", UNSET))
+        parent_ids = cast(list[str], d.pop("parentIds", UNSET))
 
         post_content_markdown_categories_body = cls(
             name=name,
-            parent_id=parent_id,
+            parent_ids=parent_ids,
         )
 
         post_content_markdown_categories_body.additional_properties = d

@@ -1,5 +1,5 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, cast
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 
@@ -17,7 +17,6 @@ class PutContentCategoriesIdBody:
         description (Union[Unset, str]):
         color (Union[Unset, str]):
         icon (Union[Unset, str]):
-        parent_id (Union[None, Unset, str]):
         sort_order (Union[Unset, int]):
         sync_txid (Union[Unset, int]):
     """
@@ -27,7 +26,6 @@ class PutContentCategoriesIdBody:
     description: Unset | str = UNSET
     color: Unset | str = UNSET
     icon: Unset | str = UNSET
-    parent_id: None | Unset | str = UNSET
     sort_order: Unset | int = UNSET
     sync_txid: Unset | int = UNSET
 
@@ -41,12 +39,6 @@ class PutContentCategoriesIdBody:
         color = self.color
 
         icon = self.icon
-
-        parent_id: Unset | str | None
-        if isinstance(self.parent_id, Unset):
-            parent_id = UNSET
-        else:
-            parent_id = self.parent_id
 
         sort_order = self.sort_order
 
@@ -65,8 +57,6 @@ class PutContentCategoriesIdBody:
             field_dict["color"] = color
         if icon is not UNSET:
             field_dict["icon"] = icon
-        if parent_id is not UNSET:
-            field_dict["parentId"] = parent_id
         if sort_order is not UNSET:
             field_dict["sortOrder"] = sort_order
         if sync_txid is not UNSET:
@@ -87,15 +77,6 @@ class PutContentCategoriesIdBody:
 
         icon = d.pop("icon", UNSET)
 
-        def _parse_parent_id(data: object) -> None | Unset | str:
-            if data is None:
-                return data
-            if isinstance(data, Unset):
-                return data
-            return cast(None | Unset | str, data)
-
-        parent_id = _parse_parent_id(d.pop("parentId", UNSET))
-
         sort_order = d.pop("sortOrder", UNSET)
 
         sync_txid = d.pop("syncTxid", UNSET)
@@ -106,7 +87,6 @@ class PutContentCategoriesIdBody:
             description=description,
             color=color,
             icon=icon,
-            parent_id=parent_id,
             sort_order=sort_order,
             sync_txid=sync_txid,
         )

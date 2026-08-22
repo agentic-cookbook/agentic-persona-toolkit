@@ -3,21 +3,19 @@ from typing import Any, TypeVar, cast
 
 from attrs import define as _attrs_define
 
-T = TypeVar("T", bound="GetContentCategoriesResponse200Item")
+T = TypeVar("T", bound="PostContentCategoryEdgesResponse201")
 
 
 @_attrs_define
-class GetContentCategoriesResponse200Item:
+class PostContentCategoryEdgesResponse201:
     """
     Attributes:
         id (str):
+        ecosystem_id (str):
         customer_id (str):
         deleted_at (Union[None, str]):
-        ecosystem_id (str):
-        name (str):
-        description (str):
-        color (str):
-        icon (str):
+        parent_id (str):
+        child_id (str):
         sort_order (int):
         created_at (str):
         updated_at (str):
@@ -27,13 +25,11 @@ class GetContentCategoriesResponse200Item:
     """
 
     id: str
+    ecosystem_id: str
     customer_id: str
     deleted_at: None | str
-    ecosystem_id: str
-    name: str
-    description: str
-    color: str
-    icon: str
+    parent_id: str
+    child_id: str
     sort_order: int
     created_at: str
     updated_at: str
@@ -44,20 +40,16 @@ class GetContentCategoriesResponse200Item:
     def to_dict(self) -> dict[str, Any]:
         id = self.id
 
+        ecosystem_id = self.ecosystem_id
+
         customer_id = self.customer_id
 
         deleted_at: str | None
         deleted_at = self.deleted_at
 
-        ecosystem_id = self.ecosystem_id
+        parent_id = self.parent_id
 
-        name = self.name
-
-        description = self.description
-
-        color = self.color
-
-        icon = self.icon
+        child_id = self.child_id
 
         sort_order = self.sort_order
 
@@ -77,13 +69,11 @@ class GetContentCategoriesResponse200Item:
         field_dict.update(
             {
                 "id": id,
+                "ecosystemId": ecosystem_id,
                 "customerId": customer_id,
                 "deletedAt": deleted_at,
-                "ecosystemId": ecosystem_id,
-                "name": name,
-                "description": description,
-                "color": color,
-                "icon": icon,
+                "parentId": parent_id,
+                "childId": child_id,
                 "sortOrder": sort_order,
                 "createdAt": created_at,
                 "updatedAt": updated_at,
@@ -100,6 +90,8 @@ class GetContentCategoriesResponse200Item:
         d = dict(src_dict)
         id = d.pop("id")
 
+        ecosystem_id = d.pop("ecosystemId")
+
         customer_id = d.pop("customerId")
 
         def _parse_deleted_at(data: object) -> None | str:
@@ -109,15 +101,9 @@ class GetContentCategoriesResponse200Item:
 
         deleted_at = _parse_deleted_at(d.pop("deletedAt"))
 
-        ecosystem_id = d.pop("ecosystemId")
+        parent_id = d.pop("parentId")
 
-        name = d.pop("name")
-
-        description = d.pop("description")
-
-        color = d.pop("color")
-
-        icon = d.pop("icon")
+        child_id = d.pop("childId")
 
         sort_order = d.pop("sortOrder")
 
@@ -136,15 +122,13 @@ class GetContentCategoriesResponse200Item:
 
         sync_txid = d.pop("syncTxid")
 
-        get_content_categories_response_200_item = cls(
+        post_content_category_edges_response_201 = cls(
             id=id,
+            ecosystem_id=ecosystem_id,
             customer_id=customer_id,
             deleted_at=deleted_at,
-            ecosystem_id=ecosystem_id,
-            name=name,
-            description=description,
-            color=color,
-            icon=icon,
+            parent_id=parent_id,
+            child_id=child_id,
             sort_order=sort_order,
             created_at=created_at,
             updated_at=updated_at,
@@ -153,4 +137,4 @@ class GetContentCategoriesResponse200Item:
             sync_txid=sync_txid,
         )
 
-        return get_content_categories_response_200_item
+        return post_content_category_edges_response_201

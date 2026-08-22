@@ -94,13 +94,14 @@ def sync_detailed(
     body: PostContentMarkdownCategoriesBody,
     workspace: Unset | str = UNSET,
 ) -> Response[Error | MarkdownCategoryNode]:
-    """Create a category, optionally nested under another
+    """Create a category, optionally nested under one or more others
 
-     Mints a category for the workspace owner. Omit `parentId` (or send null) for a root. A category NAME
-    is unique per owner across the whole tree — every other op addresses a category by name — so re-
-    posting an existing name under the SAME parent returns it unchanged (idempotent), and under a
-    DIFFERENT parent is a 409. This never MOVES a category. A `parentId` that isn't one of this owner's
-    live categories is a 404.
+     Mints a category for the workspace owner. Omit `parentIds` (or send an empty array) for an unfiled
+    category. A category NAME is unique per owner across the whole hierarchy — every other op addresses
+    a category by name — so re-posting an existing name is idempotent ONLY when every parent it asks for
+    is already one of that category's parents; asking for a new one is a 409. This never RE-FILES a
+    category: adding a parent to an existing one is an edge write on /content/category_edges. Any id in
+    `parentIds` that isn't one of this owner's live categories is a 404.
 
     Args:
         workspace (Union[Unset, str]):
@@ -132,13 +133,14 @@ def sync(
     body: PostContentMarkdownCategoriesBody,
     workspace: Unset | str = UNSET,
 ) -> Error | MarkdownCategoryNode | None:
-    """Create a category, optionally nested under another
+    """Create a category, optionally nested under one or more others
 
-     Mints a category for the workspace owner. Omit `parentId` (or send null) for a root. A category NAME
-    is unique per owner across the whole tree — every other op addresses a category by name — so re-
-    posting an existing name under the SAME parent returns it unchanged (idempotent), and under a
-    DIFFERENT parent is a 409. This never MOVES a category. A `parentId` that isn't one of this owner's
-    live categories is a 404.
+     Mints a category for the workspace owner. Omit `parentIds` (or send an empty array) for an unfiled
+    category. A category NAME is unique per owner across the whole hierarchy — every other op addresses
+    a category by name — so re-posting an existing name is idempotent ONLY when every parent it asks for
+    is already one of that category's parents; asking for a new one is a 409. This never RE-FILES a
+    category: adding a parent to an existing one is an edge write on /content/category_edges. Any id in
+    `parentIds` that isn't one of this owner's live categories is a 404.
 
     Args:
         workspace (Union[Unset, str]):
@@ -165,13 +167,14 @@ async def asyncio_detailed(
     body: PostContentMarkdownCategoriesBody,
     workspace: Unset | str = UNSET,
 ) -> Response[Error | MarkdownCategoryNode]:
-    """Create a category, optionally nested under another
+    """Create a category, optionally nested under one or more others
 
-     Mints a category for the workspace owner. Omit `parentId` (or send null) for a root. A category NAME
-    is unique per owner across the whole tree — every other op addresses a category by name — so re-
-    posting an existing name under the SAME parent returns it unchanged (idempotent), and under a
-    DIFFERENT parent is a 409. This never MOVES a category. A `parentId` that isn't one of this owner's
-    live categories is a 404.
+     Mints a category for the workspace owner. Omit `parentIds` (or send an empty array) for an unfiled
+    category. A category NAME is unique per owner across the whole hierarchy — every other op addresses
+    a category by name — so re-posting an existing name is idempotent ONLY when every parent it asks for
+    is already one of that category's parents; asking for a new one is a 409. This never RE-FILES a
+    category: adding a parent to an existing one is an edge write on /content/category_edges. Any id in
+    `parentIds` that isn't one of this owner's live categories is a 404.
 
     Args:
         workspace (Union[Unset, str]):
@@ -201,13 +204,14 @@ async def asyncio(
     body: PostContentMarkdownCategoriesBody,
     workspace: Unset | str = UNSET,
 ) -> Error | MarkdownCategoryNode | None:
-    """Create a category, optionally nested under another
+    """Create a category, optionally nested under one or more others
 
-     Mints a category for the workspace owner. Omit `parentId` (or send null) for a root. A category NAME
-    is unique per owner across the whole tree — every other op addresses a category by name — so re-
-    posting an existing name under the SAME parent returns it unchanged (idempotent), and under a
-    DIFFERENT parent is a 409. This never MOVES a category. A `parentId` that isn't one of this owner's
-    live categories is a 404.
+     Mints a category for the workspace owner. Omit `parentIds` (or send an empty array) for an unfiled
+    category. A category NAME is unique per owner across the whole hierarchy — every other op addresses
+    a category by name — so re-posting an existing name is idempotent ONLY when every parent it asks for
+    is already one of that category's parents; asking for a new one is a 409. This never RE-FILES a
+    category: adding a parent to an existing one is an edge write on /content/category_edges. Any id in
+    `parentIds` that isn't one of this owner's live categories is a 404.
 
     Args:
         workspace (Union[Unset, str]):

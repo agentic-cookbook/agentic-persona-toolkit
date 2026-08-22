@@ -65,12 +65,13 @@ def sync_detailed(
     client: AuthenticatedClient,
     workspace: Unset | str = UNSET,
 ) -> Response[Error | MarkdownCategoryTree]:
-    """List the caller's existing categories (names + the category TREE)
+    """List the caller's existing categories (names + the category HIERARCHY)
 
      The account's full set of categories (content.categories), scoped to the workspace owner and
     ecosystem. `items` is the distinct, alphabetical NAME list — the autocomplete/browse source for the
-    research classification UI. `nodes` is the same set with its structure kept (id + parentId), which
-    is what a hierarchical browser folds into a tree.
+    research classification UI. `nodes` is the same set with its structure kept (id + parentIds), which
+    is what a hierarchical browser folds. The hierarchy is a DAG, not a tree: a category may sit under
+    any number of parents, or none.
 
     Args:
         workspace (Union[Unset, str]):
@@ -99,12 +100,13 @@ def sync(
     client: AuthenticatedClient,
     workspace: Unset | str = UNSET,
 ) -> Error | MarkdownCategoryTree | None:
-    """List the caller's existing categories (names + the category TREE)
+    """List the caller's existing categories (names + the category HIERARCHY)
 
      The account's full set of categories (content.categories), scoped to the workspace owner and
     ecosystem. `items` is the distinct, alphabetical NAME list — the autocomplete/browse source for the
-    research classification UI. `nodes` is the same set with its structure kept (id + parentId), which
-    is what a hierarchical browser folds into a tree.
+    research classification UI. `nodes` is the same set with its structure kept (id + parentIds), which
+    is what a hierarchical browser folds. The hierarchy is a DAG, not a tree: a category may sit under
+    any number of parents, or none.
 
     Args:
         workspace (Union[Unset, str]):
@@ -128,12 +130,13 @@ async def asyncio_detailed(
     client: AuthenticatedClient,
     workspace: Unset | str = UNSET,
 ) -> Response[Error | MarkdownCategoryTree]:
-    """List the caller's existing categories (names + the category TREE)
+    """List the caller's existing categories (names + the category HIERARCHY)
 
      The account's full set of categories (content.categories), scoped to the workspace owner and
     ecosystem. `items` is the distinct, alphabetical NAME list — the autocomplete/browse source for the
-    research classification UI. `nodes` is the same set with its structure kept (id + parentId), which
-    is what a hierarchical browser folds into a tree.
+    research classification UI. `nodes` is the same set with its structure kept (id + parentIds), which
+    is what a hierarchical browser folds. The hierarchy is a DAG, not a tree: a category may sit under
+    any number of parents, or none.
 
     Args:
         workspace (Union[Unset, str]):
@@ -160,12 +163,13 @@ async def asyncio(
     client: AuthenticatedClient,
     workspace: Unset | str = UNSET,
 ) -> Error | MarkdownCategoryTree | None:
-    """List the caller's existing categories (names + the category TREE)
+    """List the caller's existing categories (names + the category HIERARCHY)
 
      The account's full set of categories (content.categories), scoped to the workspace owner and
     ecosystem. `items` is the distinct, alphabetical NAME list — the autocomplete/browse source for the
-    research classification UI. `nodes` is the same set with its structure kept (id + parentId), which
-    is what a hierarchical browser folds into a tree.
+    research classification UI. `nodes` is the same set with its structure kept (id + parentIds), which
+    is what a hierarchical browser folds. The hierarchy is a DAG, not a tree: a category may sit under
+    any number of parents, or none.
 
     Args:
         workspace (Union[Unset, str]):

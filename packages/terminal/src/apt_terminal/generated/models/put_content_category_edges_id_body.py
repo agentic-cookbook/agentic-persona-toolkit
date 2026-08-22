@@ -5,40 +5,32 @@ from attrs import define as _attrs_define
 
 from ..types import UNSET, Unset
 
-T = TypeVar("T", bound="PostContentCategoriesBody")
+T = TypeVar("T", bound="PutContentCategoryEdgesIdBody")
 
 
 @_attrs_define
-class PostContentCategoriesBody:
+class PutContentCategoryEdgesIdBody:
     """
     Attributes:
-        name (str):
         ecosystem_id (Union[Unset, str]):
-        description (Union[Unset, str]):
-        color (Union[Unset, str]):
-        icon (Union[Unset, str]):
+        parent_id (Union[Unset, str]):
+        child_id (Union[Unset, str]):
         sort_order (Union[Unset, int]):
         sync_txid (Union[Unset, int]):
     """
 
-    name: str
     ecosystem_id: Unset | str = UNSET
-    description: Unset | str = UNSET
-    color: Unset | str = UNSET
-    icon: Unset | str = UNSET
+    parent_id: Unset | str = UNSET
+    child_id: Unset | str = UNSET
     sort_order: Unset | int = UNSET
     sync_txid: Unset | int = UNSET
 
     def to_dict(self) -> dict[str, Any]:
-        name = self.name
-
         ecosystem_id = self.ecosystem_id
 
-        description = self.description
+        parent_id = self.parent_id
 
-        color = self.color
-
-        icon = self.icon
+        child_id = self.child_id
 
         sort_order = self.sort_order
 
@@ -46,19 +38,13 @@ class PostContentCategoriesBody:
 
         field_dict: dict[str, Any] = {}
 
-        field_dict.update(
-            {
-                "name": name,
-            }
-        )
+        field_dict.update({})
         if ecosystem_id is not UNSET:
             field_dict["ecosystemId"] = ecosystem_id
-        if description is not UNSET:
-            field_dict["description"] = description
-        if color is not UNSET:
-            field_dict["color"] = color
-        if icon is not UNSET:
-            field_dict["icon"] = icon
+        if parent_id is not UNSET:
+            field_dict["parentId"] = parent_id
+        if child_id is not UNSET:
+            field_dict["childId"] = child_id
         if sort_order is not UNSET:
             field_dict["sortOrder"] = sort_order
         if sync_txid is not UNSET:
@@ -69,28 +55,22 @@ class PostContentCategoriesBody:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
-        name = d.pop("name")
-
         ecosystem_id = d.pop("ecosystemId", UNSET)
 
-        description = d.pop("description", UNSET)
+        parent_id = d.pop("parentId", UNSET)
 
-        color = d.pop("color", UNSET)
-
-        icon = d.pop("icon", UNSET)
+        child_id = d.pop("childId", UNSET)
 
         sort_order = d.pop("sortOrder", UNSET)
 
         sync_txid = d.pop("syncTxid", UNSET)
 
-        post_content_categories_body = cls(
-            name=name,
+        put_content_category_edges_id_body = cls(
             ecosystem_id=ecosystem_id,
-            description=description,
-            color=color,
-            icon=icon,
+            parent_id=parent_id,
+            child_id=child_id,
             sort_order=sort_order,
             sync_txid=sync_txid,
         )
 
-        return post_content_categories_body
+        return put_content_category_edges_id_body

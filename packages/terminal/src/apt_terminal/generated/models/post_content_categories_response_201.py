@@ -18,7 +18,6 @@ class PostContentCategoriesResponse201:
         description (str):
         color (str):
         icon (str):
-        parent_id (Union[None, str]):
         sort_order (int):
         created_at (str):
         updated_at (str):
@@ -35,7 +34,6 @@ class PostContentCategoriesResponse201:
     description: str
     color: str
     icon: str
-    parent_id: None | str
     sort_order: int
     created_at: str
     updated_at: str
@@ -60,9 +58,6 @@ class PostContentCategoriesResponse201:
         color = self.color
 
         icon = self.icon
-
-        parent_id: str | None
-        parent_id = self.parent_id
 
         sort_order = self.sort_order
 
@@ -89,7 +84,6 @@ class PostContentCategoriesResponse201:
                 "description": description,
                 "color": color,
                 "icon": icon,
-                "parentId": parent_id,
                 "sortOrder": sort_order,
                 "createdAt": created_at,
                 "updatedAt": updated_at,
@@ -125,13 +119,6 @@ class PostContentCategoriesResponse201:
 
         icon = d.pop("icon")
 
-        def _parse_parent_id(data: object) -> None | str:
-            if data is None:
-                return data
-            return cast(None | str, data)
-
-        parent_id = _parse_parent_id(d.pop("parentId"))
-
         sort_order = d.pop("sortOrder")
 
         created_at = d.pop("createdAt")
@@ -158,7 +145,6 @@ class PostContentCategoriesResponse201:
             description=description,
             color=color,
             icon=icon,
-            parent_id=parent_id,
             sort_order=sort_order,
             created_at=created_at,
             updated_at=updated_at,

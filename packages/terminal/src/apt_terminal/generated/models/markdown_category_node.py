@@ -13,14 +13,17 @@ class MarkdownCategoryNode:
     Attributes:
         id (str):
         name (str):
-        parent_id (Union[None, str]): The category this one sits under; null for a root. App-level convention — there is
-            no FK, so a consumer folding the tree must tolerate a missing or cyclic parent.
-        sort_order (int): Sibling order hint (0 unless set through the generic CRUD).
+        parent_ids (list[str]): Every category this one sits under (content.category_edges). Empty for an unfiled
+            category — there is no null sentinel. A category may appear under several parents at once, so a consumer folding
+            this into a tree renders the same node in more than one place. Parent ids that are not themselves in `nodes` are
+            already filtered out, and the write path rejects cycles, so the fold terminates.
+        sort_order (int): Order among the unfiled/root categories (0 unless set through the generic CRUD). Order among
+            one parent's children lives on the edge.
     """
 
     id: str
     name: str
-    parent_id: None | str
+    parent_ids: list[str]
     sort_order: int
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
@@ -29,8 +32,7 @@ class MarkdownCategoryNode:
 
         name = self.name
 
-        parent_id: str | None
-        parent_id = self.parent_id
+        parent_ids = self.parent_ids
 
         sort_order = self.sort_order
 
@@ -40,7 +42,7 @@ class MarkdownCategoryNode:
             {
                 "id": id,
                 "name": name,
-                "parentId": parent_id,
+                "parentIds": parent_ids,
                 "sortOrder": sort_order,
             }
         )
@@ -54,19 +56,14 @@ class MarkdownCategoryNode:
 
         name = d.pop("name")
 
-        def _parse_parent_id(data: object) -> None | str:
-            if data is None:
-                return data
-            return cast(None | str, data)
-
-        parent_id = _parse_parent_id(d.pop("parentId"))
+        parent_ids = cast(list[str], d.pop("parentIds"))
 
         sort_order = d.pop("sortOrder")
 
         markdown_category_node = cls(
             id=id,
             name=name,
-            parent_id=parent_id,
+            parent_ids=parent_ids,
             sort_order=sort_order,
         )
 

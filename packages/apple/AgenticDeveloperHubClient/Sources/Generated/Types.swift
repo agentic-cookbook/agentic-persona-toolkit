@@ -846,6 +846,17 @@ public protocol APIProtocol: Sendable {
     /// - Remark: HTTP `POST /audience/lists/{listId}/rotate-key`.
     /// - Remark: Generated from `#/paths//audience/lists/{listId}/rotate-key/post`.
     func postAudienceListsListIdRotateKey(_ input: Operations.PostAudienceListsListIdRotateKey.Input) async throws -> Operations.PostAudienceListsListIdRotateKey.Output
+    /// What a billing UI needs before it can draw a control
+    ///
+    /// The one billing route that is NOT behind `requireBillingOperator`, and deliberately so: that gate answers 404 when the ecosystem’s `billing` flag is off — which is precisely the state an operator is trying to leave — so every other route here is invisible to the person who has to turn it on.
+    ///
+    /// It leaks nothing that gate protects. `ecosystemId` is the caller’s own acting scope, which their token already carries; the rest are facts ABOUT that scope, not rows from it. A non-owner gets `canManage: false` and a UI with no controls, rather than a 404 that would read as a claim about the product rather than about the reader.
+    ///
+    /// `ecosystemId` comes from `actingIdentity(principal)` and is by construction the same id `/billing/accounts`, `/billing/prices`, `/billing/events` and the redrive scope to. A browser cannot derive it, which is why this route exists at all.
+    ///
+    /// - Remark: HTTP `GET /billing/context`.
+    /// - Remark: Generated from `#/paths//billing/context/get`.
+    func getBillingContext(_ input: Operations.GetBillingContext.Input) async throws -> Operations.GetBillingContext.Output
     /// The ecosystem’s payer accounts, newest first
     ///
     /// Scoped to the acting identity’s ecosystem and to `deleted_at IS NULL`, ordered by `createdAt` descending and capped at 500 rows. There is no pagination and no filter: this is an operator’s payer list, not a reporting API. `claimTokenHash` is never selected — it is the receipt half of a credential, and a list endpoint is the last place it should be reachable from.
@@ -867,6 +878,15 @@ public protocol APIProtocol: Sendable {
     /// - Remark: HTTP `GET /billing/prices`.
     /// - Remark: Generated from `#/paths//billing/prices/get`.
     func getBillingPrices(_ input: Operations.GetBillingPrices.Input) async throws -> Operations.GetBillingPrices.Output
+    /// The webhook ledger, newest first
+    ///
+    /// The receipt log the redrive below operates on: did the event arrive, and did it process. A row with `processedAt: null` beside an `error` is the surface this route exists for — without it a purchase that never landed is only visible in the database.
+    ///
+    /// The stored payload is NOT returned. It is Stripe’s event body verbatim, and an operator’s ledger is not a place to re-publish a third party’s customer data; what this returns is the six fields that answer the question.
+    ///
+    /// - Remark: HTTP `GET /billing/events`.
+    /// - Remark: Generated from `#/paths//billing/events/get`.
+    func getBillingEvents(_ input: Operations.GetBillingEvents.Input) async throws -> Operations.GetBillingEvents.Output
     /// Re-apply stored Stripe events the receiver could not apply
     ///
     /// The receiver STORES every verified event before it tries to apply it, so an event that arrived before its offer existed — or that hit a transient failure — is still on disk. This re-applies a batch of 100 in `receivedAt` order and reports what happened to each. `nextOffset` is the cursor: it is non-null exactly when the batch came back full, and passing it as `offset` is what makes the second call a DIFFERENT batch. Without it the fixed limit was not pagination at all — a row the redrive examines but cannot advance stays in the first hundred forever, and everything behind it was unreachable through this API.
@@ -1559,16 +1579,16 @@ public protocol APIProtocol: Sendable {
     /// - Remark: HTTP `POST /content/markdown`.
     /// - Remark: Generated from `#/paths//content/markdown/post`.
     func postContentMarkdown(_ input: Operations.PostContentMarkdown.Input) async throws -> Operations.PostContentMarkdown.Output
-    /// List the caller's existing categories (names + the category TREE)
+    /// List the caller's existing categories (names + the category HIERARCHY)
     ///
-    /// The account's full set of categories (content.categories), scoped to the workspace owner and ecosystem. `items` is the distinct, alphabetical NAME list — the autocomplete/browse source for the research classification UI. `nodes` is the same set with its structure kept (id + parentId), which is what a hierarchical browser folds into a tree.
+    /// The account's full set of categories (content.categories), scoped to the workspace owner and ecosystem. `items` is the distinct, alphabetical NAME list — the autocomplete/browse source for the research classification UI. `nodes` is the same set with its structure kept (id + parentIds), which is what a hierarchical browser folds. The hierarchy is a DAG, not a tree: a category may sit under any number of parents, or none.
     ///
     /// - Remark: HTTP `GET /content/markdown/categories`.
     /// - Remark: Generated from `#/paths//content/markdown/categories/get`.
     func getContentMarkdownCategories(_ input: Operations.GetContentMarkdownCategories.Input) async throws -> Operations.GetContentMarkdownCategories.Output
-    /// Create a category, optionally nested under another
+    /// Create a category, optionally nested under one or more others
     ///
-    /// Mints a category for the workspace owner. Omit `parentId` (or send null) for a root. A category NAME is unique per owner across the whole tree — every other op addresses a category by name — so re-posting an existing name under the SAME parent returns it unchanged (idempotent), and under a DIFFERENT parent is a 409. This never MOVES a category. A `parentId` that isn't one of this owner's live categories is a 404.
+    /// Mints a category for the workspace owner. Omit `parentIds` (or send an empty array) for an unfiled category. A category NAME is unique per owner across the whole hierarchy — every other op addresses a category by name — so re-posting an existing name is idempotent ONLY when every parent it asks for is already one of that category's parents; asking for a new one is a 409. This never RE-FILES a category: adding a parent to an existing one is an edge write on /content/category_edges. Any id in `parentIds` that isn't one of this owner's live categories is a 404.
     ///
     /// - Remark: HTTP `POST /content/markdown/categories`.
     /// - Remark: Generated from `#/paths//content/markdown/categories/post`.
@@ -1607,6 +1627,13 @@ public protocol APIProtocol: Sendable {
     /// - Remark: HTTP `GET /content/markdown/{id}/raw`.
     /// - Remark: Generated from `#/paths//content/markdown/{id}/raw/get`.
     func getContentMarkdownIdRaw(_ input: Operations.GetContentMarkdownIdRaw.Input) async throws -> Operations.GetContentMarkdownIdRaw.Output
+    /// Check whether a public route slug is free for this document
+    ///
+    /// The live availability check behind the publish field. It answers the SAME question `POST /{id}/publish` answers with a 409, against the same author and the same exclusion (a document’s own route is never taken for itself), so the two can never disagree. Always 200 with a verdict — an unavailable route is an answer, not an error. 404s a missing, deleted, or non-owned document BEFORE looking at the route, so it cannot be used to probe another author’s slug space.
+    ///
+    /// - Remark: HTTP `GET /content/markdown/{id}/route-available/{route}`.
+    /// - Remark: Generated from `#/paths//content/markdown/{id}/route-available/{route}/get`.
+    func getContentMarkdownIdRouteAvailableRoute(_ input: Operations.GetContentMarkdownIdRouteAvailableRoute.Input) async throws -> Operations.GetContentMarkdownIdRouteAvailableRoute.Output
     /// Publish a document under an author-defined public route slug
     ///
     /// Makes the document readable UNAUTHENTICATED at /public/users/{slug}/papers/{route}. The route is lowercase, url-safe, and UNIQUE PER AUTHOR — a collision with another of the caller’s live papers returns 409.
@@ -3750,6 +3777,31 @@ public protocol APIProtocol: Sendable {
     /// - Remark: HTTP `DELETE /content/categories/{id}`.
     /// - Remark: Generated from `#/paths//content/categories/{id}/delete`.
     func deleteContentCategoriesId(_ input: Operations.DeleteContentCategoriesId.Input) async throws -> Operations.DeleteContentCategoriesId.Output
+    /// List category_edges
+    ///
+    /// - Remark: HTTP `GET /content/category-edges`.
+    /// - Remark: Generated from `#/paths//content/category-edges/get`.
+    func getContentCategoryEdges(_ input: Operations.GetContentCategoryEdges.Input) async throws -> Operations.GetContentCategoryEdges.Output
+    /// Create category_edges
+    ///
+    /// - Remark: HTTP `POST /content/category-edges`.
+    /// - Remark: Generated from `#/paths//content/category-edges/post`.
+    func postContentCategoryEdges(_ input: Operations.PostContentCategoryEdges.Input) async throws -> Operations.PostContentCategoryEdges.Output
+    /// Get category_edges by id
+    ///
+    /// - Remark: HTTP `GET /content/category-edges/{id}`.
+    /// - Remark: Generated from `#/paths//content/category-edges/{id}/get`.
+    func getContentCategoryEdgesId(_ input: Operations.GetContentCategoryEdgesId.Input) async throws -> Operations.GetContentCategoryEdgesId.Output
+    /// Update category_edges
+    ///
+    /// - Remark: HTTP `PUT /content/category-edges/{id}`.
+    /// - Remark: Generated from `#/paths//content/category-edges/{id}/put`.
+    func putContentCategoryEdgesId(_ input: Operations.PutContentCategoryEdgesId.Input) async throws -> Operations.PutContentCategoryEdgesId.Output
+    /// Delete category_edges
+    ///
+    /// - Remark: HTTP `DELETE /content/category-edges/{id}`.
+    /// - Remark: Generated from `#/paths//content/category-edges/{id}/delete`.
+    func deleteContentCategoryEdgesId(_ input: Operations.DeleteContentCategoryEdgesId.Input) async throws -> Operations.DeleteContentCategoryEdgesId.Output
     /// List category_items
     ///
     /// - Remark: HTTP `GET /content/category-items`.
@@ -7408,6 +7460,19 @@ extension APIProtocol {
             headers: headers
         ))
     }
+    /// What a billing UI needs before it can draw a control
+    ///
+    /// The one billing route that is NOT behind `requireBillingOperator`, and deliberately so: that gate answers 404 when the ecosystem’s `billing` flag is off — which is precisely the state an operator is trying to leave — so every other route here is invisible to the person who has to turn it on.
+    ///
+    /// It leaks nothing that gate protects. `ecosystemId` is the caller’s own acting scope, which their token already carries; the rest are facts ABOUT that scope, not rows from it. A non-owner gets `canManage: false` and a UI with no controls, rather than a 404 that would read as a claim about the product rather than about the reader.
+    ///
+    /// `ecosystemId` comes from `actingIdentity(principal)` and is by construction the same id `/billing/accounts`, `/billing/prices`, `/billing/events` and the redrive scope to. A browser cannot derive it, which is why this route exists at all.
+    ///
+    /// - Remark: HTTP `GET /billing/context`.
+    /// - Remark: Generated from `#/paths//billing/context/get`.
+    public func getBillingContext(headers: Operations.GetBillingContext.Input.Headers = .init()) async throws -> Operations.GetBillingContext.Output {
+        try await getBillingContext(Operations.GetBillingContext.Input(headers: headers))
+    }
     /// The ecosystem’s payer accounts, newest first
     ///
     /// Scoped to the acting identity’s ecosystem and to `deleted_at IS NULL`, ordered by `createdAt` descending and capped at 500 rows. There is no pagination and no filter: this is an operator’s payer list, not a reporting API. `claimTokenHash` is never selected — it is the receipt half of a credential, and a list endpoint is the last place it should be reachable from.
@@ -7440,6 +7505,23 @@ extension APIProtocol {
     /// - Remark: Generated from `#/paths//billing/prices/get`.
     public func getBillingPrices(headers: Operations.GetBillingPrices.Input.Headers = .init()) async throws -> Operations.GetBillingPrices.Output {
         try await getBillingPrices(Operations.GetBillingPrices.Input(headers: headers))
+    }
+    /// The webhook ledger, newest first
+    ///
+    /// The receipt log the redrive below operates on: did the event arrive, and did it process. A row with `processedAt: null` beside an `error` is the surface this route exists for — without it a purchase that never landed is only visible in the database.
+    ///
+    /// The stored payload is NOT returned. It is Stripe’s event body verbatim, and an operator’s ledger is not a place to re-publish a third party’s customer data; what this returns is the six fields that answer the question.
+    ///
+    /// - Remark: HTTP `GET /billing/events`.
+    /// - Remark: Generated from `#/paths//billing/events/get`.
+    public func getBillingEvents(
+        query: Operations.GetBillingEvents.Input.Query = .init(),
+        headers: Operations.GetBillingEvents.Input.Headers = .init()
+    ) async throws -> Operations.GetBillingEvents.Output {
+        try await getBillingEvents(Operations.GetBillingEvents.Input(
+            query: query,
+            headers: headers
+        ))
     }
     /// Re-apply stored Stripe events the receiver could not apply
     ///
@@ -9177,9 +9259,9 @@ extension APIProtocol {
             body: body
         ))
     }
-    /// List the caller's existing categories (names + the category TREE)
+    /// List the caller's existing categories (names + the category HIERARCHY)
     ///
-    /// The account's full set of categories (content.categories), scoped to the workspace owner and ecosystem. `items` is the distinct, alphabetical NAME list — the autocomplete/browse source for the research classification UI. `nodes` is the same set with its structure kept (id + parentId), which is what a hierarchical browser folds into a tree.
+    /// The account's full set of categories (content.categories), scoped to the workspace owner and ecosystem. `items` is the distinct, alphabetical NAME list — the autocomplete/browse source for the research classification UI. `nodes` is the same set with its structure kept (id + parentIds), which is what a hierarchical browser folds. The hierarchy is a DAG, not a tree: a category may sit under any number of parents, or none.
     ///
     /// - Remark: HTTP `GET /content/markdown/categories`.
     /// - Remark: Generated from `#/paths//content/markdown/categories/get`.
@@ -9192,9 +9274,9 @@ extension APIProtocol {
             headers: headers
         ))
     }
-    /// Create a category, optionally nested under another
+    /// Create a category, optionally nested under one or more others
     ///
-    /// Mints a category for the workspace owner. Omit `parentId` (or send null) for a root. A category NAME is unique per owner across the whole tree — every other op addresses a category by name — so re-posting an existing name under the SAME parent returns it unchanged (idempotent), and under a DIFFERENT parent is a 409. This never MOVES a category. A `parentId` that isn't one of this owner's live categories is a 404.
+    /// Mints a category for the workspace owner. Omit `parentIds` (or send an empty array) for an unfiled category. A category NAME is unique per owner across the whole hierarchy — every other op addresses a category by name — so re-posting an existing name is idempotent ONLY when every parent it asks for is already one of that category's parents; asking for a new one is a 409. This never RE-FILES a category: adding a parent to an existing one is an edge write on /content/category_edges. Any id in `parentIds` that isn't one of this owner's live categories is a 404.
     ///
     /// - Remark: HTTP `POST /content/markdown/categories`.
     /// - Remark: Generated from `#/paths//content/markdown/categories/post`.
@@ -9290,6 +9372,23 @@ extension APIProtocol {
         headers: Operations.GetContentMarkdownIdRaw.Input.Headers = .init()
     ) async throws -> Operations.GetContentMarkdownIdRaw.Output {
         try await getContentMarkdownIdRaw(Operations.GetContentMarkdownIdRaw.Input(
+            path: path,
+            query: query,
+            headers: headers
+        ))
+    }
+    /// Check whether a public route slug is free for this document
+    ///
+    /// The live availability check behind the publish field. It answers the SAME question `POST /{id}/publish` answers with a 409, against the same author and the same exclusion (a document’s own route is never taken for itself), so the two can never disagree. Always 200 with a verdict — an unavailable route is an answer, not an error. 404s a missing, deleted, or non-owned document BEFORE looking at the route, so it cannot be used to probe another author’s slug space.
+    ///
+    /// - Remark: HTTP `GET /content/markdown/{id}/route-available/{route}`.
+    /// - Remark: Generated from `#/paths//content/markdown/{id}/route-available/{route}/get`.
+    public func getContentMarkdownIdRouteAvailableRoute(
+        path: Operations.GetContentMarkdownIdRouteAvailableRoute.Input.Path,
+        query: Operations.GetContentMarkdownIdRouteAvailableRoute.Input.Query = .init(),
+        headers: Operations.GetContentMarkdownIdRouteAvailableRoute.Input.Headers = .init()
+    ) async throws -> Operations.GetContentMarkdownIdRouteAvailableRoute.Output {
+        try await getContentMarkdownIdRouteAvailableRoute(Operations.GetContentMarkdownIdRouteAvailableRoute.Input(
             path: path,
             query: query,
             headers: headers
@@ -14636,6 +14735,67 @@ extension APIProtocol {
         headers: Operations.DeleteContentCategoriesId.Input.Headers = .init()
     ) async throws -> Operations.DeleteContentCategoriesId.Output {
         try await deleteContentCategoriesId(Operations.DeleteContentCategoriesId.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// List category_edges
+    ///
+    /// - Remark: HTTP `GET /content/category-edges`.
+    /// - Remark: Generated from `#/paths//content/category-edges/get`.
+    public func getContentCategoryEdges(headers: Operations.GetContentCategoryEdges.Input.Headers = .init()) async throws -> Operations.GetContentCategoryEdges.Output {
+        try await getContentCategoryEdges(Operations.GetContentCategoryEdges.Input(headers: headers))
+    }
+    /// Create category_edges
+    ///
+    /// - Remark: HTTP `POST /content/category-edges`.
+    /// - Remark: Generated from `#/paths//content/category-edges/post`.
+    public func postContentCategoryEdges(
+        headers: Operations.PostContentCategoryEdges.Input.Headers = .init(),
+        body: Operations.PostContentCategoryEdges.Input.Body? = nil
+    ) async throws -> Operations.PostContentCategoryEdges.Output {
+        try await postContentCategoryEdges(Operations.PostContentCategoryEdges.Input(
+            headers: headers,
+            body: body
+        ))
+    }
+    /// Get category_edges by id
+    ///
+    /// - Remark: HTTP `GET /content/category-edges/{id}`.
+    /// - Remark: Generated from `#/paths//content/category-edges/{id}/get`.
+    public func getContentCategoryEdgesId(
+        path: Operations.GetContentCategoryEdgesId.Input.Path,
+        headers: Operations.GetContentCategoryEdgesId.Input.Headers = .init()
+    ) async throws -> Operations.GetContentCategoryEdgesId.Output {
+        try await getContentCategoryEdgesId(Operations.GetContentCategoryEdgesId.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// Update category_edges
+    ///
+    /// - Remark: HTTP `PUT /content/category-edges/{id}`.
+    /// - Remark: Generated from `#/paths//content/category-edges/{id}/put`.
+    public func putContentCategoryEdgesId(
+        path: Operations.PutContentCategoryEdgesId.Input.Path,
+        headers: Operations.PutContentCategoryEdgesId.Input.Headers = .init(),
+        body: Operations.PutContentCategoryEdgesId.Input.Body? = nil
+    ) async throws -> Operations.PutContentCategoryEdgesId.Output {
+        try await putContentCategoryEdgesId(Operations.PutContentCategoryEdgesId.Input(
+            path: path,
+            headers: headers,
+            body: body
+        ))
+    }
+    /// Delete category_edges
+    ///
+    /// - Remark: HTTP `DELETE /content/category-edges/{id}`.
+    /// - Remark: Generated from `#/paths//content/category-edges/{id}/delete`.
+    public func deleteContentCategoryEdgesId(
+        path: Operations.DeleteContentCategoryEdgesId.Input.Path,
+        headers: Operations.DeleteContentCategoryEdgesId.Input.Headers = .init()
+    ) async throws -> Operations.DeleteContentCategoryEdgesId.Output {
+        try await deleteContentCategoryEdgesId(Operations.DeleteContentCategoryEdgesId.Input(
             path: path,
             headers: headers
         ))
@@ -22477,6 +22637,100 @@ public enum Components {
                 case publicKey
             }
         }
+        /// - Remark: Generated from `#/components/schemas/BillingContext`.
+        public struct BillingContext: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/BillingContext/ecosystemId`.
+            public var ecosystemId: Swift.String
+            /// - Remark: Generated from `#/components/schemas/BillingContext/billingEnabled`.
+            public var billingEnabled: Swift.Bool
+            /// - Remark: Generated from `#/components/schemas/BillingContext/canManage`.
+            public var canManage: Swift.Bool
+            /// - Remark: Generated from `#/components/schemas/BillingContext/stripeStatus`.
+            @frozen public enum StripeStatusPayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case connected = "connected"
+                case notConnected = "not_connected"
+                case unknown = "unknown"
+            }
+            /// - Remark: Generated from `#/components/schemas/BillingContext/stripeStatus`.
+            public var stripeStatus: Components.Schemas.BillingContext.StripeStatusPayload
+            /// - Remark: Generated from `#/components/schemas/BillingContext/webhookPath`.
+            public var webhookPath: Swift.String
+            /// Creates a new `BillingContext`.
+            ///
+            /// - Parameters:
+            ///   - ecosystemId:
+            ///   - billingEnabled:
+            ///   - canManage:
+            ///   - stripeStatus:
+            ///   - webhookPath:
+            public init(
+                ecosystemId: Swift.String,
+                billingEnabled: Swift.Bool,
+                canManage: Swift.Bool,
+                stripeStatus: Components.Schemas.BillingContext.StripeStatusPayload,
+                webhookPath: Swift.String
+            ) {
+                self.ecosystemId = ecosystemId
+                self.billingEnabled = billingEnabled
+                self.canManage = canManage
+                self.stripeStatus = stripeStatus
+                self.webhookPath = webhookPath
+            }
+            public enum CodingKeys: String, CodingKey {
+                case ecosystemId
+                case billingEnabled
+                case canManage
+                case stripeStatus
+                case webhookPath
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/BillingEvent`.
+        public struct BillingEvent: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/BillingEvent/id`.
+            public var id: Swift.String
+            /// - Remark: Generated from `#/components/schemas/BillingEvent/stripeEventId`.
+            public var stripeEventId: Swift.String
+            /// - Remark: Generated from `#/components/schemas/BillingEvent/type`.
+            public var _type: Swift.String
+            /// - Remark: Generated from `#/components/schemas/BillingEvent/receivedAt`.
+            public var receivedAt: Swift.String
+            /// - Remark: Generated from `#/components/schemas/BillingEvent/processedAt`.
+            public var processedAt: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/BillingEvent/error`.
+            public var error: Swift.String?
+            /// Creates a new `BillingEvent`.
+            ///
+            /// - Parameters:
+            ///   - id:
+            ///   - stripeEventId:
+            ///   - _type:
+            ///   - receivedAt:
+            ///   - processedAt:
+            ///   - error:
+            public init(
+                id: Swift.String,
+                stripeEventId: Swift.String,
+                _type: Swift.String,
+                receivedAt: Swift.String,
+                processedAt: Swift.String? = nil,
+                error: Swift.String? = nil
+            ) {
+                self.id = id
+                self.stripeEventId = stripeEventId
+                self._type = _type
+                self.receivedAt = receivedAt
+                self.processedAt = processedAt
+                self.error = error
+            }
+            public enum CodingKeys: String, CodingKey {
+                case id
+                case stripeEventId
+                case _type = "type"
+                case receivedAt
+                case processedAt
+                case error
+            }
+        }
         /// - Remark: Generated from `#/components/schemas/BillingAccount`.
         public struct BillingAccount: Codable, Hashable, Sendable {
             /// - Remark: Generated from `#/components/schemas/BillingAccount/id`.
@@ -27544,11 +27798,11 @@ public enum Components {
             public var id: Swift.String
             /// - Remark: Generated from `#/components/schemas/MarkdownCategoryNode/name`.
             public var name: Swift.String
-            /// The category this one sits under; null for a root. App-level convention — there is no FK, so a consumer folding the tree must tolerate a missing or cyclic parent.
+            /// Every category this one sits under (content.category_edges). Empty for an unfiled category — there is no null sentinel. A category may appear under several parents at once, so a consumer folding this into a tree renders the same node in more than one place. Parent ids that are not themselves in `nodes` are already filtered out, and the write path rejects cycles, so the fold terminates.
             ///
-            /// - Remark: Generated from `#/components/schemas/MarkdownCategoryNode/parentId`.
-            public var parentId: Swift.String?
-            /// Sibling order hint (0 unless set through the generic CRUD).
+            /// - Remark: Generated from `#/components/schemas/MarkdownCategoryNode/parentIds`.
+            public var parentIds: [Swift.String]
+            /// Order among the unfiled/root categories (0 unless set through the generic CRUD). Order among one parent's children lives on the edge.
             ///
             /// - Remark: Generated from `#/components/schemas/MarkdownCategoryNode/sortOrder`.
             public var sortOrder: Swift.Int
@@ -27557,23 +27811,23 @@ public enum Components {
             /// - Parameters:
             ///   - id:
             ///   - name:
-            ///   - parentId: The category this one sits under; null for a root. App-level convention — there is no FK, so a consumer folding the tree must tolerate a missing or cyclic parent.
-            ///   - sortOrder: Sibling order hint (0 unless set through the generic CRUD).
+            ///   - parentIds: Every category this one sits under (content.category_edges). Empty for an unfiled category — there is no null sentinel. A category may appear under several parents at once, so a consumer folding this into a tree renders the same node in more than one place. Parent ids that are not themselves in `nodes` are already filtered out, and the write path rejects cycles, so the fold terminates.
+            ///   - sortOrder: Order among the unfiled/root categories (0 unless set through the generic CRUD). Order among one parent's children lives on the edge.
             public init(
                 id: Swift.String,
                 name: Swift.String,
-                parentId: Swift.String? = nil,
+                parentIds: [Swift.String],
                 sortOrder: Swift.Int
             ) {
                 self.id = id
                 self.name = name
-                self.parentId = parentId
+                self.parentIds = parentIds
                 self.sortOrder = sortOrder
             }
             public enum CodingKeys: String, CodingKey {
                 case id
                 case name
-                case parentId
+                case parentIds
                 case sortOrder
             }
         }
@@ -86316,6 +86570,173 @@ public enum Operations {
             }
         }
     }
+    /// What a billing UI needs before it can draw a control
+    ///
+    /// The one billing route that is NOT behind `requireBillingOperator`, and deliberately so: that gate answers 404 when the ecosystem’s `billing` flag is off — which is precisely the state an operator is trying to leave — so every other route here is invisible to the person who has to turn it on.
+    ///
+    /// It leaks nothing that gate protects. `ecosystemId` is the caller’s own acting scope, which their token already carries; the rest are facts ABOUT that scope, not rows from it. A non-owner gets `canManage: false` and a UI with no controls, rather than a 404 that would read as a claim about the product rather than about the reader.
+    ///
+    /// `ecosystemId` comes from `actingIdentity(principal)` and is by construction the same id `/billing/accounts`, `/billing/prices`, `/billing/events` and the redrive scope to. A browser cannot derive it, which is why this route exists at all.
+    ///
+    /// - Remark: HTTP `GET /billing/context`.
+    /// - Remark: Generated from `#/paths//billing/context/get`.
+    public enum GetBillingContext {
+        public static let id: Swift.String = "get/billing/context"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/billing/context/GET/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.GetBillingContext.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.GetBillingContext.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.GetBillingContext.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - headers:
+            public init(headers: Operations.GetBillingContext.Input.Headers = .init()) {
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/billing/context/GET/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/billing/context/GET/responses/200/content/application\/json`.
+                    case json(Components.Schemas.BillingContext)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas.BillingContext {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.GetBillingContext.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.GetBillingContext.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// The acting ecosystem’s billing context
+            ///
+            /// - Remark: Generated from `#/paths//billing/context/get/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.GetBillingContext.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.GetBillingContext.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            public struct Unauthorized: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/billing/context/GET/responses/401/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/billing/context/GET/responses/401/content/application\/json`.
+                    case json(Components.Schemas._Error)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas._Error {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.GetBillingContext.Output.Unauthorized.Body
+                /// Creates a new `Unauthorized`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.GetBillingContext.Output.Unauthorized.Body) {
+                    self.body = body
+                }
+            }
+            /// Error
+            ///
+            /// - Remark: Generated from `#/paths//billing/context/get/responses/401`.
+            ///
+            /// HTTP response code: `401 unauthorized`.
+            case unauthorized(Operations.GetBillingContext.Output.Unauthorized)
+            /// The associated value of the enum case if `self` is `.unauthorized`.
+            ///
+            /// - Throws: An error if `self` is not `.unauthorized`.
+            /// - SeeAlso: `.unauthorized`.
+            public var unauthorized: Operations.GetBillingContext.Output.Unauthorized {
+                get throws {
+                    switch self {
+                    case let .unauthorized(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "unauthorized",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Undocumented response.
+            ///
+            /// A response with a code that is not documented in the OpenAPI document.
+            case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json
+                ]
+            }
+        }
+    }
     /// The ecosystem’s payer accounts, newest first
     ///
     /// Scoped to the acting identity’s ecosystem and to `deleted_at IS NULL`, ordered by `createdAt` descending and capped at 500 rows. There is no pagination and no filter: this is an operator’s payer list, not a reporting API. `claimTokenHash` is never selected — it is the receipt half of a credential, and a list endpoint is the last place it should be reachable from.
@@ -87197,6 +87618,291 @@ public enum Operations {
                     default:
                         try throwUnexpectedResponseStatus(
                             expectedStatus: "conflict",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Undocumented response.
+            ///
+            /// A response with a code that is not documented in the OpenAPI document.
+            case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json
+                ]
+            }
+        }
+    }
+    /// The webhook ledger, newest first
+    ///
+    /// The receipt log the redrive below operates on: did the event arrive, and did it process. A row with `processedAt: null` beside an `error` is the surface this route exists for — without it a purchase that never landed is only visible in the database.
+    ///
+    /// The stored payload is NOT returned. It is Stripe’s event body verbatim, and an operator’s ledger is not a place to re-publish a third party’s customer data; what this returns is the six fields that answer the question.
+    ///
+    /// - Remark: HTTP `GET /billing/events`.
+    /// - Remark: Generated from `#/paths//billing/events/get`.
+    public enum GetBillingEvents {
+        public static let id: Swift.String = "get/billing/events"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/billing/events/GET/query`.
+            public struct Query: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/billing/events/GET/query/limit`.
+                public var limit: Swift.String?
+                /// Creates a new `Query`.
+                ///
+                /// - Parameters:
+                ///   - limit:
+                public init(limit: Swift.String? = nil) {
+                    self.limit = limit
+                }
+            }
+            public var query: Operations.GetBillingEvents.Input.Query
+            /// - Remark: Generated from `#/paths/billing/events/GET/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.GetBillingEvents.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.GetBillingEvents.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.GetBillingEvents.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - query:
+            ///   - headers:
+            public init(
+                query: Operations.GetBillingEvents.Input.Query = .init(),
+                headers: Operations.GetBillingEvents.Input.Headers = .init()
+            ) {
+                self.query = query
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/billing/events/GET/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/billing/events/GET/responses/200/content/application\/json`.
+                    case json([Components.Schemas.BillingEvent])
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: [Components.Schemas.BillingEvent] {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.GetBillingEvents.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.GetBillingEvents.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Up to `limit` events, newest first
+            ///
+            /// - Remark: Generated from `#/paths//billing/events/get/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.GetBillingEvents.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.GetBillingEvents.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            public struct Unauthorized: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/billing/events/GET/responses/401/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/billing/events/GET/responses/401/content/application\/json`.
+                    case json(Components.Schemas._Error)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas._Error {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.GetBillingEvents.Output.Unauthorized.Body
+                /// Creates a new `Unauthorized`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.GetBillingEvents.Output.Unauthorized.Body) {
+                    self.body = body
+                }
+            }
+            /// Error
+            ///
+            /// - Remark: Generated from `#/paths//billing/events/get/responses/401`.
+            ///
+            /// HTTP response code: `401 unauthorized`.
+            case unauthorized(Operations.GetBillingEvents.Output.Unauthorized)
+            /// The associated value of the enum case if `self` is `.unauthorized`.
+            ///
+            /// - Throws: An error if `self` is not `.unauthorized`.
+            /// - SeeAlso: `.unauthorized`.
+            public var unauthorized: Operations.GetBillingEvents.Output.Unauthorized {
+                get throws {
+                    switch self {
+                    case let .unauthorized(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "unauthorized",
+                            response: self
+                        )
+                    }
+                }
+            }
+            public struct Forbidden: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/billing/events/GET/responses/403/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/billing/events/GET/responses/403/content/application\/json`.
+                    case json(Components.Schemas._Error)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas._Error {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.GetBillingEvents.Output.Forbidden.Body
+                /// Creates a new `Forbidden`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.GetBillingEvents.Output.Forbidden.Body) {
+                    self.body = body
+                }
+            }
+            /// Error
+            ///
+            /// - Remark: Generated from `#/paths//billing/events/get/responses/403`.
+            ///
+            /// HTTP response code: `403 forbidden`.
+            case forbidden(Operations.GetBillingEvents.Output.Forbidden)
+            /// The associated value of the enum case if `self` is `.forbidden`.
+            ///
+            /// - Throws: An error if `self` is not `.forbidden`.
+            /// - SeeAlso: `.forbidden`.
+            public var forbidden: Operations.GetBillingEvents.Output.Forbidden {
+                get throws {
+                    switch self {
+                    case let .forbidden(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "forbidden",
+                            response: self
+                        )
+                    }
+                }
+            }
+            public struct NotFound: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/billing/events/GET/responses/404/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/billing/events/GET/responses/404/content/application\/json`.
+                    case json(Components.Schemas._Error)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas._Error {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.GetBillingEvents.Output.NotFound.Body
+                /// Creates a new `NotFound`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.GetBillingEvents.Output.NotFound.Body) {
+                    self.body = body
+                }
+            }
+            /// Error
+            ///
+            /// - Remark: Generated from `#/paths//billing/events/get/responses/404`.
+            ///
+            /// HTTP response code: `404 notFound`.
+            case notFound(Operations.GetBillingEvents.Output.NotFound)
+            /// The associated value of the enum case if `self` is `.notFound`.
+            ///
+            /// - Throws: An error if `self` is not `.notFound`.
+            /// - SeeAlso: `.notFound`.
+            public var notFound: Operations.GetBillingEvents.Output.NotFound {
+                get throws {
+                    switch self {
+                    case let .notFound(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "notFound",
                             response: self
                         )
                     }
@@ -123828,9 +124534,9 @@ public enum Operations {
             }
         }
     }
-    /// List the caller's existing categories (names + the category TREE)
+    /// List the caller's existing categories (names + the category HIERARCHY)
     ///
-    /// The account's full set of categories (content.categories), scoped to the workspace owner and ecosystem. `items` is the distinct, alphabetical NAME list — the autocomplete/browse source for the research classification UI. `nodes` is the same set with its structure kept (id + parentId), which is what a hierarchical browser folds into a tree.
+    /// The account's full set of categories (content.categories), scoped to the workspace owner and ecosystem. `items` is the distinct, alphabetical NAME list — the autocomplete/browse source for the research classification UI. `nodes` is the same set with its structure kept (id + parentIds), which is what a hierarchical browser folds. The hierarchy is a DAG, not a tree: a category may sit under any number of parents, or none.
     ///
     /// - Remark: HTTP `GET /content/markdown/categories`.
     /// - Remark: Generated from `#/paths//content/markdown/categories/get`.
@@ -124011,9 +124717,9 @@ public enum Operations {
             }
         }
     }
-    /// Create a category, optionally nested under another
+    /// Create a category, optionally nested under one or more others
     ///
-    /// Mints a category for the workspace owner. Omit `parentId` (or send null) for a root. A category NAME is unique per owner across the whole tree — every other op addresses a category by name — so re-posting an existing name under the SAME parent returns it unchanged (idempotent), and under a DIFFERENT parent is a 409. This never MOVES a category. A `parentId` that isn't one of this owner's live categories is a 404.
+    /// Mints a category for the workspace owner. Omit `parentIds` (or send an empty array) for an unfiled category. A category NAME is unique per owner across the whole hierarchy — every other op addresses a category by name — so re-posting an existing name is idempotent ONLY when every parent it asks for is already one of that category's parents; asking for a new one is a 409. This never RE-FILES a category: adding a parent to an existing one is an edge write on /content/category_edges. Any id in `parentIds` that isn't one of this owner's live categories is a 404.
     ///
     /// - Remark: HTTP `POST /content/markdown/categories`.
     /// - Remark: Generated from `#/paths//content/markdown/categories/post`.
@@ -124055,25 +124761,25 @@ public enum Operations {
                     ///
                     /// - Remark: Generated from `#/paths/content/markdown/categories/POST/requestBody/json/name`.
                     public var name: Swift.String
-                    /// Id of the category this one sits under. Omit or null for a root category.
+                    /// Ids of the categories this one sits under — any number, or none. Omit or send [] for an unfiled category.
                     ///
-                    /// - Remark: Generated from `#/paths/content/markdown/categories/POST/requestBody/json/parentId`.
-                    public var parentId: Swift.String?
+                    /// - Remark: Generated from `#/paths/content/markdown/categories/POST/requestBody/json/parentIds`.
+                    public var parentIds: [Swift.String]?
                     /// Creates a new `JsonPayload`.
                     ///
                     /// - Parameters:
                     ///   - name: The category name (unique per owner).
-                    ///   - parentId: Id of the category this one sits under. Omit or null for a root category.
+                    ///   - parentIds: Ids of the categories this one sits under — any number, or none. Omit or send [] for an unfiled category.
                     public init(
                         name: Swift.String,
-                        parentId: Swift.String? = nil
+                        parentIds: [Swift.String]? = nil
                     ) {
                         self.name = name
-                        self.parentId = parentId
+                        self.parentIds = parentIds
                     }
                     public enum CodingKeys: String, CodingKey {
                         case name
-                        case parentId
+                        case parentIds
                     }
                 }
                 /// - Remark: Generated from `#/paths/content/markdown/categories/POST/requestBody/content/application\/json`.
@@ -124125,7 +124831,7 @@ public enum Operations {
                     self.body = body
                 }
             }
-            /// The existing category with this name (already under this parent)
+            /// The existing category with this name (already under every requested parent)
             ///
             /// - Remark: Generated from `#/paths//content/markdown/categories/post/responses/200`.
             ///
@@ -125959,6 +126665,297 @@ public enum Operations {
             public static var allCases: [Self] {
                 [
                     .textMarkdown,
+                    .json
+                ]
+            }
+        }
+    }
+    /// Check whether a public route slug is free for this document
+    ///
+    /// The live availability check behind the publish field. It answers the SAME question `POST /{id}/publish` answers with a 409, against the same author and the same exclusion (a document’s own route is never taken for itself), so the two can never disagree. Always 200 with a verdict — an unavailable route is an answer, not an error. 404s a missing, deleted, or non-owned document BEFORE looking at the route, so it cannot be used to probe another author’s slug space.
+    ///
+    /// - Remark: HTTP `GET /content/markdown/{id}/route-available/{route}`.
+    /// - Remark: Generated from `#/paths//content/markdown/{id}/route-available/{route}/get`.
+    public enum GetContentMarkdownIdRouteAvailableRoute {
+        public static let id: Swift.String = "get/content/markdown/{id}/route-available/{route}"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/content/markdown/{id}/route-available/{route}/GET/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/content/markdown/{id}/route-available/{route}/GET/path/id`.
+                public var id: Swift.String
+                /// - Remark: Generated from `#/paths/content/markdown/{id}/route-available/{route}/GET/path/route`.
+                public var route: Swift.String
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - id:
+                ///   - route:
+                public init(
+                    id: Swift.String,
+                    route: Swift.String
+                ) {
+                    self.id = id
+                    self.route = route
+                }
+            }
+            public var path: Operations.GetContentMarkdownIdRouteAvailableRoute.Input.Path
+            /// - Remark: Generated from `#/paths/content/markdown/{id}/route-available/{route}/GET/query`.
+            public struct Query: Sendable, Hashable {
+                /// Scope to this WORKSPACE’s owning principal (the caller’s own customer slug, or an organization the caller belongs to). Omitted: the caller’s own documents. Unknown/foreign slug: 404.
+                ///
+                /// - Remark: Generated from `#/paths/content/markdown/{id}/route-available/{route}/GET/query/workspace`.
+                public var workspace: Swift.String?
+                /// Creates a new `Query`.
+                ///
+                /// - Parameters:
+                ///   - workspace: Scope to this WORKSPACE’s owning principal (the caller’s own customer slug, or an organization the caller belongs to). Omitted: the caller’s own documents. Unknown/foreign slug: 404.
+                public init(workspace: Swift.String? = nil) {
+                    self.workspace = workspace
+                }
+            }
+            public var query: Operations.GetContentMarkdownIdRouteAvailableRoute.Input.Query
+            /// - Remark: Generated from `#/paths/content/markdown/{id}/route-available/{route}/GET/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.GetContentMarkdownIdRouteAvailableRoute.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.GetContentMarkdownIdRouteAvailableRoute.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.GetContentMarkdownIdRouteAvailableRoute.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - query:
+            ///   - headers:
+            public init(
+                path: Operations.GetContentMarkdownIdRouteAvailableRoute.Input.Path,
+                query: Operations.GetContentMarkdownIdRouteAvailableRoute.Input.Query = .init(),
+                headers: Operations.GetContentMarkdownIdRouteAvailableRoute.Input.Headers = .init()
+            ) {
+                self.path = path
+                self.query = query
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/content/markdown/{id}/route-available/{route}/GET/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/content/markdown/{id}/route-available/{route}/GET/responses/200/content/json`.
+                    public struct JsonPayload: Codable, Hashable, Sendable {
+                        /// - Remark: Generated from `#/paths/content/markdown/{id}/route-available/{route}/GET/responses/200/content/json/available`.
+                        public var available: Swift.Bool
+                        /// `ok` when available. `invalid` — wrong shape (lowercase, [a-z0-9_-], leading alphanumeric, 2–128 chars). `reserved` — a word the site’s own routing owns. `taken` — another live paper of this author already publishes there.
+                        ///
+                        /// - Remark: Generated from `#/paths/content/markdown/{id}/route-available/{route}/GET/responses/200/content/json/reason`.
+                        @frozen public enum ReasonPayload: String, Codable, Hashable, Sendable, CaseIterable {
+                            case ok = "ok"
+                            case invalid = "invalid"
+                            case reserved = "reserved"
+                            case taken = "taken"
+                        }
+                        /// `ok` when available. `invalid` — wrong shape (lowercase, [a-z0-9_-], leading alphanumeric, 2–128 chars). `reserved` — a word the site’s own routing owns. `taken` — another live paper of this author already publishes there.
+                        ///
+                        /// - Remark: Generated from `#/paths/content/markdown/{id}/route-available/{route}/GET/responses/200/content/json/reason`.
+                        public var reason: Operations.GetContentMarkdownIdRouteAvailableRoute.Output.Ok.Body.JsonPayload.ReasonPayload
+                        /// Creates a new `JsonPayload`.
+                        ///
+                        /// - Parameters:
+                        ///   - available:
+                        ///   - reason: `ok` when available. `invalid` — wrong shape (lowercase, [a-z0-9_-], leading alphanumeric, 2–128 chars). `reserved` — a word the site’s own routing owns. `taken` — another live paper of this author already publishes there.
+                        public init(
+                            available: Swift.Bool,
+                            reason: Operations.GetContentMarkdownIdRouteAvailableRoute.Output.Ok.Body.JsonPayload.ReasonPayload
+                        ) {
+                            self.available = available
+                            self.reason = reason
+                        }
+                        public enum CodingKeys: String, CodingKey {
+                            case available
+                            case reason
+                        }
+                    }
+                    /// - Remark: Generated from `#/paths/content/markdown/{id}/route-available/{route}/GET/responses/200/content/application\/json`.
+                    case json(Operations.GetContentMarkdownIdRouteAvailableRoute.Output.Ok.Body.JsonPayload)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Operations.GetContentMarkdownIdRouteAvailableRoute.Output.Ok.Body.JsonPayload {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.GetContentMarkdownIdRouteAvailableRoute.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.GetContentMarkdownIdRouteAvailableRoute.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// The verdict
+            ///
+            /// - Remark: Generated from `#/paths//content/markdown/{id}/route-available/{route}/get/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.GetContentMarkdownIdRouteAvailableRoute.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.GetContentMarkdownIdRouteAvailableRoute.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            public struct Unauthorized: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/content/markdown/{id}/route-available/{route}/GET/responses/401/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/content/markdown/{id}/route-available/{route}/GET/responses/401/content/application\/json`.
+                    case json(Components.Schemas._Error)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas._Error {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.GetContentMarkdownIdRouteAvailableRoute.Output.Unauthorized.Body
+                /// Creates a new `Unauthorized`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.GetContentMarkdownIdRouteAvailableRoute.Output.Unauthorized.Body) {
+                    self.body = body
+                }
+            }
+            /// Error
+            ///
+            /// - Remark: Generated from `#/paths//content/markdown/{id}/route-available/{route}/get/responses/401`.
+            ///
+            /// HTTP response code: `401 unauthorized`.
+            case unauthorized(Operations.GetContentMarkdownIdRouteAvailableRoute.Output.Unauthorized)
+            /// The associated value of the enum case if `self` is `.unauthorized`.
+            ///
+            /// - Throws: An error if `self` is not `.unauthorized`.
+            /// - SeeAlso: `.unauthorized`.
+            public var unauthorized: Operations.GetContentMarkdownIdRouteAvailableRoute.Output.Unauthorized {
+                get throws {
+                    switch self {
+                    case let .unauthorized(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "unauthorized",
+                            response: self
+                        )
+                    }
+                }
+            }
+            public struct NotFound: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/content/markdown/{id}/route-available/{route}/GET/responses/404/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/content/markdown/{id}/route-available/{route}/GET/responses/404/content/application\/json`.
+                    case json(Components.Schemas._Error)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas._Error {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.GetContentMarkdownIdRouteAvailableRoute.Output.NotFound.Body
+                /// Creates a new `NotFound`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.GetContentMarkdownIdRouteAvailableRoute.Output.NotFound.Body) {
+                    self.body = body
+                }
+            }
+            /// Error
+            ///
+            /// - Remark: Generated from `#/paths//content/markdown/{id}/route-available/{route}/get/responses/404`.
+            ///
+            /// HTTP response code: `404 notFound`.
+            case notFound(Operations.GetContentMarkdownIdRouteAvailableRoute.Output.NotFound)
+            /// The associated value of the enum case if `self` is `.notFound`.
+            ///
+            /// - Throws: An error if `self` is not `.notFound`.
+            /// - SeeAlso: `.notFound`.
+            public var notFound: Operations.GetContentMarkdownIdRouteAvailableRoute.Output.NotFound {
+                get throws {
+                    switch self {
+                    case let .notFound(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "notFound",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Undocumented response.
+            ///
+            /// A response with a code that is not documented in the OpenAPI document.
+            case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
                     .json
                 ]
             }
@@ -246186,6 +247183,1772 @@ public enum Operations {
             /// - Throws: An error if `self` is not `.notFound`.
             /// - SeeAlso: `.notFound`.
             public var notFound: Operations.DeleteContentCategoriesId.Output.NotFound {
+                get throws {
+                    switch self {
+                    case let .notFound(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "notFound",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Undocumented response.
+            ///
+            /// A response with a code that is not documented in the OpenAPI document.
+            case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json
+                ]
+            }
+        }
+    }
+    /// List category_edges
+    ///
+    /// - Remark: HTTP `GET /content/category-edges`.
+    /// - Remark: Generated from `#/paths//content/category-edges/get`.
+    public enum GetContentCategoryEdges {
+        public static let id: Swift.String = "get/content/category-edges"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/content/category-edges/GET/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.GetContentCategoryEdges.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.GetContentCategoryEdges.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.GetContentCategoryEdges.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - headers:
+            public init(headers: Operations.GetContentCategoryEdges.Input.Headers = .init()) {
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/content/category-edges/GET/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/content/category-edges/GET/responses/200/content/JsonPayload`.
+                    public struct JsonPayloadPayload: Codable, Hashable, Sendable {
+                        /// - Remark: Generated from `#/paths/content/category-edges/GET/responses/200/content/JsonPayload/id`.
+                        public var id: Swift.String
+                        /// - Remark: Generated from `#/paths/content/category-edges/GET/responses/200/content/JsonPayload/ecosystemId`.
+                        public var ecosystemId: Swift.String
+                        /// - Remark: Generated from `#/paths/content/category-edges/GET/responses/200/content/JsonPayload/customerId`.
+                        public var customerId: Swift.String
+                        /// - Remark: Generated from `#/paths/content/category-edges/GET/responses/200/content/JsonPayload/parentId`.
+                        public var parentId: Swift.String
+                        /// - Remark: Generated from `#/paths/content/category-edges/GET/responses/200/content/JsonPayload/childId`.
+                        public var childId: Swift.String
+                        /// - Remark: Generated from `#/paths/content/category-edges/GET/responses/200/content/JsonPayload/sortOrder`.
+                        public var sortOrder: Swift.Int
+                        /// - Remark: Generated from `#/paths/content/category-edges/GET/responses/200/content/JsonPayload/createdAt`.
+                        public var createdAt: Swift.String
+                        /// - Remark: Generated from `#/paths/content/category-edges/GET/responses/200/content/JsonPayload/updatedAt`.
+                        public var updatedAt: Swift.String
+                        /// - Remark: Generated from `#/paths/content/category-edges/GET/responses/200/content/JsonPayload/syncVersion`.
+                        public var syncVersion: Swift.Int
+                        /// - Remark: Generated from `#/paths/content/category-edges/GET/responses/200/content/JsonPayload/syncTxid`.
+                        public var syncTxid: Swift.Int
+                        /// Creates a new `JsonPayloadPayload`.
+                        ///
+                        /// - Parameters:
+                        ///   - id:
+                        ///   - ecosystemId:
+                        ///   - customerId:
+                        ///   - parentId:
+                        ///   - childId:
+                        ///   - sortOrder:
+                        ///   - createdAt:
+                        ///   - updatedAt:
+                        ///   - syncVersion:
+                        ///   - syncTxid:
+                        public init(
+                            id: Swift.String,
+                            ecosystemId: Swift.String,
+                            customerId: Swift.String,
+                            parentId: Swift.String,
+                            childId: Swift.String,
+                            sortOrder: Swift.Int,
+                            createdAt: Swift.String,
+                            updatedAt: Swift.String,
+                            syncVersion: Swift.Int,
+                            syncTxid: Swift.Int
+                        ) {
+                            self.id = id
+                            self.ecosystemId = ecosystemId
+                            self.customerId = customerId
+                            self.parentId = parentId
+                            self.childId = childId
+                            self.sortOrder = sortOrder
+                            self.createdAt = createdAt
+                            self.updatedAt = updatedAt
+                            self.syncVersion = syncVersion
+                            self.syncTxid = syncTxid
+                        }
+                        public enum CodingKeys: String, CodingKey {
+                            case id
+                            case ecosystemId
+                            case customerId
+                            case parentId
+                            case childId
+                            case sortOrder
+                            case createdAt
+                            case updatedAt
+                            case syncVersion
+                            case syncTxid
+                        }
+                        public init(from decoder: any Swift.Decoder) throws {
+                            let container = try decoder.container(keyedBy: CodingKeys.self)
+                            self.id = try container.decode(
+                                Swift.String.self,
+                                forKey: .id
+                            )
+                            self.ecosystemId = try container.decode(
+                                Swift.String.self,
+                                forKey: .ecosystemId
+                            )
+                            self.customerId = try container.decode(
+                                Swift.String.self,
+                                forKey: .customerId
+                            )
+                            self.parentId = try container.decode(
+                                Swift.String.self,
+                                forKey: .parentId
+                            )
+                            self.childId = try container.decode(
+                                Swift.String.self,
+                                forKey: .childId
+                            )
+                            self.sortOrder = try container.decode(
+                                Swift.Int.self,
+                                forKey: .sortOrder
+                            )
+                            self.createdAt = try container.decode(
+                                Swift.String.self,
+                                forKey: .createdAt
+                            )
+                            self.updatedAt = try container.decode(
+                                Swift.String.self,
+                                forKey: .updatedAt
+                            )
+                            self.syncVersion = try container.decode(
+                                Swift.Int.self,
+                                forKey: .syncVersion
+                            )
+                            self.syncTxid = try container.decode(
+                                Swift.Int.self,
+                                forKey: .syncTxid
+                            )
+                            try decoder.ensureNoAdditionalProperties(knownKeys: [
+                                "id",
+                                "ecosystemId",
+                                "customerId",
+                                "parentId",
+                                "childId",
+                                "sortOrder",
+                                "createdAt",
+                                "updatedAt",
+                                "syncVersion",
+                                "syncTxid"
+                            ])
+                        }
+                    }
+                    /// - Remark: Generated from `#/paths/content/category-edges/GET/responses/200/content/json`.
+                    public typealias JsonPayload = [Operations.GetContentCategoryEdges.Output.Ok.Body.JsonPayloadPayload]
+                    /// - Remark: Generated from `#/paths/content/category-edges/GET/responses/200/content/application\/json`.
+                    case json(Operations.GetContentCategoryEdges.Output.Ok.Body.JsonPayload)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Operations.GetContentCategoryEdges.Output.Ok.Body.JsonPayload {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.GetContentCategoryEdges.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.GetContentCategoryEdges.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// List
+            ///
+            /// - Remark: Generated from `#/paths//content/category-edges/get/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.GetContentCategoryEdges.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.GetContentCategoryEdges.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            public struct Unauthorized: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/content/category-edges/GET/responses/401/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/content/category-edges/GET/responses/401/content/application\/json`.
+                    case json(Components.Schemas._Error)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas._Error {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.GetContentCategoryEdges.Output.Unauthorized.Body
+                /// Creates a new `Unauthorized`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.GetContentCategoryEdges.Output.Unauthorized.Body) {
+                    self.body = body
+                }
+            }
+            /// Error
+            ///
+            /// - Remark: Generated from `#/paths//content/category-edges/get/responses/401`.
+            ///
+            /// HTTP response code: `401 unauthorized`.
+            case unauthorized(Operations.GetContentCategoryEdges.Output.Unauthorized)
+            /// The associated value of the enum case if `self` is `.unauthorized`.
+            ///
+            /// - Throws: An error if `self` is not `.unauthorized`.
+            /// - SeeAlso: `.unauthorized`.
+            public var unauthorized: Operations.GetContentCategoryEdges.Output.Unauthorized {
+                get throws {
+                    switch self {
+                    case let .unauthorized(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "unauthorized",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Undocumented response.
+            ///
+            /// A response with a code that is not documented in the OpenAPI document.
+            case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json
+                ]
+            }
+        }
+    }
+    /// Create category_edges
+    ///
+    /// - Remark: HTTP `POST /content/category-edges`.
+    /// - Remark: Generated from `#/paths//content/category-edges/post`.
+    public enum PostContentCategoryEdges {
+        public static let id: Swift.String = "post/content/category-edges"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/content/category-edges/POST/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.PostContentCategoryEdges.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.PostContentCategoryEdges.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.PostContentCategoryEdges.Input.Headers
+            /// - Remark: Generated from `#/paths/content/category-edges/POST/requestBody`.
+            @frozen public enum Body: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/content/category-edges/POST/requestBody/json`.
+                public struct JsonPayload: Codable, Hashable, Sendable {
+                    /// - Remark: Generated from `#/paths/content/category-edges/POST/requestBody/json/ecosystemId`.
+                    public var ecosystemId: Swift.String?
+                    /// - Remark: Generated from `#/paths/content/category-edges/POST/requestBody/json/parentId`.
+                    public var parentId: Swift.String
+                    /// - Remark: Generated from `#/paths/content/category-edges/POST/requestBody/json/childId`.
+                    public var childId: Swift.String
+                    /// - Remark: Generated from `#/paths/content/category-edges/POST/requestBody/json/sortOrder`.
+                    public var sortOrder: Swift.Int?
+                    /// - Remark: Generated from `#/paths/content/category-edges/POST/requestBody/json/syncTxid`.
+                    public var syncTxid: Swift.Int?
+                    /// Creates a new `JsonPayload`.
+                    ///
+                    /// - Parameters:
+                    ///   - ecosystemId:
+                    ///   - parentId:
+                    ///   - childId:
+                    ///   - sortOrder:
+                    ///   - syncTxid:
+                    public init(
+                        ecosystemId: Swift.String? = nil,
+                        parentId: Swift.String,
+                        childId: Swift.String,
+                        sortOrder: Swift.Int? = nil,
+                        syncTxid: Swift.Int? = nil
+                    ) {
+                        self.ecosystemId = ecosystemId
+                        self.parentId = parentId
+                        self.childId = childId
+                        self.sortOrder = sortOrder
+                        self.syncTxid = syncTxid
+                    }
+                    public enum CodingKeys: String, CodingKey {
+                        case ecosystemId
+                        case parentId
+                        case childId
+                        case sortOrder
+                        case syncTxid
+                    }
+                    public init(from decoder: any Swift.Decoder) throws {
+                        let container = try decoder.container(keyedBy: CodingKeys.self)
+                        self.ecosystemId = try container.decodeIfPresent(
+                            Swift.String.self,
+                            forKey: .ecosystemId
+                        )
+                        self.parentId = try container.decode(
+                            Swift.String.self,
+                            forKey: .parentId
+                        )
+                        self.childId = try container.decode(
+                            Swift.String.self,
+                            forKey: .childId
+                        )
+                        self.sortOrder = try container.decodeIfPresent(
+                            Swift.Int.self,
+                            forKey: .sortOrder
+                        )
+                        self.syncTxid = try container.decodeIfPresent(
+                            Swift.Int.self,
+                            forKey: .syncTxid
+                        )
+                        try decoder.ensureNoAdditionalProperties(knownKeys: [
+                            "ecosystemId",
+                            "parentId",
+                            "childId",
+                            "sortOrder",
+                            "syncTxid"
+                        ])
+                    }
+                }
+                /// - Remark: Generated from `#/paths/content/category-edges/POST/requestBody/content/application\/json`.
+                case json(Operations.PostContentCategoryEdges.Input.Body.JsonPayload)
+            }
+            public var body: Operations.PostContentCategoryEdges.Input.Body?
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - headers:
+            ///   - body:
+            public init(
+                headers: Operations.PostContentCategoryEdges.Input.Headers = .init(),
+                body: Operations.PostContentCategoryEdges.Input.Body? = nil
+            ) {
+                self.headers = headers
+                self.body = body
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Created: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/content/category-edges/POST/responses/201/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/content/category-edges/POST/responses/201/content/json`.
+                    public struct JsonPayload: Codable, Hashable, Sendable {
+                        /// - Remark: Generated from `#/paths/content/category-edges/POST/responses/201/content/json/id`.
+                        public var id: Swift.String
+                        /// - Remark: Generated from `#/paths/content/category-edges/POST/responses/201/content/json/ecosystemId`.
+                        public var ecosystemId: Swift.String
+                        /// - Remark: Generated from `#/paths/content/category-edges/POST/responses/201/content/json/customerId`.
+                        public var customerId: Swift.String
+                        /// - Remark: Generated from `#/paths/content/category-edges/POST/responses/201/content/json/parentId`.
+                        public var parentId: Swift.String
+                        /// - Remark: Generated from `#/paths/content/category-edges/POST/responses/201/content/json/childId`.
+                        public var childId: Swift.String
+                        /// - Remark: Generated from `#/paths/content/category-edges/POST/responses/201/content/json/sortOrder`.
+                        public var sortOrder: Swift.Int
+                        /// - Remark: Generated from `#/paths/content/category-edges/POST/responses/201/content/json/createdAt`.
+                        public var createdAt: Swift.String
+                        /// - Remark: Generated from `#/paths/content/category-edges/POST/responses/201/content/json/updatedAt`.
+                        public var updatedAt: Swift.String
+                        /// - Remark: Generated from `#/paths/content/category-edges/POST/responses/201/content/json/syncVersion`.
+                        public var syncVersion: Swift.Int
+                        /// - Remark: Generated from `#/paths/content/category-edges/POST/responses/201/content/json/syncTxid`.
+                        public var syncTxid: Swift.Int
+                        /// Creates a new `JsonPayload`.
+                        ///
+                        /// - Parameters:
+                        ///   - id:
+                        ///   - ecosystemId:
+                        ///   - customerId:
+                        ///   - parentId:
+                        ///   - childId:
+                        ///   - sortOrder:
+                        ///   - createdAt:
+                        ///   - updatedAt:
+                        ///   - syncVersion:
+                        ///   - syncTxid:
+                        public init(
+                            id: Swift.String,
+                            ecosystemId: Swift.String,
+                            customerId: Swift.String,
+                            parentId: Swift.String,
+                            childId: Swift.String,
+                            sortOrder: Swift.Int,
+                            createdAt: Swift.String,
+                            updatedAt: Swift.String,
+                            syncVersion: Swift.Int,
+                            syncTxid: Swift.Int
+                        ) {
+                            self.id = id
+                            self.ecosystemId = ecosystemId
+                            self.customerId = customerId
+                            self.parentId = parentId
+                            self.childId = childId
+                            self.sortOrder = sortOrder
+                            self.createdAt = createdAt
+                            self.updatedAt = updatedAt
+                            self.syncVersion = syncVersion
+                            self.syncTxid = syncTxid
+                        }
+                        public enum CodingKeys: String, CodingKey {
+                            case id
+                            case ecosystemId
+                            case customerId
+                            case parentId
+                            case childId
+                            case sortOrder
+                            case createdAt
+                            case updatedAt
+                            case syncVersion
+                            case syncTxid
+                        }
+                        public init(from decoder: any Swift.Decoder) throws {
+                            let container = try decoder.container(keyedBy: CodingKeys.self)
+                            self.id = try container.decode(
+                                Swift.String.self,
+                                forKey: .id
+                            )
+                            self.ecosystemId = try container.decode(
+                                Swift.String.self,
+                                forKey: .ecosystemId
+                            )
+                            self.customerId = try container.decode(
+                                Swift.String.self,
+                                forKey: .customerId
+                            )
+                            self.parentId = try container.decode(
+                                Swift.String.self,
+                                forKey: .parentId
+                            )
+                            self.childId = try container.decode(
+                                Swift.String.self,
+                                forKey: .childId
+                            )
+                            self.sortOrder = try container.decode(
+                                Swift.Int.self,
+                                forKey: .sortOrder
+                            )
+                            self.createdAt = try container.decode(
+                                Swift.String.self,
+                                forKey: .createdAt
+                            )
+                            self.updatedAt = try container.decode(
+                                Swift.String.self,
+                                forKey: .updatedAt
+                            )
+                            self.syncVersion = try container.decode(
+                                Swift.Int.self,
+                                forKey: .syncVersion
+                            )
+                            self.syncTxid = try container.decode(
+                                Swift.Int.self,
+                                forKey: .syncTxid
+                            )
+                            try decoder.ensureNoAdditionalProperties(knownKeys: [
+                                "id",
+                                "ecosystemId",
+                                "customerId",
+                                "parentId",
+                                "childId",
+                                "sortOrder",
+                                "createdAt",
+                                "updatedAt",
+                                "syncVersion",
+                                "syncTxid"
+                            ])
+                        }
+                    }
+                    /// - Remark: Generated from `#/paths/content/category-edges/POST/responses/201/content/application\/json`.
+                    case json(Operations.PostContentCategoryEdges.Output.Created.Body.JsonPayload)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Operations.PostContentCategoryEdges.Output.Created.Body.JsonPayload {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.PostContentCategoryEdges.Output.Created.Body
+                /// Creates a new `Created`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.PostContentCategoryEdges.Output.Created.Body) {
+                    self.body = body
+                }
+            }
+            /// category_edges
+            ///
+            /// - Remark: Generated from `#/paths//content/category-edges/post/responses/201`.
+            ///
+            /// HTTP response code: `201 created`.
+            case created(Operations.PostContentCategoryEdges.Output.Created)
+            /// The associated value of the enum case if `self` is `.created`.
+            ///
+            /// - Throws: An error if `self` is not `.created`.
+            /// - SeeAlso: `.created`.
+            public var created: Operations.PostContentCategoryEdges.Output.Created {
+                get throws {
+                    switch self {
+                    case let .created(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "created",
+                            response: self
+                        )
+                    }
+                }
+            }
+            public struct BadRequest: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/content/category-edges/POST/responses/400/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/content/category-edges/POST/responses/400/content/application\/json`.
+                    case json(Components.Schemas._Error)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas._Error {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.PostContentCategoryEdges.Output.BadRequest.Body
+                /// Creates a new `BadRequest`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.PostContentCategoryEdges.Output.BadRequest.Body) {
+                    self.body = body
+                }
+            }
+            /// Error
+            ///
+            /// - Remark: Generated from `#/paths//content/category-edges/post/responses/400`.
+            ///
+            /// HTTP response code: `400 badRequest`.
+            case badRequest(Operations.PostContentCategoryEdges.Output.BadRequest)
+            /// The associated value of the enum case if `self` is `.badRequest`.
+            ///
+            /// - Throws: An error if `self` is not `.badRequest`.
+            /// - SeeAlso: `.badRequest`.
+            public var badRequest: Operations.PostContentCategoryEdges.Output.BadRequest {
+                get throws {
+                    switch self {
+                    case let .badRequest(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "badRequest",
+                            response: self
+                        )
+                    }
+                }
+            }
+            public struct Unauthorized: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/content/category-edges/POST/responses/401/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/content/category-edges/POST/responses/401/content/application\/json`.
+                    case json(Components.Schemas._Error)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas._Error {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.PostContentCategoryEdges.Output.Unauthorized.Body
+                /// Creates a new `Unauthorized`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.PostContentCategoryEdges.Output.Unauthorized.Body) {
+                    self.body = body
+                }
+            }
+            /// Error
+            ///
+            /// - Remark: Generated from `#/paths//content/category-edges/post/responses/401`.
+            ///
+            /// HTTP response code: `401 unauthorized`.
+            case unauthorized(Operations.PostContentCategoryEdges.Output.Unauthorized)
+            /// The associated value of the enum case if `self` is `.unauthorized`.
+            ///
+            /// - Throws: An error if `self` is not `.unauthorized`.
+            /// - SeeAlso: `.unauthorized`.
+            public var unauthorized: Operations.PostContentCategoryEdges.Output.Unauthorized {
+                get throws {
+                    switch self {
+                    case let .unauthorized(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "unauthorized",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Undocumented response.
+            ///
+            /// A response with a code that is not documented in the OpenAPI document.
+            case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json
+                ]
+            }
+        }
+    }
+    /// Get category_edges by id
+    ///
+    /// - Remark: HTTP `GET /content/category-edges/{id}`.
+    /// - Remark: Generated from `#/paths//content/category-edges/{id}/get`.
+    public enum GetContentCategoryEdgesId {
+        public static let id: Swift.String = "get/content/category-edges/{id}"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/content/category-edges/{id}/GET/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/content/category-edges/{id}/GET/path/id`.
+                public var id: Swift.String
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - id:
+                public init(id: Swift.String) {
+                    self.id = id
+                }
+            }
+            public var path: Operations.GetContentCategoryEdgesId.Input.Path
+            /// - Remark: Generated from `#/paths/content/category-edges/{id}/GET/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.GetContentCategoryEdgesId.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.GetContentCategoryEdgesId.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.GetContentCategoryEdgesId.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            public init(
+                path: Operations.GetContentCategoryEdgesId.Input.Path,
+                headers: Operations.GetContentCategoryEdgesId.Input.Headers = .init()
+            ) {
+                self.path = path
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/content/category-edges/{id}/GET/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/content/category-edges/{id}/GET/responses/200/content/json`.
+                    public struct JsonPayload: Codable, Hashable, Sendable {
+                        /// - Remark: Generated from `#/paths/content/category-edges/{id}/GET/responses/200/content/json/id`.
+                        public var id: Swift.String
+                        /// - Remark: Generated from `#/paths/content/category-edges/{id}/GET/responses/200/content/json/ecosystemId`.
+                        public var ecosystemId: Swift.String
+                        /// - Remark: Generated from `#/paths/content/category-edges/{id}/GET/responses/200/content/json/customerId`.
+                        public var customerId: Swift.String
+                        /// - Remark: Generated from `#/paths/content/category-edges/{id}/GET/responses/200/content/json/parentId`.
+                        public var parentId: Swift.String
+                        /// - Remark: Generated from `#/paths/content/category-edges/{id}/GET/responses/200/content/json/childId`.
+                        public var childId: Swift.String
+                        /// - Remark: Generated from `#/paths/content/category-edges/{id}/GET/responses/200/content/json/sortOrder`.
+                        public var sortOrder: Swift.Int
+                        /// - Remark: Generated from `#/paths/content/category-edges/{id}/GET/responses/200/content/json/createdAt`.
+                        public var createdAt: Swift.String
+                        /// - Remark: Generated from `#/paths/content/category-edges/{id}/GET/responses/200/content/json/updatedAt`.
+                        public var updatedAt: Swift.String
+                        /// - Remark: Generated from `#/paths/content/category-edges/{id}/GET/responses/200/content/json/syncVersion`.
+                        public var syncVersion: Swift.Int
+                        /// - Remark: Generated from `#/paths/content/category-edges/{id}/GET/responses/200/content/json/syncTxid`.
+                        public var syncTxid: Swift.Int
+                        /// Creates a new `JsonPayload`.
+                        ///
+                        /// - Parameters:
+                        ///   - id:
+                        ///   - ecosystemId:
+                        ///   - customerId:
+                        ///   - parentId:
+                        ///   - childId:
+                        ///   - sortOrder:
+                        ///   - createdAt:
+                        ///   - updatedAt:
+                        ///   - syncVersion:
+                        ///   - syncTxid:
+                        public init(
+                            id: Swift.String,
+                            ecosystemId: Swift.String,
+                            customerId: Swift.String,
+                            parentId: Swift.String,
+                            childId: Swift.String,
+                            sortOrder: Swift.Int,
+                            createdAt: Swift.String,
+                            updatedAt: Swift.String,
+                            syncVersion: Swift.Int,
+                            syncTxid: Swift.Int
+                        ) {
+                            self.id = id
+                            self.ecosystemId = ecosystemId
+                            self.customerId = customerId
+                            self.parentId = parentId
+                            self.childId = childId
+                            self.sortOrder = sortOrder
+                            self.createdAt = createdAt
+                            self.updatedAt = updatedAt
+                            self.syncVersion = syncVersion
+                            self.syncTxid = syncTxid
+                        }
+                        public enum CodingKeys: String, CodingKey {
+                            case id
+                            case ecosystemId
+                            case customerId
+                            case parentId
+                            case childId
+                            case sortOrder
+                            case createdAt
+                            case updatedAt
+                            case syncVersion
+                            case syncTxid
+                        }
+                        public init(from decoder: any Swift.Decoder) throws {
+                            let container = try decoder.container(keyedBy: CodingKeys.self)
+                            self.id = try container.decode(
+                                Swift.String.self,
+                                forKey: .id
+                            )
+                            self.ecosystemId = try container.decode(
+                                Swift.String.self,
+                                forKey: .ecosystemId
+                            )
+                            self.customerId = try container.decode(
+                                Swift.String.self,
+                                forKey: .customerId
+                            )
+                            self.parentId = try container.decode(
+                                Swift.String.self,
+                                forKey: .parentId
+                            )
+                            self.childId = try container.decode(
+                                Swift.String.self,
+                                forKey: .childId
+                            )
+                            self.sortOrder = try container.decode(
+                                Swift.Int.self,
+                                forKey: .sortOrder
+                            )
+                            self.createdAt = try container.decode(
+                                Swift.String.self,
+                                forKey: .createdAt
+                            )
+                            self.updatedAt = try container.decode(
+                                Swift.String.self,
+                                forKey: .updatedAt
+                            )
+                            self.syncVersion = try container.decode(
+                                Swift.Int.self,
+                                forKey: .syncVersion
+                            )
+                            self.syncTxid = try container.decode(
+                                Swift.Int.self,
+                                forKey: .syncTxid
+                            )
+                            try decoder.ensureNoAdditionalProperties(knownKeys: [
+                                "id",
+                                "ecosystemId",
+                                "customerId",
+                                "parentId",
+                                "childId",
+                                "sortOrder",
+                                "createdAt",
+                                "updatedAt",
+                                "syncVersion",
+                                "syncTxid"
+                            ])
+                        }
+                    }
+                    /// - Remark: Generated from `#/paths/content/category-edges/{id}/GET/responses/200/content/application\/json`.
+                    case json(Operations.GetContentCategoryEdgesId.Output.Ok.Body.JsonPayload)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Operations.GetContentCategoryEdgesId.Output.Ok.Body.JsonPayload {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.GetContentCategoryEdgesId.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.GetContentCategoryEdgesId.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// category_edges
+            ///
+            /// - Remark: Generated from `#/paths//content/category-edges/{id}/get/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.GetContentCategoryEdgesId.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.GetContentCategoryEdgesId.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            public struct Unauthorized: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/content/category-edges/{id}/GET/responses/401/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/content/category-edges/{id}/GET/responses/401/content/application\/json`.
+                    case json(Components.Schemas._Error)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas._Error {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.GetContentCategoryEdgesId.Output.Unauthorized.Body
+                /// Creates a new `Unauthorized`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.GetContentCategoryEdgesId.Output.Unauthorized.Body) {
+                    self.body = body
+                }
+            }
+            /// Error
+            ///
+            /// - Remark: Generated from `#/paths//content/category-edges/{id}/get/responses/401`.
+            ///
+            /// HTTP response code: `401 unauthorized`.
+            case unauthorized(Operations.GetContentCategoryEdgesId.Output.Unauthorized)
+            /// The associated value of the enum case if `self` is `.unauthorized`.
+            ///
+            /// - Throws: An error if `self` is not `.unauthorized`.
+            /// - SeeAlso: `.unauthorized`.
+            public var unauthorized: Operations.GetContentCategoryEdgesId.Output.Unauthorized {
+                get throws {
+                    switch self {
+                    case let .unauthorized(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "unauthorized",
+                            response: self
+                        )
+                    }
+                }
+            }
+            public struct NotFound: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/content/category-edges/{id}/GET/responses/404/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/content/category-edges/{id}/GET/responses/404/content/application\/json`.
+                    case json(Components.Schemas._Error)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas._Error {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.GetContentCategoryEdgesId.Output.NotFound.Body
+                /// Creates a new `NotFound`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.GetContentCategoryEdgesId.Output.NotFound.Body) {
+                    self.body = body
+                }
+            }
+            /// Error
+            ///
+            /// - Remark: Generated from `#/paths//content/category-edges/{id}/get/responses/404`.
+            ///
+            /// HTTP response code: `404 notFound`.
+            case notFound(Operations.GetContentCategoryEdgesId.Output.NotFound)
+            /// The associated value of the enum case if `self` is `.notFound`.
+            ///
+            /// - Throws: An error if `self` is not `.notFound`.
+            /// - SeeAlso: `.notFound`.
+            public var notFound: Operations.GetContentCategoryEdgesId.Output.NotFound {
+                get throws {
+                    switch self {
+                    case let .notFound(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "notFound",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Undocumented response.
+            ///
+            /// A response with a code that is not documented in the OpenAPI document.
+            case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json
+                ]
+            }
+        }
+    }
+    /// Update category_edges
+    ///
+    /// - Remark: HTTP `PUT /content/category-edges/{id}`.
+    /// - Remark: Generated from `#/paths//content/category-edges/{id}/put`.
+    public enum PutContentCategoryEdgesId {
+        public static let id: Swift.String = "put/content/category-edges/{id}"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/content/category-edges/{id}/PUT/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/content/category-edges/{id}/PUT/path/id`.
+                public var id: Swift.String
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - id:
+                public init(id: Swift.String) {
+                    self.id = id
+                }
+            }
+            public var path: Operations.PutContentCategoryEdgesId.Input.Path
+            /// - Remark: Generated from `#/paths/content/category-edges/{id}/PUT/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.PutContentCategoryEdgesId.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.PutContentCategoryEdgesId.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.PutContentCategoryEdgesId.Input.Headers
+            /// - Remark: Generated from `#/paths/content/category-edges/{id}/PUT/requestBody`.
+            @frozen public enum Body: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/content/category-edges/{id}/PUT/requestBody/json`.
+                public struct JsonPayload: Codable, Hashable, Sendable {
+                    /// - Remark: Generated from `#/paths/content/category-edges/{id}/PUT/requestBody/json/ecosystemId`.
+                    public var ecosystemId: Swift.String?
+                    /// - Remark: Generated from `#/paths/content/category-edges/{id}/PUT/requestBody/json/parentId`.
+                    public var parentId: Swift.String?
+                    /// - Remark: Generated from `#/paths/content/category-edges/{id}/PUT/requestBody/json/childId`.
+                    public var childId: Swift.String?
+                    /// - Remark: Generated from `#/paths/content/category-edges/{id}/PUT/requestBody/json/sortOrder`.
+                    public var sortOrder: Swift.Int?
+                    /// - Remark: Generated from `#/paths/content/category-edges/{id}/PUT/requestBody/json/syncTxid`.
+                    public var syncTxid: Swift.Int?
+                    /// Creates a new `JsonPayload`.
+                    ///
+                    /// - Parameters:
+                    ///   - ecosystemId:
+                    ///   - parentId:
+                    ///   - childId:
+                    ///   - sortOrder:
+                    ///   - syncTxid:
+                    public init(
+                        ecosystemId: Swift.String? = nil,
+                        parentId: Swift.String? = nil,
+                        childId: Swift.String? = nil,
+                        sortOrder: Swift.Int? = nil,
+                        syncTxid: Swift.Int? = nil
+                    ) {
+                        self.ecosystemId = ecosystemId
+                        self.parentId = parentId
+                        self.childId = childId
+                        self.sortOrder = sortOrder
+                        self.syncTxid = syncTxid
+                    }
+                    public enum CodingKeys: String, CodingKey {
+                        case ecosystemId
+                        case parentId
+                        case childId
+                        case sortOrder
+                        case syncTxid
+                    }
+                    public init(from decoder: any Swift.Decoder) throws {
+                        let container = try decoder.container(keyedBy: CodingKeys.self)
+                        self.ecosystemId = try container.decodeIfPresent(
+                            Swift.String.self,
+                            forKey: .ecosystemId
+                        )
+                        self.parentId = try container.decodeIfPresent(
+                            Swift.String.self,
+                            forKey: .parentId
+                        )
+                        self.childId = try container.decodeIfPresent(
+                            Swift.String.self,
+                            forKey: .childId
+                        )
+                        self.sortOrder = try container.decodeIfPresent(
+                            Swift.Int.self,
+                            forKey: .sortOrder
+                        )
+                        self.syncTxid = try container.decodeIfPresent(
+                            Swift.Int.self,
+                            forKey: .syncTxid
+                        )
+                        try decoder.ensureNoAdditionalProperties(knownKeys: [
+                            "ecosystemId",
+                            "parentId",
+                            "childId",
+                            "sortOrder",
+                            "syncTxid"
+                        ])
+                    }
+                }
+                /// - Remark: Generated from `#/paths/content/category-edges/{id}/PUT/requestBody/content/application\/json`.
+                case json(Operations.PutContentCategoryEdgesId.Input.Body.JsonPayload)
+            }
+            public var body: Operations.PutContentCategoryEdgesId.Input.Body?
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            ///   - body:
+            public init(
+                path: Operations.PutContentCategoryEdgesId.Input.Path,
+                headers: Operations.PutContentCategoryEdgesId.Input.Headers = .init(),
+                body: Operations.PutContentCategoryEdgesId.Input.Body? = nil
+            ) {
+                self.path = path
+                self.headers = headers
+                self.body = body
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/content/category-edges/{id}/PUT/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/content/category-edges/{id}/PUT/responses/200/content/json`.
+                    public struct JsonPayload: Codable, Hashable, Sendable {
+                        /// - Remark: Generated from `#/paths/content/category-edges/{id}/PUT/responses/200/content/json/id`.
+                        public var id: Swift.String
+                        /// - Remark: Generated from `#/paths/content/category-edges/{id}/PUT/responses/200/content/json/ecosystemId`.
+                        public var ecosystemId: Swift.String
+                        /// - Remark: Generated from `#/paths/content/category-edges/{id}/PUT/responses/200/content/json/customerId`.
+                        public var customerId: Swift.String
+                        /// - Remark: Generated from `#/paths/content/category-edges/{id}/PUT/responses/200/content/json/parentId`.
+                        public var parentId: Swift.String
+                        /// - Remark: Generated from `#/paths/content/category-edges/{id}/PUT/responses/200/content/json/childId`.
+                        public var childId: Swift.String
+                        /// - Remark: Generated from `#/paths/content/category-edges/{id}/PUT/responses/200/content/json/sortOrder`.
+                        public var sortOrder: Swift.Int
+                        /// - Remark: Generated from `#/paths/content/category-edges/{id}/PUT/responses/200/content/json/createdAt`.
+                        public var createdAt: Swift.String
+                        /// - Remark: Generated from `#/paths/content/category-edges/{id}/PUT/responses/200/content/json/updatedAt`.
+                        public var updatedAt: Swift.String
+                        /// - Remark: Generated from `#/paths/content/category-edges/{id}/PUT/responses/200/content/json/syncVersion`.
+                        public var syncVersion: Swift.Int
+                        /// - Remark: Generated from `#/paths/content/category-edges/{id}/PUT/responses/200/content/json/syncTxid`.
+                        public var syncTxid: Swift.Int
+                        /// Creates a new `JsonPayload`.
+                        ///
+                        /// - Parameters:
+                        ///   - id:
+                        ///   - ecosystemId:
+                        ///   - customerId:
+                        ///   - parentId:
+                        ///   - childId:
+                        ///   - sortOrder:
+                        ///   - createdAt:
+                        ///   - updatedAt:
+                        ///   - syncVersion:
+                        ///   - syncTxid:
+                        public init(
+                            id: Swift.String,
+                            ecosystemId: Swift.String,
+                            customerId: Swift.String,
+                            parentId: Swift.String,
+                            childId: Swift.String,
+                            sortOrder: Swift.Int,
+                            createdAt: Swift.String,
+                            updatedAt: Swift.String,
+                            syncVersion: Swift.Int,
+                            syncTxid: Swift.Int
+                        ) {
+                            self.id = id
+                            self.ecosystemId = ecosystemId
+                            self.customerId = customerId
+                            self.parentId = parentId
+                            self.childId = childId
+                            self.sortOrder = sortOrder
+                            self.createdAt = createdAt
+                            self.updatedAt = updatedAt
+                            self.syncVersion = syncVersion
+                            self.syncTxid = syncTxid
+                        }
+                        public enum CodingKeys: String, CodingKey {
+                            case id
+                            case ecosystemId
+                            case customerId
+                            case parentId
+                            case childId
+                            case sortOrder
+                            case createdAt
+                            case updatedAt
+                            case syncVersion
+                            case syncTxid
+                        }
+                        public init(from decoder: any Swift.Decoder) throws {
+                            let container = try decoder.container(keyedBy: CodingKeys.self)
+                            self.id = try container.decode(
+                                Swift.String.self,
+                                forKey: .id
+                            )
+                            self.ecosystemId = try container.decode(
+                                Swift.String.self,
+                                forKey: .ecosystemId
+                            )
+                            self.customerId = try container.decode(
+                                Swift.String.self,
+                                forKey: .customerId
+                            )
+                            self.parentId = try container.decode(
+                                Swift.String.self,
+                                forKey: .parentId
+                            )
+                            self.childId = try container.decode(
+                                Swift.String.self,
+                                forKey: .childId
+                            )
+                            self.sortOrder = try container.decode(
+                                Swift.Int.self,
+                                forKey: .sortOrder
+                            )
+                            self.createdAt = try container.decode(
+                                Swift.String.self,
+                                forKey: .createdAt
+                            )
+                            self.updatedAt = try container.decode(
+                                Swift.String.self,
+                                forKey: .updatedAt
+                            )
+                            self.syncVersion = try container.decode(
+                                Swift.Int.self,
+                                forKey: .syncVersion
+                            )
+                            self.syncTxid = try container.decode(
+                                Swift.Int.self,
+                                forKey: .syncTxid
+                            )
+                            try decoder.ensureNoAdditionalProperties(knownKeys: [
+                                "id",
+                                "ecosystemId",
+                                "customerId",
+                                "parentId",
+                                "childId",
+                                "sortOrder",
+                                "createdAt",
+                                "updatedAt",
+                                "syncVersion",
+                                "syncTxid"
+                            ])
+                        }
+                    }
+                    /// - Remark: Generated from `#/paths/content/category-edges/{id}/PUT/responses/200/content/application\/json`.
+                    case json(Operations.PutContentCategoryEdgesId.Output.Ok.Body.JsonPayload)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Operations.PutContentCategoryEdgesId.Output.Ok.Body.JsonPayload {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.PutContentCategoryEdgesId.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.PutContentCategoryEdgesId.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// category_edges
+            ///
+            /// - Remark: Generated from `#/paths//content/category-edges/{id}/put/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.PutContentCategoryEdgesId.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.PutContentCategoryEdgesId.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            public struct BadRequest: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/content/category-edges/{id}/PUT/responses/400/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/content/category-edges/{id}/PUT/responses/400/content/application\/json`.
+                    case json(Components.Schemas._Error)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas._Error {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.PutContentCategoryEdgesId.Output.BadRequest.Body
+                /// Creates a new `BadRequest`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.PutContentCategoryEdgesId.Output.BadRequest.Body) {
+                    self.body = body
+                }
+            }
+            /// Error
+            ///
+            /// - Remark: Generated from `#/paths//content/category-edges/{id}/put/responses/400`.
+            ///
+            /// HTTP response code: `400 badRequest`.
+            case badRequest(Operations.PutContentCategoryEdgesId.Output.BadRequest)
+            /// The associated value of the enum case if `self` is `.badRequest`.
+            ///
+            /// - Throws: An error if `self` is not `.badRequest`.
+            /// - SeeAlso: `.badRequest`.
+            public var badRequest: Operations.PutContentCategoryEdgesId.Output.BadRequest {
+                get throws {
+                    switch self {
+                    case let .badRequest(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "badRequest",
+                            response: self
+                        )
+                    }
+                }
+            }
+            public struct Unauthorized: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/content/category-edges/{id}/PUT/responses/401/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/content/category-edges/{id}/PUT/responses/401/content/application\/json`.
+                    case json(Components.Schemas._Error)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas._Error {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.PutContentCategoryEdgesId.Output.Unauthorized.Body
+                /// Creates a new `Unauthorized`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.PutContentCategoryEdgesId.Output.Unauthorized.Body) {
+                    self.body = body
+                }
+            }
+            /// Error
+            ///
+            /// - Remark: Generated from `#/paths//content/category-edges/{id}/put/responses/401`.
+            ///
+            /// HTTP response code: `401 unauthorized`.
+            case unauthorized(Operations.PutContentCategoryEdgesId.Output.Unauthorized)
+            /// The associated value of the enum case if `self` is `.unauthorized`.
+            ///
+            /// - Throws: An error if `self` is not `.unauthorized`.
+            /// - SeeAlso: `.unauthorized`.
+            public var unauthorized: Operations.PutContentCategoryEdgesId.Output.Unauthorized {
+                get throws {
+                    switch self {
+                    case let .unauthorized(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "unauthorized",
+                            response: self
+                        )
+                    }
+                }
+            }
+            public struct NotFound: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/content/category-edges/{id}/PUT/responses/404/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/content/category-edges/{id}/PUT/responses/404/content/application\/json`.
+                    case json(Components.Schemas._Error)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas._Error {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.PutContentCategoryEdgesId.Output.NotFound.Body
+                /// Creates a new `NotFound`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.PutContentCategoryEdgesId.Output.NotFound.Body) {
+                    self.body = body
+                }
+            }
+            /// Error
+            ///
+            /// - Remark: Generated from `#/paths//content/category-edges/{id}/put/responses/404`.
+            ///
+            /// HTTP response code: `404 notFound`.
+            case notFound(Operations.PutContentCategoryEdgesId.Output.NotFound)
+            /// The associated value of the enum case if `self` is `.notFound`.
+            ///
+            /// - Throws: An error if `self` is not `.notFound`.
+            /// - SeeAlso: `.notFound`.
+            public var notFound: Operations.PutContentCategoryEdgesId.Output.NotFound {
+                get throws {
+                    switch self {
+                    case let .notFound(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "notFound",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Undocumented response.
+            ///
+            /// A response with a code that is not documented in the OpenAPI document.
+            case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json
+                ]
+            }
+        }
+    }
+    /// Delete category_edges
+    ///
+    /// - Remark: HTTP `DELETE /content/category-edges/{id}`.
+    /// - Remark: Generated from `#/paths//content/category-edges/{id}/delete`.
+    public enum DeleteContentCategoryEdgesId {
+        public static let id: Swift.String = "delete/content/category-edges/{id}"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/content/category-edges/{id}/DELETE/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/content/category-edges/{id}/DELETE/path/id`.
+                public var id: Swift.String
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - id:
+                public init(id: Swift.String) {
+                    self.id = id
+                }
+            }
+            public var path: Operations.DeleteContentCategoryEdgesId.Input.Path
+            /// - Remark: Generated from `#/paths/content/category-edges/{id}/DELETE/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.DeleteContentCategoryEdgesId.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.DeleteContentCategoryEdgesId.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.DeleteContentCategoryEdgesId.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            public init(
+                path: Operations.DeleteContentCategoryEdgesId.Input.Path,
+                headers: Operations.DeleteContentCategoryEdgesId.Input.Headers = .init()
+            ) {
+                self.path = path
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct NoContent: Sendable, Hashable {
+                /// Creates a new `NoContent`.
+                public init() {}
+            }
+            /// Deleted
+            ///
+            /// - Remark: Generated from `#/paths//content/category-edges/{id}/delete/responses/204`.
+            ///
+            /// HTTP response code: `204 noContent`.
+            case noContent(Operations.DeleteContentCategoryEdgesId.Output.NoContent)
+            /// Deleted
+            ///
+            /// - Remark: Generated from `#/paths//content/category-edges/{id}/delete/responses/204`.
+            ///
+            /// HTTP response code: `204 noContent`.
+            public static var noContent: Self {
+                .noContent(.init())
+            }
+            /// The associated value of the enum case if `self` is `.noContent`.
+            ///
+            /// - Throws: An error if `self` is not `.noContent`.
+            /// - SeeAlso: `.noContent`.
+            public var noContent: Operations.DeleteContentCategoryEdgesId.Output.NoContent {
+                get throws {
+                    switch self {
+                    case let .noContent(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "noContent",
+                            response: self
+                        )
+                    }
+                }
+            }
+            public struct Unauthorized: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/content/category-edges/{id}/DELETE/responses/401/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/content/category-edges/{id}/DELETE/responses/401/content/application\/json`.
+                    case json(Components.Schemas._Error)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas._Error {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.DeleteContentCategoryEdgesId.Output.Unauthorized.Body
+                /// Creates a new `Unauthorized`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.DeleteContentCategoryEdgesId.Output.Unauthorized.Body) {
+                    self.body = body
+                }
+            }
+            /// Error
+            ///
+            /// - Remark: Generated from `#/paths//content/category-edges/{id}/delete/responses/401`.
+            ///
+            /// HTTP response code: `401 unauthorized`.
+            case unauthorized(Operations.DeleteContentCategoryEdgesId.Output.Unauthorized)
+            /// The associated value of the enum case if `self` is `.unauthorized`.
+            ///
+            /// - Throws: An error if `self` is not `.unauthorized`.
+            /// - SeeAlso: `.unauthorized`.
+            public var unauthorized: Operations.DeleteContentCategoryEdgesId.Output.Unauthorized {
+                get throws {
+                    switch self {
+                    case let .unauthorized(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "unauthorized",
+                            response: self
+                        )
+                    }
+                }
+            }
+            public struct NotFound: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/content/category-edges/{id}/DELETE/responses/404/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/content/category-edges/{id}/DELETE/responses/404/content/application\/json`.
+                    case json(Components.Schemas._Error)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas._Error {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.DeleteContentCategoryEdgesId.Output.NotFound.Body
+                /// Creates a new `NotFound`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.DeleteContentCategoryEdgesId.Output.NotFound.Body) {
+                    self.body = body
+                }
+            }
+            /// Error
+            ///
+            /// - Remark: Generated from `#/paths//content/category-edges/{id}/delete/responses/404`.
+            ///
+            /// HTTP response code: `404 notFound`.
+            case notFound(Operations.DeleteContentCategoryEdgesId.Output.NotFound)
+            /// The associated value of the enum case if `self` is `.notFound`.
+            ///
+            /// - Throws: An error if `self` is not `.notFound`.
+            /// - SeeAlso: `.notFound`.
+            public var notFound: Operations.DeleteContentCategoryEdgesId.Output.NotFound {
                 get throws {
                     switch self {
                     case let .notFound(response):
