@@ -57,6 +57,20 @@ export function MessageBubble({
       onClick={onClick}
       style={onClick ? { cursor: 'pointer' } : undefined}
     >
+      {/* The speaker's mark, in the gutter.
+       *
+       * Rendered for EVERY message, not only for senders that have one: a
+       * transcript with several participants wants one left edge for the text,
+       * and a node that appears only sometimes cannot give it — the lines whose
+       * sender has no avatar would sit a gutter further left. So the element is
+       * always here and is EMPTY when the sender has no mark, which a theme
+       * reads with `.pc-avatar:empty`.
+       *
+       * `base.css` hides it (`display: none`), so this changes nothing for a
+       * theme that has never styled it; showing avatars is a theme opting in. */}
+      <div className="pc-avatar" aria-hidden="true">
+        {message.sender.avatar ?? ''}
+      </div>
       <div className="pc-bubble">
         {message.toolCalls && message.toolCalls.length > 0 && (
           <div className="pc-tool-calls">

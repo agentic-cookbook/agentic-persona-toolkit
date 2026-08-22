@@ -61,6 +61,12 @@
 .pc-message.pc-persona { justify-content: flex-start; }
 .pc-message.pc-user { justify-content: flex-end; }
 
+/* The speaker's mark. `MessageBubble` renders this for every message — empty
+ * when that sender has no avatar, so every line shares one text edge — and it
+ * is hidden here, which is what keeps every theme written before it existed
+ * looking exactly as it did. A theme that wants avatars gives it a `display`
+ * and a size of its own, and reads `.pc-avatar:empty` for the speakers without
+ * one. */
 .pc-avatar { display: none; }
 
 .pc-bubble {
