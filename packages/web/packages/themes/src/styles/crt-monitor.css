@@ -39,30 +39,87 @@
   --ost-green-soft: rgba(0, 255, 65, 0.5);
   --ost-border: rgba(0, 255, 65, 0.35);
 
-  /* The tube face. Both numbers are LENGTHS, not percentages, and that is the
-   * whole lesson: a percentage radius scales with the box, so on a composer
-   * that is six times wider than it is tall the corners swallow the edges and
-   * the screen comes out an ellipse. Curvature is a property of the glass, not
-   * of the aspect ratio.
+  /* The tube face: eight cubic curves around eight anchor points — the middle
+   * of each edge, and the 45-degree point of each corner.
    *
-   * `--crt-screen-radius` is the fallback silhouette — rounded corners, straight
-   * edges. `--crt-screen-shape` is the real one, for browsers with CSS Shapes 2:
-   * every edge is one arc that sits 12px inside the box at the corners and
-   * reaches within 2px of it at the middle, so the face bows the way a tube's
-   * does. The control points sit OUTSIDE the box on purpose — a clip cannot
-   * paint past the element, so the overshoot is what flattens the middle of
-   * each edge against the true edge instead of leaving it rounded. */
-  --crt-screen-radius: 42px / 38px;
+   * WHY EIGHT AND NOT FOUR. Four anchors, one per edge midpoint, is a
+   * superellipse, and a superellipse cannot be both flat-edged and
+   * round-cornered: raising its exponent straightens the edges and shrinks the
+   * corners together. On a composer four times wider than it is tall the two
+   * settings that look right are a lozenge (corners so large they eat the
+   * prompt off both ends) and a rectangle. A real tube is neither. It is a
+   * rounded rectangle whose edges bow gently outward, and describing that needs
+   * an anchor in the corner as well as one on the edge.
+   *
+   * WHY IT DOES NOT CREASE. Every anchor fixes its own tangent, and the two
+   * curves that meet there are given control points on the same line through
+   * it: horizontal at the top and bottom midpoints (both controls share y),
+   * vertical at the left and right midpoints (both share x), and 45 degrees at
+   * each corner point (both are offset by the SAME amount in x and y, which is
+   * the whole job of `--crt-h`). Tangents match at all eight joins by
+   * construction, so no setting of these numbers can put a kink in the outline.
+   * The outline this replaced could: it aimed a bowed quadratic edge straight
+   * into a corner arc whose tangent was horizontal, and the deeper the bow, the
+   * worse the corner buckled.
+   *
+   *   --crt-qx / --crt-qy  where the corner's 45-degree point sits, measured in
+   *                        from the two edges it belongs to. Together they say
+   *                        how big the corner is; equal values read as circular.
+   *   --crt-h              how far the corner point's controls sit along that
+   *                        45-degree tangent — the corner's tightness. Small
+   *                        turns the corner abruptly, large opens it out.
+   *   --crt-a              the top and bottom control, measured in from the
+   *                        near side. THIS IS THE BOW: at a small value the
+   *                        edge runs flat and only turns down at the corner; at
+   *                        a large one it starts easing away from the edge near
+   *                        the middle, which is the barrel of the glass.
+   *   --crt-b              the same for the left and right edges.
+   *
+   * Corner sizes are lengths and bows are percentages, and the split is not
+   * arbitrary. A corner is a property of the glass — it should look identical
+   * on a wide screen and a narrow one, which a percentage would not give. A bow
+   * runs the length of its edge, so it is only meaningful as a share of that
+   * edge. Every value stays under half its own dimension, so the path cannot
+   * cross itself at any size.
+   *
+   * `--crt-screen-radius` is the fallback silhouette for a browser without
+   * `clip-path: shape()` — round corners, straight edges — and it is what the
+   * theme root's glow is rounded by too, since a `box-shadow` cannot be given a
+   * clip-path's outline. Keep it near the corner these numbers describe: when
+   * the glow's rectangle is wider than the tube it lights, the gap between them
+   * reads as a bezel that isn't there. */
+  --crt-qx: 44px;
+  --crt-qy: 40px;
+  --crt-h: 42px;
+  --crt-a: 28%;
+  --crt-b: 15%;
+  --crt-screen-radius: 104px;
   --crt-screen-shape: shape(
-    from 48px 10px,
-    curve to calc(100% - 48px) 10px with 50% -12px,
-    curve to calc(100% - 10px) 48px with calc(100% - 16px) 16px,
-    curve to calc(100% - 10px) calc(100% - 48px) with calc(100% + 12px) 50%,
-    curve to calc(100% - 48px) calc(100% - 10px) with calc(100% - 16px) calc(100% - 16px),
-    curve to 48px calc(100% - 10px) with 50% calc(100% + 12px),
-    curve to 10px calc(100% - 48px) with 16px calc(100% - 16px),
-    curve to 10px 48px with -12px 50%,
-    curve to 48px 10px with 16px 16px,
+    from 50% 0%,
+    curve to calc(100% - var(--crt-qx)) var(--crt-qy)
+      with calc(100% - var(--crt-a)) 0%
+         / calc(100% - var(--crt-qx) - var(--crt-h)) calc(var(--crt-qy) - var(--crt-h)),
+    curve to 100% 50%
+      with calc(100% - var(--crt-qx) + var(--crt-h)) calc(var(--crt-qy) + var(--crt-h))
+         / 100% calc(50% - var(--crt-b)),
+    curve to calc(100% - var(--crt-qx)) calc(100% - var(--crt-qy))
+      with 100% calc(50% + var(--crt-b))
+         / calc(100% - var(--crt-qx) + var(--crt-h)) calc(100% - var(--crt-qy) - var(--crt-h)),
+    curve to 50% 100%
+      with calc(100% - var(--crt-qx) - var(--crt-h)) calc(100% - var(--crt-qy) + var(--crt-h))
+         / calc(100% - var(--crt-a)) 100%,
+    curve to var(--crt-qx) calc(100% - var(--crt-qy))
+      with var(--crt-a) 100%
+         / calc(var(--crt-qx) + var(--crt-h)) calc(100% - var(--crt-qy) + var(--crt-h)),
+    curve to 0% 50%
+      with calc(var(--crt-qx) - var(--crt-h)) calc(100% - var(--crt-qy) - var(--crt-h))
+         / 0% calc(50% + var(--crt-b)),
+    curve to var(--crt-qx) var(--crt-qy)
+      with 0% calc(50% - var(--crt-b))
+         / calc(var(--crt-qx) - var(--crt-h)) calc(var(--crt-qy) + var(--crt-h)),
+    curve to 50% 0%
+      with calc(var(--crt-qx) + var(--crt-h)) calc(var(--crt-qy) - var(--crt-h))
+         / var(--crt-a) 0%,
     close
   );
 
@@ -73,6 +130,9 @@
    * floor, not a height: the transcript fills from the bottom (`base.css` keeps
    * `justify-content: flex-end`), so an empty screen is dark above the prompt
    * and the first line still lands directly over the entry. */
+  /* How far past the tube the glow reaches before it is fully transparent. */
+  --crt-glow-reach: 120px;
+
   --crt-screen-min-h: 33vh;
 
   /* The speaker gutter. `--crt-gutter` is the whole column: mark plus the space
@@ -164,9 +224,7 @@
  * only part of this theme that lives OUTSIDE the element's own box. It cannot
  * be stated on the chat, because the chat is clipped to the tube's silhouette
  * and `clip-path` throws away an element's outer shadows along with everything
- * else it paints. So it is stated one box out, where nothing clips it — and the
- * root wears `--crt-screen-radius` for no other reason than to give that shadow
- * the tube's corners instead of a rectangle's.
+ * else it paints. So it is stated one box out, where nothing clips it.
  *
  * Any ancestor with `overflow: hidden` still erases it — the glow is not
  * clipped by a rule here, it is clipped by whatever encloses the chat, so a
@@ -182,16 +240,35 @@ body {
   /* VT323 renders small per px — bump up a notch vs the JetBrains Mono themes. */
   font-size: 16px;
   line-height: 1.5;
-  border-radius: var(--crt-screen-radius);
-  /* ONE term, with a spread deep enough that the shadow's own box ends well
-   * inside the tube's silhouette. The cabinet used to hide a second, tighter
-   * term; with nothing painted on this element the gap between the root's
-   * rectangle and the bowed edge of the glass is see-through, and a glow that
-   * hugs the box shows THROUGH that gap as a crisp rounded rectangle — a ghost
-   * bezel, in the exact place the bezel was just taken out of. Pulling the
-   * shadow box 30px in and blurring it 130px leaves only the far, edgeless part
-   * of the falloff. */
-  box-shadow: 0 0 130px -30px rgba(0, 255, 65, 0.34);
+}
+
+/* The glow, and it is a PAINTED HALO rather than a `box-shadow`, because an
+ * outer box-shadow cannot do this job however it is tuned.
+ *
+ * A box-shadow is knocked out inside its element's border box. The root's box
+ * is a rectangle and the tube inside it is not, so the four corner gaps between
+ * them fall inside the knockout and stay unlit while everything just outside
+ * the rectangle glows — a hard rounded-rectangle edge cutting across the tube's
+ * corners, reading as a bezel this theme deliberately does not have. Widening
+ * the blur or driving the spread negative moves that edge; it does not remove
+ * it, because the knockout is the element's border box either way. A background
+ * gradient has no knockout at all.
+ *
+ * The pseudo-element is inflated past the root on every side so the falloff has
+ * somewhere to happen, and the gradient's own stops end at `transparent` well
+ * inside that, so the halo has no edge of any shape anywhere. */
+body::before {
+  content: '';
+  position: absolute;
+  inset: calc(-1 * var(--crt-glow-reach));
+  pointer-events: none;
+  z-index: 0;
+  background: radial-gradient(
+    58% 60% at 50% 50%,
+    rgba(0, 255, 65, 0.15),
+    rgba(0, 255, 65, 0.055) 46%,
+    transparent 74%
+  );
 }
 
 /* The glass: scanlines, tube vignette, and a diagonal glare, sitting ON TOP of
@@ -254,6 +331,12 @@ body::after {
   clip-path: var(--crt-screen-shape);
   /* A third of the window before a word is said — see `--crt-screen-min-h`. */
   min-height: var(--crt-screen-min-h);
+  /* The halo is an absolutely positioned pseudo-element and the chat is an
+   * ordinary in-flow block, so without a stacking position of its own the chat
+   * would paint UNDER the glow and wear it as a green wash across the middle of
+   * the screen. The glass overlay sits at 6 and still covers both. */
+  position: relative;
+  z-index: 1;
   /* INSET terms only, and that is a rule rather than a preference: `clip-path`
    * throws away an element's outer shadows exactly as it throws away the parts
    * of its background outside the shape. The retaining ring, black surround and
