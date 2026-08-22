@@ -138,20 +138,26 @@
    * a hole rather than a fill, nothing is painted behind the screen, which is
    * what lets the tube stay see-through. */
   --crt-bw: 2px;
-  /* The grey of things on this surface that are NOT emitting light, as bare
+  /* The greys of things on this surface that are NOT emitting light, as bare
    * channels so each use can pick its own alpha — `rgb(var(--crt-unlit) / x)`.
-   * Two things read it: the bezel's inner lip, and the placeholder at the
-   * prompt. They look unrelated and are the same idea, which is why they share
-   * a token: everything green here is phosphor, so anything painted green is
-   * claiming to be lit. A ring is hardware catching room light. A placeholder
-   * is a caption on an empty field — the machine has not written anything, and
-   * a lit one says a line is waiting to be sent when none is.
+   * Everything green here is phosphor, so anything painted green is claiming to
+   * be lit: the bezel's inner lip is hardware catching room light, and the
+   * placeholder is a caption on an empty field rather than something the
+   * machine has written.
    *
-   * It is a few points green-shifted rather than a true neutral, because a pure
-   * grey against a green field reads faintly magenta by simultaneous contrast;
-   * the shift cancels that without the grey reading as lit. */
+   * ONE HUE, TWO GRADES, because "not lit" is not one brightness. A placeholder
+   * is text and has a floor — below some value it stops being readable, which
+   * is the entire reason it is on screen. A bezel has no floor at all: it only
+   * has to say where the glass stops, and the dimmer it does that the more the
+   * eye stays on the text instead of tracing the frame. So the ring takes the
+   * darker grade and the two stay tied by hue rather than by value.
+   *
+   * The hue is a few points green-shifted rather than a true neutral, because a
+   * pure grey against a green field reads faintly magenta by simultaneous
+   * contrast; the shift cancels that without the grey reading as lit. */
   --crt-unlit: 150 162 152;
-  --crt-ring: rgb(var(--crt-unlit) / 0.32);
+  --crt-unlit-dim: 96 104 98;
+  --crt-ring: rgb(var(--crt-unlit-dim) / 0.32);
 
   --crt-screen-shape: shape(
     from 50% 0%,
