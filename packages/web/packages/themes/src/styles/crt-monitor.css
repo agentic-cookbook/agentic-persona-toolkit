@@ -224,17 +224,23 @@
     close
   );
 
-  /* How tall the tube is before anything is said. A CRT is a BOX — the picture
-   * has depth to it — and a transcript that starts one line high reads as a
-   * chat widget with a frame drawn round it, whatever the frame is made of. A
-   * third of the window is the shortest that still reads as hardware. It is a
-   * floor, not a height: the transcript fills from the bottom (`base.css` keeps
-   * `justify-content: flex-end`), so an empty screen is dark above the prompt
-   * and the first line still lands directly over the entry. */
+  /* How tall the tube is, and it is a HEIGHT rather than a floor. It was a
+   * floor — the screen opened at a third of the window and then grew a line at
+   * a time as the transcript filled — and growing is the one thing a piece of
+   * hardware cannot do. A monitor does not get taller because more was said on
+   * it; its glass is a fixed size and the text scrolls behind it. A tube that
+   * stretches gives itself away as a div with a curve drawn round it, and it
+   * takes the page's layout with it, walking the composer up the screen on
+   * every reply.
+   *
+   * A third of the window is also the shortest that reads as hardware in the
+   * first place: a CRT is a BOX, the picture has depth to it, and a transcript
+   * one line high is a chat widget with a frame around it whatever the frame is
+   * made of. Same number, now doing both jobs. */
+  --crt-screen-h: 33vh;
+
   /* How far past the tube the glow reaches before it is fully transparent. */
   --crt-glow-reach: 120px;
-
-  --crt-screen-min-h: 33vh;
 
   /* The speaker gutter. `--crt-gutter` is the whole column: mark plus the space
    * after it, and it is what every message is indented by, so all speakers
@@ -258,6 +264,13 @@
    * above it. */
   --crt-screen-pad: 40px;
 
+  /* The RAMP of the top fade, and only the ramp — the blank band above it is
+   * `--crt-qy`, so the scrollback is fully dark until the curve has finished
+   * intruding and then takes this long to come up. Deep enough to read as the
+   * glass curving away rather than as a line with its top half missing, and
+   * shorter than it looks because the hold is already doing thirty of it. */
+  --crt-fade: 28px;
+
   /* How far the prompt sits off the BOTTOM of the tube, and it has to be more
    * than `--crt-screen-pad`, not the same. Equal insets are only equal
    * clearance against a straight edge. The prompt is the one row living in the
@@ -271,6 +284,15 @@
    * without breaking that column. */
   --crt-entry-floor: 60px;
 
+  /* THE TYPE SIZE, and it is the first thing to reach for when this screen is
+   * hard to read. VT323 is a low-resolution face: its x-height is a little
+   * under half its em, so 16px of it is a seven-pixel lowercase letter, and a
+   * face built out of two-pixel strokes has nothing left to lose at that size.
+   * Every other legibility lever below is worth a fraction of this one. 19px
+   * puts the x-height back over eight pixels, where the strokes resolve, and it
+   * costs nothing of the period look — a real terminal's type is LARGE. */
+  --crt-type-size: 19px;
+
   /* The entry line's type size. It is a token rather than a number in the rule
    * because the size is set in TWO stylesheets: the theme's own `.pc-input`
    * rule weighs (0,2,0), and the chat package's iOS focus-zoom guard weighs
@@ -278,13 +300,25 @@
    * apply at all, and learntruefacts does. Both read this, so neither can drift
    * from the other, and the `❯` the site prints in front of the field reads it
    * too. Larger than the transcript on purpose: the line being typed is the
-   * only one on screen that is still being written. */
-  --crt-entry-size: 18px;
+   * only one on screen that is still being written — but stated as a STEP off
+   * the transcript rather than as its own number, because what says "still
+   * being written" is the difference and not the size. Six pixels of it made
+   * the prompt a second typeface on the screen; two is a difference you feel
+   * without seeing it, and it survives the transcript being retuned. */
+  --crt-entry-size: calc(var(--crt-type-size) + 2px);
   /* VT323 ships one weight, so this is a synthesised bold and that is the point:
    * a hair more ink on the line being typed, without it changing size or font
    * against the transcript above it. */
   --crt-entry-weight: 600;
-  --crt-scanline: rgba(0, 0, 0, 0.33);
+  /* The scanlines, and their PITCH is a legibility number, not just a texture
+   * one. The dark band is a whole pixel however wide the gap is, so a 3px pitch
+   * takes a third of every horizontal stroke away — and at this size a stroke
+   * is two pixels, which is most of it. At 4px it takes a quarter, and at a
+   * lower alpha what it takes it does not take completely. Both moves leave the
+   * lines exactly as countable as they were; they were never the thing that
+   * said CRT, the curve and the glow are. */
+  --crt-scanline: rgba(0, 0, 0, 0.24);
+  --crt-scanline-pitch: 4px;
 
   /* Site color tokens — surface stays transparent so a site that paints its own
    * background is not blanked by the token. The tube below sets its own
@@ -357,8 +391,7 @@ body {
   position: relative;
   color: var(--color-text-primary);
   font-family: var(--font-mono);
-  /* VT323 renders small per px — bump up a notch vs the JetBrains Mono themes. */
-  font-size: 16px;
+  font-size: var(--crt-type-size);
   line-height: 1.5;
 }
 
@@ -411,7 +444,7 @@ body::after {
   background-image:
     linear-gradient(133deg, rgba(255, 255, 255, 0.028) 0%, rgba(255, 255, 255, 0.008) 18%, transparent 38%),
     radial-gradient(96% 104% at 50% 46%, transparent 20%, rgba(0, 0, 0, 0.3) 64%, rgba(0, 0, 0, 0.62) 100%),
-    repeating-linear-gradient(to bottom, var(--crt-scanline) 0 1px, transparent 1px 3px);
+    repeating-linear-gradient(to bottom, var(--crt-scanline) 0 1px, transparent 1px var(--crt-scanline-pitch));
   animation: crt-flicker 6.1s steps(1) infinite;
 }
 
@@ -444,13 +477,21 @@ body::after {
     radial-gradient(58% 68% at 50% 54%, rgba(0, 255, 65, 0.085), transparent 74%),
     var(--pc-surface);
   color: var(--ost-green);
-  font-size: 16px;
+  font-size: var(--crt-type-size);
   line-height: 1.5;
+  /* Tracking, because VT323 is CONDENSED as well as low-resolution: its stems
+   * sit close enough that at a small size the upright of one letter and the
+   * upright of the next read as a single wider stroke. A hair of space is what
+   * separates them, and it is the one adjustment here that a period terminal
+   * also had — character cells were wider than the glyphs drawn in them. */
+  letter-spacing: 0.03em;
   border: none;
   border-radius: var(--crt-screen-radius);
   clip-path: var(--crt-screen-shape);
-  /* A third of the window before a word is said — see `--crt-screen-min-h`. */
-  min-height: var(--crt-screen-min-h);
+  /* Fixed, not a minimum — see `--crt-screen-h`. `.pc-transcript` is already
+   * `flex: 1; overflow-y: auto` in `base.css`, so pinning the tube is the whole
+   * change: the scrollback goes behind the glass instead of stretching it. */
+  height: var(--crt-screen-h);
   /* The halo is an absolutely positioned pseudo-element and the chat is an
    * ordinary in-flow block, so without a stacking position of its own the chat
    * would paint UNDER the glow and wear it as a green wash across the middle of
@@ -565,14 +606,36 @@ body::after {
 
 .persona-chat .pc-message.pc-persona .pc-bubble {
   color: var(--pc-persona-text);
-  text-shadow: 0 0 7px rgba(0, 255, 65, 0.32);
+  text-shadow:
+    0 0 1px rgba(0, 255, 65, 0.55),
+    0 0 9px rgba(0, 255, 65, 0.26);
 }
 
 .persona-chat .pc-message.pc-user .pc-bubble {
   color: var(--pc-user-text);
-  letter-spacing: 0.02em;
-  text-shadow: 0 0 7px rgba(170, 255, 170, 0.45);
+  /* Wider than the chat's own tracking by the same 0.02em it always was — the
+   * distinction is the margin, so it moves when the base does. */
+  letter-spacing: 0.05em;
+  text-shadow:
+    0 0 1px rgba(170, 255, 170, 0.6),
+    0 0 9px rgba(170, 255, 170, 0.34);
 }
+
+/* WHY EVERY BLOOM ON THIS SCREEN IS TWO SHADOWS.
+ *
+ * A single wide `text-shadow` is the obvious way to write phosphor glow and it
+ * is the wrong shape. Spreading light 7px out from a 2px stroke puts most of it
+ * where the glyph is not — it fills the counters of `a`, `e` and `o` until they
+ * close up, and it lifts the ground immediately beside every stem, which is the
+ * contrast the eye actually reads an edge by. The text goes soft and, for all
+ * that light, does not look especially lit.
+ *
+ * Real phosphor is a bright core with a faint halo around it, so it is written
+ * as two terms: a 1px shadow in the glyph's own colour at high alpha, which
+ * keeps the light ON the stroke and incidentally thickens a face that has very
+ * little ink in it, and a wide low-alpha term for the room glow. The result is
+ * both sharper and glowier than the single blur was, which is not a trade — the
+ * one blur was simply spending its light in the wrong place. */
 
 /* The speaker's mark: the participant's INITIAL, printed in the gutter.
  *
@@ -605,7 +668,9 @@ body::after {
   text-transform: uppercase;
   color: var(--ost-green);
   opacity: 0.72;
-  text-shadow: 0 0 6px var(--ost-green-soft);
+  text-shadow:
+    0 0 1px rgba(0, 255, 65, 0.5),
+    0 0 8px var(--ost-green-soft);
 }
 
 /* === The status line ===
@@ -620,6 +685,50 @@ body::after {
  *
  * Its POSITION is a different question, and that one is this theme's — see the
  * `.pc-typing` rule with the other rows below. */
+
+/* Filling from the bottom, in a box that now actually overflows.
+ *
+ * `base.css` does it with `justify-content: flex-end`, which is right until the
+ * content is taller than the box: distributed alignment overflows in BOTH
+ * directions, and the part that goes off the start edge is not reachable by
+ * scrolling in every engine — the oldest messages become unreadable rather than
+ * scrolled away. `margin-top: auto` on the first child is the version that
+ * survives overflow: with nothing to spare the margin is zero and the column
+ * simply starts at the top, which is what a scrollable transcript wants.
+ *
+ * The fade is the affordance that replaces a scrollbar. A native bar would run
+ * down the far right of the glass, where `clip-path` cuts its ends off against
+ * the curve, and a chrome scrollbar on a CRT face is the one anachronism this
+ * theme cannot absorb. Text dissolving into the top of the tube says "there is
+ * more above" in the screen's own language — it is what a phosphor line looks
+ * like as it goes over the curve — and it costs nothing when there is not.
+ *
+ * It starts with a BLANK band, not with the ramp, and the band is exactly
+ * `--crt-qy` deep. That is the same number the clip path uses for the corner's
+ * 45° point, which is to say: it is how far the curve reaches into the top of
+ * the box. A ramp starting at zero leaves a line still half-lit where the arc
+ * cuts across it, and a horizontal stroke sliced by a curve reads as CLIPPING —
+ * the div showing through — where the same stroke dissolved reads as the tube.
+ * Tying the hold to `--crt-qy` means retuning the curve retunes the fade with
+ * it, instead of leaving a number that was right for the old corner. */
+.persona-chat .pc-transcript {
+  justify-content: flex-start;
+  scrollbar-width: none;
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent var(--crt-qy),
+    #000 calc(var(--crt-qy) + var(--crt-fade))
+  );
+}
+
+.persona-chat .pc-transcript::-webkit-scrollbar {
+  display: none;
+}
+
+.persona-chat .pc-transcript > :first-child {
+  margin-top: auto;
+}
 
 /* === Rows on the screen ===
  *
@@ -695,7 +804,9 @@ body::after {
    * green is the dimmer one; the two brightnesses are the whole speaker
    * distinction on a single-column terminal. */
   color: var(--ost-green-bright);
-  text-shadow: 0 0 8px rgba(170, 255, 170, 0.5);
+  text-shadow:
+    0 0 1px rgba(170, 255, 170, 0.7),
+    0 0 10px rgba(170, 255, 170, 0.38);
   font-family: var(--pc-font);
   font-size: var(--crt-entry-size);
   font-weight: var(--crt-entry-weight);
