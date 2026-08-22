@@ -1,6 +1,7 @@
 import {
   adhCss,
   agenticcookbookwebCss,
+  crtMonitorCss,
   devTeamCss,
   fishlampCss,
   greenMatrixCss,
@@ -19,6 +20,7 @@ import {
 export type ThemeKey =
   | 'adh'
   | 'agenticcookbookweb'
+  | 'crt-monitor'
   | 'dev-team'
   | 'fishlamp'
   | 'green-matrix'
@@ -42,6 +44,7 @@ export interface ThemeEntry {
 export const themes: Record<ThemeKey, ThemeEntry> = {
   adh: { id: 'adh', label: 'Agentic Developer Hub', css: adhCss },
   agenticcookbookweb: { id: 'agenticcookbookweb', label: 'Agentic Cookbook', css: agenticcookbookwebCss },
+  'crt-monitor': { id: 'crt-monitor', label: 'CRT Monitor', css: crtMonitorCss },
   'dev-team': { id: 'dev-team', label: 'Dev Team', css: devTeamCss },
   fishlamp: { id: 'fishlamp', label: 'fishlamp (ember on ink)', css: fishlampCss },
   'green-matrix': { id: 'green-matrix', label: 'Green Matrix', css: greenMatrixCss },
