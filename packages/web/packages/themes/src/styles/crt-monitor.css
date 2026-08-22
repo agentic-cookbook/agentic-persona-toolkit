@@ -62,25 +62,52 @@
    * into a corner arc whose tangent was horizontal, and the deeper the bow, the
    * worse the corner buckled.
    *
-   *   --crt-qx / --crt-qy  where the corner's 45-degree point sits, measured in
-   *                        from the two edges it belongs to. Together they say
-   *                        how big the corner is; equal values read as circular.
-   *   --crt-h              how far the corner point's controls sit along that
-   *                        45-degree tangent — the corner's tightness. Small
-   *                        turns the corner abruptly, large opens it out.
-   *   --crt-a              the top and bottom control, measured in from the
-   *                        near side. THIS IS THE BOW: at a small value the
-   *                        edge runs flat and only turns down at the corner; at
-   *                        a large one it starts easing away from the edge near
-   *                        the middle, which is the barrel of the glass.
-   *   --crt-b              the same for the left and right edges.
+   * WHY THE CORNER AND THE BOW ARE WRITTEN AS SEPARATE NUMBERS. `--crt-qx` and
+   * `--crt-qy` are the only two the path can see, and each of them is saying
+   * two things at once: how big the corner is, and how far the edge beside it
+   * bulges, because that edge runs from the corner point out to a midpoint
+   * sitting on the box. Tuned as raw insets on a screen four times wider than
+   * it is tall, they went to 44px and 40px — near enough equal, which sounds
+   * like symmetry and is not. 40px of bow across 1120px of top edge is almost
+   * flat; 44px across 295px of side is a semicircular end cap. That is not one
+   * curved surface, it is two different ones meeting at the corners, and it is
+   * exactly what the tube looked like.
    *
-   * Corner sizes are lengths and bows are percentages, and the split is not
-   * arbitrary. A corner is a property of the glass — it should look identical
-   * on a wide screen and a narrow one, which a percentage would not give. A bow
-   * runs the length of its edge, so it is only meaningful as a share of that
-   * edge. Every value stays under half its own dimension, so the path cannot
-   * cross itself at any size.
+   * So they are written as sums instead. Picture a rounded rectangle inset from
+   * the box by the two bows, with `--crt-corner` at every corner; then each
+   * edge is pulled out to touch the box at its midpoint. A circular corner's
+   * 45-degree point lies `r * (1 - 1/sqrt2)` in from both of its tangents,
+   * hence the 0.2929.
+   *
+   * This buys no shape that raw insets could not also reach — it is the same
+   * two numbers, split. What it buys is an INVARIANT: the corner term is one
+   * token shared by both axes, so the corner stays circular however the bows
+   * are tuned, and any difference between qx and qy is bow by construction
+   * rather than a slightly elliptical corner nobody meant to type.
+   *
+   *   --crt-corner   the corner radius, ONE number for both axes, so a corner
+   *                  is the same corner at the top of the tube as at the side.
+   *   --crt-bow-x    how far the left and right edges bulge past that
+   *                  rectangle; --crt-bow-y the same for top and bottom. They
+   *                  are not equal and should not be: a bow is a sagitta, and
+   *                  the depth that reads as the same curvature falls away with
+   *                  the square of the edge it spans. A short edge wants very
+   *                  little; the long top edge wants a few times more to read
+   *                  as bowed at all.
+   *   --crt-h        how far the corner point's controls sit along its
+   *                  45-degree tangent — the corner's tightness. Small turns
+   *                  the corner abruptly, large opens it out.
+   *   --crt-a        the top and bottom control, measured in from the near
+   *                  side: how long the edge holds its tangent before it starts
+   *                  easing toward the corner. --crt-b the same for the sides.
+   *
+   * Corners and bows are lengths and the two tangent controls are percentages,
+   * and the split is not arbitrary. A corner is a property of the glass — it
+   * should look identical on a wide screen and a narrow one, which a percentage
+   * would not give, and a bow depth is a corner's neighbour and scales with it.
+   * A tangent length runs along its edge, so it is only meaningful as a share
+   * of that edge. Every value stays under half its own dimension, so the path
+   * cannot cross itself at any size.
    *
    * `--crt-screen-radius` is the fallback silhouette for a browser without
    * `clip-path: shape()` — round corners, straight edges — and it is what the
@@ -88,12 +115,31 @@
    * clip-path's outline. Keep it near the corner these numbers describe: when
    * the glow's rectangle is wider than the tube it lights, the gap between them
    * reads as a bezel that isn't there. */
-  --crt-qx: 44px;
-  --crt-qy: 40px;
-  --crt-h: 42px;
-  --crt-a: 28%;
-  --crt-b: 15%;
-  --crt-screen-radius: 104px;
+  --crt-corner: 60px;
+  --crt-bow-x: 8px;
+  --crt-bow-y: 12px;
+  --crt-h: 20px;
+  --crt-a: 30%;
+  --crt-b: 16%;
+  --crt-qx: calc(var(--crt-bow-x) + var(--crt-corner) * 0.2929);
+  --crt-qy: calc(var(--crt-bow-y) + var(--crt-corner) * 0.2929);
+  --crt-screen-radius: 60px;
+  /* The retaining ring around the glass. A `border` cannot draw it: a border is
+   * painted along the element's rectangle and `clip-path` then cuts away every
+   * part of that rectangle outside the tube, so the line survives only at the
+   * four edge midpoints and is gone at the corners. An `inset` box-shadow fails
+   * the same way, for the same reason.
+   *
+   * `--crt-screen-ring-shape` is instead a COMPOUND path: the face's outline,
+   * then the same outline again on a box inset by `--crt-bw` and wound the
+   * opposite way round, which under the default `nonzero` fill rule punches the
+   * second contour out of the first. What is left is a stroke of the silhouette
+   * itself — even width all the way round, corners included — and, because it is
+   * a hole rather than a fill, nothing is painted behind the screen, which is
+   * what lets the tube stay see-through. */
+  --crt-bw: 2px;
+  --crt-ring: rgba(0, 255, 65, 0.34);
+
   --crt-screen-shape: shape(
     from 50% 0%,
     curve to calc(100% - var(--crt-qx)) var(--crt-qy)
@@ -120,6 +166,61 @@
     curve to 50% 0%
       with calc(var(--crt-qx) + var(--crt-h)) calc(var(--crt-qy) - var(--crt-h))
          / var(--crt-a) 0%,
+    close
+  );
+
+  --crt-screen-ring-shape: shape(
+    from 50% 0%,
+    curve to calc(100% - var(--crt-qx)) var(--crt-qy)
+      with calc(100% - var(--crt-a)) 0%
+         / calc(100% - var(--crt-qx) - var(--crt-h)) calc(var(--crt-qy) - var(--crt-h)),
+    curve to 100% 50%
+      with calc(100% - var(--crt-qx) + var(--crt-h)) calc(var(--crt-qy) + var(--crt-h))
+         / 100% calc(50% - var(--crt-b)),
+    curve to calc(100% - var(--crt-qx)) calc(100% - var(--crt-qy))
+      with 100% calc(50% + var(--crt-b))
+         / calc(100% - var(--crt-qx) + var(--crt-h)) calc(100% - var(--crt-qy) - var(--crt-h)),
+    curve to 50% 100%
+      with calc(100% - var(--crt-qx) - var(--crt-h)) calc(100% - var(--crt-qy) + var(--crt-h))
+         / calc(100% - var(--crt-a)) 100%,
+    curve to var(--crt-qx) calc(100% - var(--crt-qy))
+      with var(--crt-a) 100%
+         / calc(var(--crt-qx) + var(--crt-h)) calc(100% - var(--crt-qy) + var(--crt-h)),
+    curve to 0% 50%
+      with calc(var(--crt-qx) - var(--crt-h)) calc(100% - var(--crt-qy) - var(--crt-h))
+         / 0% calc(50% + var(--crt-b)),
+    curve to var(--crt-qx) var(--crt-qy)
+      with 0% calc(50% - var(--crt-b))
+         / calc(var(--crt-qx) - var(--crt-h)) calc(var(--crt-qy) + var(--crt-h)),
+    curve to 50% 0%
+      with calc(var(--crt-qx) + var(--crt-h)) calc(var(--crt-qy) - var(--crt-h))
+         / var(--crt-a) 0%,
+    close,
+    move to 50% calc(var(--crt-bw)),
+    curve to calc(var(--crt-bw) + var(--crt-qx)) calc(var(--crt-bw) + var(--crt-qy))
+      with calc(var(--crt-bw) + var(--crt-a)) calc(var(--crt-bw))
+         / calc(var(--crt-bw) + var(--crt-qx) + var(--crt-h)) calc(var(--crt-bw) + var(--crt-qy) - var(--crt-h)),
+    curve to calc(var(--crt-bw)) 50%
+      with calc(var(--crt-bw) + var(--crt-qx) - var(--crt-h)) calc(var(--crt-bw) + var(--crt-qy) + var(--crt-h))
+         / calc(var(--crt-bw)) calc(50% - var(--crt-b)),
+    curve to calc(var(--crt-bw) + var(--crt-qx)) calc(100% - var(--crt-bw) - var(--crt-qy))
+      with calc(var(--crt-bw)) calc(50% + var(--crt-b))
+         / calc(var(--crt-bw) + var(--crt-qx) - var(--crt-h)) calc(100% - var(--crt-bw) - var(--crt-qy) - var(--crt-h)),
+    curve to 50% calc(100% - var(--crt-bw))
+      with calc(var(--crt-bw) + var(--crt-qx) + var(--crt-h)) calc(100% - var(--crt-bw) - var(--crt-qy) + var(--crt-h))
+         / calc(var(--crt-bw) + var(--crt-a)) calc(100% - var(--crt-bw)),
+    curve to calc(100% - var(--crt-bw) - var(--crt-qx)) calc(100% - var(--crt-bw) - var(--crt-qy))
+      with calc(100% - var(--crt-bw) - var(--crt-a)) calc(100% - var(--crt-bw))
+         / calc(100% - var(--crt-bw) - var(--crt-qx) - var(--crt-h)) calc(100% - var(--crt-bw) - var(--crt-qy) + var(--crt-h)),
+    curve to calc(100% - var(--crt-bw)) 50%
+      with calc(100% - var(--crt-bw) - var(--crt-qx) + var(--crt-h)) calc(100% - var(--crt-bw) - var(--crt-qy) - var(--crt-h))
+         / calc(100% - var(--crt-bw)) calc(50% + var(--crt-b)),
+    curve to calc(100% - var(--crt-bw) - var(--crt-qx)) calc(var(--crt-bw) + var(--crt-qy))
+      with calc(100% - var(--crt-bw)) calc(50% - var(--crt-b))
+         / calc(100% - var(--crt-bw) - var(--crt-qx) + var(--crt-h)) calc(var(--crt-bw) + var(--crt-qy) + var(--crt-h)),
+    curve to 50% calc(var(--crt-bw))
+      with calc(100% - var(--crt-bw) - var(--crt-qx) - var(--crt-h)) calc(var(--crt-bw) + var(--crt-qy) - var(--crt-h))
+         / calc(100% - var(--crt-bw) - var(--crt-a)) calc(var(--crt-bw)),
     close
   );
 
@@ -157,6 +258,19 @@
    * above it. */
   --crt-screen-pad: 40px;
 
+  /* How far the prompt sits off the BOTTOM of the tube, and it has to be more
+   * than `--crt-screen-pad`, not the same. Equal insets are only equal
+   * clearance against a straight edge. The prompt is the one row living in the
+   * bottom corners, where the glass is falling away diagonally, so a point 40px
+   * up and 40px in from where the corner would be is barely inside it — the
+   * distance that matters there is measured to the ARC, not to either edge. The
+   * extra 20px buys about that much daylight under the line, and it buys it
+   * beside the line too, because the corner has opened out by the time the text
+   * gets that high. The left inset stays on the shared token: the prompt has to
+   * hold the transcript's text column, and moving it up is what gives it room
+   * without breaking that column. */
+  --crt-entry-floor: 60px;
+
   /* The entry line's type size. It is a token rather than a number in the rule
    * because the size is set in TWO stylesheets: the theme's own `.pc-input`
    * rule weighs (0,2,0), and the chat package's iOS focus-zoom guard weighs
@@ -165,7 +279,11 @@
    * from the other, and the `❯` the site prints in front of the field reads it
    * too. Larger than the transcript on purpose: the line being typed is the
    * only one on screen that is still being written. */
-  --crt-entry-size: 22px;
+  --crt-entry-size: 18px;
+  /* VT323 ships one weight, so this is a synthesised bold and that is the point:
+   * a hair more ink on the line being typed, without it changing size or font
+   * against the transcript above it. */
+  --crt-entry-weight: 600;
   --crt-scanline: rgba(0, 0, 0, 0.33);
 
   /* Site color tokens — surface stays transparent so a site that paints its own
@@ -187,11 +305,13 @@
   --color-error: #ff5555;
   --color-info: var(--ost-green-bright);
 
-  /* Chat color tokens. The tube is nearly opaque, unlike old-school-terminal's
-   * 80% surface — that existed to let a matrix rain show through from behind.
-   * Dark glass in front of a phosphor coating does not transmit a starfield; the
-   * glow the cabinet throws is what reaches the page around it now. */
-  --pc-surface: rgba(4, 12, 6, 0.95);
+  /* Chat color tokens. The tube is DARK GLASS, not a painted panel: the page
+   * behind it comes through, dimmed and green-shifted, the way an unlit CRT
+   * shows the room in front of it. It was opaque while the page behind it was a
+   * flat starscape with nothing to see; with a photograph back there, letting it
+   * through is most of what sells the screen as glass rather than as a shape cut
+   * out of the background. */
+  --pc-surface: rgba(4, 12, 6, 0.62);
   --pc-persona-name: var(--ost-green);
   --pc-persona-text: var(--ost-green);
   --pc-user-name: var(--ost-green-bright);
@@ -290,7 +410,7 @@ body::after {
   z-index: 6;
   background-image:
     linear-gradient(133deg, rgba(255, 255, 255, 0.028) 0%, rgba(255, 255, 255, 0.008) 18%, transparent 38%),
-    radial-gradient(96% 104% at 50% 46%, transparent 20%, rgba(0, 0, 0, 0.55) 64%, rgba(0, 0, 0, 0.97) 100%),
+    radial-gradient(96% 104% at 50% 46%, transparent 20%, rgba(0, 0, 0, 0.3) 64%, rgba(0, 0, 0, 0.62) 100%),
     repeating-linear-gradient(to bottom, var(--crt-scanline) 0 1px, transparent 1px 3px);
   animation: crt-flicker 6.1s steps(1) infinite;
 }
@@ -404,6 +524,21 @@ body::after {
   animation: none;
   opacity: 0;
 }
+}
+
+/* The retaining ring. It sits on the tube rather than on the root because it
+ * belongs to the glass, and it is a pseudo-element rather than a border for the
+ * reason given at `--crt-screen-ring-shape`. `z-index: 5` puts it over the
+ * transcript; the chat's own `z-index: 1` makes a stacking context, so the glass
+ * at 6 on the root still covers it. */
+.persona-chat::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+  background: var(--crt-ring);
+  clip-path: var(--crt-screen-ring-shape);
 }
 
 /* === Who is speaking ===
@@ -535,17 +670,19 @@ body::after {
 
 /* Borderless input row — no divider above it.
  *
- * The bottom padding is much deeper than the top: `--crt-screen-shape` bows the
- * bottom edge OUT past the corners, so the prompt has to clear a curve there
- * that the rows above it never meet, and a line of text sitting close to that
- * curve reads as falling off the tube. It is the SAME token as the left inset
- * rather than a number of its own: an equal gap below and to the left of the
- * prompt is what makes the clearance read as deliberate instead of as whatever
- * was left over. */
+ * The bottom padding is much deeper than the top, and deeper than the sides:
+ * `--crt-screen-shape` bows the bottom edge OUT past the corners, so the prompt
+ * has to clear a curve there that the rows above it never meet, and a line of
+ * text sitting close to that curve reads as falling off the tube. See
+ * `--crt-entry-floor` for why that number is not the left inset. */
 .persona-chat .pc-input-area {
   border-top: none;
   background: var(--pc-input-bg);
-  padding: 2px var(--crt-screen-pad) var(--crt-screen-pad);
+  /* On the ROW, so the `❯` the site draws as this element's ::before takes the
+   * same weight as the text it precedes — a pseudo-element inherits from its
+   * originating element, not from `.pc-input` beside it. */
+  font-weight: var(--crt-entry-weight);
+  padding: 2px var(--crt-screen-pad) var(--crt-entry-floor);
   gap: 10px;
 }
 
@@ -561,6 +698,7 @@ body::after {
   text-shadow: 0 0 8px rgba(170, 255, 170, 0.5);
   font-family: var(--pc-font);
   font-size: var(--crt-entry-size);
+  font-weight: var(--crt-entry-weight);
   /* The native thin I-beam is hidden by the host in JS (input.style.caretColor),
    * not here — so if the client never hydrates, the input degrades to the native
    * caret rather than to no caret at all. The host then draws the blinking block
