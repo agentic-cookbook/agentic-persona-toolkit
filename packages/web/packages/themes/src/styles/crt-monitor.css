@@ -138,17 +138,20 @@
    * a hole rather than a fill, nothing is painted behind the screen, which is
    * what lets the tube stay see-through. */
   --crt-bw: 2px;
-  /* Grey, not phosphor. A green ring is the tube's own light leaking out past
-   * the glass, which puts the brightest thing on the surface at its OUTER edge
-   * — the eye lands on the frame and works inward to the text. The ring is
-   * HARDWARE: the bezel's inner lip, catching whatever light is in the room.
-   * Neutral and dim, it does the one job an outline has, which is to say where
-   * the glass stops, and then gets out of the way.
+  /* The grey of things on this surface that are NOT emitting light, as bare
+   * channels so each use can pick its own alpha — `rgb(var(--crt-unlit) / x)`.
+   * Two things read it: the bezel's inner lip, and the placeholder at the
+   * prompt. They look unrelated and are the same idea, which is why they share
+   * a token: everything green here is phosphor, so anything painted green is
+   * claiming to be lit. A ring is hardware catching room light. A placeholder
+   * is a caption on an empty field — the machine has not written anything, and
+   * a lit one says a line is waiting to be sent when none is.
    *
-   * It is a hair green-shifted rather than a true neutral. A pure grey next to
-   * a green field reads faintly magenta by simultaneous contrast; pulling it a
-   * few points toward the phosphor cancels that without it reading as lit. */
-  --crt-ring: rgba(150, 162, 152, 0.32);
+   * It is a few points green-shifted rather than a true neutral, because a pure
+   * grey against a green field reads faintly magenta by simultaneous contrast;
+   * the shift cancels that without the grey reading as lit. */
+  --crt-unlit: 150 162 152;
+  --crt-ring: rgb(var(--crt-unlit) / 0.32);
 
   --crt-screen-shape: shape(
     from 50% 0%,
@@ -274,12 +277,28 @@
    * above it. */
   --crt-screen-pad: 40px;
 
-  /* The RAMP of the top fade, and only the ramp — the blank band above it is
-   * `--crt-qy`, so the scrollback is fully dark until the curve has finished
-   * intruding and then takes this long to come up. Deep enough to read as the
-   * glass curving away rather than as a line with its top half missing, and
-   * shorter than it looks because the hold is already doing thirty of it. */
+  /* The fade has three parts and each is doing a different job.
+   *
+   * `--crt-qy` of BLANK first, because that is how far the corner arc reaches
+   * into the top of the box: a line still half-lit where the curve cuts across
+   * it reads as clipping — the div showing through — where the same line
+   * dissolved reads as the tube.
+   *
+   * Then `--crt-fade` to the KNEE, the alpha a line arrives at as it clears the
+   * lip. Low, so emerging from the top is a real event.
+   *
+   * Then a long shallow climb to full at `--crt-fade-end`, over most of the
+   * glass. That last part is the one that matters and it is not a lip effect at
+   * all: it means every line is dimmer than the line below it, all the way
+   * down, so age is legible at a glance instead of only at the moment a line
+   * leaves. It is also the true thing about the hardware — a CRT's phosphor
+   * decays, and on a screen that fills from the bottom the oldest light is the
+   * faintest. A mask on the SCROLL BOX rather than on the content is what makes
+   * that work: it stays put while the text moves through it, so a line dims as
+   * it travels rather than carrying a fixed opacity with it. */
   --crt-fade: 28px;
+  --crt-fade-knee: 0.34;
+  --crt-fade-end: 86%;
 
   /* How far the prompt sits off the BOTTOM of the tube, and it has to be more
    * than `--crt-screen-pad`, not the same. Equal insets are only equal
@@ -729,14 +748,10 @@ body::after {
  * more above" in the screen's own language — it is what a phosphor line looks
  * like as it goes over the curve — and it costs nothing when there is not.
  *
- * It starts with a BLANK band, not with the ramp, and the band is exactly
- * `--crt-qy` deep. That is the same number the clip path uses for the corner's
- * 45° point, which is to say: it is how far the curve reaches into the top of
- * the box. A ramp starting at zero leaves a line still half-lit where the arc
- * cuts across it, and a horizontal stroke sliced by a curve reads as CLIPPING —
- * the div showing through — where the same stroke dissolved reads as the tube.
- * Tying the hold to `--crt-qy` means retuning the curve retunes the fade with
- * it, instead of leaving a number that was right for the old corner. */
+ * It is also the age indicator, which is the bigger of its two jobs: the ramp
+ * does not finish at the lip, it keeps climbing to `--crt-fade-end` over most
+ * of the glass, so every line is a little dimmer than the one below it. See
+ * `--crt-fade` for why the mask is on the scroll box and not on the rows. */
 .persona-chat .pc-transcript {
   justify-content: flex-start;
   scrollbar-width: none;
@@ -744,7 +759,8 @@ body::after {
     to bottom,
     transparent 0,
     transparent var(--crt-qy),
-    #000 calc(var(--crt-qy) + var(--crt-fade))
+    rgb(0 0 0 / var(--crt-fade-knee)) calc(var(--crt-qy) + var(--crt-fade)),
+    #000 var(--crt-fade-end)
   );
 }
 
@@ -852,8 +868,21 @@ body::after {
  * keeps the input always-focused, hiding it on :focus — as this theme's ancestor
  * used to — means it never shows at all. The block cursor parks at the empty
  * prompt and blinks over the placeholder's first glyph; the blink keeps that
- * glyph legible. */
-.persona-chat .pc-input::placeholder { color: var(--ost-border); }
+ * glyph legible.
+ *
+ * Which is exactly why it cannot be green. It inherited `--ost-border` from
+ * `old-school-terminal`, phosphor at 35%, so an empty field looked like a field
+ * with a dim line already typed in it — and on this host, where the prompt is
+ * always focused, that is the state a visitor sees first.
+ *
+ * The bloom has to go with the colour, and this is the part a straight colour
+ * swap misses: `text-shadow` inherits from `.pc-input`, so grey glyphs kept a
+ * green halo — unlit ink lit from behind, which reads as a rendering fault
+ * rather than as a quiet placeholder. */
+.persona-chat .pc-input::placeholder {
+  color: rgb(var(--crt-unlit) / 0.5);
+  text-shadow: none;
+}
 
 /* Old-school block cursor. The host positions this overlay (left/top/width/
  * height all set inline, in px, from the input's own font-size) at the caret,
