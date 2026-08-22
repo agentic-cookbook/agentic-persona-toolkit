@@ -131,13 +131,26 @@
    * the same way, for the same reason.
    *
    * `--crt-screen-ring-shape` is instead a COMPOUND path: the face's outline,
-   * then the same outline again on a box inset by `--crt-bw` and wound the
-   * opposite way round, which under the default `nonzero` fill rule punches the
-   * second contour out of the first. What is left is a stroke of the silhouette
-   * itself — even width all the way round, corners included — and, because it is
-   * a hole rather than a fill, nothing is painted behind the screen, which is
-   * what lets the tube stay see-through. */
+   * then the same outline again on an inset box wound the opposite way round,
+   * which under the default `nonzero` fill rule punches the second contour out
+   * of the first. What is left is a stroke of the silhouette itself, corners
+   * included — and, because it is a hole rather than a fill, nothing is painted
+   * behind the screen, which is what lets the tube stay see-through.
+   *
+   * TWO INSETS, because a path offset is not an axis offset. Moving an anchor
+   * `--crt-bw` in x AND `--crt-bw` in y walks it along the diagonal, so at the
+   * corner anchors — the 45-degree points, where the outline's tangent is
+   * exactly diagonal — the perpendicular gap between the two contours comes out
+   * `bw * sqrt(2)`, not `bw`. Measured, that was a 2.00px ring at the four edge
+   * midpoints and 2.83px through the corners: a 41% bulge on a hairline, and
+   * one that scales, so raising `--crt-bw` to 6px would have put 8.5px in the
+   * corners. `--crt-bwd` is the same distance taken diagonally (`bw / sqrt(2)`
+   * in each axis) and the four corner anchors use it. The midpoint anchors keep
+   * `--crt-bw`, where the tangent is axis-aligned and the two agree; the
+   * control points between them are left on `--crt-bw`, which blends the two
+   * regimes over the arc the way an offset curve does anyway. */
   --crt-bw: 2px;
+  --crt-bwd: calc(var(--crt-bw) * 0.70711);
   /* The greys of things on this surface that are NOT emitting light, as bare
    * channels so each use can pick its own alpha — `rgb(var(--crt-unlit) / x)`.
    * Everything green here is phosphor, so anything painted green is claiming to
@@ -146,11 +159,12 @@
    * machine has written.
    *
    * ONE HUE, TWO GRADES, because "not lit" is not one brightness. A placeholder
-   * is text and has a floor — below some value it stops being readable, which
-   * is the entire reason it is on screen. A bezel has no floor at all: it only
-   * has to say where the glass stops, and the dimmer it does that the more the
-   * eye stays on the text instead of tracing the frame. So the ring takes the
-   * darker grade and the two stay tied by hue rather than by value.
+   * is text and its floor is a MEASURED one: WCAG 1.4.3 wants 4.5:1 and none of
+   * the size exemptions apply here (19px is 14.25pt, and the entry line's
+   * "bold" is synthesised, not a 700 face). A bezel has no floor at all — it
+   * only has to say where the glass stops, and the dimmer it does that the more
+   * the eye stays on the text instead of tracing the frame. So the ring takes
+   * the darker grade and the two stay tied by hue rather than by value.
    *
    * The hue is a few points green-shifted rather than a true neutral, because a
    * pure grey against a green field reads faintly magenta by simultaneous
@@ -216,25 +230,25 @@
          / var(--crt-a) 0%,
     close,
     move to 50% calc(var(--crt-bw)),
-    curve to calc(var(--crt-bw) + var(--crt-qx)) calc(var(--crt-bw) + var(--crt-qy))
+    curve to calc(var(--crt-bwd) + var(--crt-qx)) calc(var(--crt-bwd) + var(--crt-qy))
       with calc(var(--crt-bw) + var(--crt-a)) calc(var(--crt-bw))
          / calc(var(--crt-bw) + var(--crt-qx) + var(--crt-h)) calc(var(--crt-bw) + var(--crt-qy) - var(--crt-h)),
     curve to calc(var(--crt-bw)) 50%
       with calc(var(--crt-bw) + var(--crt-qx) - var(--crt-h)) calc(var(--crt-bw) + var(--crt-qy) + var(--crt-h))
          / calc(var(--crt-bw)) calc(50% - var(--crt-b)),
-    curve to calc(var(--crt-bw) + var(--crt-qx)) calc(100% - var(--crt-bw) - var(--crt-qy))
+    curve to calc(var(--crt-bwd) + var(--crt-qx)) calc(100% - var(--crt-bwd) - var(--crt-qy))
       with calc(var(--crt-bw)) calc(50% + var(--crt-b))
          / calc(var(--crt-bw) + var(--crt-qx) - var(--crt-h)) calc(100% - var(--crt-bw) - var(--crt-qy) - var(--crt-h)),
     curve to 50% calc(100% - var(--crt-bw))
       with calc(var(--crt-bw) + var(--crt-qx) + var(--crt-h)) calc(100% - var(--crt-bw) - var(--crt-qy) + var(--crt-h))
          / calc(var(--crt-bw) + var(--crt-a)) calc(100% - var(--crt-bw)),
-    curve to calc(100% - var(--crt-bw) - var(--crt-qx)) calc(100% - var(--crt-bw) - var(--crt-qy))
+    curve to calc(100% - var(--crt-bwd) - var(--crt-qx)) calc(100% - var(--crt-bwd) - var(--crt-qy))
       with calc(100% - var(--crt-bw) - var(--crt-a)) calc(100% - var(--crt-bw))
          / calc(100% - var(--crt-bw) - var(--crt-qx) - var(--crt-h)) calc(100% - var(--crt-bw) - var(--crt-qy) + var(--crt-h)),
     curve to calc(100% - var(--crt-bw)) 50%
       with calc(100% - var(--crt-bw) - var(--crt-qx) + var(--crt-h)) calc(100% - var(--crt-bw) - var(--crt-qy) - var(--crt-h))
          / calc(100% - var(--crt-bw)) calc(50% + var(--crt-b)),
-    curve to calc(100% - var(--crt-bw) - var(--crt-qx)) calc(var(--crt-bw) + var(--crt-qy))
+    curve to calc(100% - var(--crt-bwd) - var(--crt-qx)) calc(var(--crt-bwd) + var(--crt-qy))
       with calc(100% - var(--crt-bw)) calc(50% - var(--crt-b))
          / calc(100% - var(--crt-bw) - var(--crt-qx) + var(--crt-h)) calc(var(--crt-bw) + var(--crt-qy) + var(--crt-h)),
     curve to 50% calc(var(--crt-bw))
@@ -255,8 +269,42 @@
    * A third of the window is also the shortest that reads as hardware in the
    * first place: a CRT is a BOX, the picture has depth to it, and a transcript
    * one line high is a chat widget with a frame around it whatever the frame is
-   * made of. Same number, now doing both jobs. */
-  --crt-screen-h: 33vh;
+   * made of. Same number, now doing both jobs.
+   *
+   * A BARE `33vh` was two bugs, and both are about what a fraction cannot say.
+   *
+   * It has no floor. The status row and the prompt are inflexible siblings and
+   * take their space first; the transcript gets the remainder, so the tube does
+   * not shrink gracefully — it crosses a threshold and the scrollback is gone
+   * while the prompt still renders. `--crt-screen-min` is that floor.
+   *
+   * And it has no ceiling that knows about the SOFT KEYBOARD. `vh` is the large
+   * viewport: it does not move when iOS raises the keyboard, so a fixed tube
+   * plus the composer's own keyboard lift can total more than the space left,
+   * and the prompt goes under the keyboard with nothing to scroll. `100dvh` is
+   * what the viewport shell is already sized to, `--kb-inset` is the keyboard
+   * height the viewport package publishes on `:root`, and `--crt-screen-chrome`
+   * is whatever the HOST puts above and below the tube — the theme cannot see
+   * that, so the host sets it and the fallback here is nothing.
+   *
+   * `--crt-screen-chrome` is read as a `var()` FALLBACK rather than declared in
+   * this block with a `0px` default, and that is not a style choice. A default
+   * here would be a declaration on the theme root, and the theme root is the
+   * host's `.pc-theme-scope` element — the same element the host would set the
+   * real value on. An element's own declaration beats an inherited one, and at
+   * equal specificity `:scope` beats an unscoped `.pc-theme-scope` on scope
+   * proximity, so the `0px` would win and the host's value would never be seen.
+   * `--pc-gutter` is the same trap sprung from the other side.
+   *
+   * The nominal size stays on `svh` rather than `dvh` on purpose: `dvh` grows
+   * as a mobile URL bar collapses, and a tube that resizes while you read is
+   * the exact failure the fixed height was for. The keyboard term is a separate
+   * clamp, applied only when there is genuinely not room. */
+  --crt-screen-min: 220px;
+  --crt-screen-h: max(
+    var(--crt-screen-min),
+    min(33svh, calc(100dvh - var(--kb-inset, 0px) - var(--crt-screen-chrome, 0px)))
+  );
 
   /* How far past the tube the glow reaches before it is fully transparent. */
   --crt-glow-reach: 120px;
@@ -405,6 +453,20 @@
   --pc-input-border: var(--ost-border);
   --pc-input-focus: var(--ost-green);
   --pc-time-color: rgba(0, 255, 65, 0.4);
+  /* The settled status line — "Thought for 4s" and the like. This is a COLOUR
+   * TOKEN the chat library publishes for themes to fill in, not an override of
+   * one of its decisions, which is the distinction drawn at the `.pc-thinking`
+   * comment below: size and weight there stay the library's, and the colour was
+   * always meant to be the theme's.
+   *
+   * Its default is `#8a8a8a`, a neutral grey tuned for a light panel. On this
+   * glass it measures 2.73:1 and fails WCAG 1.4.3 outright. It also inherits
+   * the phosphor `text-shadow` from the chat's text, so it rendered as grey ink
+   * wearing a green halo — light coming off something that is not lit, which
+   * reads as a rendering fault. Phosphor at the library's own 0.75 opacity
+   * measures 6.30:1 and makes the halo correct instead of an artifact: the line
+   * is the machine's, and on this screen the machine writes in green. */
+  --pc-thinking-done-color: var(--ost-green);
 
   /* Code highlighting (Shiki) */
   --scp-shiki-theme: 'github-dark';
@@ -414,7 +476,6 @@
   --font-mono: 'VT323', ui-monospace, 'SF Mono', Menlo, monospace;
   --font-sans: 'VT323', ui-monospace, 'SF Mono', Menlo, monospace;
   --pc-font: 'VT323', ui-monospace, 'SF Mono', Menlo, monospace;
-  --pc-gutter: 12px;
   --pc-radius: 0;
 }
 
@@ -530,6 +591,14 @@ body::after {
   color: var(--ost-green);
   font-size: var(--crt-type-size);
   line-height: 1.5;
+  /* HERE and not in the token block, which is where it was and where it did
+   * nothing. `base.css` declares `--pc-gutter: 16px` on `.persona-chat` itself;
+   * an element's own declaration beats an inherited one whatever the scope or
+   * the source order, so a value set on the theme root was shadowed before
+   * anything could read it. It is the one `--pc-*` token base states on an
+   * inner element rather than leaving to the theme — `--pc-radius` next to it
+   * works from the root precisely because base does not. */
+  --pc-gutter: 12px;
   /* Tracking, because VT323 is CONDENSED as well as low-resolution: its stems
    * sit close enough that at a small size the upright of one letter and the
    * upright of the next read as a single wider stroke. A hair of space is what
@@ -616,6 +685,17 @@ body::after {
   animation: none;
   opacity: 0;
 }
+/* The other two, and the two that matter most: both are hard `steps(1)` /
+ * near-square blinks, which is the strobe the preference is actually about,
+ * while the flicker and the roll are slow fades. Each stops at a state that
+ * still says what it is — a solid block still reads as a cursor, three lit dots
+ * still read as "working" — so they stand still rather than disappear. */
+.pc-input-caret {
+  animation: none;
+}
+.persona-chat .pc-dots span {
+  animation: none;
+}
 }
 
 /* The retaining ring. It sits on the tube rather than on the root because it
@@ -629,8 +709,35 @@ body::after {
   inset: 0;
   pointer-events: none;
   z-index: 5;
+  /* THE FALLBACK IS THE DEFAULT, and the compound path is the override.
+   *
+   * `shape()` is CSS Shapes 2 — Chrome 135, Safari 18.4, and not in Firefox at
+   * all. `@scope`, which decides whether this file is read in the first place,
+   * shipped in Firefox 128. So there is a live browser that applies every rule
+   * here and cannot draw a single one of these paths, and an invalid `var()`
+   * substitution computes `clip-path` to `none` rather than dropping the
+   * declaration — the ring would have painted as a solid grey rectangle across
+   * the tube, over the transcript, at `z-index: 5`.
+   *
+   * Written the other way round — path first, `@supports not` for the rest —
+   * that browser gets the rectangle by default and has to be rescued. Written
+   * this way it gets a border, which is what a ring is, and the compound path
+   * is what the engines that can draw it get instead. `border` and `background`
+   * are both cleared in the override so the two cannot stack. */
+  border: var(--crt-bw) solid var(--crt-ring);
+  border-radius: var(--crt-screen-radius);
+}
+
+/* Flush left for the same line-anchored-rewrite reason as the reduced-motion
+ * block above. The probe is a minimal `shape()` rather than the real token: a
+ * `var()` inside `@supports` is always assumed valid, so testing the token
+ * would report support everywhere. */
+@supports (clip-path: shape(from 0% 0%, line to 100% 100%, close)) {
+.persona-chat::before {
+  border: none;
   background: var(--crt-ring);
   clip-path: var(--crt-screen-ring-shape);
+}
 }
 
 /* === Who is speaking ===
@@ -702,19 +809,50 @@ body::after {
  *
  * No `:empty` rule is needed: a speaker with no mark renders an empty box, and
  * an empty box paints nothing. The gutter is padding on the row, so it holds
- * open either way and both speakers keep one left edge. */
-.persona-chat .pc-avatar {
+ * open either way and both speakers keep one left edge.
+ *
+ * THREE CLASSES, AND HALF THE DECLARATIONS ARE UN-PAINTING. This is the one
+ * element on the surface where the page palette outweighs the scoped theme, and
+ * it is worth being precise about why, because the same trap is waiting on any
+ * other part a palette happens to style harder.
+ *
+ * `@scope` adds no specificity. Scope proximity is the step AFTER specificity in
+ * the cascade, so it only settles ties — which is enough against a palette's
+ * `.persona-chat .pc-avatar`, and not enough against `.persona-chat .pc-persona
+ * .pc-avatar`, which every palette also ships and which weighs one class more
+ * than this rule used to. The result was a page-theme circle behind the mark:
+ * `background` and `color` from the three-class rule, and from the two-class one
+ * a 32px `height`, a 50% `border-radius`, a 13px `font-size` and a 600
+ * `font-weight` that this rule had no opinion about and therefore did not
+ * shadow. Switching the site palette redecorated the inside of the tube.
+ *
+ * So the selector is stated at `.pc-message` depth — matching the heaviest
+ * palette rule and winning the tie on proximity — and it declares the whole
+ * surface rather than only the parts it wants to change. The four inherited
+ * font properties are named explicitly because `font-size` in particular is
+ * load-bearing here for the reason given two comments down: the mark's baseline
+ * is the row's baseline BY CONSTRUCTION, and a palette's 13px puts it back. */
+.persona-chat .pc-message .pc-avatar {
   display: block;
   position: absolute;
   left: 0;
   top: 0;
   width: var(--crt-avatar-size);
-  /* No `font-size` and no `line-height`. Both are inherited from the row, so
-   * the mark's line box is the same height as the first line of what was said
-   * and its baseline IS that line's baseline — by construction, rather than by
-   * two numbers being kept in agreement. Shrinking the glyph re-opens exactly
-   * that gap: half-leading is computed per element, so a 0.9em mark sits
-   * visibly high and reads as a bullet. It recedes by opacity instead. */
+  height: auto;
+  background: none;
+  border: none;
+  border-radius: 0;
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: inherit;
+  /* `font-size` and `line-height` are `inherit` above, and that is the whole
+   * design rather than a default being restated. Taken from the row, the mark's
+   * line box is the same height as the first line of what was said and its
+   * baseline IS that line's baseline — by construction, rather than by two
+   * numbers being kept in agreement. Shrinking the glyph re-opens exactly that
+   * gap: half-leading is computed per element, so a 0.9em mark sits visibly high
+   * and reads as a bullet. It recedes by opacity instead. */
   text-align: center;
   text-transform: uppercase;
   color: var(--ost-green);
@@ -726,13 +864,18 @@ body::after {
 
 /* === The status line ===
  *
- * Deliberately UNSTYLED. `old-school-terminal` has no `.pc-thinking` rule at
- * all, so the status wears the chat library's own size, weight and settled
- * grey, and this theme inherits that by keeping quiet. It was briefly shrunk,
- * lower-cased and tinted green here on the theory that the machine's own line
- * should recede below anything a participant said; but size and colour there
- * are the library's to decide, and overriding them made the same status read
- * differently depending on which terminal skin was loaded.
+ * Deliberately UNSTYLED — no rule of its own. `old-school-terminal` has none
+ * either, so the status wears the chat library's own size and weight, and this
+ * theme inherits that by keeping quiet. It was briefly shrunk and lower-cased
+ * here on the theory that the machine's own line should recede below anything a
+ * participant said; but size and weight there are the library's to decide, and
+ * overriding them made the same status read differently depending on which
+ * terminal skin was loaded.
+ *
+ * Its COLOUR is the exception, and not by breaking that rule: the library asks
+ * for it by name through `--pc-thinking-done-color`, which this theme sets with
+ * the other colour tokens. Filling in a token a library publishes is not the
+ * same act as writing a rule that outranks one.
  *
  * Its POSITION is a different question, and that one is this theme's — see the
  * `.pc-typing` rule with the other rows below. */
@@ -788,6 +931,17 @@ body::after {
  * said should sit directly above the status line, and the status line directly
  * above the prompt, the way a terminal fills from the bottom.
  *
+ * Its TOP padding is not a taste number: it is the mask's dead band, and it has
+ * to be read off the mask rather than picked. The gradient holds `transparent`
+ * for the first `--crt-qy` — the corner's own depth, where the glass is turning
+ * away and there is no flat screen to write on — and only then ramps to
+ * `--crt-fade-knee` over `--crt-fade`. Padding shorter than `--crt-qy` puts the
+ * first line inside the fully transparent run, so scrolling to the top of the
+ * scrollback showed a blank band with the oldest message invisible in it and no
+ * way to bring it down. Padding to the KNEE instead — `--crt-qy + --crt-fade` —
+ * lands the top line at the first alpha the ramp actually reaches and every
+ * line above the fold climbs from there. The three tokens move together.
+ *
  * The status row gets the screen clearance and NOT the speaker gutter, even
  * though the library renders it as a `.pc-message` and the rule above would
  * otherwise indent it like one. Nobody is speaking on that line, so hanging it
@@ -796,7 +950,7 @@ body::after {
  * order at equal specificity, which is why it is stated as the four-sided
  * shorthand rather than as a `padding-left` trusting the tie. */
 .persona-chat .pc-transcript {
-  padding: 20px var(--crt-screen-pad) 4px;
+  padding: calc(var(--crt-qy) + var(--crt-fade)) var(--crt-screen-pad) 4px;
   gap: 10px;
 }
 
@@ -817,8 +971,6 @@ body::after {
   line-height: 1.1;
 }
 
-.persona-chat .pc-persona .pc-sender { color: var(--pc-persona-name); }
-.persona-chat .pc-user .pc-sender { color: var(--pc-user-name); }
 
 /* No clock in the margin. A terminal transcript is a log of what was said, not
  * when — and with several participants the gutter is already carrying the only
@@ -886,7 +1038,12 @@ body::after {
  * green halo — unlit ink lit from behind, which reads as a rendering fault
  * rather than as a quiet placeholder. */
 .persona-chat .pc-input::placeholder {
-  color: rgb(var(--crt-unlit) / 0.5);
+  /* The alpha is set by the contrast floor and nothing else. Measured on the
+   * rendered page — the tube's glass over the photograph reads (4, 10, 6) at
+   * the prompt row — 0.5 came out at 2.19:1 against a 4.5:1 requirement, which
+   * is not "quiet", it is unreadable. 0.9 measures 4.73:1. It is still visibly
+   * a grey caption next to lit phosphor; it just clears the floor. */
+  color: rgb(var(--crt-unlit) / 0.9);
   text-shadow: none;
 }
 
@@ -942,4 +1099,30 @@ body::after {
 @keyframes ost-dot-blink {
   0%, 80%, 100% { opacity: 0.2; }
   40% { opacity: 0.9; }
+}
+
+/* === Short viewports ===
+ *
+ * A laptop in a split screen, and any phone turned sideways. Flush left for the
+ * same line-anchored-rewrite reason as the blocks above.
+ *
+ * `--crt-screen-min` is a floor, and a floor set for a tall window is a bug in a
+ * short one: 220px of tube under 76px of composer chrome does not fit in a 320px
+ * landscape viewport with a keyboard up, and `max()` would hold the 220 anyway.
+ * 110px is two lines and the prompt — the least that is still a screen — and at
+ * this height the clamp above is what is actually choosing, so the floor's only
+ * job is to stop being the thing that overflows.
+ *
+ * The three paddings come down with it because they were tuned as a share of a
+ * 300px tube. Left alone they eat most of a 130px one, and the transcript — the
+ * only part that can give — is what pays. The bezel numbers (`--crt-corner`,
+ * `--crt-bow-*`) deliberately do NOT move: they are the hardware's proportions,
+ * and a monitor does not get a smaller bezel because the desk got smaller. */
+@media (max-height: 560px) {
+:root {
+  --crt-screen-min: 110px;
+  --crt-screen-pad: 20px;
+  --crt-entry-floor: 16px;
+  --crt-status-gap: 10px;
+}
 }

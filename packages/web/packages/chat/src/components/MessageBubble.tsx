@@ -72,6 +72,25 @@ export function MessageBubble({
         {message.sender.avatar ?? ''}
       </div>
       <div className="pc-bubble">
+        {/* Who said it, for anything that is not looking at the screen.
+          *
+          * Every visual cue for the speaker is unavailable to assistive tech:
+          * the avatar above is `aria-hidden`, the persona/user distinction is
+          * otherwise carried by colour and by which side the bubble sits on,
+          * and a theme may legitimately have neither (a terminal skin has one
+          * column and one hue). Without this the transcript reads out as an
+          * undifferentiated run of text with no turns in it.
+          *
+          * `pc-visually-hidden` and NOT `pc-sender`, which is the obvious
+          * choice and the wrong one. Sixteen themes ship `.pc-sender` rules and
+          * no component has ever rendered the element, so every one of those
+          * rules is inert — emitting the class would light all of them at once
+          * and put a visible name into sixteen designs that were drawn without
+          * one. This node is for the accessibility tree only; a theme that
+          * wants a visible name is a separate, deliberate change.
+          *
+          * The colon is inside the span so a screen reader gets the pause. */}
+        <span className="pc-visually-hidden">{message.sender.name}: </span>
         {message.toolCalls && message.toolCalls.length > 0 && (
           <div className="pc-tool-calls">
             {message.toolCalls.map((call, i) => (
