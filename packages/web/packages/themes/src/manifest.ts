@@ -6,6 +6,7 @@ import {
   fishlampCss,
   greenMatrixCss,
   greenMatrixGlassCss,
+  handheldCommunicatorCss,
   mikefullertonCss,
   myprojectsCss,
   myprojectsoverviewCss,
@@ -25,6 +26,7 @@ export type ThemeKey =
   | 'fishlamp'
   | 'green-matrix'
   | 'green-matrix-glass'
+  | 'handheld-communicator'
   | 'mikefullerton'
   | 'myprojects'
   | 'myprojectsoverview'
@@ -49,6 +51,7 @@ export const themes: Record<ThemeKey, ThemeEntry> = {
   fishlamp: { id: 'fishlamp', label: 'fishlamp (ember on ink)', css: fishlampCss },
   'green-matrix': { id: 'green-matrix', label: 'Green Matrix', css: greenMatrixCss },
   'green-matrix-glass': { id: 'green-matrix-glass', label: 'Green Matrix (Glass)', css: greenMatrixGlassCss },
+  'handheld-communicator': { id: 'handheld-communicator', label: 'Handheld Communicator', css: handheldCommunicatorCss },
   mikefullerton: { id: 'mikefullerton', label: 'Mike Fullerton', css: mikefullertonCss },
   myprojects: { id: 'myprojects', label: 'My Projects', css: myprojectsCss },
   myprojectsoverview: { id: 'myprojectsoverview', label: 'Projects Overview', css: myprojectsoverviewCss },

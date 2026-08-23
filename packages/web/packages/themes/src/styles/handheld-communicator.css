@@ -1,0 +1,1086 @@
+/* Handheld Communicator — crt-monitor, turned on its end and shrunk to a device
+ * you could hold.
+ *
+ * A copy of `crt-monitor` that keeps its palette, its face and its glass
+ * verbatim (#00ff41 phosphor on near-black, VT323 — a recreation of the DEC
+ * VT320 ROM font; scanlines, vignette, glare, roll bar, flicker, and the room
+ * glow the screen throws past its own box) and changes exactly two things: the
+ * ASPECT and the OUTLINE. The chat is no longer a landscape sheet of glass the
+ * width of the page; it is a portrait slab about the size of a phone, standing
+ * at the left of the composer.
+ *
+ * WHAT THE BOWS COST, AND WHY THEY ARE GONE. `crt-monitor`'s silhouette is
+ * eight cubic curves — a rounded rectangle whose four edges bulge outward —
+ * because a picture tube's glass is a section of a sphere and its edges really
+ * do bow. A handheld's screen is flat, and its frame is a rectangle with
+ * rounded corners and nothing else. That is not a simplification of the tube's
+ * shape, it is a different object, so the whole `shape()` apparatus goes:
+ * `--crt-screen-shape`, the compound `--crt-screen-ring-shape` that punched a
+ * hairline ring out of itself, and the `@supports` branch that existed only
+ * because Firefox cannot draw either one. What is left is `border-radius`,
+ * which every engine has always had — so this theme, unlike its parent, renders
+ * identically in Firefox.
+ *
+ * WHAT THE PORTRAIT ASPECT COSTS. Six numbers. `crt-monitor`'s paddings were
+ * tuned as a share of a screen four times wider than it is tall, and against a
+ * corner arc that is not this corner arc; carried over unchanged they eat a
+ * 390px-wide box alive. Every one of them is retuned below and says so at the
+ * point of change. The colours, alphas, fonts and textures are untouched.
+ *
+ * The palette tokens are still named `--ost-*`, for the reason `crt-monitor`
+ * gives: consuming sites name them directly — learntruefacts' own `globals.css`
+ * reaches for `--ost-green` and `--ost-border` to colour the shell prompt and
+ * the send glyph. Two `--crt-*` names survive here on the same argument, and
+ * only those two: `--crt-screen-chrome`, which the HOST declares, and
+ * `--crt-entry-size`, which the host READS in two rules. They are the interface
+ * between a theme and its page, not this theme's own vocabulary, and renaming
+ * them would break a host that is meant to be able to mount either theme. The
+ * device's own vocabulary is `--hc-*`.
+ *
+ * WRITTEN FOR SCOPED USE. `ThemeStyle` rewrites both `:root` and `body` to
+ * `:scope`, so on a chat wrapper the two collapse onto one element and that
+ * element is the device. Used unscoped it puts a 390px-wide slab in the corner
+ * of the page's <body> and lays the glass over the whole window, which is not
+ * what it was measured for. Single mode (always dark).
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+
+/* === Tokens === */
+
+:root {
+  /* Phosphor palette — verbatim from old-school-terminal. */
+  --ost-green: #00ff41;
+  --ost-green-bright: #aaffaa;
+  --ost-green-soft: rgba(0, 255, 65, 0.5);
+  --ost-border: rgba(0, 255, 65, 0.35);
+
+  /* The frame: a vertical rectangle with rounded corners, and that is the whole
+   * outline. No `shape()`, no compound path, no `@supports` branch — see the
+   * file header for what came out and why a handheld is not a small tube.
+   *
+   * `--hc-radius` is a LENGTH rather than a percentage because a corner is a
+   * property of the object: the same device held closer does not get rounder
+   * corners. A percentage would also stop being circular the moment the box is
+   * not square, and this box is more than twice as tall as it is wide, so each
+   * corner would draw as an ellipse. The value is about 0.11 of the frame's
+   * width, near enough the proportion a modern phone's display corner holds —
+   * large enough to read as a device from across the page, small enough that the
+   * four arcs together still leave a rectangle of usable glass.
+   *
+   * ONE RADIUS FOR THREE ELEMENTS. The frame is drawn three times over — the
+   * chat's own background, the retaining ring on top of it, and the glass
+   * overlay one box out on the theme root — and all three read this token, so
+   * they cannot drift apart. `crt-monitor` had to carry a second number
+   * (`--crt-screen-radius`) beside its path precisely because a `box-shadow` and
+   * a `clip-path` cannot share an outline; with the path gone, they can. */
+  --hc-radius: 44px;
+
+  /* The retaining ring's width. Here this really is a `border`, which is worth
+   * saying because the parent went to some length to avoid one: `clip-path` cuts
+   * a border away everywhere except the four edge midpoints, so the ring had to
+   * be punched out of a compound path, and a path offset had to be corrected for
+   * the diagonal at the corner anchors (`--crt-bwd`). A `border-radius` clips
+   * nothing. The ordinary thing works, and both of those corrections are gone. */
+  --hc-bw: 2px;
+
+  /* The greys of things on this surface that are NOT emitting light, as bare
+   * channels so each use can pick its own alpha — `rgb(var(--hc-unlit) / x)`.
+   * Everything green here is phosphor, so anything painted green is claiming to
+   * be lit: the frame is hardware catching room light, and the placeholder is a
+   * caption on an empty field rather than something the machine has written.
+   *
+   * ONE HUE, TWO GRADES, because "not lit" is not one brightness. A placeholder
+   * is text and its floor is a MEASURED one: WCAG 1.4.3 wants 4.5:1 and none of
+   * the size exemptions apply here (19px is 14.25pt, and the entry line's
+   * "bold" is synthesised, not a 700 face). A frame has no floor at all — it
+   * only has to say where the glass stops, and the dimmer it does that the more
+   * the eye stays on the text instead of tracing the outline. So the ring takes
+   * the darker grade and the two stay tied by hue rather than by value.
+   *
+   * The hue is a few points green-shifted rather than a true neutral, because a
+   * pure grey against a green field reads faintly magenta by simultaneous
+   * contrast; the shift cancels that without the grey reading as lit. */
+  --hc-unlit: 150 162 152;
+  --hc-unlit-dim: 96 104 98;
+  --hc-ring: rgb(var(--hc-unlit-dim) / 0.32);
+
+  /* HOW BIG THE DEVICE IS — the one measurement this theme adds that its parent
+   * had no need for. `crt-monitor` took its width from the page, whatever column
+   * the host put it in, and stated only a height. A handheld has BOTH, because
+   * it is an object rather than a surface: the aspect ratio is part of what
+   * identifies it, and a screen as wide as the browser window is not a phone
+   * however tall it is.
+   *
+   * 390 x 844 is an iPhone's display in CSS points, used verbatim. Rounding it
+   * to something tidier would be a decision about nothing — "roughly the size of
+   * an iPhone" has an exact answer and it costs the same to type.
+   *
+   * AND THE WIDTH IS WHAT LEFT-JUSTIFIES THE CHAT. There is no `margin-right:
+   * auto` anywhere in this file and there should not be: the theme root is an
+   * ordinary block, and a block with a width and no auto margins already sits at
+   * the start of its containing block. Stating the width IS stating the
+   * alignment. The only thing that can undo it is a host that centres the
+   * wrapper itself, which is the host's decision and stays the host's to make.
+   *
+   * `min(…, 100%)` lives in the RULE below and deliberately not in this token. A
+   * percentage resolves against the containing block on the axis it is used on,
+   * so a `100%` folded in here would mean "of the width" in the width rule and
+   * "of the HEIGHT" in the height expression — one token silently meaning two
+   * different lengths. The height reads the nominal 390 instead, which on a
+   * window narrower than that leaves the device slightly taller than an iPhone
+   * rather than slightly shorter. Nothing can see the difference.
+   *
+   * The height CLAMP is `crt-monitor`'s, unchanged in structure and only in its
+   * terms. `--hc-frame-min-h` is the floor, so the device does not collapse onto
+   * the prompt in a short window. `100dvh` is what the viewport shell is already
+   * sized to, `--kb-inset` is the soft-keyboard height the viewport package
+   * publishes on `:root`, and `--crt-screen-chrome` is whatever the HOST puts
+   * above and below the device — the theme cannot see that, so the host sets it
+   * and the fallback here is nothing.
+   *
+   * `--crt-screen-chrome` keeps its `--crt-` name (see the file header) and is
+   * read as a `var()` FALLBACK rather than declared in this block with a `0px`
+   * default. That is not a style choice. A default here would be a declaration
+   * on the theme root, and the theme root is the host's `.pc-theme-scope`
+   * element — the same element the host sets the real value on. An element's own
+   * declaration beats an inherited one, and at equal specificity `:scope` beats
+   * an unscoped `.pc-theme-scope` on scope proximity, so the `0px` would win and
+   * the host's value would never be seen. `--pc-gutter` is the same trap sprung
+   * from the other side.
+   *
+   * There is no `svh` term here, and that is the one structural difference from
+   * the parent. A tube sized as a SHARE of the window (`33svh`) had to say `svh`
+   * rather than `dvh` so it would not resize while a mobile URL bar collapsed.
+   * This device has a fixed nominal size, so the only viewport term left is the
+   * clamp — and a clamp should track the space genuinely available, which is
+   * exactly what `dvh` reports. */
+  --hc-frame-w: 390px;
+  --hc-frame-min-h: 300px;
+  --hc-frame-h: max(
+    var(--hc-frame-min-h),
+    min(
+      calc(var(--hc-frame-w) * 2.1641),
+      calc(100dvh - var(--kb-inset, 0px) - var(--crt-screen-chrome, 0px))
+    )
+  );
+
+  /* How far past the device the glow reaches before it is fully transparent.
+   * DOWN from the tube's 120px, and it is a proportion rather than a taste. The
+   * halo is a radial gradient sized as a percentage of the inflated box, so the
+   * reach and the box compound: 120px around a 390px-wide slab is a glow wider
+   * than the object throwing it, which stops reading as light on the wall and
+   * starts reading as a second, blurrier device. 90px keeps the spill roughly
+   * the fraction of the screen it was on the tube. */
+  --hc-glow-reach: 90px;
+
+  /* The speaker gutter. `--hc-gutter` is the whole column: mark plus the space
+   * after it, and it is what every message is indented by, so all speakers
+   * share one left text edge by construction rather than by two numbers
+   * agreeing. Narrow on purpose — the mark is a character, and a gutter wide
+   * enough for a picture would push the text off the left of the screen. Held
+   * at the tube's 26px even though the screen is a third of the width: the
+   * gutter holds ONE GLYPH, and a glyph is the same size on either device. What
+   * changes is what it costs — see `--hc-screen-pad`. */
+  --hc-avatar-size: 18px;
+  --hc-gutter: 26px;
+
+  /* Clearance from the frame's edge to the first character, and DOWN from the
+   * tube's 40px because on this device that number was buying the wrong thing
+   * at a much higher price.
+   *
+   * On the tube, 40px a side out of 1120px was 7% of the width and the clearance
+   * was genuinely needed: `shape()` bowed the edges outward and cut the corners
+   * on a curve, so a row at the box's own edge ran under the glass. Here the
+   * edges are straight — only the four corner arcs cut anything, and the arcs
+   * are handled where they actually bite, at the top of the mask and under the
+   * prompt. So the sides only have to look like a margin.
+   *
+   * And 40px a side out of 390px is 20% of the device, on top of the 26px
+   * gutter: it leaves a 244px text column, about 24 characters of VT323 at this
+   * size, which is a column narrow enough to wrap most sentences twice. 22px
+   * leaves 320px and about 32 characters — still a handheld's line, and a line
+   * you can read.
+   *
+   * One token for every row, transcript and prompt alike, because the thing it
+   * is really protecting is a single left text edge — the moment the entry line
+   * gets its own left padding it stops being the same column as the transcript
+   * above it. */
+  --hc-screen-pad: 22px;
+
+  /* The fade has three parts and each is doing a different job.
+   *
+   * `--hc-lip` of BLANK first, because that is how far the corner arc reaches
+   * into the top of the box over anything that gets painted there: a line still
+   * half-lit where the curve cuts across it reads as clipping — the div showing
+   * through — where the same line dissolved reads as the screen.
+   *
+   * It is a MEASURED number, not a picked one, and it replaces the tube's
+   * `--crt-qy`, which was the corner's depth read straight off the path. Here
+   * the corner is a plain circular arc of `--hc-radius`, so its depth at a given
+   * distance `x` in from the side is `r - sqrt(r² - (r - x)²)`. The leftmost
+   * thing ever painted is the speaker's mark, at `--hc-screen-pad` — 22px in,
+   * against r = 44 — which the arc reaches 5.9px down to. 8px clears it with a
+   * pixel or two to spare, and everything further in (the text column starts
+   * another 26px over, past the arc entirely) is clear by construction.
+   *
+   * Then `--hc-fade` to the KNEE, the alpha a line arrives at as it clears the
+   * lip. Low, so emerging from the top is a real event. Unchanged from the tube:
+   * it is a distance over which a line dissolves, which is a property of the
+   * type and not of how big the screen is.
+   *
+   * Then a long shallow climb to full at `--hc-fade-end`, over most of the
+   * glass. That last part is the one that matters and it is not a lip effect at
+   * all: it means every line is dimmer than the line below it, all the way
+   * down, so age is legible at a glance instead of only at the moment a line
+   * leaves. It is also the true thing about the hardware — phosphor decays, and
+   * on a screen that fills from the bottom the oldest light is the faintest. A
+   * mask on the SCROLL BOX rather than on the content is what makes that work:
+   * it stays put while the text moves through it, so a line dims as it travels
+   * rather than carrying a fixed opacity with it. */
+  --hc-lip: 8px;
+  --hc-fade: 28px;
+  --hc-fade-knee: 0.34;
+  --hc-fade-end: 86%;
+
+  /* How far the prompt sits off the BOTTOM of the frame. Still more than
+   * `--hc-screen-pad` and no longer much more, and the reason it shrank from the
+   * tube's 60px is that most of that 60 was paying for a curve this device does
+   * not have.
+   *
+   * On the tube the bottom edge bowed OUT past the corners, so the prompt — the
+   * one row living in the bottom corners — had to clear a curve none of the rows
+   * above it ever met, and the distance that mattered was measured to the arc
+   * rather than to either edge. Here the bottom edge is straight and the only
+   * thing cutting in is the corner arc itself, which by the arithmetic at
+   * `--hc-lip` reaches 5.9px up at the `❯`'s own column. Clearance is therefore
+   * already satisfied at the side inset.
+   *
+   * What is left to buy is CHIN — the band of dark glass under the last line
+   * that makes the bottom of the frame read as the bottom of a device rather
+   * than as text running out of room. 30px is a line and a half of it, and on a
+   * 844px screen that is about 3.5% of the height; the tube's 60 would be 7% of
+   * this one, which is a bezel, and this theme has no bezel.
+   *
+   * The left inset stays on the shared token: the prompt has to hold the
+   * transcript's text column, and moving it UP is what gives it room without
+   * breaking that column. */
+  --hc-entry-floor: 30px;
+
+  /* THE TYPE SIZE, and it is the first thing to reach for when this screen is
+   * hard to read. VT323 is a low-resolution face: its x-height is a little
+   * under half its em, so 16px of it is a seven-pixel lowercase letter, and a
+   * face built out of two-pixel strokes has nothing left to lose at that size.
+   * Every other legibility lever below is worth a fraction of this one. 19px
+   * puts the x-height back over eight pixels, where the strokes resolve, and it
+   * costs nothing of the period look — a real terminal's type is LARGE. */
+  --hc-type-size: 19px;
+
+  /* The entry line's type size. It is a token rather than a number in the rule
+   * because the size is set in TWO stylesheets: the theme's own `.pc-input`
+   * rule weighs (0,2,0), and the chat package's iOS focus-zoom guard weighs
+   * (0,3,0) — so a consuming site has to restate it a class deeper to have it
+   * apply at all, and learntruefacts does. Both read this, so neither can drift
+   * from the other, and the `❯` the site prints in front of the field reads it
+   * too. It reads the transcript's size EXACTLY, and the step it used to carry
+   * is gone. The step was two pixels off a 16px transcript, which was a
+   * difference you felt without seeing it; off a 19px transcript the same two
+   * pixels put the prompt visibly out of scale with everything above it — the
+   * line being typed stopped being the same terminal and became a caption.
+   *
+   * What made the step worth having is still on the line: `--hc-entry-weight`
+   * says "this one is still being written" with ink instead of with size, and
+   * ink is the safer axis, because it does not change how much of the tube the
+   * prompt occupies when the transcript is retuned. That is the reason this is
+   * still an alias rather than being deleted — the tie to the transcript is
+   * what is being stated, and a rule reading `--hc-type-size` directly would
+   * lose the two other stylesheets that have to agree with it. */
+  --crt-entry-size: var(--hc-type-size);
+  /* VT323 ships one weight, so this is a synthesised bold and that is the point:
+   * a hair more ink on the line being typed, without it changing size or font
+   * against the transcript above it. */
+  --hc-entry-weight: 600;
+
+  /* Air ABOVE the status line, which is how it gets closer to the prompt.
+   * There are three bands on the screen and only two gaps between them, so the
+   * status line belongs to whichever gap is smaller. Left even it belonged to
+   * neither: it floated mid-screen, reading as a third participant rather than
+   * as the machine annotating the line you are about to send. The fix is not to
+   * push it down — nothing below it will move — but to open the gap above, and
+   * the space comes out of the scrollback, which has somewhere to put it.
+   *
+   * DOWN from the tube's 24px only because the scrollback here is narrower and
+   * therefore wraps more: the gap has to stay bigger than the transcript's own
+   * 10px row gap (that is the whole mechanism) without eating a line of a
+   * column that is already only 32 characters wide. 16px clears the row gap by
+   * the same comfortable margin 24 did on a wider screen. */
+  --hc-status-gap: 16px;
+  /* The scanlines, and their PITCH is a legibility number, not just a texture
+   * one. The dark band is a whole pixel however wide the gap is, so a 3px pitch
+   * takes a third of every horizontal stroke away — and at this size a stroke
+   * is two pixels, which is most of it. At 4px it takes a quarter, and at a
+   * lower alpha what it takes it does not take completely. Both moves leave the
+   * lines exactly as countable as they were; they were never the thing that
+   * said phosphor — the glow and the green are. */
+  --hc-scanline: rgba(0, 0, 0, 0.24);
+  --hc-scanline-pitch: 4px;
+
+  /* Site color tokens — surface stays transparent so a site that paints its own
+   * background is not blanked by the token. The device below sets its own
+   * `background` explicitly rather than reading this one. */
+  --color-surface: transparent;
+  --color-surface-raised: #050805;
+  --color-surface-hover: #0a0f0a;
+  --color-border: var(--ost-border);
+  --color-border-subtle: rgba(0, 255, 65, 0.18);
+
+  --color-text-primary: var(--ost-green);
+  --color-text-secondary: var(--ost-green-soft);
+  --color-text-dim: rgba(0, 255, 65, 0.4);
+
+  --color-accent: var(--ost-green);
+  --color-accent-dim: rgba(0, 255, 65, 0.08);
+  --color-success: var(--ost-green);
+  --color-error: #ff5555;
+  --color-info: var(--ost-green-bright);
+
+  /* Chat color tokens. The screen is DARK GLASS, not a painted panel: the page
+   * behind it comes through, dimmed and green-shifted, the way an unlit
+   * phosphor panel shows the room in front of it. It was opaque while the page behind it was a
+   * flat starscape with nothing to see; with a photograph back there, letting it
+   * through is most of what sells the screen as glass rather than as a shape cut
+   * out of the background. */
+  --pc-surface: rgba(4, 12, 6, 0.62);
+  --pc-persona-name: var(--ost-green);
+  --pc-persona-text: var(--ost-green);
+  --pc-user-name: var(--ost-green-bright);
+  --pc-user-text: var(--ost-green-bright);
+  --pc-input-bg: transparent;
+  --pc-input-border: var(--ost-border);
+  --pc-input-focus: var(--ost-green);
+  --pc-time-color: rgba(0, 255, 65, 0.4);
+  /* The settled status line — "Thought for 4s" and the like. This is a COLOUR
+   * TOKEN the chat library publishes for themes to fill in, not an override of
+   * one of its decisions, which is the distinction drawn at the `.pc-thinking`
+   * comment below: size and weight there stay the library's, and the colour was
+   * always meant to be the theme's.
+   *
+   * Its default is `#8a8a8a`, a neutral grey tuned for a light panel. On this
+   * glass it measures 2.73:1 and fails WCAG 1.4.3 outright. It also inherits
+   * the phosphor `text-shadow` from the chat's text, so it rendered as grey ink
+   * wearing a green halo — light coming off something that is not lit, which
+   * reads as a rendering fault. Phosphor at the library's own 0.75 opacity
+   * measures 6.30:1 and makes the halo correct instead of an artifact: the line
+   * is the machine's, and on this screen the machine writes in green. */
+  --pc-thinking-done-color: var(--ost-green);
+
+  /* Code highlighting (Shiki) */
+  --scp-shiki-theme: 'github-dark';
+
+  /* Shared (non-color) tokens */
+  --font-display: 'VT323', ui-monospace, 'SF Mono', Menlo, monospace;
+  --font-mono: 'VT323', ui-monospace, 'SF Mono', Menlo, monospace;
+  --font-sans: 'VT323', ui-monospace, 'SF Mono', Menlo, monospace;
+  --pc-font: 'VT323', ui-monospace, 'SF Mono', Menlo, monospace;
+  --pc-radius: 0;
+}
+
+/* === The device, and the room glow ===
+ *
+ * The selector below is the theme root — `:scope`, the chat's wrapper, once
+ * ThemeStyle has rewritten it. It paints nothing of its own: no padding, no
+ * background, no border. It carries three things instead, and the first is new
+ * in this theme.
+ *
+ * THE DEVICE'S WIDTH lives here rather than on `.persona-chat`, and that is
+ * load-bearing twice over. The glow and the glass are both pseudo-elements of
+ * THIS element and are sized from its box, so a width stated one level down
+ * would leave both of them the full width of the page with a narrow chat
+ * rattling around inside. And `.persona-chat` is a block: given nothing, it
+ * fills its parent exactly, so stating the width once here sizes both boxes and
+ * they cannot disagree. `min(…, 100%)` rather than the bare token so a window
+ * narrower than the device shrinks it instead of overflowing — see
+ * `--hc-frame-w` for why the `100%` is here and not folded into the token.
+ *
+ * This is also, and only, what LEFT-JUSTIFIES the chat: a block with a width and
+ * no auto margins sits at the start of its containing block. There is no
+ * alignment rule anywhere in this file.
+ *
+ * The GLOW is the second. A lit screen lights the wall behind it, and that spill
+ * is the only part of this theme that lives OUTSIDE the element's own box, so it
+ * is painted one box out where the frame cannot clip it.
+ *
+ * Any ancestor with `overflow: hidden` still erases it — the glow is not
+ * clipped by a rule here, it is clipped by whatever encloses the chat, so a
+ * host has to let its shell overflow (persona's ViewportShell takes
+ * `clip={false}` for exactly this). The third thing is the glass, below.
+ */
+
+body {
+  box-sizing: border-box;
+  position: relative;
+  width: min(var(--hc-frame-w), 100%);
+  color: var(--color-text-primary);
+  font-family: var(--font-mono);
+  font-size: var(--hc-type-size);
+  line-height: 1.5;
+}
+
+/* The glow, and it is a PAINTED HALO rather than a `box-shadow` — but for a
+ * weaker reason here than on the tube, which is worth saying so nobody carries
+ * the strong one forward as though it still applied.
+ *
+ * On `crt-monitor` a box-shadow was structurally impossible: the root's box is a
+ * rectangle, the tube inside it was not, and a shadow is knocked out inside its
+ * element's BORDER BOX — so the four corner gaps between rectangle and tube fell
+ * inside the knockout and stayed dark while everything just outside the
+ * rectangle glowed. A hard rounded-rectangle edge cutting across the tube's
+ * corners, and no blur or negative spread could move it. This device's outline
+ * IS a rounded rectangle, so that knockout would now land exactly on the frame
+ * and a box-shadow would work.
+ *
+ * It stays a gradient because of the FALLOFF, not the shape. The halo is three
+ * stops — a bright core, a long shallow shoulder at 46%, out to nothing at 74%
+ * — and a box-shadow has one blur, so matching this curve takes a stack of
+ * three or four shadows that then all have to be retuned together. One gradient
+ * says it once.
+ *
+ * The pseudo-element is inflated past the root on every side so the falloff has
+ * somewhere to happen, and the gradient's own stops end at `transparent` well
+ * inside that, so the halo has no edge of any shape anywhere. */
+body::before {
+  content: '';
+  position: absolute;
+  inset: calc(-1 * var(--hc-glow-reach));
+  pointer-events: none;
+  z-index: 0;
+  background: radial-gradient(
+    58% 60% at 50% 50%,
+    rgba(0, 255, 65, 0.15),
+    rgba(0, 255, 65, 0.055) 46%,
+    transparent 74%
+  );
+}
+
+/* The glass: scanlines, vignette, and a diagonal glare, sitting ON TOP of
+ * everything on the screen — including the block cursor, which a host renders
+ * as a sibling of the chat rather than inside it. That sibling is why the glass
+ * is a pseudo-element on the ROOT and not on the chat: painted inside the chat
+ * it would pass UNDER the caret.
+ *
+ * `inset: 0` because there is no bezel to inset by — the chat fills the root, so
+ * the two boxes coincide and the same `--hc-radius` rounds both. A pseudo-
+ * element's own background is clipped by its own `border-radius`, so nothing
+ * further is needed to keep the glass inside the frame.
+ *
+ * The two GRADIENTS are unchanged from the tube and did not need retuning,
+ * unlike every length in this file, because both are sized in percentages of
+ * this box — `96% 104%` of a portrait slab covers the same fraction of it that
+ * `96% 104%` of a landscape one did. The scanline pitch is absolute and stays
+ * absolute for the opposite reason: it is a property of the raster, not of how
+ * big the screen showing it is. */
+body::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: var(--hc-radius);
+  pointer-events: none;
+  z-index: 6;
+  background-image:
+    linear-gradient(133deg, rgba(255, 255, 255, 0.028) 0%, rgba(255, 255, 255, 0.008) 18%, transparent 38%),
+    radial-gradient(96% 104% at 50% 46%, transparent 20%, rgba(0, 0, 0, 0.3) 64%, rgba(0, 0, 0, 0.62) 100%),
+    repeating-linear-gradient(to bottom, var(--hc-scanline) 0 1px, transparent 1px var(--hc-scanline-pitch));
+  animation: hc-flicker 6.1s steps(1) infinite;
+}
+
+::selection { background: var(--ost-green); color: #000; }
+
+.prose {
+  --tw-prose-body: var(--color-text-primary);
+  --tw-prose-headings: var(--color-accent);
+  --tw-prose-links: var(--color-accent);
+  --tw-prose-bold: var(--ost-green-bright);
+  --tw-prose-code: var(--color-accent);
+  --tw-prose-pre-bg: var(--color-surface-raised);
+  --tw-prose-pre-code: var(--color-text-primary);
+  --tw-prose-quotes: var(--color-text-secondary);
+  --tw-prose-quote-borders: var(--color-accent);
+  --tw-prose-hr: var(--color-border);
+}
+
+/* === The screen === */
+
+.persona-chat {
+  font-family: var(--pc-font);
+  /* The phosphor coating, then the glass. The haze is a background layer rather
+   * than another inset shadow: a shadow is drawn inward from the EDGES, so in a
+   * box far longer on one axis than the other it comes out as a band across the
+   * middle instead of a pool of light in the centre. On the tube that band was
+   * horizontal; on this device it would be vertical, which is the same bug
+   * standing up. A radial gradient is positioned in the box, which is what "the
+   * middle of the screen is brighter" actually means, at either aspect. */
+  background:
+    radial-gradient(58% 68% at 50% 54%, rgba(0, 255, 65, 0.085), transparent 74%),
+    var(--pc-surface);
+  color: var(--ost-green);
+  font-size: var(--hc-type-size);
+  line-height: 1.5;
+  /* HERE and not in the token block, which is where it was and where it did
+   * nothing. `base.css` declares `--pc-gutter: 16px` on `.persona-chat` itself;
+   * an element's own declaration beats an inherited one whatever the scope or
+   * the source order, so a value set on the theme root was shadowed before
+   * anything could read it. It is the one `--pc-*` token base states on an
+   * inner element rather than leaving to the theme — `--pc-radius` next to it
+   * works from the root precisely because base does not. */
+  --pc-gutter: 12px;
+  /* Tracking, because VT323 is CONDENSED as well as low-resolution: its stems
+   * sit close enough that at a small size the upright of one letter and the
+   * upright of the next read as a single wider stroke. A hair of space is what
+   * separates them, and it is the one adjustment here that a period terminal
+   * also had — character cells were wider than the glyphs drawn in them. */
+  letter-spacing: 0.03em;
+  border: none;
+  /* The frame. `base.css` already gives `.persona-chat` `overflow: hidden`, and
+   * a rounded border box clips descendants as well as its own background — so
+   * this one declaration does what `clip-path` was doing on the tube, for the
+   * roll bar and the transcript alike, in every engine. No width: the chat is a
+   * block and fills the theme root, which is where the width is stated. */
+  border-radius: var(--hc-radius);
+  /* Fixed, not a minimum — see `--hc-frame-h`. `.pc-transcript` is already
+   * `flex: 1; overflow-y: auto` in `base.css`, so pinning the screen is the
+   * whole change: the scrollback goes behind the glass instead of stretching
+   * it. Doubly so here — a device that grew a line at a time would be one whose
+   * aspect ratio changed as you talked to it, and the aspect ratio is most of
+   * what says "phone". */
+  height: var(--hc-frame-h);
+  /* The halo is an absolutely positioned pseudo-element and the chat is an
+   * ordinary in-flow block, so without a stacking position of its own the chat
+   * would paint UNDER the glow and wear it as a green wash across the middle of
+   * the screen. The glass overlay sits at 6 and still covers both. */
+  position: relative;
+  z-index: 1;
+  /* INSET terms only. On the tube this was forced — `clip-path` threw away an
+   * element's outer shadows exactly as it threw away the parts of its background
+   * outside the shape — and with the path gone it is a choice instead: an outer
+   * shadow here would paint fine. It stays inset because the spill belongs to
+   * the root's halo, and two elements throwing light in the same direction is
+   * two things to keep in agreement.
+   *
+   * THE TWO BLURS ARE RETUNED and the rim is not, which is the whole pattern of
+   * this file in one declaration. `inset 0 0 0 1px` is one pixel of edge and one
+   * pixel is one pixel at any size. The other two are lengths reaching in from
+   * the edges of a box that is now a third as wide: 8px of spread under 30px of
+   * blur creeps ~38px in from each side, which was 7% of the tube and would be
+   * 19% of this device — the vignette would meet itself in the middle and read
+   * as a dark stripe down a lit screen rather than as darkening at the corners.
+   * 2 + 16 holds it at about 9%, the fraction it was. The haze's negative spread
+   * comes in for the same reason: -30px of a 390px box is most of the way to the
+   * centre before the blur has started. */
+  box-shadow:
+    /* the screen: a hard rim, a deep corner vignette, and the haze in the middle
+     * of the glass — the part that makes it look lit from behind rather than
+     * like a dark rectangle with green text on it. */
+    inset 0 0 0 1px rgba(0, 0, 0, 0.9),
+    inset 0 0 16px 2px rgba(0, 0, 0, 0.82),
+    inset 0 0 60px -20px rgba(0, 255, 65, 0.18);
+}
+
+/* The roll bar — one band drifting down the screen, the way a phosphor display
+ * slightly out of sync with its source shows. Drawn inside the chat so the chat's own
+ * `overflow: hidden` and radius clip it to the screen.
+ *
+ * Both stops are at HALF the strength they started at. A roll bar is a defect
+ * being quoted, not an effect: at the point where a reader notices the sweep
+ * they are watching the furniture instead of the transcript, and the band has
+ * to cross the text to be seen at all. Barely-there is the whole brief. */
+.persona-chat::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 20%;
+  pointer-events: none;
+  z-index: 4;
+  background: linear-gradient(to bottom,
+    transparent,
+    rgba(0, 255, 65, 0.025) 42%,
+    rgba(255, 255, 255, 0.017) 55%,
+    transparent);
+  animation: hc-roll 8.5s linear infinite;
+}
+
+@keyframes hc-roll {
+  from { transform: translateY(-100%); }
+  to { transform: translateY(500%); }
+}
+
+/* Barely there on purpose: a phosphor screen's brightness is not steady, but a
+ * strobing chat is unreadable. Three near-imperceptible dips per cycle. */
+@keyframes hc-flicker {
+  0%, 46%, 49%, 71%, 73%, 100% { opacity: 1; }
+  47%, 48% { opacity: 0.93; }
+  72% { opacity: 0.96; }
+}
+
+/* Selectors are flush left inside this block on purpose. The host rewrites the
+ * theme for `@scope` with a line-anchored regex — `/(^|,\s*)body(?=[\s,{:.])/gm`
+ * — so an indented `body` inside a media block is never rewritten, and the rule
+ * ends up aimed at the document's real body instead of the theme root, where it
+ * silently does nothing. */
+@media (prefers-reduced-motion: reduce) {
+body::after {
+  animation: none;
+}
+/* The roll bar is nothing BUT its motion — standing still it is a stray bright
+ * band across the transcript, so it goes rather than stops. */
+.persona-chat::after {
+  animation: none;
+  opacity: 0;
+}
+/* The other two, and the two that matter most: both are hard `steps(1)` /
+ * near-square blinks, which is the strobe the preference is actually about,
+ * while the flicker and the roll are slow fades. Each stops at a state that
+ * still says what it is — a solid block still reads as a cursor, three lit dots
+ * still read as "working" — so they stand still rather than disappear. */
+.pc-input-caret {
+  animation: none;
+}
+.persona-chat .pc-dots span {
+  animation: none;
+}
+}
+
+/* THE FRAME — the vertical rectangle with rounded corners, as one border.
+ *
+ * It sits on the screen rather than on the root because it belongs to the glass.
+ * `z-index: 5` puts it over the transcript; the chat's own `z-index: 1` makes a
+ * stacking context, so the glass at 6 on the root still covers it.
+ *
+ * It is a pseudo-element rather than a `border` on `.persona-chat` itself for a
+ * layout reason, not a painting one: a border there would be inside the fixed
+ * `--hc-frame-h` (the chat is `box-sizing: border-box` from base), taking two
+ * pixels off the top and bottom of the scrollback and shifting every row inward.
+ * Painted on an `inset: 0` overlay it costs the content nothing.
+ *
+ * WHAT USED TO BE HERE, and why the whole apparatus is gone. `crt-monitor` could
+ * not use a border at all: a border is painted along the element's rectangle and
+ * `clip-path` then cuts away every part of that rectangle outside the tube, so
+ * the line survived only at the four edge midpoints and vanished at the corners.
+ * The ring had to be a COMPOUND `shape()` — the outline, then the same outline
+ * inset and wound the opposite way, punching a hole through it — which in turn
+ * needed a diagonal correction at the corner anchors, and an `@supports` branch
+ * because Firefox has `@scope` and does not have `shape()`, and an invalid
+ * `var()` computes `clip-path` to `none` rather than dropping the declaration,
+ * so the fallback had to be the DEFAULT or Firefox got a solid grey rectangle
+ * over the transcript.
+ *
+ * Three rules, a second token block and a browser caveat, all of them in service
+ * of drawing a line around a shape. A rounded rectangle needs none of it. */
+.persona-chat::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+  border: var(--hc-bw) solid var(--hc-ring);
+  border-radius: var(--hc-radius);
+}
+
+/* === Who is speaking ===
+ *
+ * One column, two speakers, and a gutter down the left holding the speaker's
+ * mark. A terminal has one column; a right-aligned bubble is a messenger's
+ * idiom and would read as a different machine.
+ *
+ * The gutter is PADDING on `.pc-message`, not a margin on the bubble, and the
+ * mark is positioned into it. Three things fall out of that and all three are
+ * the reason for it. Wrapped lines land under the first character with no
+ * negative `text-indent` to undo. The speaker WITHOUT a mark keeps the same
+ * left edge for free, so an empty gutter reads as "you". And the status line
+ * above the input — which the chat library renders as a `.pc-message` with no
+ * avatar — sits on that edge too, without a rule of its own.
+ *
+ * The mark itself is `.pc-avatar`, which the library renders for every message
+ * (empty when that sender has none) and `base.css` hides. Nothing here is a
+ * pseudo-element standing in for a missing node. */
+.persona-chat .pc-message {
+  justify-content: flex-start;
+  padding-left: var(--hc-gutter);
+}
+
+.persona-chat .pc-message.pc-persona .pc-bubble {
+  color: var(--pc-persona-text);
+  text-shadow:
+    0 0 1px rgba(0, 255, 65, 0.55),
+    0 0 9px rgba(0, 255, 65, 0.26);
+}
+
+.persona-chat .pc-message.pc-user .pc-bubble {
+  color: var(--pc-user-text);
+  /* Wider than the chat's own tracking by the same 0.02em it always was — the
+   * distinction is the margin, so it moves when the base does. */
+  letter-spacing: 0.05em;
+  text-shadow:
+    0 0 1px rgba(170, 255, 170, 0.6),
+    0 0 9px rgba(170, 255, 170, 0.34);
+}
+
+/* WHY EVERY BLOOM ON THIS SCREEN IS TWO SHADOWS.
+ *
+ * A single wide `text-shadow` is the obvious way to write phosphor glow and it
+ * is the wrong shape. Spreading light 7px out from a 2px stroke puts most of it
+ * where the glyph is not — it fills the counters of `a`, `e` and `o` until they
+ * close up, and it lifts the ground immediately beside every stem, which is the
+ * contrast the eye actually reads an edge by. The text goes soft and, for all
+ * that light, does not look especially lit.
+ *
+ * Real phosphor is a bright core with a faint halo around it, so it is written
+ * as two terms: a 1px shadow in the glyph's own colour at high alpha, which
+ * keeps the light ON the stroke and incidentally thickens a face that has very
+ * little ink in it, and a wide low-alpha term for the room glow. The result is
+ * both sharper and glowier than the single blur was, which is not a trade — the
+ * one blur was simply spending its light in the wrong place. */
+
+/* The speaker's mark: the participant's INITIAL, printed in the gutter.
+ *
+ * This used to be an 8×8 bitmap face carried in a `--hc-avatar` data URL and
+ * painted through `mask-image`. A picture is the wrong unit here for two
+ * reasons. A terminal has one glyph grid and a face does not sit on it, so at
+ * any size that fits the gutter the bitmap reads as an emoticon rather than as
+ * hardware. And the identity lived in the THEME — one token, one face, so a
+ * second participant needed a second data URL written by hand — while the
+ * library was already carrying `sender.avatar` per participant and had been
+ * all along. Printing that string is both the smaller rule and the one that
+ * scales to the multi-participant case without further edits.
+ *
+ * No `:empty` rule is needed: a speaker with no mark renders an empty box, and
+ * an empty box paints nothing. The gutter is padding on the row, so it holds
+ * open either way and both speakers keep one left edge.
+ *
+ * THREE CLASSES, AND HALF THE DECLARATIONS ARE UN-PAINTING. This is the one
+ * element on the surface where the page palette outweighs the scoped theme, and
+ * it is worth being precise about why, because the same trap is waiting on any
+ * other part a palette happens to style harder.
+ *
+ * `@scope` adds no specificity. Scope proximity is the step AFTER specificity in
+ * the cascade, so it only settles ties — which is enough against a palette's
+ * `.persona-chat .pc-avatar`, and not enough against `.persona-chat .pc-persona
+ * .pc-avatar`, which every palette also ships and which weighs one class more
+ * than this rule used to. The result was a page-theme circle behind the mark:
+ * `background` and `color` from the three-class rule, and from the two-class one
+ * a 32px `height`, a 50% `border-radius`, a 13px `font-size` and a 600
+ * `font-weight` that this rule had no opinion about and therefore did not
+ * shadow. Switching the site palette redecorated the inside of the screen.
+ *
+ * So the selector is stated at `.pc-message` depth — matching the heaviest
+ * palette rule and winning the tie on proximity — and it declares the whole
+ * surface rather than only the parts it wants to change. The four inherited
+ * font properties are named explicitly because `font-size` in particular is
+ * load-bearing here for the reason given two comments down: the mark's baseline
+ * is the row's baseline BY CONSTRUCTION, and a palette's 13px puts it back. */
+.persona-chat .pc-message .pc-avatar {
+  display: block;
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: var(--hc-avatar-size);
+  height: auto;
+  background: none;
+  border: none;
+  border-radius: 0;
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: inherit;
+  /* `font-size` and `line-height` are `inherit` above, and that is the whole
+   * design rather than a default being restated. Taken from the row, the mark's
+   * line box is the same height as the first line of what was said and its
+   * baseline IS that line's baseline — by construction, rather than by two
+   * numbers being kept in agreement. Shrinking the glyph re-opens exactly that
+   * gap: half-leading is computed per element, so a 0.9em mark sits visibly high
+   * and reads as a bullet. It recedes by opacity instead. */
+  text-align: center;
+  text-transform: uppercase;
+  color: var(--ost-green);
+  opacity: 0.72;
+  text-shadow:
+    0 0 1px rgba(0, 255, 65, 0.5),
+    0 0 8px var(--ost-green-soft);
+}
+
+/* === The status line ===
+ *
+ * Deliberately UNSTYLED — no rule of its own. `old-school-terminal` has none
+ * either, so the status wears the chat library's own size and weight, and this
+ * theme inherits that by keeping quiet. It was briefly shrunk and lower-cased
+ * here on the theory that the machine's own line should recede below anything a
+ * participant said; but size and weight there are the library's to decide, and
+ * overriding them made the same status read differently depending on which
+ * terminal skin was loaded.
+ *
+ * Its COLOUR is the exception, and not by breaking that rule: the library asks
+ * for it by name through `--pc-thinking-done-color`, which this theme sets with
+ * the other colour tokens. Filling in a token a library publishes is not the
+ * same act as writing a rule that outranks one.
+ *
+ * Its POSITION is a different question, and that one is this theme's — see the
+ * `.pc-typing` rule with the other rows below. */
+
+/* Filling from the bottom, in a box that now actually overflows.
+ *
+ * `base.css` does it with `justify-content: flex-end`, which is right until the
+ * content is taller than the box: distributed alignment overflows in BOTH
+ * directions, and the part that goes off the start edge is not reachable by
+ * scrolling in every engine — the oldest messages become unreadable rather than
+ * scrolled away. `margin-top: auto` on the first child is the version that
+ * survives overflow: with nothing to spare the margin is zero and the column
+ * simply starts at the top, which is what a scrollable transcript wants.
+ *
+ * The fade is the affordance that replaces a scrollbar, and dropping the
+ * scrollbar matters MORE on this device than it did on the tube, not less. A
+ * native bar would run down the far right of the glass, and on a 390px screen
+ * it is a chrome widget taking a full 4% of the width — inside a frame whose
+ * whole claim is to be a piece of hardware. Text dissolving into the top says
+ * "there is more above" in the screen's own language, and it costs nothing when
+ * there is not.
+ *
+ * It is also the age indicator, which is the bigger of its two jobs: the ramp
+ * does not finish at the lip, it keeps climbing to `--hc-fade-end` over most
+ * of the glass, so every line is a little dimmer than the one below it. See
+ * `--hc-fade` for why the mask is on the scroll box and not on the rows. */
+.persona-chat .pc-transcript {
+  justify-content: flex-start;
+  scrollbar-width: none;
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent var(--hc-lip),
+    rgb(0 0 0 / var(--hc-fade-knee)) calc(var(--hc-lip) + var(--hc-fade)),
+    #000 var(--hc-fade-end)
+  );
+}
+
+.persona-chat .pc-transcript::-webkit-scrollbar {
+  display: none;
+}
+
+.persona-chat .pc-transcript > :first-child {
+  margin-top: auto;
+}
+
+/* === Rows on the screen ===
+ *
+ * Where the three bands sit inside the frame. The theme states this rather than
+ * the site: the numbers are a consequence of `--hc-radius` and of the mask, and
+ * a site that overrides them is compensating for a corner arc it cannot see.
+ *
+ * The transcript's bottom padding is nearly nothing on purpose — the last thing
+ * said should sit directly above the status line, and the status line directly
+ * above the prompt, the way a terminal fills from the bottom.
+ *
+ * Its TOP padding is not a taste number: it is the mask's dead band, and it has
+ * to be read off the mask rather than picked. The gradient holds `transparent`
+ * for the first `--hc-lip` — the corner arc's depth at the leftmost column
+ * anything is painted in — and only then ramps to `--hc-fade-knee` over
+ * `--hc-fade`. Padding shorter than `--hc-lip` puts the first line inside the
+ * fully transparent run, so scrolling to the top of the scrollback shows a blank
+ * band with the oldest message invisible in it and no way to bring it down.
+ * Padding to the KNEE instead — `--hc-lip + --hc-fade` — lands the top line at
+ * the first alpha the ramp actually reaches and every line above the fold climbs
+ * from there. The three tokens move together.
+ *
+ * The status row gets the screen clearance and NOT the speaker gutter, even
+ * though the library renders it as a `.pc-message` and the rule above would
+ * otherwise indent it like one. Nobody is speaking on that line, so hanging it
+ * off the participants' text column claims a speaker it does not have; flush
+ * with the prompt, it belongs to the terminal. That override rides on document
+ * order at equal specificity, which is why it is stated as the four-sided
+ * shorthand rather than as a `padding-left` trusting the tie. */
+.persona-chat .pc-transcript {
+  padding: calc(var(--hc-lip) + var(--hc-fade)) var(--hc-screen-pad) 4px;
+  gap: 10px;
+}
+
+/* base.css collapses the padding while there is nothing to show; restated a
+ * class deeper because the rule above is a class more specific than base's
+ * `:empty` and would otherwise hold 20px open on an empty screen. */
+.persona-chat .pc-transcript:empty {
+  padding: 8px 0 0;
+}
+
+.persona-chat > .pc-typing {
+  /* No bottom padding, and a line box barely taller than its own text: both
+   * gaps here are mostly LEADING, so tightening the leading is what actually
+   * moves the status onto the prompt. `--hc-status-gap` then buys the
+   * separation back on the other side. */
+  padding: 0 var(--hc-screen-pad);
+  margin-top: var(--hc-status-gap);
+  line-height: 1.1;
+}
+
+
+/* No clock in the margin. A terminal transcript is a log of what was said, not
+ * when — and with several participants the gutter is already carrying the only
+ * per-message metadata this surface wants.
+ *
+ * Stated at two classes rather than one on purpose: the page palette that
+ * paints the rest of the site also ships `.pc-time` rules, and this outweighs
+ * every one of them, so a palette switch cannot bring the timestamps back. */
+.persona-chat .pc-time {
+  display: none;
+}
+
+/* Borderless input row — no divider above it.
+ *
+ * The bottom padding is deeper than the top and deeper than the sides. On the
+ * tube that was clearance — the bottom edge bowed OUT past the corners and the
+ * prompt had to clear a curve the rows above it never met. Here the bottom edge
+ * is straight, so it is chin instead: the band of dark glass that makes the
+ * bottom of the frame read as the bottom of a device. Same asymmetry, different
+ * reason, and a smaller number — see `--hc-entry-floor`. */
+.persona-chat .pc-input-area {
+  border-top: none;
+  background: var(--pc-input-bg);
+  /* On the ROW, so the `❯` the site draws as this element's ::before takes the
+   * same weight as the text it precedes — a pseudo-element inherits from its
+   * originating element, not from `.pc-input` beside it. */
+  font-weight: var(--hc-entry-weight);
+  padding: 2px var(--hc-screen-pad) var(--hc-entry-floor);
+  gap: 10px;
+}
+
+.persona-chat .pc-input {
+  background: transparent;
+  border: none;
+  /* Brighter than the transcript, and specifically the same `--ost-green-bright`
+   * a USER's sent message is painted in — so a line reads the same before and
+   * after Enter, and the phosphor bloom carries over with it. The persona's
+   * green is the dimmer one; the two brightnesses are the whole speaker
+   * distinction on a single-column terminal. */
+  color: var(--ost-green-bright);
+  text-shadow:
+    0 0 1px rgba(170, 255, 170, 0.7),
+    0 0 10px rgba(170, 255, 170, 0.38);
+  font-family: var(--pc-font);
+  font-size: var(--crt-entry-size);
+  font-weight: var(--hc-entry-weight);
+  /* The native thin I-beam is hidden by the host in JS (input.style.caretColor),
+   * not here — so if the client never hydrates, the input degrades to the native
+   * caret rather than to no caret at all. The host then draws the blinking block
+   * over the insertion point (a native caret can't be reshaped in CSS). */
+}
+
+/* The placeholder stays visible at the prompt even when focused. On a host that
+ * keeps the input always-focused, hiding it on :focus — as this theme's ancestor
+ * used to — means it never shows at all. The block cursor parks at the empty
+ * prompt and blinks over the placeholder's first glyph; the blink keeps that
+ * glyph legible.
+ *
+ * Which is exactly why it cannot be green. It inherited `--ost-border` from
+ * `old-school-terminal`, phosphor at 35%, so an empty field looked like a field
+ * with a dim line already typed in it — and on this host, where the prompt is
+ * always focused, that is the state a visitor sees first.
+ *
+ * The bloom has to go with the colour, and this is the part a straight colour
+ * swap misses: `text-shadow` inherits from `.pc-input`, so grey glyphs kept a
+ * green halo — unlit ink lit from behind, which reads as a rendering fault
+ * rather than as a quiet placeholder. */
+.persona-chat .pc-input::placeholder {
+  /* The alpha is set by the contrast floor and nothing else. Measured on the
+   * rendered page — the device's glass over the photograph reads (4, 10, 6) at
+   * the prompt row — 0.5 came out at 2.19:1 against a 4.5:1 requirement, which
+   * is not "quiet", it is unreadable. 0.9 measures 4.73:1. It is still visibly
+   * a grey caption next to lit phosphor; it just clears the floor. */
+  color: rgb(var(--hc-unlit) / 0.9);
+  text-shadow: none;
+}
+
+/* Old-school block cursor. The host positions this overlay (left/top/width/
+ * height all set inline, in px, from the input's own font-size) at the caret,
+ * since an <input> exposes no caret-shape styling; this rule supplies the
+ * phosphor look + blink. */
+.pc-input-caret {
+  position: fixed;
+  /* The bright phosphor, matching the text it is standing in — the host sizes
+   * the block from the input's own font-size, so it follows `--crt-entry-size`
+   * on its own. */
+  background: var(--ost-green-bright);
+  box-shadow: 0 0 8px rgba(170, 255, 170, 0.55); /* phosphor bloom */
+  pointer-events: none;
+  z-index: 2;
+  animation: hc-caret-blink 1.06s steps(1) infinite;
+}
+
+@keyframes hc-caret-blink { 50% { opacity: 0; } } /* hard on/off, no fade */
+
+/* Borderless send button — a terminal return glyph instead of the paper plane */
+.persona-chat .pc-send-btn {
+  background: transparent;
+  border: none;
+  color: var(--ost-green);
+  padding: 2px 8px;
+}
+.persona-chat .pc-send-btn svg { display: none; }
+.persona-chat .pc-send-btn::before {
+  content: "\21B5"; /* ↵ return */
+  font-family: var(--pc-font);
+  /* The same size as the line it commits, so the row reads as one piece of
+   * type rather than a field with a smaller button parked next to it. */
+  font-size: var(--crt-entry-size);
+  line-height: 1;
+}
+.persona-chat .pc-send-btn:not(:disabled):hover { background: rgba(0, 255, 65, 0.08); }
+.persona-chat .pc-send-btn:disabled { opacity: 0.3; }
+
+/* Typing indicator — blinking phosphor dots */
+.persona-chat .pc-dots span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ost-green);
+  opacity: 0.6;
+  animation: hc-dot-blink 1.2s infinite ease-in-out;
+}
+.persona-chat .pc-dots span:nth-child(2) { animation-delay: 0.15s; }
+.persona-chat .pc-dots span:nth-child(3) { animation-delay: 0.3s; }
+
+@keyframes hc-dot-blink {
+  0%, 80%, 100% { opacity: 0.2; }
+  40% { opacity: 0.9; }
+}
+
+/* === Short viewports ===
+ *
+ * A laptop in a split screen, and any phone turned sideways. Flush left for the
+ * same line-anchored-rewrite reason as the blocks above.
+ *
+ * This is the one place a handheld is HARDER to size than the tube it came
+ * from. A tube is a surface and can simply get shorter; a device has a shape,
+ * and 390 x 300 is not a phone by any reading. The theme takes that on the chin
+ * rather than pretending otherwise: below this height the frame stops being an
+ * iPhone and becomes a small screen with rounded corners, which is still a
+ * better answer than a device taller than the window it sits in.
+ *
+ * `--hc-frame-min-h` is the floor, and a floor set for a tall window is a bug in
+ * a short one: 300px of device under 76px of composer chrome does not fit in a
+ * 320px landscape viewport with a keyboard up, and `max()` would hold the 300
+ * anyway. 150px is two lines and the prompt — the least that is still a screen —
+ * and at this height the clamp is what is actually choosing, so the floor's only
+ * job is to stop being the thing that overflows.
+ *
+ * The three paddings come down with it because they were tuned as a share of the
+ * nominal device. They come down FURTHER than the parent's did (14 against its
+ * 20) because this frame is also narrower than the tube ever was, so the same
+ * pad is a larger share of both axes at once. The frame numbers (`--hc-radius`,
+ * `--hc-bw`) deliberately do NOT move: they are the hardware's proportions, and
+ * a device does not get sharper corners because the desk got smaller. The width
+ * does not move either — a phone held sideways is still 390 points across. */
+@media (max-height: 560px) {
+:root {
+  --hc-frame-min-h: 150px;
+  --hc-screen-pad: 14px;
+  --hc-entry-floor: 16px;
+  --hc-status-gap: 8px;
+}
+}
