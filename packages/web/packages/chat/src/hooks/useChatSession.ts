@@ -211,7 +211,17 @@ function createSession(options: {
     destroyBackend(): void {
       // Closing the backend ends the orchestrator's event loop on its own —
       // the inbound stream completes — so there is no separate `stop()` here.
-      ;(raw as { destroy?: () => void }).destroy?.()
+      //
+      // `backend`, NOT `raw`. When `raw` is already a contract backend the two are
+      // the same object and this is unchanged; when it is not, `backend` is the
+      // `ChatBackendAdapter` built above and the adapter is what the orchestrator
+      // has been driving. Destroying `raw` directly skipped the adapter's own
+      // teardown — its shared AbortController, and the EventQueue whose closure is
+      // what actually ends `runEventLoop`'s pending `iterator.next()` — so every
+      // mount/unmount cycle leaked an adapter, a controller, and an event loop that
+      // could never complete. The adapter's `destroy()` calls `raw.destroy?.()`
+      // itself, so nothing is lost by going through it.
+      ;(backend as { destroy?: () => void }).destroy?.()
     },
   }
 }

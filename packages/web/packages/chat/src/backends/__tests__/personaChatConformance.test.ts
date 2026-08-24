@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import type { InboundEvent } from '../../contract/backend/InboundEvent'
 import { PersonaChatBackend, type TurnStatus } from '../PersonaChatBackend'
-import { hangingSse, sse, truncatedSse } from './sse'
+import { hangingSse, type ScriptedSse, scriptedSse, sse, truncatedSse } from './sse'
 
 /**
  * Conformance vectors for the `persona-chat-coordinator` ingredient.
@@ -28,7 +28,7 @@ interface Fixture {
 
 function fixture(
   streamFor: (signal: AbortSignal | null | undefined) => ReadableStream<Uint8Array> | null,
-  opts: { conversationOk?: boolean } = {},
+  opts: { conversationOk?: boolean; conversationGate?: Promise<void> } = {},
 ): Fixture {
   const calls: Call[] = []
   const statuses: Array<TurnStatus | null> = []
@@ -39,6 +39,8 @@ function fixture(
     authorize: async (path, init) => {
       calls.push({ path, init })
       if (path.endsWith('/conversations')) {
+        // Held open so a vector can act while the creation POST is still in flight.
+        if (opts.conversationGate) await opts.conversationGate
         if (opts.conversationOk === false) return new Response('nope', { status: 500 })
         return new Response(JSON.stringify({ id: 'conv-1' }), {
           status: 200,
@@ -76,6 +78,14 @@ function fixture(
       return out
     },
   }
+}
+
+/**
+ * Let the turn chain advance. Turns are sequenced on promise resolution, not on timers, so
+ * there is nothing for fake timers to advance — draining the microtask queue is the wait.
+ */
+async function settle(): Promise<void> {
+  for (let i = 0; i < 16; i++) await Promise.resolve()
 }
 
 const hello: Array<[string, unknown]> = [
@@ -293,6 +303,67 @@ describe('persona-chat-coordinator conformance', () => {
     f.backend.destroy()
     await expect(f.backend.send('hi', [])).rejects.toThrow(/destroyed/i)
     expect(f.calls).toEqual([])
+  })
+
+  it('pcc-017 ci-one-turn-at-a-time: a second send waits for the first turn to finish', async () => {
+    // The coordinator keeps ONE cancellation handle and ONE open-invocation map, so two turns
+    // running at once corrupt both: the second turn's controller overwrites the first's (leaving
+    // `destroy` able to cancel only the newer request), and whichever turn ends first clears the
+    // shared invocation map out from under the other. Nothing upstream prevents the overlap —
+    // none of the chat surfaces disable the composer while a turn is in flight — so the
+    // coordinator has to sequence the turns itself.
+    const scripts: ScriptedSse[] = []
+    const f = fixture(() => {
+      const script = scriptedSse()
+      scripts.push(script)
+      return script.stream
+    })
+    const messages = () => f.calls.filter((c) => c.path.endsWith('/messages'))
+
+    await f.backend.send('one', [])
+    await f.backend.send('two', [])
+    await settle()
+
+    // The second turn is queued, not racing: its request has not been issued at all.
+    expect(messages()).toHaveLength(1)
+    expect(JSON.parse(String(messages()[0]!.init.body))).toEqual({ message: 'one' })
+
+    scripts[0]!.emit('done', {})
+    scripts[0]!.close()
+    await f.events(2)
+    await settle()
+
+    // And it is not dropped either — it goes out once the first turn is off the wire.
+    expect(messages()).toHaveLength(2)
+    expect(JSON.parse(String(messages()[1]!.init.body))).toEqual({ message: 'two' })
+  })
+
+  it('pcc-018 ci-destroy-authoritative: destroy during conversation creation stops the turn', async () => {
+    // The window before a turn has a controller of its own. The creation POST runs on the
+    // coordinator's lifetime handle instead, and the turn re-checks after that await: a
+    // creation request that had already resolved would otherwise carry straight on and post the
+    // user's message into a conversation the caller believes is gone.
+    let release!: () => void
+    const gate = new Promise<void>((resolve) => {
+      release = resolve
+    })
+    const f = fixture(() => sse(hello), { conversationGate: gate })
+
+    await f.backend.send('hi', [])
+    await settle()
+    const created = f.calls.filter((c) => c.path.endsWith('/conversations'))
+    expect(created).toHaveLength(1)
+    const signal = created[0]!.init.signal as AbortSignal | null | undefined
+    expect(signal?.aborted).toBe(false)
+
+    f.backend.destroy()
+    expect(signal?.aborted).toBe(true)
+
+    // Resolved AFTER the destroy, standing in for a request already on its way back when the
+    // surface tore down — an abort the transport had no chance to honour.
+    release()
+    await settle()
+    expect(f.calls.filter((c) => c.path.endsWith('/messages'))).toEqual([])
   })
 
   it('pcc-016 ci-status-out-of-band: a retry drives status, never the transcript', async () => {

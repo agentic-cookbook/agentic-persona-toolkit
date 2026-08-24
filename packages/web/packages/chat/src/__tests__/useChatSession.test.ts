@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
 import { useChatSession } from '../hooks/useChatSession'
 import type { ChatBackend } from '../backends/types'
+import { ChatBackendAdapter } from '../backends/ChatBackendAdapter'
 
 function createMockBackend(response: string = 'mock reply'): ChatBackend {
   return {
@@ -187,6 +188,36 @@ describe('useChatSession', () => {
 
     unmount()
     expect(destroy).toHaveBeenCalled()
+  })
+
+  // The hook wraps a non-contract `ChatBackend` in a `ChatBackendAdapter`, and it is the
+  // ADAPTER that owns the EventQueue whose closure is what actually ends `runEventLoop`'s
+  // pending `iterator.next()`. Tearing down the raw backend directly left the adapter and its
+  // event loop alive for the life of the page — one leak per mount/unmount cycle, and under
+  // Strict Mode that is every mount.
+  //
+  // Asserted on the adapter's own `destroy` because the leak has no other visible edge: the raw
+  // backend's mock is called either way, which is exactly why the test above passed throughout.
+  it('destroys the adapter, not just the raw backend it wraps', () => {
+    const adapterDestroy = vi.spyOn(ChatBackendAdapter.prototype, 'destroy')
+    try {
+      const destroy = vi.fn()
+      const backend: ChatBackend = {
+        sendMessage: vi.fn().mockResolvedValue('ok'),
+        destroy,
+      }
+
+      const { unmount } = renderHook(() =>
+        useChatSession({ backend, persona: { name: 'Bot' } }),
+      )
+
+      unmount()
+      expect(adapterDestroy).toHaveBeenCalled()
+      // Nothing is lost by going through the adapter: it destroys the raw backend itself.
+      expect(destroy).toHaveBeenCalled()
+    } finally {
+      adapterDestroy.mockRestore()
+    }
   })
 
   // `say` types a line one character at a time, each character scheduling the next, and the

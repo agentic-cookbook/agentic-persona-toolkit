@@ -75,6 +75,29 @@ export class PersonaChatBackend implements Backend {
   private conversationID: string | null = null
   private controller: AbortController | null = null
   private destroyed = false
+  /**
+   * Aborted by {@link destroy}. `controller` covers only the message stream, which does not
+   * exist yet while {@link ensureConversation} is in flight — so a destroy during that window
+   * used to abort `null` and the turn carried on, POSTing the user's message after teardown.
+   */
+  private readonly lifetime = new AbortController()
+  /**
+   * The tail of the turn chain. Turns run ONE AT A TIME, in send order.
+   *
+   * `send` is fire-and-forget by contract, and it used to fire `runTurn` straight into the
+   * background with nothing serialising them. Two overlapping turns then shared the two pieces
+   * of per-turn state on this instance and clobbered each other: `controller` holds one slot,
+   * so the second turn overwrote the first's and {@link destroy} could only abort the newer
+   * one; and `openInvocations` is one map, so the FIRST turn's `finally` cleared it out from
+   * under the second, whose still-streaming `commandCompleted` events then matched no open id.
+   * Nothing gates the composer on an in-flight turn — none of the three chat surfaces disable
+   * it — so overlapping sends are ordinary, not a corner case.
+   *
+   * Queuing rather than widening the state to a per-turn record is the smaller change AND the
+   * better model: adh serves one reply at a time on a conversation, so a second turn racing
+   * the first was never a state the transcript could represent.
+   */
+  private tail: Promise<void> = Promise.resolve()
 
   /** Open invocations, oldest first, keyed by command name (see ci-invocation-ids). */
   private readonly openInvocations = new Map<string, string[]>()
@@ -109,7 +132,13 @@ export class PersonaChatBackend implements Backend {
     }
 
     const localID = crypto.randomUUID()
-    void this.runTurn(text, localID)
+    // Queued behind whatever is already running (see `tail`). The chain must never reject, or
+    // one turn's unexpected throw would swallow every turn after it.
+    this.tail = this.tail
+      .then(() => this.runTurn(text, localID))
+      .catch((err) => {
+        this.emit({ kind: 'transportError', message: errorMessage(err, 'The chat request failed.') })
+      })
     return localID
   }
 
@@ -127,6 +156,9 @@ export class PersonaChatBackend implements Backend {
   destroy(): void {
     this.destroyed = true
     this.controller?.abort()
+    // The conversation-creation POST is not covered by `controller` — it runs before any turn
+    // has one. Without this, destroying mid-`ensureConversation` left that request in flight.
+    this.lifetime.abort()
     // Emitted here rather than left to the aborted turn's own cleanup: the
     // abort unwinds asynchronously, and the queue closes on the next line.
     // A surface holding a half-written draft would otherwise keep it forever.
@@ -139,6 +171,7 @@ export class PersonaChatBackend implements Backend {
     if (this.conversationID) return this.conversationID
     const res = await this.opts.authorize(this.conversationsPath, {
       method: 'POST',
+      signal: this.lifetime.signal,
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({
         personaSlug: this.opts.personaSlug,
@@ -161,6 +194,8 @@ export class PersonaChatBackend implements Backend {
   private async runTurn(text: string, localID: string): Promise<void> {
     const status = this.opts.onStatus
     let committed = false
+    // A queued turn can reach the front of the chain after the surface was torn down.
+    if (this.destroyed) return
     try {
       status?.('thinking')
 
@@ -177,6 +212,12 @@ export class PersonaChatBackend implements Backend {
         })
         return
       }
+
+      // Re-checked AFTER the await: `destroy` during `ensureConversation` set the flag and
+      // aborted `lifetime`, but if that request had already resolved the turn would otherwise
+      // carry straight on and POST the user's message to a conversation the caller believes is
+      // gone — contradicting this class's own `ci-destroy-authoritative` promise.
+      if (this.destroyed) return
 
       const controller = new AbortController()
       this.controller = controller

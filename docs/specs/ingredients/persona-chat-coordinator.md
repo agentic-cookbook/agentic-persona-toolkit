@@ -3,11 +3,11 @@ id: 412B845B-7496-4347-A710-1BD29325C1BE
 title: "Persona Chat Coordinator"
 domain: agenticdevelopertoolkit://ingredients/chat/persona-chat-coordinator
 type: ingredient
-version: 1.2.0
+version: 1.3.0
 status: draft
 language: en
 created: 2026-08-20
-modified: 2026-08-20
+modified: 2026-08-24
 author: Mike Fullerton
 copyright: 2026 Mike Fullerton
 license: MIT
@@ -80,6 +80,14 @@ knowledge and must not acquire any.
   persona slug and the configured model at creation time.
 - **ci-no-history**: The coordinator MUST NOT send conversation history with a
   turn, and MUST NOT retain history locally. History is adh's.
+- **ci-one-turn-at-a-time**: Turns MUST run one at a time, in send order. A
+  `send` issued while a turn is in flight MUST be queued rather than started
+  alongside it, and MUST still run once the turn ahead of it ends. The
+  coordinator carries per-turn state — its cancellation handle and its open
+  invocations — in single slots, so two turns in flight corrupt both; and adh
+  serves one reply per conversation at a time, so overlapping turns are not a
+  state the transcript can represent either. Nothing upstream enforces this: no
+  surface disables its composer for the duration of a turn.
 
 ### Streaming
 
@@ -125,7 +133,10 @@ knowledge and must not acquire any.
 - **ci-destroy-authoritative**: `destroy` MUST cancel any in-flight turn. The
   coordinator MUST own its own cancellation handle rather than binding directly
   to a caller-supplied one, so that `destroy` remains authoritative when a caller
-  signal is also present.
+  signal is also present. The guarantee MUST hold for the whole turn,
+  including the window before the turn has a handle of its own — conversation
+  creation. A turn whose creation request had already resolved when `destroy`
+  landed MUST stop there rather than posting the message.
 - **ci-no-reuse-after-destroy**: Once destroyed, a coordinator is spent. A
   subsequent `send` MUST fail immediately and MUST NOT reach the network, so a
   caller that keeps a stale reference gets an error rather than a turn whose
@@ -177,6 +188,8 @@ control can announce turn progress; announcement is the control's concern.
 | pcc-014 | ci-destroy-authoritative | `destroy` mid-stream | Request cancelled, `draftCleared`, no `messageReceived` |
 | pcc-015 | ci-no-reuse-after-destroy | `send` after `destroy` | Throws; no request issued |
 | pcc-016 | ci-status-out-of-band | `status` event, phase `retrying` | Status sink receives retry phase; no `InboundEvent` emitted |
+| pcc-017 | ci-one-turn-at-a-time | Two `send`s, first turn still streaming | One message POST; the second is issued only after the first turn ends |
+| pcc-018 | ci-destroy-authoritative | `destroy` while conversation creation is in flight | Creation request cancelled; no message POST, even if creation then resolves |
 
 Each vector MUST be observed failing for its stated reason before it is trusted.
 A vector that has never failed has proved nothing.
@@ -196,7 +209,12 @@ A vector that has never failed has proved nothing.
   correlates to the oldest open invocation of that name. Recorded in Design
   Decisions.
 - **`destroy` during conversation creation.** The creation request is cancelled
-  and no conversation is retained.
+  and no conversation is retained. A transport that cannot honour the abort in
+  time is covered too: the turn re-checks after the await rather than trusting
+  the cancellation to have taken.
+- **A second `send` during a turn.** Queued behind it, not raced against it (see
+  `ci-one-turn-at-a-time`). The queue is a chain of turns, and one turn's failure
+  MUST NOT break the chain for the turns behind it.
 - **Reuse after `destroy`.** A destroyed coordinator MUST fail fast rather than
   silently reconnecting.
 
@@ -333,6 +351,7 @@ rule. The real fix is an invocation id on the wire, which is an adh change.
 
 | Version | Date | Author | Summary |
 |---------|------|--------|---------|
+| 1.3.0 | 2026-08-24 | Mike Fullerton | Added `ci-one-turn-at-a-time` and extended `ci-destroy-authoritative` over the conversation-creation window. Both were behaviors the implementation silently lacked: overlapping turns shared one cancellation handle and one invocation map, and a `destroy` during creation left the request in flight and let the turn post afterwards. Added vectors pcc-017 and pcc-018. |
 | 1.0.0 | 2026-08-20 | Mike Fullerton | Initial creation |
 | 1.2.0 | 2026-08-20 | Mike Fullerton | Rewrote the Kotlin and Windows platform notes to match the port plans in `docs/planning/ports/`. The Kotlin note called for a cold `Flow`, which cannot express a push source; the Windows note called for `CancellationToken`, which the contract has no parameter to carry. |
 | 1.1.0 | 2026-08-20 | Mike Fullerton | Replaced `ci-forward-caller-signal` with `ci-no-reuse-after-destroy`. The original requirement was unimplementable as written: `Backend.send` takes no cancellation signal, so there is no caller signal to forward. `ci-destroy-authoritative` already carries the cancellation guarantee; what was untested was the state a destroyed coordinator is left in. Re-pointed `pcc-015` accordingly. |
