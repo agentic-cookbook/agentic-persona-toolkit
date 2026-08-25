@@ -36,6 +36,8 @@ import {
   synthwave84Css,
   tokyoNightCss,
   vesperCss,
+  crtMonitorCss,
+  handheldCommunicatorCss,
 } from './theme-data'
 
 export type ThemeKey =
@@ -76,6 +78,8 @@ export type ThemeKey =
   | 'synthwave84'
   | 'tokyo-night'
   | 'vesper'
+  | 'crt-monitor'
+  | 'handheld-communicator'
 
 export interface ThemeEntry {
   id: ThemeKey
@@ -129,6 +133,12 @@ export const themes: Record<ThemeKey, ThemeEntry> = {
   synthwave84: { id: 'synthwave84', label: "Synthwave '84", css: synthwave84Css },
   'tokyo-night': { id: 'tokyo-night', label: 'Tokyo Night', css: tokyoNightCss },
   vesper: { id: 'vesper', label: 'Vesper', css: vesperCss },
+  'crt-monitor': { id: 'crt-monitor', label: 'CRT Monitor', css: crtMonitorCss },
+  'handheld-communicator': {
+    id: 'handheld-communicator',
+    label: 'Handheld Communicator',
+    css: handheldCommunicatorCss,
+  },
 }
 
 export const themeIds: ThemeKey[] = Object.keys(themes) as ThemeKey[]
