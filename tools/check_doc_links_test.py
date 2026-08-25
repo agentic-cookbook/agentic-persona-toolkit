@@ -76,4 +76,37 @@ with tempfile.TemporaryDirectory() as tmp:
         True,
     )
 
-print("check_doc_links_test: 6 passed")
+    # (7) The private-scope guard's own self-test carries a recipe-URI fixture
+    #     string that does not name a real recipe. It is skipped by filename, not
+    #     scanned as a citation into this repo.
+    root = Path(tmp) / "private-scope-self-test-skipped"
+    (root / "tools").mkdir(parents=True)
+    (root / "tools" / "check_no_private_scope_test.py").write_text(
+        'domain: agenticdeveloperhub://recipes/does-not-exist\n'
+    )
+    (root / "recipes").mkdir(parents=True)
+    (root / "recipes" / "button.md").write_text("hello\n")
+    check(
+        "private-scope self-test fixture is skipped",
+        run(root).returncode,
+        0,
+    )
+
+    # (8) The skip is by filename, not by directory: a different file in the same
+    #     tools/ dir, carrying the same fixture string, must still be scanned and
+    #     fail. Without this half, widening SKIP_DIRS to swallow all of tools/
+    #     would pass test (7) too, and that is not what the fix does.
+    root = Path(tmp) / "tools-dir-not-fully-skipped"
+    (root / "tools").mkdir(parents=True)
+    (root / "tools" / "notes.md").write_text(
+        'agenticdeveloperhub://recipes/does-not-exist\n'
+    )
+    (root / "recipes").mkdir(parents=True)
+    (root / "recipes" / "button.md").write_text("hello\n")
+    check(
+        "same fixture string in a non-self-test file still fails",
+        run(root).returncode,
+        1,
+    )
+
+print("check_doc_links_test: 8 passed")

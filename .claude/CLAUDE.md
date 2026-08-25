@@ -1,8 +1,9 @@
 # agenticdevelopertoolkit
 
 A set of reusable per-platform packages: sixteen web libraries (`ui`,
-`chat`, `editing`, `markdown`, `search`, `themes`, and more) plus native
-scaffolding for Apple, Terminal, Android, and Windows. Persona-chat wiring
+`chat`, `editing`, `markdown`, `search`, `themes`, and more), a Swift
+package for Apple, and a Python package for Terminal. Android and Windows
+are port plans in `docs/planning/ports/`, with no code yet. Persona-chat wiring
 is one capability among them, not the toolkit's identity: the `chat`
 package's `PersonaChatBackend` wires apps to the official agentic registry
 (persona definitions + LLM provider integrations) and my-agentic-storage

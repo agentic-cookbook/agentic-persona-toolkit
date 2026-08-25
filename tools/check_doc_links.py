@@ -39,8 +39,10 @@ SKIP_NAMES = {"pnpm-lock.yaml", "package-lock.json"}
 # sit in the self-test's own source, and a repo-root scan (this guard's
 # default) walks tools/ same as everything else. Skip that one file rather
 # than the strings inside it: they are proof-of-behavior, not a citation
-# into this repo.
-SKIP_NAMES |= {"check_doc_links_test.py"}
+# into this repo. The private-scope guard's self-test carries the same kind
+# of fixture — a recipe URI written to prove the `(?!://recipes/)` carve-out
+# fires — and is skipped for the same reason.
+SKIP_NAMES |= {"check_doc_links_test.py", "check_no_private_scope_test.py"}
 
 
 def main() -> None:

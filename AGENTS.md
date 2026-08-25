@@ -6,8 +6,9 @@ Orientation for agents (and humans) working in this repo.
 
 A set of reusable per-platform packages: sixteen web libraries under
 `packages/web/packages/` (`ui`, `chat`, `editing`, `markdown`, `search`,
-`themes`, and more, listed in full below) plus native scaffolding for
-Apple, Terminal, Android, and Windows.
+`themes`, and more, listed in full below), a Swift package for Apple, and a
+Python package for Terminal. Android and Windows are port plans in
+`docs/planning/ports/`, with no code yet.
 
 Persona-chat wiring is one capability among them, not the toolkit's
 identity: the `chat` package's `PersonaChatBackend` wires apps to the
