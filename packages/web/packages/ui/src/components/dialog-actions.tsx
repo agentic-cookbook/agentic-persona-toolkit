@@ -32,8 +32,9 @@ export interface DialogActionsProps {
   focusOnMount?: boolean
   /**
    * Button-row layout. "auto" (default) resolves equal-width vs natural-right-
-   * justify per alert-and-dialog §Layout; "equal" / "natural" force it. The
-   * invitation modal forces "equal" per its design spec.
+   * justify per alert-and-dialog §Layout; "equal" / "natural" force it. "equal"
+   * exists as a deliberate escape hatch from the auto rule, for a host whose
+   * button row needs equal widths regardless.
    */
   layout?: "auto" | "equal" | "natural"
 }

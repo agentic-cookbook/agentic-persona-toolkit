@@ -20,9 +20,9 @@ import { cn } from "../lib/utils"
  * Deliberately NOT `ErrorText`, which is the platform's inline error everywhere else:
  * `ErrorText` is `text-sm`, and a `text-sm` error swapping in for a `font-mono
  * text-[0.7rem]` hint moves the layout on the keystroke that makes the value invalid.
- * Here the hint's metrics win and the error is its red twin — the refutation is
- * recorded in docs/ui/fleet-ui-audit.md (Tier 6). One consequence of that choice is
- * that this line carries no `role="alert"`, which `ErrorText` does.
+ * Here the hint's metrics win and the error is its red twin — this divergence was
+ * challenged in a design audit and deliberately upheld. One consequence of that
+ * choice is that this line carries no `role="alert"`, which `ErrorText` does.
  */
 export function FieldFootnote({
   hint,

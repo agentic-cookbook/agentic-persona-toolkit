@@ -6,15 +6,15 @@
 // who doesn't should never notice it.
 //
 // This does NOT compose `Disclosure`. Disclosure is a framed card — rounded
-// border, raised surface, `text-sm font-medium` title, a ruled content box — and
-// its three consumers (DeleteEntitySection, the API explorer's three panels, the
-// showcase) all want exactly that. Reaching this look through it would mean
-// cancelling every visual decision it makes: the card chrome, the header padding,
-// the chevron's size and colour, the title's family/size/weight/colour, and the
-// content frame — nine overrides to keep ~20 lines of open/close state, and a
-// standing coupling that would let a future Disclosure restyle silently break
-// the document reader. Two disclosures in the toolkit is not a DRY violation:
-// they encode different knowledge (a framed section vs. an inline text toggle).
+// border, raised surface, `text-sm font-medium` title, a ruled content box — for
+// a host that wants exactly that shape; no block in this repository currently
+// composes it. Reaching this look through it would still mean cancelling every
+// visual decision it makes: the card chrome, the header padding, the chevron's
+// size and colour, the title's family/size/weight/colour, and the content frame
+// — nine overrides to keep ~20 lines of open/close state, and a standing
+// coupling that would let a future Disclosure restyle silently break the
+// document reader. Two disclosures in the toolkit is not a DRY violation: they
+// encode different knowledge (a framed section vs. an inline text toggle).
 
 import type { HTMLAttributes, ReactNode } from "react"
 import { useId, useState } from "react"

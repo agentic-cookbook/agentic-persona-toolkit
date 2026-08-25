@@ -819,7 +819,7 @@ describe('HierarchicalTopicDetail — the automatic frontier detail', () => {
   // With a region chosen and no ecosystem, the ecosystems list is the unselected frontier and the
   // pane belongs to the package. There are two modes and no third: the default nudge, and the same
   // nudge carrying a host `overviewHelp` blurb. Every one of these asserts that no ROW is duplicated
-  // into the pane — that is the rule (docs/ui/fleet-ui-audit.md §1.5), and the card grid that used
+  // into the pane — that is the rule, and the card grid that used
   // to be the `overview: "cards"` opt-in is exactly what it forbids.
   const pane = (container: HTMLElement): HTMLElement => {
     const el = container.querySelector('section')

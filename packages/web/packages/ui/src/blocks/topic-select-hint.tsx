@@ -24,8 +24,8 @@ const article = (noun: string): string => (/^[aeiou]/i.test(noun) ? "an" : "a")
  * WHY to choose one — rendered under the headline; with `selectable: false` (an empty
  * list) the blurb shows alone, since there is nothing to select yet and the rail already
  * shows the level's `emptyLabel`. There is no richer alternative to opt into: an
- * unselected frontier is this card and nothing else (docs/ui/fleet-ui-audit.md §1.5),
- * which is why the card-grid landing this file used to also export is gone.
+ * unselected frontier is this card and nothing else, which is why the card-grid landing
+ * this file used to also export is gone.
  * `data-htd-select-hint` is the stable hook for tests, so they never couple to the copy.
  */
 export function TopicSelectHint({

@@ -105,11 +105,10 @@ function UploadMarkdownControl({
  * accessible name. Controlled via `value` / `onChange`; the editor owns no title
  * or classification fields — those stay with the consuming form.
  *
- * It is the primitive, not the default: a surface that edits a whole document
- * wants `MarkdownDocumentEditor` from `@agenticdevelopertoolkit/markdown`, which composes
- * this
- * with a live preview and a side-by-side layout. Reach for this one when a preview would
- * be noise — a one-line description, a comment box.
+ * It is the primitive, not the default: a surface that edits a whole document wants
+ * `MarkdownDocumentEditor` from `@agenticdevelopertoolkit/markdown`, which composes
+ * this with a live preview and a side-by-side layout. Reach for this one when a preview
+ * would be noise — a one-line description, a comment box.
  */
 export function MarkdownEditor({
   value,

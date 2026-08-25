@@ -48,8 +48,8 @@ export interface TopicDetailItem {
   previewLines?: number
   /** What this topic is for — one or two sentences. **This component renders it nowhere.** It fed
    *  the card grid that a level could opt into for its unselected frontier, and that opt-in is gone
-   *  (docs/ui/fleet-ui-audit.md §1.5 — the unselected frontier is the select nudge and nothing
-   *  else), so setting it changes no pixel here. It survives because hosts carry the same row shape
+   *  (the unselected frontier is the select nudge and nothing else), so setting it changes no pixel
+   *  here. It survives because hosts carry the same row shape
    *  into surfaces that DO show a blurb (a selected topic's `EmptyState`); to explain a LIST, use
    *  the level's `overviewHelp`, which is the copy the nudge renders. */
   description?: string

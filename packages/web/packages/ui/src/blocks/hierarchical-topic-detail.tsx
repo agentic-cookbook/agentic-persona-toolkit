@@ -98,9 +98,9 @@ export interface TopicLevel {
    *  `itemNoun` / `overviewHelp`). Pass `false` ONLY where the pane is already holding a real
    *  editor with nothing selected — the inline CREATE form (`useMasterDetailLevel`),
    *  which the nudge would otherwise cover. Never to hang a landing page there: an
-   *  unselected frontier is the nudge and nothing else (docs/ui/fleet-ui-audit.md §1.5) —
-   *  which is why there is no longer a card-grid opt-in: a grid of the rows the rail is
-   *  already showing IS a second surface beside the rail. */
+   *  unselected frontier is the nudge and nothing else, which is why there is no longer a
+   *  card-grid opt-in: a grid of the rows the rail is already showing IS a second surface
+   *  beside the rail. */
   overview?: boolean
   /** Singular noun for one row ("workspace", "site", "work item") — the select nudge names
    *  it: "Select a workspace …". Omit to fall back to the level's `title` ("Select an item
@@ -816,7 +816,7 @@ export function HierarchicalTopicDetail({
   // opts out entirely (`overview: false`), never to hang a landing page there. It exists ONLY in
   // that state: the moment the frontier gains a selection the host's real detail (children) shows.
   // There is exactly ONE shape here, by rule: a card grid of the same rows the rail is already
-  // showing is a second surface beside the rail (docs/ui/fleet-ui-audit.md §1.5).
+  // showing is a second surface beside the rail.
   const frontierLevel = firstUnselected === -1 ? null : levels[firstUnselected]
   const overview =
     // The nudge names the level's rows as specifically as it can (itemNoun → title → generic)

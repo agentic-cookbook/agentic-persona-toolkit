@@ -40,10 +40,10 @@
  * These are plain attributes with no runtime behaviour, so they are safe on any
  * `<input>`/`<textarea>`, server-rendered, with nothing to hydrate.
  *
- * Packages that cannot depend on `@agenticdevelopertoolkit/ui` (the registry and chat
- * packages ship zero runtime deps on purpose, so a host site can render them without
- * pulling the UI kit in) repeat the literal attributes inline and point back here.
- * This module stays the list of record.
+ * Packages that cannot depend on `@agenticdevelopertoolkit/ui` (`@agenticdevelopertoolkit/chat`
+ * ships zero runtime deps on purpose, so a host site can render it without pulling the
+ * UI kit in) repeat the literal attributes inline and point back here. This module
+ * stays the list of record.
  *
  * A parity guard in the consuming application is what holds those copies to it: it
  * reads this literal and fails when any copy is short, drifted, or carries a
