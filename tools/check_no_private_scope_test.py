@@ -20,6 +20,25 @@ def run(root: Path) -> subprocess.CompletedProcess:
     )
 
 
+def run_default(repo_root: Path) -> subprocess.CompletedProcess:
+    """Invoke the guard's default (no positional roots) code path, but pointed at a
+    throwaway repo_root via --repo-root instead of this script's own repo — the
+    only way to exercise DEFAULT_ROOTS/DEFAULT_FILES without editing real files."""
+    return subprocess.run(
+        [sys.executable, str(GUARD), "--repo-root", str(repo_root)],
+        capture_output=True,
+        text=True,
+    )
+
+
+def _stub_default_roots(repo_root: Path) -> None:
+    """The default invocation scans DEFAULT_ROOTS alongside DEFAULT_FILES — stub
+    them out as empty dirs so a DEFAULT_FILES test doesn't also need real
+    package/recipe/doc content to scan."""
+    for rel in ("packages/web/packages", "recipes", "docs", "websites"):
+        (repo_root / rel).mkdir(parents=True, exist_ok=True)
+
+
 def test_clean_tree_passes() -> None:
     with tempfile.TemporaryDirectory() as tmp:
         root = Path(tmp)
@@ -144,6 +163,73 @@ def test_empty_scan_is_not_a_pass() -> None:
         empty.mkdir()
         result = run(empty)
         assert result.returncode == 2, f"empty tree returned {result.returncode}"
+
+
+def test_default_files_readme_leak_is_caught() -> None:
+    """Fix 2, Step 6: DEFAULT_FILES widens the default invocation with three
+    root-level files scanned individually, without widening to the repo root.
+    Mirrors test_multiple_roots_are_all_scanned, but for the new file-shaped scan."""
+    with tempfile.TemporaryDirectory() as tmp:
+        repo_root = Path(tmp)
+        _stub_default_roots(repo_root)
+        (repo_root / "README.md").write_text(
+            "# @agentic-toolkit/model\n", encoding="utf-8"
+        )
+        result = run_default(repo_root)
+        assert result.returncode == 1, f"README.md leak survived the default scan: {result.stderr}"
+        assert "README.md:1" in result.stderr, result.stderr
+
+
+def test_default_files_missing_entry_is_skipped() -> None:
+    """A DEFAULT_FILES entry that does not exist (AGENTS.md and .claude/CLAUDE.md,
+    in this fixture) is skipped rather than erroring — only README.md is present."""
+    with tempfile.TemporaryDirectory() as tmp:
+        repo_root = Path(tmp)
+        _stub_default_roots(repo_root)
+        (repo_root / "README.md").write_text("clean\n", encoding="utf-8")
+        result = run_default(repo_root)
+        assert result.returncode == 0, (
+            f"a missing DEFAULT_FILES entry was not skipped cleanly: {result.stderr}"
+        )
+
+
+def test_recipe_uri_scheme_is_not_a_leak() -> None:
+    """Fix 3, Step 9 — positive: the recipe corpus's own domain-URI scheme is
+    exactly what the `(?!://recipes/)` lookahead exists to carve out."""
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        (root / "src").mkdir()
+        (root / "src" / "button.md").write_text(
+            "domain: agenticdeveloperhub://recipes/button\n", encoding="utf-8"
+        )
+        result = run(root)
+        assert result.returncode == 0, f"recipe URI scheme false-flagged: {result.stderr}"
+
+
+def test_lookahead_does_not_swallow_the_whole_scheme() -> None:
+    """Fix 3, Step 9 — negative, the one that matters: the carve-out is exactly one
+    scheme shape (`agenticdeveloperhub://recipes/...`). A bare product-name mention
+    still fires, and so does an `agenticdeveloperhub://` URI whose path is not
+    `recipes/` — proving the lookahead did not swallow the whole scheme."""
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        (root / "src").mkdir()
+        (root / "src" / "bare.ts").write_text(
+            "// built for agenticdeveloperhub\n", encoding="utf-8"
+        )
+        result = run(root)
+        assert result.returncode == 1, f"bare product name survived the lookahead: {result.stderr}"
+        assert "product name" in result.stderr, result.stderr
+
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        (root / "src").mkdir()
+        (root / "src" / "api.ts").write_text(
+            "// see agenticdeveloperhub://api/personas\n", encoding="utf-8"
+        )
+        result = run(root)
+        assert result.returncode == 1, f"non-recipes URI survived the lookahead: {result.stderr}"
+        assert "product name" in result.stderr, result.stderr
 
 
 def main() -> int:

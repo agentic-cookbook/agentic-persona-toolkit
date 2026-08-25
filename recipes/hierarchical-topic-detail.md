@@ -31,7 +31,6 @@ ingredients:
 - agenticdeveloperhub://recipes/alert-and-dialog
 depends-on: []
 related:
-- agenticdeveloperhub://recipes/focused-topic-detail
 - agenticdeveloperhub://recipes/topic-detail
 references: []
 ---
@@ -44,7 +43,7 @@ The **Hierarchical Topic / Detail View** is the general contract for a *stack* o
 nested topic/detail rails — the generalisation of the adh.com `/home` nesting
 (`[workspaces] | [features] | [entities] | [topics] | [detail]`). Each topic list's
 selection scopes the next, so a route reads as a hierarchy: **workspace ▸ feature ▸
-entity ▸ topic ▸ leaf**. It supersedes the popup-driven [[focused-topic-detail]]
+entity ▸ topic ▸ leaf**. It supersedes an earlier popup-driven detail pattern
 for workspace routes: the entity selector is a first-class *topic list* rail, not a
 dropdown.
 
@@ -418,8 +417,8 @@ ends at the list's edge lands beside whatever row happens to sit at the parent's
 phantom selection (v1.13.0 — a stub into the unselected frontier was tried and rejected). The
 unselected frontier's own landing is the select nudge below, not a connector.
 
-Standalone `TopicDetail` (the single two-pane primitive, used by [[focused-topic-detail]] and the showcase)
-keeps the classic **`selectionStyle="bar"`** gold left-border — the dash/connector markers are a property of
+Standalone `TopicDetail` (the single two-pane primitive, used by other single-pane
+consumers and the showcase) keeps the classic **`selectionStyle="bar"`** gold left-border — the dash/connector markers are a property of
 the hierarchical stack, not the primitive.
 
 ### The select nudge — the automatic no-selection landing (every HTDV)
@@ -1073,8 +1072,8 @@ arguments — the measuring stays in the component, the deciding is tested.
 - **One chrome, fed by context.** A single full-width breadcrumb + help spans every list;
   the feature **publishes its levels up** through the `WorkspaceChrome` context (rather
   than nesting its own frame), so the shell renders ONE merged frame. The entity selector
-  is a first-class list, not a popup — this recipe supersedes [[focused-topic-detail]] for
-  workspace routes.
+  is a first-class list, not a popup — this recipe supersedes the earlier popup-driven
+  pattern for workspace routes.
 - **Pure-intent selection, package-owned.** `onSelect`/`onClear` are pure navigation; the
   package decides which fires (re-click → `onClear`) and never auto-selects. Consumers
   write no toggle/resume logic — unselection and no-auto-select hold uniformly (dry).

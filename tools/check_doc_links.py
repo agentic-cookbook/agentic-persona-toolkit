@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
-"""Every repo-relative `docs/…md` or `recipes/…md` citation in this repo must resolve.
+"""Every repo-relative `docs/…md` or `recipes/…md` citation in this repo must resolve,
+and so must every `agenticdeveloperhub://recipes/<slug>` citation — the recipe corpus's
+own cross-reference scheme, used in `domain:` (self-resolving), `ingredients:`/`related:`
+frontmatter lists, and an ingredient table's Domain column.
 
 The scope guard is a denylist and knows the private scope's name; this is the complement.
 It asks only whether a reader following the citation lands on a file, which is the property
@@ -17,6 +20,17 @@ from pathlib import Path
 # A repo-relative doc path. The lookbehind rejects `./docs/x.md` and `../docs/x.md`
 # (relative to the citing file, so not ours to resolve) and `https://…/docs/x.md`.
 CITATION = re.compile(r"(?<![./\w-])((?:docs|recipes)/[\w./-]+\.md)\b")
+
+# The recipe corpus's own cross-reference scheme: `agenticdeveloperhub://recipes/<slug>`,
+# used in a recipe's `domain:` (self-resolving — the file always exists, it's citing
+# itself), `ingredients:`/`related:` frontmatter lists, and an ingredient table's Domain
+# column. check_no_private_scope.py's product-name pattern carries a matching
+# `(?!://recipes/)` lookahead that carves this same scheme shape out of its leak check —
+# that guard is answering "is this a product-name leak?" (no, it's an internal URI
+# scheme); this pattern answers the complementary question "does it still resolve to a
+# real file?" (not necessarily — a slug can name a recipe that stayed private, or one
+# that was never written). Both claims are true of the same string at once.
+RECIPE_URI = re.compile(r"agenticdeveloperhub://recipes/([a-z0-9-]+)\b")
 SKIP_DIRS = {"node_modules", "dist", ".turbo", ".git", "coverage", ".next"}
 SKIP_SUFFIXES = {".png", ".jpg", ".jpeg", ".svg", ".woff2", ".map", ".lock"}
 SKIP_NAMES = {"pnpm-lock.yaml", "package-lock.json"}
@@ -51,6 +65,10 @@ def main() -> None:
         for i, line in enumerate(lines, 1):
             for m in CITATION.finditer(line):
                 cited = m.group(1)
+                if not (root / cited).exists():
+                    hits.setdefault(cited, []).append(f"{rel}:{i}")
+            for m in RECIPE_URI.finditer(line):
+                cited = f"recipes/{m.group(1)}.md"
                 if not (root / cited).exists():
                     hits.setdefault(cited, []).append(f"{rel}:{i}")
 

@@ -22,8 +22,6 @@ tags:
 - toolbar
 ingredients:
 - agenticdeveloperhub://recipes/topic-detail
-- agenticdeveloperhub://recipes/button-bar
-- agenticdeveloperhub://recipes/empty-state
 depends-on: []
 related:
 - agenticdeveloperhub://recipes/list-with-details-pane
@@ -61,9 +59,9 @@ It is the base editor shell behind hub/admin topics that manage a list of record
 
 | Name | Domain | Role | Required | Configuration |
 |---|---|---|---|---|
-| ButtonBar | agenticdeveloperhub://recipes/button-bar | The fixed editing toolbar: gold mono title (`leading`) + the New/Delete/Cancel/Save preset | yes | `leading` = title + `titleBadge`; `actions` = `{ onCreate, createLabel, onCancel, canCancel, onSave, canSave, saving, onDelete, canDelete }`; `showDelete` = `!!onDelete` |
+| ButtonBar | — | The fixed editing toolbar: gold mono title (`leading`) + the New/Delete/Cancel/Save preset | yes | `leading` = title + `titleBadge`; `actions` = `{ onCreate, createLabel, onCancel, canCancel, onSave, canSave, saving, onDelete, canDelete }`; `showDelete` = `!!onDelete` |
 | TopicDetail | agenticdeveloperhub://recipes/topic-detail | The two-pane rail\|pane primitive: collapsible records rail + detail pane | yes | `items` (mapped from `EditorSectionItem[]`), `selectedId`, `onSelect`, `emptyLabel` = `emptyList`, `railSlot` = `listHeader`, `railWidth`, `panePadding={false}` |
-| EmptyState | agenticdeveloperhub://recipes/empty-state | The "nothing selected" placeholder rendered in the pane when not editing | yes | `title` = `emptyDetail`; fixed `className="m-3.5 min-h-[200px] flex-1"` |
+| EmptyState | — | The "nothing selected" placeholder rendered in the pane when not editing | yes | `title` = `emptyDetail`; fixed `className="m-3.5 min-h-[200px] flex-1"` |
 
 Composed shared primitives without their own recipe domains: `Badge`
 (`variant="accent"`) for the `⚠ N` count badge on warned rows.

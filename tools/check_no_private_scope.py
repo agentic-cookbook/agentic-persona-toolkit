@@ -15,12 +15,16 @@ not compile.
 This guard scans four directories, not the repo root: `packages/web/packages`
 (the library — the packages that arrived from the private repo), `recipes` and
 `docs` (the prose that describes them), and `websites` (the demo sites, which
-ship too). Nowhere else. The true repo root was tried and rejected: ADT's Apple
+ship too). The true repo root was tried and rejected: ADT's Apple
 and terminal trees legitimately reference `api.agenticdeveloperhub.com` as a real
 service endpoint, and this file's own source and self-test contain every pattern
 they exist to detect — a root that floods with expected hits is a guard nobody
 reads past. These four are exactly the trees that hold shipped prose and shipped
-code and nothing else that this guard can tell apart from a leak.
+code and nothing else that this guard can tell apart from a leak. So instead of
+widening to the root, three root-level files that a public reader actually opens
+first — `README.md`, `AGENTS.md`, `.claude/CLAUDE.md` — are named individually
+and scanned alongside the four directories, without pulling in the Apple/terminal
+noise the rest of the root would bring.
 
 Three patterns, for three different failures:
 
@@ -74,6 +78,11 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_ROOTS = ("packages/web/packages", "recipes", "docs", "websites")
+# Root-level files scanned individually rather than by widening to the repo root
+# (see the docstring). A listed file that does not exist is skipped, not an error —
+# these three are the ones this repo happens to ship; a fork of this guard might not
+# ship all of them.
+DEFAULT_FILES = ("README.md", "AGENTS.md", ".claude/CLAUDE.md")
 
 PATTERNS = {
     "private package scope": re.compile(r"@agentic-toolkit/"),
@@ -101,6 +110,15 @@ SKIP_SUFFIXES = {
 }
 
 
+def _scan_lines(text: str, rel: Path) -> list[str]:
+    hits: list[str] = []
+    for lineno, line in enumerate(text.splitlines(), start=1):
+        for label, pattern in PATTERNS.items():
+            if pattern.search(line):
+                hits.append(f"{rel}:{lineno}: {label}: {line.strip()}")
+    return hits
+
+
 def scan(root: Path) -> tuple[list[str], int]:
     hits: list[str] = []
     scanned = 0
@@ -116,12 +134,20 @@ def scan(root: Path) -> tuple[list[str], int]:
         except (UnicodeDecodeError, OSError):
             continue
         scanned += 1
-        for lineno, line in enumerate(text.splitlines(), start=1):
-            for label, pattern in PATTERNS.items():
-                if pattern.search(line):
-                    rel = path.relative_to(root)
-                    hits.append(f"{rel}:{lineno}: {label}: {line.strip()}")
+        hits.extend(_scan_lines(text, path.relative_to(root)))
     return hits, scanned
+
+
+def scan_file(path: Path, label_root: Path) -> tuple[list[str], int]:
+    """Scan one DEFAULT_FILES entry. The caller decides what a missing file means
+    (skip, per DEFAULT_FILES' contract) — this only scans what is actually there."""
+    if path.name in SKIP_NAMES or path.suffix.lower() in SKIP_SUFFIXES:
+        return [], 0
+    try:
+        text = path.read_text(encoding="utf-8")
+    except (UnicodeDecodeError, OSError):
+        return [], 0
+    return _scan_lines(text, path.relative_to(label_root)), 1
 
 
 def main() -> int:
@@ -133,13 +159,27 @@ def main() -> int:
         default=None,
         help=(
             "trees to scan (default: packages/web/packages, recipes, docs, "
-            "websites). A single per-package path — e.g. "
-            "packages/web/packages/<pkg> — still works unchanged."
+            "websites, plus the individually-named README.md, AGENTS.md, and "
+            ".claude/CLAUDE.md). A single per-package path — e.g. "
+            "packages/web/packages/<pkg> — still works unchanged, but passing "
+            "explicit roots replaces the default files too."
+        ),
+    )
+    parser.add_argument(
+        "--repo-root",
+        default=None,
+        help=(
+            "base to resolve DEFAULT_ROOTS/DEFAULT_FILES against, instead of this "
+            "script's own repo (self-test only — real usage never needs this)."
         ),
     )
     args = parser.parse_args()
+    repo_root = Path(args.repo_root).resolve() if args.repo_root else REPO_ROOT
 
-    roots = args.roots if args.roots else [REPO_ROOT / r for r in DEFAULT_ROOTS]
+    roots = args.roots if args.roots else [repo_root / r for r in DEFAULT_ROOTS]
+    # DEFAULT_FILES rides along only with the default invocation — explicit roots
+    # on the command line replace DEFAULT_ROOTS and are not widened further.
+    files = [repo_root / f for f in DEFAULT_FILES] if not args.roots else []
 
     all_hits: list[str] = []
     total_scanned = 0
@@ -149,6 +189,13 @@ def main() -> int:
             return 2
 
         hits, scanned = scan(root)
+        all_hits.extend(hits)
+        total_scanned += scanned
+
+    for file_path in files:
+        if not file_path.exists():
+            continue
+        hits, scanned = scan_file(file_path, repo_root)
         all_hits.extend(hits)
         total_scanned += scanned
 

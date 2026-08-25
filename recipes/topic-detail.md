@@ -21,8 +21,7 @@ tags:
 - two-pane
 - navigation
 depends-on: []
-related:
-- agenticdeveloperhub://recipes/focused-topic-detail
+related: []
 references: []
 ---
 
@@ -33,7 +32,7 @@ references: []
 **TopicDetail** is the reusable two-pane primitive — a selectable topic list on
 the left rail beside a detail pane on the right, exactly the adh.com/home
 rail|content split. It is *only* the split: no title row and no action bar — those
-are composed around it (see [[focused-topic-detail]]). It is a faithful port of
+are composed around it by the consumer. It is a faithful port of
 the hub's settings rail (CSS → utilities with `apt-*` tokens) so home and the
 shared library render identically. It fills its container, so give it a height.
 

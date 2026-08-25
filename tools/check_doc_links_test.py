@@ -52,4 +52,28 @@ with tempfile.TemporaryDirectory() as tmp:
     root.mkdir()
     check("empty scan exits 2", run(root).returncode, 2)
 
-print("check_doc_links_test: 4 passed")
+    # (5) A recipe corpus URI citation that resolves is silent.
+    root = Path(tmp) / "uri-ok"
+    (root / "recipes").mkdir(parents=True)
+    (root / "recipes" / "button.md").write_text("hello\n")
+    (root / "recipes" / "dialog.md").write_text(
+        "---\nrelated:\n- agenticdeveloperhub://recipes/button\n---\n"
+    )
+    check("resolving recipe URI exits 0", run(root).returncode, 0)
+
+    # (6) A recipe corpus URI citation that does not resolve fails, and names the
+    #     offending slug.
+    root = Path(tmp) / "uri-dangling"
+    (root / "recipes").mkdir(parents=True)
+    (root / "recipes" / "dialog.md").write_text(
+        "---\nrelated:\n- agenticdeveloperhub://recipes/send-invitation-modal\n---\n"
+    )
+    bad = run(root)
+    check("dangling recipe URI exits 1", bad.returncode, 1)
+    check(
+        "names the offending slug",
+        "recipes/send-invitation-modal.md" in bad.stdout + bad.stderr,
+        True,
+    )
+
+print("check_doc_links_test: 6 passed")

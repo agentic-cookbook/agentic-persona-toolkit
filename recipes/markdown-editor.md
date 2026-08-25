@@ -50,9 +50,9 @@ title, category, or classification fields — those stay with the consuming form
 
 | Name | Domain | Role | Required | Configuration |
 |---|---|---|---|---|
-| Textarea | agenticdeveloperhub://recipes/textarea | The markdown source field | yes | `id` (from `useId`), `rows`, `spellCheck`, mono font |
-| Label | agenticdeveloperhub://recipes/label | Caption bound to the textarea via `htmlFor` | yes | mono uppercase caption styling |
-| EditorToolbar | agenticdeveloperhub://recipes/editor-toolbar | `role="toolbar"` row holding the controls | yes | `ariaLabel` |
+| Textarea | — | The markdown source field | yes | `id` (from `useId`), `rows`, `spellCheck`, mono font |
+| Label | — | Caption bound to the textarea via `htmlFor` | yes | mono uppercase caption styling |
+| EditorToolbar | — | `role="toolbar"` row holding the controls | yes | `ariaLabel` |
 | MarkdownQuickReference | agenticdeveloperhub://recipes/markdown-quick-reference | Built-in quick-reference popover control | optional (`quickReference`, default on) | side/align defaults |
 | Button | agenticdeveloperhub://recipes/button | The "Upload .md" trigger | optional (only when `onUpload` set) | `variant="outline" size="sm"` |
 

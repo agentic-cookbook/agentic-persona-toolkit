@@ -20,8 +20,7 @@ tags:
 - collapsible
 - expander
 depends-on: []
-related:
-- agenticdeveloperhub://recipes/focused-topic-detail
+related: []
 references: []
 ---
 
@@ -34,7 +33,7 @@ with a rotating chevron that shows or hides its children, themed with the family
 `apt-*` tokens. It is uncontrolled by default (`defaultOpen`) but accepts
 `open`/`onOpenChange` to be driven by a caller. The header can carry trailing
 `actions` that do not toggle the section — useful for per-section buttons (e.g.
-the focused-topic-detail Danger Zone).
+a section's own danger-zone action).
 
 ## Behavioral Requirements
 

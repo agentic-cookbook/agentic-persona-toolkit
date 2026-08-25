@@ -27,7 +27,6 @@ depends-on:
 - agenticdeveloperhub://recipes/dialog
 - agenticdeveloperhub://recipes/dialog-actions
 related:
-- agenticdeveloperhub://recipes/hierarchical-category-browser
 - agenticdeveloperhub://recipes/list-chooser
 - agenticdeveloperhub://recipes/entity-chooser
 references: []
@@ -52,7 +51,7 @@ browses the same materialisation the rail draws. Browsing is a real WAI-ARIA
 field switches the list to a flat, trail-annotated filter (`role="listbox"`) so a
 match three levels down is found by typing its name rather than walking to it.
 
-It is the modal behind [[hierarchical-category-browser]]'s "Move…" gear action —
+It is the modal behind a hierarchical category browser's "Move…" gear action —
 the host supplies `disabledIds` (the moved category and its own descendants, so a
 category can never become its own ancestor) and `allowRoot` (a move can land a
 category at the top level, which is why the root row exists at all). Every word on
@@ -164,8 +163,8 @@ Selected row: `bg-apt-gold/15`. Disabled row: `opacity-40`. All color from
   already the flat `CategoryTreeNode[]` a caller passes through `buildCategoryTree`
   itself (this component calls it once more, on the same input), and that fold's
   own cycle-breaking (re-seeding an orphaned branch as a root) is what determines
-  what the tree shows; see [[hierarchical-category-browser]] for the fold's
-  contract. The dialog adds no cycle handling of its own — it only walks what the
+  what the tree shows; see the tree-fold's own contract for `buildCategoryTree`.
+  The dialog adds no cycle handling of its own — it only walks what the
   fold hands back.
 - **The `MAX_TREE_NODES` cap (4000).** A forest at the cap still renders and is
   still fully keyboard-navigable — the fold stops MATERIALISING nodes, not the
@@ -205,9 +204,9 @@ drives and owns any telemetry for it.
 ## Platform Notes
 
 - **React / Web (TypeScript):** `packages/web/packages/ui/src/blocks/category-picker-dialog.tsx`. `"use client"`.
-- Consumes `buildCategoryTree`, `categoryKey`, `CategoryNode`, `CategoryTreeNode` from the sibling `category-tree.ts` — the single fold every hierarchical category surface reads (see [[hierarchical-category-browser]]).
+- Consumes `buildCategoryTree`, `categoryKey`, `CategoryNode`, `CategoryTreeNode` from the sibling `category-tree.ts` — the single fold every hierarchical category surface reads.
 - Demo: `local/ui-showcase/app/page.tsx` (Topic id `category-picker`) + the showcase source registry.
-- First (and so far only) consumer: [[hierarchical-category-browser]]'s Move action.
+- First (and so far only) consumer: a hierarchical category browser's Move action.
 - Responsive: verify via the ui-showcase demo at 375 / 768 / 1440 — the dialog's own `max-w-md` and internal scroll (`max-h-72`) keep it usable at phone width; keyboard-only and pointer flows both apply at every width.
 
 ## Design Decisions
