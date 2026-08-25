@@ -24,13 +24,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Pure-Python, no toolchain — run before install so a licence regression
-      # fails in seconds rather than after the whole workspace builds. Self-test
-      # first: a guard whose failing case has rotted passes vacuously.
-      - name: licence fields are Apache-2.0
+      # Pure-Python, no toolchain — run before install so a regression fails in
+      # seconds rather than after the whole workspace builds. Self-test first,
+      # for each guard: a guard whose failing case has rotted passes vacuously.
+      - name: repo guards
         run: |
           python3 packages/web/tools/check_license_fields_test.py
           python3 packages/web/tools/check_license_fields.py
+          python3 tools/check_recipe_scope_test.py
+          python3 tools/check_recipe_scope.py
+          python3 tools/check_recipe_scope.py --root docs
+          python3 tools/check_doc_links_test.py
+          python3 tools/check_doc_links.py
 
       # Eight packages are arriving here from a PRIVATE repo, each carrying the
       # prose its old home wrote about it. The per-package arrival checks scan

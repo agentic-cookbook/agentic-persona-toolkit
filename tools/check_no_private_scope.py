@@ -10,7 +10,17 @@ they may.
 The per-package arrival checks scan `src/` only, which is where the imports are —
 and imports are not where this leaks. It leaks in README.md, in CHANGELOG.md, in
 a doc comment at the top of a config file: the files nobody greps because they do
-not compile. This guard scans the whole tree.
+not compile.
+
+This guard scans four directories, not the repo root: `packages/web/packages`
+(the library — the packages that arrived from the private repo), `recipes` and
+`docs` (the prose that describes them), and `websites` (the demo sites, which
+ship too). Nowhere else. The true repo root was tried and rejected: ADT's Apple
+and terminal trees legitimately reference `api.agenticdeveloperhub.com` as a real
+service endpoint, and this file's own source and self-test contain every pattern
+they exist to detect — a root that floods with expected hits is a guard nobody
+reads past. These four are exactly the trees that hold shipped prose and shipped
+code and nothing else that this guard can tell apart from a leak.
 
 Three patterns, for three different failures:
 
@@ -33,6 +43,16 @@ nothing else" is exactly what a consumer needs to read. A CSS class called
 `adh-mv-prose` is this toolkit's public API; a theme called `adh-comic` is shipped
 branding. None of those are leaks and none of them are matched here.
 
+Widening into `recipes/` turned up one more shape like it: every recipe's frontmatter
+carries a `domain: agenticdeveloperhub://recipes/<slug>` field (and the same scheme in
+`ingredients:`/`related:` cross-references) — the artifact format's own internal URI
+namespace for the recipe corpus, present identically in every recipe this repo already
+shipped before this task, resolving nowhere and naming no coordinate. It is not a
+leak in the sense this guard exists to catch, any more than `adh-mv-prose` is, so the
+product-name pattern below carves out exactly that one scheme shape and nothing wider —
+a bare `agenticdeveloperhub` anywhere else, including `agenticdeveloperhub.com` or
+`api.agenticdeveloperhub.com`, still fires.
+
 A path is different in kind. It cannot be followed by anyone outside the private
 repo, so it is useless to the reader it is addressed to, and it describes a layout
 they were not given. Several of the comments carrying such paths do record something
@@ -41,8 +61,9 @@ guard, and that editing one alone will be caught. Keep the invariant, drop the
 coordinate: "a parity guard in the consuming application asserts these two copies
 stay identical" says the useful half and names nothing unreachable.
 
-Exit 0 clean, 1 on a hit, 2 if there was nothing to scan — an empty scan is a
-broken path, never a pass.
+Exit 0 clean, 1 on a hit, 2 if there was nothing to scan, or if a named root does
+not exist — an empty scan (and a missing root looks exactly like one) is a broken
+path, never a pass.
 """
 from __future__ import annotations
 
@@ -51,9 +72,14 @@ import re
 import sys
 from pathlib import Path
 
+REPO_ROOT = Path(__file__).resolve().parents[1]
+DEFAULT_ROOTS = ("packages/web/packages", "recipes", "docs", "websites")
+
 PATTERNS = {
     "private package scope": re.compile(r"@agentic-toolkit/"),
-    "product name": re.compile(r"agenticdeveloperhub", re.IGNORECASE),
+    # (?!://recipes/) carves out the recipe corpus's own `agenticdeveloperhub://recipes/<slug>`
+    # domain-URI scheme (see the docstring) — everything else still fires.
+    "product name": re.compile(r"agenticdeveloperhub(?!://recipes/)", re.IGNORECASE),
     "private repo path": re.compile(
         r"backend/src/(adh|builder|status)"
         r"|frontend/(src|tools)/"
@@ -101,27 +127,38 @@ def scan(root: Path) -> tuple[list[str], int]:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
-        "root",
-        nargs="?",
+        "roots",
+        nargs="*",
         type=Path,
-        default=Path(__file__).resolve().parents[1] / "packages" / "web" / "packages",
-        help="tree to scan (default: every web package)",
+        default=None,
+        help=(
+            "trees to scan (default: packages/web/packages, recipes, docs, "
+            "websites). A single per-package path — e.g. "
+            "packages/web/packages/<pkg> — still works unchanged."
+        ),
     )
     args = parser.parse_args()
 
-    if not args.root.exists():
-        print(f"check_no_private_scope: no such path: {args.root}", file=sys.stderr)
+    roots = args.roots if args.roots else [REPO_ROOT / r for r in DEFAULT_ROOTS]
+
+    all_hits: list[str] = []
+    total_scanned = 0
+    for root in roots:
+        if not root.exists():
+            print(f"check_no_private_scope: no such path: {root}", file=sys.stderr)
+            return 2
+
+        hits, scanned = scan(root)
+        all_hits.extend(hits)
+        total_scanned += scanned
+
+    if total_scanned == 0:
+        print(f"check_no_private_scope: nothing to scan under {roots}", file=sys.stderr)
         return 2
 
-    hits, scanned = scan(args.root)
-
-    if scanned == 0:
-        print(f"check_no_private_scope: nothing to scan under {args.root}", file=sys.stderr)
-        return 2
-
-    if hits:
-        print(f"check_no_private_scope: {len(hits)} leak(s) in {scanned} files:\n", file=sys.stderr)
-        for hit in hits:
+    if all_hits:
+        print(f"check_no_private_scope: {len(all_hits)} leak(s) in {total_scanned} files:\n", file=sys.stderr)
+        for hit in all_hits:
             print(f"  {hit}", file=sys.stderr)
         print(
             "\nThis repo is public. A private package name here is an install "
@@ -130,7 +167,7 @@ def main() -> int:
         )
         return 1
 
-    print(f"check_no_private_scope: {scanned} files, no private references")
+    print(f"check_no_private_scope: {total_scanned} files, no private references")
     return 0
 
 

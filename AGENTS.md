@@ -27,9 +27,18 @@ The web platform is a pnpm workspace; its libraries live under
 - `@agenticdevelopertoolkit/avatar`
 - `@agenticdevelopertoolkit/chat`
 - `@agenticdevelopertoolkit/chrome`
+- `@agenticdevelopertoolkit/controls`
+- `@agenticdevelopertoolkit/editing`
+- `@agenticdevelopertoolkit/landing`
+- `@agenticdevelopertoolkit/markdown`
+- `@agenticdevelopertoolkit/model`
 - `@agenticdevelopertoolkit/popover`
+- `@agenticdevelopertoolkit/registry-profile`
+- `@agenticdevelopertoolkit/registry-types`
+- `@agenticdevelopertoolkit/search`
 - `@agenticdevelopertoolkit/textlens`
 - `@agenticdevelopertoolkit/themes`
+- `@agenticdevelopertoolkit/ui`
 - `@agenticdevelopertoolkit/viewport`
 
 ## Where to look first

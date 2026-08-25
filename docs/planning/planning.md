@@ -105,8 +105,8 @@ Specified in `docs/specs/ingredients/persona-chat-coordinator.md`.
 ## Test bed
 
 `learntruefacts` (`~/Development/projects/learntruefacts/`) is the dogfood
-site for apt. It is a separate monorepo, not a directory inside
-`agenticdeveloperhub`. Today its `sites/main` uses the chat by vendoring
+site for apt. It is a separate monorepo of its own, not a directory inside
+some other product's repo. Today its `sites/main` uses the chat by vendoring
 `agentic-web-toolkit` at `vendor/agentic-web-toolkit/`. The success criterion
 for M1 is: that vendor copy is gone, replaced by an apt dependency, and the
 chat is talking to a real persona in the registry with messages persisted in

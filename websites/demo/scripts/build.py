@@ -8,8 +8,8 @@ so the consumer needs no `transpilePackages`, but `dist/` is gitignored and
 must be built before `next build`.
 
 This installs the toolkit's pnpm workspace under `packages/web/`, builds every
-package's `dist/`, then runs `next build`. It mirrors the build wrapper in the
-`agenticdeveloperhub` app so both toolkit consumers build the same way.
+package's `dist/`, then runs `next build`. It mirrors the build wrapper used by
+this toolkit's other consumer, so both build the same way.
 """
 from __future__ import annotations
 

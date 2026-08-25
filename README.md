@@ -34,12 +34,36 @@ The web platform is a pnpm monorepo with libraries under
   `ThreePaneChat`, `MobileChat`, `PersonaChat`) with pluggable backends.
 - `@agenticdevelopertoolkit/chrome` — site chrome: the menu button and the
   close glyph derived from it.
+- `@agenticdevelopertoolkit/controls` — settings, search dialog, dev banner,
+  logging panel, and the other small operator-facing controls a consumer site
+  wires up around the rest of the kit.
+- `@agenticdevelopertoolkit/editing` — a host-agnostic inline-editing
+  container: sections, validation, repair, and the scope/server plumbing
+  around them.
+- `@agenticdevelopertoolkit/landing` — a snap-scrolling, long-form landing
+  page kit: the scroll deck, fixed-header chrome, and a vocabulary of
+  presentational blocks, themed entirely through `--lp-*` custom properties.
+- `@agenticdevelopertoolkit/markdown` — a markdown renderer with its own
+  component set, syntax themes, and rendering hooks.
+- `@agenticdevelopertoolkit/model` — provider integrations, hooks, and
+  library helpers for talking to an LLM provider.
 - `@agenticdevelopertoolkit/popover` — hover popovers: the anchored panel, its
   pointing arrow, and the hover-intent state for a row of them.
+- `@agenticdevelopertoolkit/registry-profile` — renders a registry service's
+  public profile: fields, service list, and the surrounding layout.
+- `@agenticdevelopertoolkit/registry-types` — shared types, validation, and
+  visibility rules for registry data.
+- `@agenticdevelopertoolkit/search` — a search UI (components, data layer,
+  and a small results registry) for querying a site's own content.
 - `@agenticdevelopertoolkit/textlens` — a travelling lens that magnifies,
   softens and tints each character of a line as it passes.
 - `@agenticdevelopertoolkit/themes` — Theme manifest, `ThemeStyle`, and
-  `ColorModeProvider`.
+  `ColorModeProvider`, plus the page-level, unscoped accessibility styles
+  (`data-reduce-motion`, `data-contrast`, `data-text-size`) that sit alongside
+  the per-widget theme scoping.
+- `@agenticdevelopertoolkit/ui` — the shared UI kit: primitives (the shadcn
+  slot + `cn` helper), a larger vocabulary of composed blocks, and the global
+  styles they share.
 - `@agenticdevelopertoolkit/viewport` — iOS-correct viewport / keyboard
   primitives.
 

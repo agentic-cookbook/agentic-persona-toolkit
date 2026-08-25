@@ -10,9 +10,9 @@ site becomes a palette, a token map, and a set of compositions.
 
 ## Why a new package, and not an extension of `viewport`
 
-`@agenticdevelopertoolkit/viewport` — a package in the sibling
-agenticdevelopertoolkit repo, which several consumer sites load alongside this
-one — opens its `css/base.css` with `html, body { overflow: hidden }`. It
+`@agenticdevelopertoolkit/viewport` — a sibling package in this same repo,
+which several consumer sites load alongside this one — opens its
+`css/base.css` with `html, body { overflow: hidden }`. It
 **locks the page to the visible viewport** so an inner shell can scroll. This
 deck needs the opposite: the *document* is the scroller, because Safari only
 collapses its toolbar in response to the document scroller moving (measured).
@@ -71,6 +71,16 @@ package never fights it. The cost of that safety is that every fallback has to
 be written at every use site, which is also why the fallback literals below
 are the *complete* list of what a host must override to fully re-theme the
 page (see **Tokens**).
+
+**A renamed selector keeps its source specificity.** This package's class
+names are BEM-flat (`.lp-shot__bar`, not `.lp-shot .bar`), which is a
+deliberate flattening from the nested selectors of the sites it was ported
+from — `.shot .bar` is (0,2,0), `.lp-shot__bar` is (0,1,0). Dropping a
+selector's specificity when renaming it can hand the cascade to a different
+rule than the original had, and jsdom-based tests do not resolve the cascade,
+so nothing catches it. A future rename inside this package (or a host
+overriding one of these classes) has to carry the original weight forward,
+not just the original name.
 
 ## Minimal example
 

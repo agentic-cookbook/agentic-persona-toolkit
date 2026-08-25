@@ -112,6 +112,27 @@ def test_node_modules_and_lockfiles_are_skipped() -> None:
         assert result.returncode == 0, f"skipped trees were scanned: {result.stderr}"
 
 
+def test_multiple_roots_are_all_scanned() -> None:
+    """Step 13 widened the guard from one default root to four. Prove the multi-root
+    path actually scans every root passed, not just the first — a hit in a
+    docs-shaped second root must fail the run exactly like one in the first."""
+    with tempfile.TemporaryDirectory() as tmp:
+        packages_root = Path(tmp) / "packages"
+        docs_root = Path(tmp) / "docs"
+        packages_root.mkdir()
+        docs_root.mkdir()
+        (packages_root / "index.ts").write_text("export const a = 1\n", encoding="utf-8")
+        (docs_root / "guide.md").write_text(
+            "See `@agentic-toolkit/ui` for the source component.\n", encoding="utf-8"
+        )
+        result = subprocess.run(
+            [sys.executable, str(GUARD), str(packages_root), str(docs_root)],
+            capture_output=True, text=True,
+        )
+        assert result.returncode == 1, f"docs-root leak survived a multi-root scan: {result.stderr}"
+        assert "guide.md:1" in result.stderr, result.stderr
+
+
 def test_empty_scan_is_not_a_pass() -> None:
     """A guard that greens on a wrong path is worse than no guard."""
     with tempfile.TemporaryDirectory() as tmp:

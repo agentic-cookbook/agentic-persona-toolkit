@@ -19,7 +19,7 @@ to a Ktor backend with persona-driven prompts and a shared tool registry.
 | Provider factory | `web/backend/.../llm/LlmProviderFactory.kt` |
 | Provider impls (no SDKs, HTTP only) | `OpenAiCompatProvider.kt`, `AnthropicProvider.kt`, `GeminiProvider.kt` |
 | Persona seed | `web/backend/.../database/PersonaSeeder.kt` (slug `charlie`) |
-| Narrative doc | `docs/personas/charlie.md` |
+| Narrative doc | `<temporal>/docs/personas/charlie.md` |
 
 ## 1. Frontend
 

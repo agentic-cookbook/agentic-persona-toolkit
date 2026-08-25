@@ -28,11 +28,7 @@ tags:
 depends-on: []
 related:
   - agenticdevelopercookbook://ingredients/ui/components/ai-chat-control
-references:
-  - "adh: backend/src/adh/src/routes/chat.ts"
-  - "adh: backend/src/adh/src/llm/service.ts"
-  - "adh: backend/src/adh/src/llm/persistence.ts"
-  - "prior art: adh/frontend/src/shared/adh/src/persona-chat/index.ts"
+references: []
 ---
 
 # Persona Chat Coordinator

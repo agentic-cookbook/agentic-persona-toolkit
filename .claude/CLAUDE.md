@@ -118,9 +118,18 @@ tsup. `src/theme-data.ts` is gitignored — `install.sh` regenerates it.
 | `@agenticdevelopertoolkit/avatar` | `packages/web/packages/avatar/src/` (engine, gaze, pose, reflexes, idleLife, arbitration) |
 | `@agenticdevelopertoolkit/chat` | `packages/web/packages/chat/src/` (modes/, components/, hooks/, backends/, css/) |
 | `@agenticdevelopertoolkit/chrome` | `packages/web/packages/chrome/src/` (MenuButton, css/) |
+| `@agenticdevelopertoolkit/controls` | `packages/web/packages/controls/src/` (appearance-mode-toggle, dev-banner, filtered-list, logging-panel, orb-row, search-dialog, source-code-panel, user-settings) |
+| `@agenticdevelopertoolkit/editing` | `packages/web/packages/editing/src/` (host, container, controls, sections, repair, validation, descriptors, scope, server) |
+| `@agenticdevelopertoolkit/landing` | `packages/web/packages/landing/src/` (deck/, chrome/, blocks/, flow/, client.ts, css/) |
+| `@agenticdevelopertoolkit/markdown` | `packages/web/packages/markdown/src/` (components/, hooks/, lib/, themes/, types.ts) |
+| `@agenticdevelopertoolkit/model` | `packages/web/packages/model/src/` (providers/, hooks/, lib/, types.ts) |
 | `@agenticdevelopertoolkit/popover` | `packages/web/packages/popover/src/` (Popover, PopoverAnchor, useHoverPopoverGroup, css/) |
+| `@agenticdevelopertoolkit/registry-profile` | `packages/web/packages/registry-profile/src/` (RegistryProfile, FieldValue, ServiceList, css/) |
+| `@agenticdevelopertoolkit/registry-types` | `packages/web/packages/registry-types/src/` (types, validate, visibility, show-if) |
+| `@agenticdevelopertoolkit/search` | `packages/web/packages/search/src/` (components/, data/, lib/, registry/, styles/, types.ts) |
 | `@agenticdevelopertoolkit/textlens` | `packages/web/packages/textlens/src/` (createLens, useTextLens, color) |
 | `@agenticdevelopertoolkit/themes` | `packages/web/packages/themes/src/` (manifest, ThemeStyle, colorMode, styles/) |
+| `@agenticdevelopertoolkit/ui` | `packages/web/packages/ui/src/` (components/, blocks/, hooks/, lib/, styles/) |
 | `@agenticdevelopertoolkit/viewport` | `packages/web/packages/viewport/src/` (ViewportShell, ViewportSpacer, ViewportComposer, useKeyboardInset) |
 
 Library packages may only depend on other `packages/web/packages/*`
