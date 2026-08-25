@@ -59,6 +59,18 @@ jobs:
       - run: pnpm install --frozen-lockfile
         working-directory: packages/web
 
+      # A fresh checkout has neither `themes`' generated src/theme-data.ts (gitignored,
+      # produced by its own `build:data`) nor any package's `dist/`. Most packages
+      # resolve straight from `src/` for an in-repo/workspace consumer with no build
+      # step — but `model` (arrived with AT's "Model A" contract: package.json's
+      # `main`/`exports` point only at `./dist/...`, no source fallback) does not, and
+      # `controls` depends on it. Both gaps are invisible in a dev checkout, where a
+      # prior `pnpm build` or `./install.sh` run leaves stale artifacts on disk indefinitely
+      # — this step is what makes CI actually exercise a clean checkout instead of trusting
+      # whatever the last local build left behind.
+      - run: pnpm build
+        working-directory: packages/web
+
       # Both, because neither alone covers the workspace. The root `pnpm test` is
       # one vitest run configured with `dir: './packages'`, so it DISCOVERS every
       # package's tests including the ones that declare no test script of their
