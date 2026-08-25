@@ -1,0 +1,48 @@
+# ADT is consumed as a submodule by more than one host repo, so its suites run AT
+# THE SOURCE on every push and PR — not only inside a consumer's CI at whatever
+# pinned SHA that consumer happens to hold.
+name: web-tests
+
+on:
+  push:
+    # open-source-etc is included because every phase of this migration lands
+    # directly on that branch with no PR open; with [main] alone this workflow
+    # would never fire until the branch merges, and Tasks 4-11 need the gate to
+    # exist before then. Remove the open-source-etc entry when this branch merges.
+    branches: [main, open-source-etc]
+    paths:
+      - "packages/web/**"
+      - ".github/workflows/web-tests.yml"
+  pull_request:
+    paths:
+      - "packages/web/**"
+      - ".github/workflows/web-tests.yml"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Pure-Python, no toolchain — run before install so a licence regression
+      # fails in seconds rather than after the whole workspace builds. Self-test
+      # first: a guard whose failing case has rotted passes vacuously.
+      - name: licence fields are Apache-2.0
+        run: |
+          python3 packages/web/tools/check_license_fields_test.py
+          python3 packages/web/tools/check_license_fields.py
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: packages/web/pnpm-lock.yaml
+
+      - run: pnpm install --frozen-lockfile
+        working-directory: packages/web
+
+      - run: pnpm -r --if-present run test
+        working-directory: packages/web
