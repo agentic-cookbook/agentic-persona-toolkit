@@ -1,10 +1,14 @@
-'use client'
-
-import { useIsomorphicLayoutEffect } from '@agenticdevelopertoolkit/ui'
 import { themes, type ThemeKey } from './manifest'
 
 const GLOBAL_ID = 'agentic-toolkit-theme'
 const SCOPED_ID = 'agentic-toolkit-theme-scoped'
+
+/** One id per scope, not one id for all scoped blocks. A page can carry several
+ *  scoped themes at once (a chat theming itself, plus a host app theming the
+ *  wrapper it sits in), and a shared id makes those duplicates — invalid HTML, and
+ *  `getElementById` silently resolves to whichever happens to come first. */
+const scopedId = (scope: string): string =>
+  `${SCOPED_ID}-${scope.replace(/[^a-zA-Z0-9_-]+/g, '-').replace(/(^-+|-+$)/g, '').toLowerCase()}`
 
 const IMPORT_RE = /^@import\s+url\([^)]+\);\s*$/gm
 // Full-palette themes — every theme with a complete M3 role layer — anchor their token
@@ -39,14 +43,35 @@ const ROOT_NOT_DARK_RE = new RegExp(ANCHOR + String.raw`:root:not\(\.dark\)`, 'g
 const ROOT_RE = new RegExp(ANCHOR + String.raw`:root(?=[\s,{:])`, 'gm')
 const BODY_RE = new RegExp(ANCHOR + String.raw`body(?=[\s,{:.])`, 'gm')
 
-export function buildScopedCss(css: string, scope: string): string {
+/** A scoped selector that never matches — used to drop the unwanted variant. */
+const NEVER = ':scope.pc-colormode-off'
+
+export type ThemeColorMode = 'system' | 'light' | 'dark'
+
+export function buildScopedCss(
+  css: string,
+  scope: string,
+  colorMode: ThemeColorMode = 'system',
+): string {
   const imports = (css.match(IMPORT_RE) || []).join('\n')
+  // `system` (default) follows the document's `html.dark` class. When forced,
+  // resolve the chosen variant's `:root` selectors to `:scope` (always apply)
+  // and the other variant's to a never-matching selector (drop it), so the
+  // theme renders in that mode regardless of `html.dark`.
+  const darkSel =
+    colorMode === 'dark' ? ':scope'
+      : colorMode === 'light' ? NEVER
+        : 'html.dark :scope'
+  const lightSel =
+    colorMode === 'light' ? ':scope'
+      : colorMode === 'dark' ? NEVER
+        : 'html:not(.dark) :scope'
   const body = css
     .replace(IMPORT_RE, '')
     .replace(HTML_ROOT_QUALIFIED_RE, '$1html$2 :scope')
     .replace(HTML_ROOT_RE, '$1:scope')
-    .replace(ROOT_DARK_RE, '$1html.dark :scope')
-    .replace(ROOT_NOT_DARK_RE, '$1html:not(.dark) :scope')
+    .replace(ROOT_DARK_RE, `$1${darkSel}`)
+    .replace(ROOT_NOT_DARK_RE, `$1${lightSel}`)
     .replace(ROOT_RE, '$1:scope')
     .replace(BODY_RE, '$1:scope')
   return `${imports}\n@scope (${scope}) {\n${body}\n}`
@@ -55,21 +80,24 @@ export function buildScopedCss(css: string, scope: string): string {
 export interface ThemeStyleProps {
   theme: ThemeKey
   scope?: string
+  /**
+   * Force the theme's color variant regardless of the document's `html.dark`
+   * class. `system` (default) follows `html.dark` — the prior behavior. Only
+   * affects scoped usage (when `scope` is set).
+   */
+  colorMode?: ThemeColorMode
 }
 
-export function ThemeStyle({ theme, scope }: ThemeStyleProps) {
-  useIsomorphicLayoutEffect(() => {
-    const entry = themes[theme]
-    if (!entry) return
-    const id = scope ? SCOPED_ID : GLOBAL_ID
-    let el = document.getElementById(id) as HTMLStyleElement | null
-    if (!el) {
-      el = document.createElement('style')
-      el.id = id
-      document.head.appendChild(el)
-    }
-    el.textContent = scope ? buildScopedCss(entry.css, scope) : entry.css
-  }, [theme, scope])
-
-  return null
+export function ThemeStyle({ theme, scope, colorMode = 'system' }: ThemeStyleProps) {
+  const css = scope
+    ? buildScopedCss(themes[theme].css, scope, colorMode)
+    : themes[theme].css
+  const id = scope ? scopedId(scope) : GLOBAL_ID
+  // Render the <style> inline (so it's in the SSR HTML and applied on the very
+  // first paint — no flash of default-sized, unstyled chat before a client
+  // effect runs). The content is the resolved theme CSS, so re-rendering on a
+  // theme/CSS change (incl. HMR) swaps it live. dangerouslySetInnerHTML is the
+  // standard way to emit a <style> body without React escaping CSS punctuation
+  // (e.g. `>`); the source is our own static theme manifest, not user input.
+  return <style id={id} dangerouslySetInnerHTML={{ __html: css }} />
 }
