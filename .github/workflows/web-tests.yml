@@ -47,12 +47,19 @@ jobs:
       # Both, because neither alone covers the workspace. The root `pnpm test` is
       # one vitest run configured with `dir: './packages'`, so it DISCOVERS every
       # package's tests including the ones that declare no test script of their
-      # own — today that is seven of nine, among them `chat`. The recursive run
-      # covers the opposite gap: each package that does declare a script runs
-      # under its own config, which is the config its consumers build against.
-      # This is also the command CONTRIBUTING.md tells contributors to run, and a
-      # public repo whose documented test command is not the one CI runs is
-      # telling two different stories about what passing means.
+      # own — today that is seven of nine, among them `chat`. It is also the
+      # command CONTRIBUTING.md tells contributors to run, and a public repo
+      # whose documented test command is not the one CI runs is telling two
+      # different stories about what passing means.
+      #
+      # The recursive run covers the opposite gap: a package that declares a
+      # test script runs under ITS OWN config, which is the config its consumers
+      # build against, and which can differ from the root's (extra setup files,
+      # a different environment). That only holds because every such package
+      # carries a vitest.config.ts — vitest walks up to the root config but keeps
+      # cwd as its root, so the root's `dir: './packages'` would resolve to
+      # <package>/packages and silently match nothing. A package that declares
+      # `test` without its own config runs zero tests and exits 0.
       - run: pnpm test
         working-directory: packages/web
 
