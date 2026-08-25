@@ -20,7 +20,7 @@ emits its own types with `tsc --emitDeclarationOnly`.
 
 ## Before you open a pull request
 
-- `pnpm -r --if-present run test` passes.
+- `pnpm test` passes.
 - `python3 packages/web/tools/check_license_fields.py` passes.
 - New packages declare `"license": "Apache-2.0"`.
 - Components stay presentational. This toolkit does not fetch, authenticate, or
