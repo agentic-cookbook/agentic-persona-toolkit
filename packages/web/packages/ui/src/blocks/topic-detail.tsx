@@ -46,12 +46,12 @@ export interface TopicDetailItem {
    *  preview at all, so a list whose row height is a user preference can keep passing `preview`
    *  and let this one number carry the setting — including its "off" position. */
   previewLines?: number
-  /** What this topic is for — one or two sentences. **This component renders it nowhere.** It fed
-   *  the card grid that a level could opt into for its unselected frontier, and that opt-in is gone
-   *  (the unselected frontier is the select nudge and nothing else), so setting it changes no pixel
-   *  here. It survives because hosts carry the same row shape
-   *  into surfaces that DO show a blurb (a selected topic's `EmptyState`); to explain a LIST, use
-   *  the level's `overviewHelp`, which is the copy the nudge renders. */
+  /** What this topic is for — one or two sentences. **This component renders it nowhere.** It fed the
+   *  card grid that a level could opt into for its unselected frontier, and that opt-in is gone (the
+   *  unselected frontier is the select nudge and nothing else), so setting it changes no pixel here. It
+   *  survives because hosts carry the same row shape into surfaces that DO show a blurb (a selected
+   *  topic's `EmptyState`); to explain a LIST, use the level's `overviewHelp`, which is the copy the
+   *  nudge renders. */
   description?: string
   /** 16px leading icon; tints with the label (currentColor). The rail is always
    *  collapsible, so every row is guaranteed an icon — a neutral ring fills in
