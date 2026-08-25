@@ -1,4 +1,4 @@
-# `@agentic-cookbook/agenticdevelopertoolkit/chat`
+# `@agenticdevelopertoolkit/chat`
 
 A React chat-widget library. This README explains how consumers compose the four orthogonal axes — **layout**, **behavior**, **theme**, and **transport** — to configure a chat for their site.
 
@@ -19,7 +19,7 @@ Layout is **not a runtime decision**. Pick a component and import it directly.
 `<PersonaChat mode={...}>` is a thin runtime mode-switcher that dispatches to one of the three above. Reach for it only if you genuinely need to flip layouts at runtime — otherwise pick the component directly.
 
 ```tsx
-import { InlineChat, MockBackend } from '@agentic-cookbook/agenticdevelopertoolkit/chat'
+import { InlineChat, MockBackend } from '@agenticdevelopertoolkit/chat'
 
 <InlineChat backend={new MockBackend()} persona={{ name: 'Bot' }} />
 ```
@@ -101,12 +101,12 @@ You can also write your own positioning CSS — the chat doesn't care. If you us
 Themes are stylesheets driven by CSS variables. Import one:
 
 ```tsx
-import '@agentic-cookbook/agenticdevelopertoolkit/chat/css/base.css'      // always required
-import '@agentic-cookbook/agenticdevelopertoolkit/chat/css/modes/inline.css'  // for inline mode
-import '@agentic-cookbook/agenticdevelopertoolkit/chat/themes/professional.css'
+import '@agenticdevelopertoolkit/chat/css/base.css'      // always required
+import '@agenticdevelopertoolkit/chat/css/modes/inline.css'  // for inline mode
+import '@agenticdevelopertoolkit/themes/styles/professional.css'
 ```
 
-Themes shipped today: `professional`, `techy`, `whimsical`, `agenticcookbookweb`, `dev-team`, `mikefullerton`, `myprojects`, `myprojectsoverview`, `terminal`, `terminal-split`. See [`themes/`](./themes/).
+Themes shipped today: `professional`, `techy`, `whimsical`, `agenticcookbookweb`, `dev-team`, `mikefullerton`, `myprojects`, `myprojectsoverview`, `terminal`, `terminal-split`. See [`themes/styles/`](../themes/src/styles/) in the `@agenticdevelopertoolkit/themes` package.
 
 **Themes are mutually exclusive.** Importing two at once produces a last-import-wins style cascade. If you need to switch themes at runtime, do it via dynamic import + remount (the example uses `<style>{themeCss}</style>` swapping for the same effect).
 
