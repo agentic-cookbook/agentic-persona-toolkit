@@ -33,6 +33,24 @@ const IMPORT_RE = /^@import\s+url\([^)]+\);\s*$/gm
 // horizontal whitespace, not at the line start alone. `[ \t]*` and not `\s*`: the latter
 // eats newlines, which would let one match swallow a preceding blank line.
 const ANCHOR = String.raw`(^[ \t]*|,\s*)`
+
+// The paired light block for a full-palette theme (27 of the 41 shipped stylesheets,
+// measured against src/styles: dracula.css is typical — a 91-declaration `html:root`
+// dark block followed by an 85-declaration `html:root[data-color-mode]:not(.dark)`
+// light block). Its qualifier is EXACTLY the color-mode discriminator, `[data-color-
+// mode]:not(.dark)`, and — the part that matters here — it is the ENTIRE selector of
+// its OWN rule (immediately followed by `{`). That second condition is what colorMode
+// used to ignore: this pattern is textually indistinguishable from one comma-list item
+// among several UNLESS the lookahead for `{` (not `,`) is checked too, and two shipped
+// themes (charcoal.css, fishlamp.css — "dark-always", no light palette) share exactly
+// this discriminator as one item in a combined `html:root, html:root[data-color-mode]
+// :not(.dark), …[data-contrast=…] { }` list. Matching the discriminator alone would
+// rewrite THAT occurrence as well and hand those themes a light variant they don't
+// have — the regression this anchor is scoped, by construction, to avoid.
+const HTML_ROOT_LIGHT_ANCHOR_RE = new RegExp(
+  ANCHOR + String.raw`html:root\[data-color-mode\]:not\(\.dark\)(?=\s*\{)`,
+  'gm',
+)
 const HTML_ROOT_QUALIFIED_RE = new RegExp(
   ANCHOR + String.raw`html:root((?:\[[^\]]*\]|:not\([^()]*\))+)`,
   'gm',
@@ -66,8 +84,20 @@ export function buildScopedCss(
     colorMode === 'light' ? ':scope'
       : colorMode === 'dark' ? NEVER
         : 'html:not(.dark) :scope'
+  // Same three-way shape as lightSel above, for the html:root-anchored light block:
+  // system leaves it exactly as HTML_ROOT_QUALIFIED_RE would have produced anyway (no
+  // regression for the 27 themes already relying on that path); light drops the now-
+  // redundant discriminator and collapses to `:scope`, so it wins over the dark block's
+  // own unconditional `:scope` by source order (the dark block, from HTML_ROOT_RE, is
+  // never removed — see that regex's own comment); dark sends it to NEVER so it can't
+  // fire regardless of the document's real data-color-mode.
+  const lightAnchorSel =
+    colorMode === 'light' ? ':scope'
+      : colorMode === 'dark' ? NEVER
+        : 'html[data-color-mode]:not(.dark) :scope'
   const body = css
     .replace(IMPORT_RE, '')
+    .replace(HTML_ROOT_LIGHT_ANCHOR_RE, `$1${lightAnchorSel}`)
     .replace(HTML_ROOT_QUALIFIED_RE, '$1html$2 :scope')
     .replace(HTML_ROOT_RE, '$1:scope')
     .replace(ROOT_DARK_RE, `$1${darkSel}`)
@@ -89,9 +119,12 @@ export interface ThemeStyleProps {
 }
 
 export function ThemeStyle({ theme, scope, colorMode = 'system' }: ThemeStyleProps) {
-  const css = scope
-    ? buildScopedCss(themes[theme].css, scope, colorMode)
-    : themes[theme].css
+  const entry = themes[theme]
+  // An unknown theme key (a stale persisted choice, a typo in a consumer's own theme
+  // list) must render nothing, not throw — throwing here takes down the whole page a
+  // <style> tag was never worth taking down.
+  if (!entry) return null
+  const css = scope ? buildScopedCss(entry.css, scope, colorMode) : entry.css
   const id = scope ? scopedId(scope) : GLOBAL_ID
   // Render the <style> inline (so it's in the SSR HTML and applied on the very
   // first paint — no flash of default-sized, unstyled chat before a client

@@ -3,9 +3,10 @@ import { defineConfig } from 'vitest/config'
 // Self-contained config so `pnpm --filter @agenticdevelopertoolkit/themes run test`
 // (cwd = this package) discovers src/__tests__/* (the workspace-root config's
 // `dir: '../packages'` resolves outside the web workspace, so it finds nothing —
-// see the @agenticdevelopertoolkit/ui package for the same pattern). No test files
-// exist yet for this package, so `passWithNoTests` keeps `test` green rather than
-// failing on an empty suite.
+// see the @agenticdevelopertoolkit/ui package for the same pattern). `passWithNoTests`
+// stays on even though src/__tests__ is populated now, so a future PR that empties it
+// (a rewrite in flight, a package split) keeps `test` green rather than failing on
+// having nothing left to run.
 export default defineConfig({
   test: {
     environment: 'jsdom',

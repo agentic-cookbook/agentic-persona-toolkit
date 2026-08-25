@@ -56,4 +56,10 @@ describe('ThemeStyle', () => {
     expect(css).toContain('html.dark :scope')
     expect(css).toContain('html:not(.dark) :scope')
   })
+
+  it('renders nothing for an unknown theme key, instead of throwing', () => {
+    expect(() => render(<ThemeStyle theme={'not-a-real-theme' as never} />)).not.toThrow()
+    const { container } = render(<ThemeStyle theme={'not-a-real-theme' as never} />)
+    expect(container.querySelector('style')).toBeNull()
+  })
 })

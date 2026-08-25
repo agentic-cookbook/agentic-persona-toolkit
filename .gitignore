@@ -6,6 +6,7 @@
 
 # Node / Next.js / OpenNext / Wrangler build outputs
 # packages/web/node_modules/**
+node_modules/
 packages/web/**/node_modules
 packages/web/**/dist
 
