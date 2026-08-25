@@ -125,6 +125,7 @@ describe('persona-chat recipe', () => {
       'isTyping',
       'messages',
       'say',
+      'sayStream',
       'selectMessage',
       'selectedIndex',
       'sendMessage',

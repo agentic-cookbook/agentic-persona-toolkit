@@ -44,5 +44,17 @@ jobs:
       - run: pnpm install --frozen-lockfile
         working-directory: packages/web
 
+      # Both, because neither alone covers the workspace. The root `pnpm test` is
+      # one vitest run configured with `dir: './packages'`, so it DISCOVERS every
+      # package's tests including the ones that declare no test script of their
+      # own — today that is seven of nine, among them `chat`. The recursive run
+      # covers the opposite gap: each package that does declare a script runs
+      # under its own config, which is the config its consumers build against.
+      # This is also the command CONTRIBUTING.md tells contributors to run, and a
+      # public repo whose documented test command is not the one CI runs is
+      # telling two different stories about what passing means.
+      - run: pnpm test
+        working-directory: packages/web
+
       - run: pnpm -r --if-present run test
         working-directory: packages/web
