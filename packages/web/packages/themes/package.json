@@ -2,7 +2,7 @@
   "name": "@agenticdevelopertoolkit/themes",
   "version": "0.1.0",
   "description": "Theme manifest, ThemeStyle component, and ColorModeProvider for agenticdevelopertoolkit.",
-  "license": "UNLICENSED",
+  "license": "Apache-2.0",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

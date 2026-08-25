@@ -2,7 +2,7 @@
   "name": "@agenticdevelopertoolkit/registry-profile",
   "version": "0.1.0",
   "description": "The public registry-entry profile renderer. Takes a serialized entry and renders it — no fetching, no auth, no adh imports, so it drops into anyone's site.",
-  "license": "UNLICENSED",
+  "license": "Apache-2.0",
   "type": "module",
   "sideEffects": ["**/*.css"],
   "files": ["dist"],

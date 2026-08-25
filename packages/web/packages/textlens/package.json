@@ -2,7 +2,7 @@
   "name": "@agenticdevelopertoolkit/textlens",
   "version": "0.1.0",
   "description": "A travelling lens that sweeps along a line of text, magnifying, softening and tinting each glyph as it passes. Per-character DOM animation with the colour ramp read from CSS custom properties.",
-  "license": "UNLICENSED",
+  "license": "Apache-2.0",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

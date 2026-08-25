@@ -2,7 +2,7 @@
   "name": "@agenticdevelopertoolkit/viewport",
   "version": "0.1.0",
   "description": "Page-shell primitives for iOS-correct viewport + keyboard handling — ViewportShell, ViewportSpacer, ViewportComposer, useKeyboardInset.",
-  "license": "UNLICENSED",
+  "license": "Apache-2.0",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
