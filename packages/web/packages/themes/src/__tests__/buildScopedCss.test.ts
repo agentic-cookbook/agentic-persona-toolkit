@@ -20,7 +20,11 @@ describe('buildScopedCss', () => {
     expect(out).not.toMatch(/^:scope \{/m)
   })
 
-  it('still handles the legacy :root / :root.dark anchors', () => {
+  // Contract regression test: no theme in src/styles/ exercises this path today — the
+  // :root / :root.dark pair was converted away from before this repo went public — but
+  // buildScopedCss is a public export, and an external consumer's stylesheet may still
+  // be in this shape. Keep resolving it even though nothing shipped here still does.
+  it('still resolves the legacy :root / :root.dark anchor pair for external consumers', () => {
     const out = buildScopedCss(':root {\n  --a: 1;\n}\n:root.dark {\n  --a: 2;\n}\n', '.host')
     expect(out).toContain(':scope {')
     expect(out).toContain('html.dark :scope {')
