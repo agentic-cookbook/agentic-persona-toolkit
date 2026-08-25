@@ -56,6 +56,45 @@ def test_product_name_is_caught() -> None:
         assert "product name" in result.stderr, result.stderr
 
 
+def test_private_repo_path_is_caught() -> None:
+    """A comment giving coordinates into a repo the reader does not have."""
+    cases = [
+        "// A MIRROR of backend/src/adh/src/lib/rdid.ts, pinned by a parity guard.\n",
+        "// `frontend/tools/verify_autofill_copies.py` is what holds the copies together.\n",
+        "/* Route-keyed, over adh-site-config/content/help.en.json. */\n",
+        "// NOT adh/src/help/store.ts, which is easy to mistake this for.\n",
+    ]
+    for source in cases:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "src").mkdir()
+            (root / "src" / "thing.ts").write_text(source, encoding="utf-8")
+            result = run(root)
+            assert result.returncode == 1, f"path survived the guard: {source!r}"
+            assert "private repo path" in result.stderr, result.stderr
+
+
+def test_naming_adh_as_a_service_is_not_a_leak() -> None:
+    """The narrow half of the rule, and the reason the pattern is about paths.
+
+    `chat` exists to talk to adh's API and says so in twenty-one places. A CSS class
+    is public API; a theme name is branding; a fixture is sample data. A guard that
+    fired on these would be turned off within a week, and it would deserve to be.
+    """
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        (root / "src").mkdir()
+        (root / "src" / "backend.ts").write_text(
+            "// adh's chat endpoint carries a message and nothing else.\n"
+            "const cls = 'adh-mv-prose'\n"
+            "const theme = 'adh-comic'\n"
+            "const fixture = { orgSlug: 'adh', badge: 'ADH-42' }\n",
+            encoding="utf-8",
+        )
+        result = run(root)
+        assert result.returncode == 0, f"false positive on legitimate adh prose: {result.stderr}"
+
+
 def test_node_modules_and_lockfiles_are_skipped() -> None:
     """A vendored dep naming the private scope is not this repo's leak to fix."""
     with tempfile.TemporaryDirectory() as tmp:

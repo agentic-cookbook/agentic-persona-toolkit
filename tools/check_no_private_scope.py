@@ -12,7 +12,7 @@ and imports are not where this leaks. It leaks in README.md, in CHANGELOG.md, in
 a doc comment at the top of a config file: the files nobody greps because they do
 not compile. This guard scans the whole tree.
 
-Two patterns, for two different failures:
+Three patterns, for three different failures:
 
   @agentic-toolkit/   a private package name. Fatal wherever it appears, including
                       in prose about a package that no longer exists — a public
@@ -21,6 +21,25 @@ Two patterns, for two different failures:
                       meant to be usable by anyone; a reference to the one product
                       it happens to serve is either a leak or a coupling, and both
                       are worth seeing.
+  private repo paths  a filesystem path into a tree the reader does not have:
+                      `backend/src/adh/src/lib/rdid.ts`,
+                      `frontend/tools/verify_autofill_copies.py`,
+                      `adh-site-config/content/help.en.json`.
+
+That third pattern is deliberately about PATHS and not about the word "adh". Naming
+adh as a service is correct and this repo does it in twenty-one places on purpose —
+`chat` exists to talk to adh's API, and "adh's chat endpoint carries a message and
+nothing else" is exactly what a consumer needs to read. A CSS class called
+`adh-mv-prose` is this toolkit's public API; a theme called `adh-comic` is shipped
+branding. None of those are leaks and none of them are matched here.
+
+A path is different in kind. It cannot be followed by anyone outside the private
+repo, so it is useless to the reader it is addressed to, and it describes a layout
+they were not given. Several of the comments carrying such paths do record something
+worth keeping — that two copies of a list are pinned against each other by a parity
+guard, and that editing one alone will be caught. Keep the invariant, drop the
+coordinate: "a parity guard in the consuming application asserts these two copies
+stay identical" says the useful half and names nothing unreachable.
 
 Exit 0 clean, 1 on a hit, 2 if there was nothing to scan — an empty scan is a
 broken path, never a pass.
@@ -35,6 +54,13 @@ from pathlib import Path
 PATTERNS = {
     "private package scope": re.compile(r"@agentic-toolkit/"),
     "product name": re.compile(r"agenticdeveloperhub", re.IGNORECASE),
+    "private repo path": re.compile(
+        r"backend/src/(adh|builder|status)"
+        r"|frontend/(src|tools)/"
+        r"|\badh/(src|frontend)/"
+        r"|adh-site-config",
+        re.IGNORECASE,
+    ),
 }
 
 SKIP_DIRS = {"node_modules", "dist", ".turbo", ".git", "coverage"}
