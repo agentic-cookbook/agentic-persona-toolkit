@@ -32,6 +32,16 @@ jobs:
           python3 packages/web/tools/check_license_fields_test.py
           python3 packages/web/tools/check_license_fields.py
 
+      # Eight packages are arriving here from a PRIVATE repo, each carrying the
+      # prose its old home wrote about it. The per-package arrival checks scan
+      # src/, which is where the imports are — and imports are not where this
+      # leaks. It leaks in a README, a CHANGELOG, a comment in a config file:
+      # the files nobody greps because they do not compile.
+      - name: no private package references
+        run: |
+          python3 tools/check_no_private_scope_test.py
+          python3 tools/check_no_private_scope.py
+
       - uses: pnpm/action-setup@v4
         with:
           version: 9.15.9
