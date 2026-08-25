@@ -1,37 +1,16 @@
 # agenticdevelopertoolkit
 
-Developer toolkit for wiring AI persona chats into apps using the official
-agentic registry (persona definitions + LLM provider integrations) and
-my-agentic-storage (chat history + state). Replaces the deprecated
+A set of reusable per-platform packages: sixteen web libraries (`ui`,
+`chat`, `editing`, `markdown`, `search`, `themes`, and more) plus native
+scaffolding for Apple, Terminal, Android, and Windows. Persona-chat wiring
+is one capability among them, not the toolkit's identity: the `chat`
+package's `PersonaChatBackend` wires apps to the official agentic registry
+(persona definitions + LLM provider integrations) and my-agentic-storage
+(chat history + state). Replaces the deprecated
 `agentic-persona-coordinator`.
 
 Authoritative planning: [`docs/planning/planning.md`](../docs/planning/planning.md).
 README: [`README.md`](../README.md).
-
-## Ecosystem map
-
-- **`~/Development/projects/adh/adh`** — the monorepo the registry and
-  storage are now folded into, and the chat backend the coordinator talks
-  to. Chat API at `backend/src/adh/src/routes/chat.ts`; prompt assembly and
-  provider calls at `llm/service.ts`; history at `llm/persistence.ts`.
-- **`~/Development/projects/agenticregistry`** — registry service, now
-  folded into adh. Has
-  per-user persona services (Anthropic / OpenAI / Gemini), provider
-  integrations at `web/backend/src/lib/providers/`, persona records with
-  `slug`, `modelPrompt`, `voice`, `character`, `examples`, `serviceId`,
-  `model`. Public read at `/api/public/personas/:slug`. No chat-completion
-  endpoint exists yet — M1 will add one.
-- **`~/Development/projects/my-agentic-storage`** — storage service.
-  Primitives: `buckets`, `lists`, `events`, `kv`, `counters`, `queues`,
-  `memory`, `keywords`. Per-user API keys. Chat history is a fit for `lists`
-  or `events`.
-- **`~/Development/projects/agentic-web-toolkit`** — current home of the
-  chat package at `packages/features/chat/`. M1 relocates it here.
-- **`~/Development/projects/learntruefacts`** — dogfood site for apt.
-  Currently vendors `agentic-web-toolkit/` under `vendor/`. M1's success
-  criterion is replacing that vendor copy with a real apt dependency.
-- **`~/Development/projects/agentic-persona-coordinator`** — deprecated.
-  Do not change anything there.
 
 ## M1 scope (the only milestone designed so far)
 
@@ -49,11 +28,11 @@ ports. Each gets its own design spec when its turn comes.
 
 ## Settled: A1 — the server orchestrates, the client relays
 
-Chat orchestration lives in adh (`~/Development/projects/adh/adh`, which
-folds in both the registry and storage). adh resolves the persona, assembles
-the prompt, reads and writes history, calls the provider, and streams the
-reply as SSE. The coordinator holds no history, no credentials, and no
-prompt.
+Chat orchestration lives in a backend service this toolkit talks to (adh,
+which folds in both the registry and storage), not in the toolkit itself.
+That service resolves the persona, assembles the prompt, reads and writes
+history, calls the provider, and streams the reply as SSE. The coordinator
+holds no history, no credentials, and no prompt.
 
 The clearest evidence is in the contract itself: `Backend.send` receives only
 the new message. There is no history parameter anywhere, because history is

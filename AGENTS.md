@@ -4,9 +4,16 @@ Orientation for agents (and humans) working in this repo.
 
 ## Purpose
 
-A toolkit that ships reusable per-platform SDKs for wiring apps to the
+A set of reusable per-platform packages: sixteen web libraries under
+`packages/web/packages/` (`ui`, `chat`, `editing`, `markdown`, `search`,
+`themes`, and more, listed in full below) plus native scaffolding for
+Apple, Terminal, Android, and Windows.
+
+Persona-chat wiring is one capability among them, not the toolkit's
+identity: the `chat` package's `PersonaChatBackend` wires apps to the
 [agentic registry](https://github.com/agentic-cookbook/agenticregistry) and
 [my-agentic-storage](https://github.com/agentic-cookbook/my-agentic-storage).
+
 Each platform folder under `packages/` is the **root of its native build
 system** — its conventional manifest file lives there.
 

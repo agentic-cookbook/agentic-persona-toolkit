@@ -1,12 +1,16 @@
 # agenticdevelopertoolkit
 
-A toolkit that ships reusable per-platform SDKs for wiring AI persona chats
-into apps using the [official agentic registry](https://github.com/agentic-cookbook/agenticregistry)
+A set of reusable per-platform packages — sixteen web libraries (`ui`,
+`chat`, `editing`, `markdown`, `search`, `themes`, and more, listed in full
+below) plus native scaffolding for Apple, Terminal, Android, and Windows.
+
+Persona-chat wiring is one capability among them, not the toolkit's
+identity: the `chat` package's `PersonaChatBackend` splices the
+[official agentic registry](https://github.com/agentic-cookbook/agenticregistry)
 (persona definitions + LLM provider integrations) and
 [my-agentic-storage](https://github.com/agentic-cookbook/my-agentic-storage)
-(chat history + state). The toolkit's coordinator code is the glue that
-splices both services into the shape a chat UI expects, so each consumer
-app does not have to re-implement orchestration.
+(chat history + state) into the shape a chat UI expects, so a consumer app
+does not have to re-implement that orchestration.
 
 Supersedes the deprecated `agentic-persona-coordinator`.
 
