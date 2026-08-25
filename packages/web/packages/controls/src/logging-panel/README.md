@@ -16,7 +16,7 @@ theming + click-routing keeps consumers to a configuration object.
 
 ```tsx
 import { LogPanel } from '@agenticdevelopertoolkit/controls/logging-panel'
-import '@agenticdevelopertoolkit/controls/logging-panel/styles/logging-panel.css'
+import '@agenticdevelopertoolkit/controls/logging-panel/styles.css'
 
 type Ctx = { sessionId: string }
 

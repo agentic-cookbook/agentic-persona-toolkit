@@ -99,8 +99,8 @@ export function FilteredList<T>(props: FilteredListProps<T>) {
 
   return (
     <div className={rootClass}>
-      {/* A form around the field, for the reason ChatInput.tsx in the persona toolkit
-          records from an iOS 26 measurement: a field with no form ancestor is scoped
+      {/* A form around the field, for the reason an iOS 26 measurement against a
+          production chat input recorded: a field with no form ancestor is scoped
           for autofill against the whole DOCUMENT, so Safari classifies it from whatever
           else the page says and offers the reader's own contact card over it. The form
           is a plain block in `.fl-root`'s column flex and the input is still

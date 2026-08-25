@@ -16,7 +16,7 @@ to a one-liner.
 
 ```tsx
 import { SourceCodePanel } from '@agenticdevelopertoolkit/controls/source-code-panel'
-import '@agenticdevelopertoolkit/controls/source-code-panel/styles/source-code-panel.css'
+import '@agenticdevelopertoolkit/controls/source-code-panel/styles.css'
 
 <SourceCodePanel
   filename="example.tsx"

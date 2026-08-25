@@ -25,7 +25,7 @@ Two entry points:
 
 ```tsx
 import { FilteredList } from '@agenticdevelopertoolkit/controls/filtered-list'
-import '@agenticdevelopertoolkit/controls/filtered-list/styles/filtered-list.css'
+import '@agenticdevelopertoolkit/controls/filtered-list/styles.css'
 
 type Service = { id: string; name: string; providerKind: string; baseUrl: string }
 

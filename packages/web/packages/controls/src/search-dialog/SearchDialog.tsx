@@ -66,9 +66,9 @@ export function SearchDialog({
           {/* A form, not a div, and that is what stops iOS offering "AutoFill Contact"
               above the keyboard. A field with no form ancestor is scoped for autofill
               against the whole DOCUMENT, so Safari classifies it from whatever else the
-              page happens to say. Measured on iOS 26 in the persona toolkit's ChatInput,
-              where stripping every attribute off the input did not move it and giving the
-              field a form of its own did. The element keeps `awt-search-dialog__input-row`
+              page happens to say. Measured on iOS 26 against a production chat
+              input, where stripping every attribute off the field did not move it and
+              giving the field a form of its own did. The element keeps `awt-search-dialog__input-row`
               unchanged, so it is still the flex row the stylesheet draws — the tag is the
               only thing that changed, and `onSubmit` only stops the navigation an implicit
               submit would perform, since Enter is already handled by `handleKey`. */}
