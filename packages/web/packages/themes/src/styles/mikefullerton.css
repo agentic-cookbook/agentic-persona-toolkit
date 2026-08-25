@@ -1,136 +1,236 @@
-/* mikefullerton — ember on ink, set in Iosevka.
- *
- * The shipped look of mikefullerton.com: the same ember the lamp is lit with on
- * fishlamp.com (--color-ember in that site's globals.css), over near-black, in
- * the same self-hosted Iosevka. The two sites are one person; they light the
- * same way.
- *
- * This file used to describe a DIFFERENT site — Instrument Serif and DM Mono off
- * a Google Fonts @import, gold #8a6d20 light / #c4a35a dark. mikefullerton.com
- * moved to ember and Iosevka and left this behind, then defended itself by
- * re-declaring every token in its own styles.css on `:root, :root.dark`, where
- * the extra `.dark` out-specifies the plain `:root` here. That worked for the
- * tokens and did nothing for `body`, which is the same specificity in both files
- * and so came down to whichever stylesheet Next happened to order last — this
- * one. The page has been painting #0e0e14 under a #c4a35a glow ever since,
- * while every gradient drawn on top of it faded to #0c0c0f.
- *
- * So the palette below IS the site's palette now, and the site declares none of
- * its own. One value per role, here.
- *
- * SINGLE MODE, always dark. mikefullerton.com has one appearance and no toggle
- * (see its layout.tsx), so a light variant would be a second palette nobody has
- * ever seen and nobody would notice going wrong.
- *
- * NO WEBFONT @import, unlike this package's older skins. Iosevka arrives from
- * the host — mikefullerton.com self-hosts the subset pair as --font-iosevka via
- * next/font — and degrades to the platform monospace where the host has none. A
- * theme is the wrong place to put a third-party request on someone else's page.
- *
- * TWO VOCABULARIES, ONE SET OF VALUES. The short names (--bg, --text, --accent,
- * …) are what the site's own CSS is written in. The --color-*, --font-* and
- * --pc-* names are the contract this package's base.css files read from a theme.
- * The second set is aliases of the first, so there is still one hex per role.
+/* Mike Fullerton — converged site + chat theme.
+ * Tight, technical, cinematic. Instrument Serif (display) + DM Mono (UI).
+ * Gold + blue accents. Light = warm paper; dark = cinematic black.
  */
 
-/* === Tokens === */
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Instrument+Serif:ital@0;1&display=swap');
 
-:root {
-  /* --- The palette ----------------------------------------------------- */
+/* === Tokens ===
+ * Dark is the default (html:root); light overrides under
+ * html:root[data-color-mode]:not(.dark) — matching the appearance system, whose pre-paint
+ * stamps data-color-mode. The leading `html` type selector adds an element-column point so
+ * BOTH blocks outrank the always-on adh base theme (:root, 0-1-0) AND color-mode-light
+ * (:root[data-color-mode]:not(.dark), 0-3-0) regardless of stylesheet source order. BOTH
+ * are load-bearing: drop the light block and light mode silently reverts to the base
+ * palette, because 0-3-0 beats the dark block's 0-1-1.
+ *
+ * Converted from this theme's legacy `:root` / `:root.dark` token blocks by
+ * scripts/convert-legacy-theme.py, which derived the M3 color roles from the palette below
+ * — see that script for why a legacy theme cannot be switched to as-is, and for how each
+ * role is derived. The conversion was ONE-SHOT: this file is hand-maintained from here on,
+ * nothing regenerates it. */
 
-  /* Surfaces. --bg is what every gradient on the site fades to, and what
-   * layout.tsx hands the browser as `themeColor` so the mobile chrome blends
-   * into the page — three readers of one value, which is the argument for it
-   * living in exactly one place. */
-  --bg: #0c0c0f;
-  --surface: rgba(20, 20, 26, 0.94);
+html:root {
+  color-scheme: dark;
 
-  --border: #2a2a36;
-  --border-subtle: #1e1e28;
-
-  --text: #e8e6e3;
-  --text-muted: #8a8a9a;
-  --text-dim: #5a5a6a;
-
-  /* fishlamp.com's ember, the gold of the lamp the studio is named after. */
-  --accent: #e8a33d;
-  --accent-dim: rgba(232, 163, 61, 0.15);
-
-  /* --- The typeface ---------------------------------------------------- */
-
-  /* One face in four roles. The roles still differ even where the family no
-   * longer does, so they keep four names: collapsing them here would mean
-   * hunting down every call site to ever set them apart again. */
-  --font-mono: var(--font-iosevka, 'Iosevka'), ui-monospace, SFMono-Regular, Menlo, monospace;
-  --font-display: var(--font-mono);
-  --font-sans: var(--font-mono);
-  --font-read: var(--font-mono);
-
-  /* --- The toolkit's token contract, aliased onto the palette ---------- */
-
-  --color-surface: var(--bg);
-  --color-surface-raised: var(--surface);
-  --color-border: var(--border);
-  --color-border-subtle: var(--border-subtle);
-
-  --color-text-primary: var(--text);
-  --color-text-secondary: var(--text-muted);
-  --color-text-dim: var(--text-dim);
-
-  --color-accent: var(--accent);
-  --color-accent-dim: var(--accent-dim);
-
-  /* The status hues have no short name because the site has no use for them —
-   * only the chat below reads them. --color-info is also the one hue here that
-   * is not ember: the reader's side of a conversation, so the two speakers are
-   * told apart by more than which edge they sit on. */
+  /* --- The theme's own tokens, as authored. --- */
+  --color-surface: #0e0e14;
+  --color-surface-raised: rgba(20, 20, 28, 0.7);
+  --color-surface-hover: rgba(30, 30, 40, 0.7);
+  --color-border: rgba(42, 42, 54, 0.6);
+  --color-border-subtle: rgba(30, 30, 40, 0.5);
+  --color-text-primary: #e8e6e3;
+  --color-text-secondary: #8a8a9a;
+  --color-text-dim: #5a5a6a;
+  --color-accent: #c4a35a;
+  --color-accent-dim: rgba(196, 163, 90, 0.10);
   --color-success: #5cb270;
   --color-error: #d45454;
   --color-info: #5a8fd4;
-
-  --scp-shiki-theme: 'github-dark';
-
-  /* --- Chat ------------------------------------------------------------ */
-
-  /* Every tint is mixed from a palette token rather than written out as a
-   * fourth copy of the ember, so a change to --accent carries here too. */
-  --pc-font: var(--font-mono);
-  --pc-radius: 3px;
-  --pc-surface: color-mix(in srgb, var(--bg) 55%, transparent);
-  --pc-persona-bg: color-mix(in srgb, var(--accent) 8%, transparent);
-  --pc-persona-border: color-mix(in srgb, var(--accent) 15%, transparent);
-  --pc-persona-text: var(--text);
-  --pc-persona-name: var(--accent);
-  --pc-user-bg: color-mix(in srgb, var(--color-info) 8%, transparent);
-  --pc-user-border: color-mix(in srgb, var(--color-info) 15%, transparent);
-  --pc-user-text: var(--text);
-  --pc-user-name: var(--color-info);
-  --pc-input-bg: color-mix(in srgb, var(--bg) 60%, transparent);
-  --pc-input-border: var(--border);
-  --pc-input-focus: var(--accent);
+  --pc-surface: rgba(14, 14, 20, 0.55);
+  --pc-persona-bg: rgba(196, 163, 90, 0.08);
+  --pc-persona-border: rgba(196, 163, 90, 0.15);
+  --pc-persona-text: #e8e6e3;
+  --pc-persona-name: #c4a35a;
+  --pc-user-bg: rgba(90, 143, 212, 0.08);
+  --pc-user-border: rgba(90, 143, 212, 0.15);
+  --pc-user-text: #e8e6e3;
+  --pc-user-name: #5a8fd4;
+  --pc-input-bg: rgba(12, 12, 15, 0.6);
+  --pc-input-border: #2a2a36;
+  --pc-input-focus: #c4a35a;
   --pc-send-bg: transparent;
-  --pc-send-text: var(--accent);
-  --pc-time-color: var(--text-dim);
+  --pc-send-text: #c4a35a;
+  --pc-time-color: #5a5a6a;
+  --scp-shiki-theme: 'github-dark';
+  --font-display: 'Instrument Serif', Georgia, serif;
+  --font-mono: 'DM Mono', ui-monospace, monospace;
+  --font-sans: 'DM Mono', ui-monospace, monospace;
+  --pc-font: 'DM Mono', monospace;
+  --pc-radius: 3px;
+
+  /* --- M3 colour roles, derived from the palette above by
+     scripts/convert-legacy-theme.py. Hand-editable from here on. --- */
+  --color-primary: #c4a35a;
+  --color-on-primary: #0e0e14;
+  --color-primary-container: #292522;
+  --color-on-primary-container: #e2dacb;
+  --color-inverse-primary: #ccb27a;
+  --color-primary-bright: #ccb27a;
+  --color-primary-dim: rgba(196, 163, 90, 0.10);
+  --color-secondary: #8a8a9a;
+  --color-on-secondary: #0e0e14;
+  --color-secondary-container: #12121a;
+  --color-on-secondary-container: #e8e6e3;
+  --color-tertiary: #5a8fd4;
+  --color-on-tertiary: #0e0e14;
+  --color-tertiary-container: #1b2231;
+  --color-on-tertiary-container: #ced7e2;
+  --color-on-error: #0e0e14;
+  --color-error-container: #2d1b1f;
+  --color-on-error-container: #e8cdc8;
+  --color-surface-dim: #0e0e14;
+  --color-surface-bright: #1f1f28;
+  --color-surface-container-lowest: #0e0e14;
+  --color-surface-container-low: #101017;
+  --color-surface-container: #12121a;
+  --color-surface-container-high: #191922;
+  --color-surface-container-highest: #1d1d27;
+  --color-on-surface: #e8e6e3;
+  --color-on-surface-variant: #8a8a9a;
+  --color-outline: rgba(42, 42, 54, 0.6);
+  --color-outline-variant: rgba(30, 30, 40, 0.5);
+  --color-outline-strong: #626167;
+  --color-inverse-surface: #e8e6e3;
+  --color-inverse-on-surface: #0e0e14;
+  --color-scrim: #000000;
+  --color-shadow: #000000;
+  --color-on-success: #0e0e14;
+  --color-success-container: #1c2724;
+  --color-on-success-container: #d0ddce;
+  --color-warning: #a58e63;
+  --color-on-warning: #0e0e14;
+  --color-warning-container: #252222;
+  --color-on-warning-container: #dcd6cb;
+  --color-on-info: #0e0e14;
+  --color-info-container: #1b2231;
+  --color-on-info-container: #ced7e2;
+
+  /* --- Compat aliases: one authoritative value per colour. --- */
+  --color-border-strong: var(--color-outline-strong);
+  --color-accent-bright: var(--color-primary-bright);
+  --color-link: var(--color-primary);
+  --color-link-hover: var(--color-primary-bright);
+  --focus-ring-color: var(--color-primary);
+  --color-surface-tint: var(--color-primary);
+  --color-apt-nav: var(--color-surface-container-high);
+}
+
+html:root[data-color-mode]:not(.dark) {
+  color-scheme: light;
+
+  /* --- The theme's own tokens. The ones marked `nudged` could not
+     carry the job the M3 layer gives them (see DUTIES in
+     scripts/convert-legacy-theme.py) and were moved along their own
+     lightness ramp — hue and chroma untouched — by the smallest step
+     that clears WCAG AA. Everything else is exactly as authored. --- */
+  --color-surface: #fafaf7;
+  --color-surface-raised: rgba(255, 255, 255, 0.7);
+  --color-surface-hover: rgba(245, 245, 240, 0.7);
+  --color-border: rgba(180, 175, 165, 0.4);
+  --color-border-subtle: rgba(200, 195, 185, 0.3);
+  --color-text-primary: #1a1a24;
+  --color-text-secondary: #55556a;
+  --color-text-dim: #8a8a9c;
+  --color-accent: #8a6d20;
+  --color-accent-dim: rgba(138, 109, 32, 0.08);
+  --color-success: #308e48; /* nudged for AA; was #2d8b45 */
+  --color-error: #b03939;
+  --color-info: #3565a8;
+  --pc-surface: rgba(255, 255, 255, 0.55);
+  --pc-persona-bg: rgba(138, 109, 32, 0.06);
+  --pc-persona-border: rgba(138, 109, 32, 0.20);
+  --pc-persona-text: #1a1a24;
+  --pc-persona-name: #8a6d20;
+  --pc-user-bg: rgba(53, 101, 168, 0.06);
+  --pc-user-border: rgba(53, 101, 168, 0.20);
+  --pc-user-text: #1a1a24;
+  --pc-user-name: #3565a8;
+  --pc-input-bg: rgba(255, 255, 255, 0.6);
+  --pc-input-border: #c8c4ba;
+  --pc-input-focus: #8a6d20;
+  --pc-send-bg: transparent;
+  --pc-send-text: #8a6d20;
+  --pc-time-color: #8a8a9c;
+  --scp-shiki-theme: 'github-light';
+  --font-display: 'Instrument Serif', Georgia, serif;
+  --font-mono: 'DM Mono', ui-monospace, monospace;
+  --font-sans: 'DM Mono', ui-monospace, monospace;
+  --pc-font: 'DM Mono', monospace;
+  --pc-radius: 3px;
+
+  /* --- M3 colour roles, derived from the palette above by
+     scripts/convert-legacy-theme.py. Hand-editable from here on. --- */
+  --color-primary: #8a6d20;
+  --color-on-primary: #fafaf7;
+  --color-primary-container: #e5e0d1;
+  --color-on-primary-container: #2c2828;
+  --color-inverse-primary: #6f5a28;
+  --color-primary-bright: #6f5a28;
+  --color-primary-dim: rgba(138, 109, 32, 0.08);
+  --color-secondary: #55556a;
+  --color-on-secondary: #fafaf7;
+  --color-secondary-container: #fefefd;
+  --color-on-secondary-container: #1a1a24;
+  --color-tertiary: #3565a8;
+  --color-on-tertiary: #fafaf7;
+  --color-tertiary-container: #d5dfea;
+  --color-on-tertiary-container: #202739;
+  --color-on-error: #fafaf7;
+  --color-error-container: #f1d8d3;
+  --color-on-error-container: #332229;
+  --color-surface-dim: #fafaf7;
+  --color-surface-bright: #ffffff;
+  --color-surface-container-lowest: #fafaf7;
+  --color-surface-container-low: #fcfcfa;
+  --color-surface-container: #fefefd;
+  --color-surface-container-high: #f6f6f2;
+  --color-surface-container-highest: #e4e2dd;
+  --color-on-surface: #1a1a24;
+  --color-on-surface-variant: #55556a;
+  --color-outline: rgba(180, 175, 165, 0.4);
+  --color-outline-variant: rgba(200, 195, 185, 0.3);
+  --color-outline-strong: #8e8d8f;
+  --color-inverse-surface: #1a1a24;
+  --color-inverse-on-surface: #fafaf7;
+  --color-scrim: #000000;
+  --color-shadow: #000000;
+  --color-on-success: #141210;
+  --color-success-container: #d7e7d6;
+  --color-on-success-container: #212d2c;
+  --color-warning: #816f41;
+  --color-on-warning: #fafaf7;
+  --color-warning-container: #e3e0d5;
+  --color-on-warning-container: #2a282b;
+  --color-on-info: #fafaf7;
+  --color-info-container: #d5dfea;
+  --color-on-info-container: #202739;
+
+  /* --- Compat aliases: one authoritative value per colour. --- */
+  --color-border-strong: var(--color-outline-strong);
+  --color-accent-bright: var(--color-primary-bright);
+  --color-link: var(--color-primary);
+  --color-link-hover: var(--color-primary-bright);
+  --focus-ring-color: var(--color-primary);
+  --color-surface-tint: var(--color-primary);
+  --color-apt-nav: var(--color-surface-container-high);
 }
 
 /* === Site surface === */
 
-/* Flat, with no radial glow behind it. The version this replaces washed the top
- * of the page in --color-accent-dim, which on a site whose first screen is a
- * full-bleed photograph was never visible anywhere it could be judged. */
 body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: var(--font-sans);
+  background:
+    radial-gradient(ellipse at top, var(--color-accent-dim), transparent 60%),
+    var(--color-surface);
+  color: var(--color-text-primary);
+  font-family: var(--font-mono);
   font-size: 13.5px;
   line-height: 1.7;
   letter-spacing: 0.01em;
   -webkit-font-smoothing: antialiased;
 }
 
-/* A wash the ember shows through, not a block of it. Selecting a line should
- * mark it, not repaint it. */
-::selection { background: var(--accent-dim); color: var(--accent); }
+::selection { background: var(--color-accent); color: var(--color-surface); }
 
 .prose {
   --tw-prose-body: var(--color-text-primary);
@@ -150,14 +250,11 @@ body {
   --tw-prose-captions: var(--color-text-dim);
 }
 
-/* No `font-style: italic` on the display type. It was there for Instrument
- * Serif, which ships a drawn italic; the Iosevka subset is Regular and Bold
- * only, so the browser would answer with a synthetic oblique — the whole face
- * sheared a few degrees. Tracking opens up instead. */
 .prose :where(h1, h2):not(:where([class~='not-prose'], [class~='not-prose'] *)) {
   font-family: var(--font-display);
   font-weight: 400;
-  letter-spacing: 0.02em;
+  font-style: italic;
+  letter-spacing: -0.01em;
   color: var(--color-accent);
 }
 .prose :where(h3, h4):not(:where([class~='not-prose'], [class~='not-prose'] *)) {

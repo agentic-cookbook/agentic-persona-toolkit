@@ -1,3 +1,17 @@
+'use client'
+
+/**
+ * Legacy color-mode context for the customer-facing toolkit. Provider-based,
+ * stores `agentic-toolkit:color-mode`, and writes `data-appearance-mode`.
+ *
+ * The ADH chrome/sites use the newer, Provider-free appearance system instead
+ * (see appearance.ts / appearance-store.tsx): storage key `adh:appearance`,
+ * attribute `data-color-mode`, plus accessibility prefs. The two are intentionally
+ * separate (different keys/attributes) and must NOT both be mounted on one
+ * document — `useAppearancePreferences` is canonical for ADH; this stays for the
+ * toolkit until it migrates.
+ */
+
 import {
   createContext,
   useCallback,
@@ -25,15 +39,15 @@ interface ColorModeContextValue {
 
 const ColorModeContext = createContext<ColorModeContextValue | null>(null)
 
-function readStoredMode(key: string): ColorMode {
-  if (typeof window === 'undefined') return 'auto'
+function readStoredMode(key: string): ColorMode | null {
+  if (typeof window === 'undefined') return null
   try {
     const v = window.localStorage.getItem(key)
     if (v === 'light' || v === 'dark' || v === 'auto') return v
   } catch {
     /* ignore */
   }
-  return 'auto'
+  return null
 }
 
 export interface ColorModeProviderProps {
@@ -47,7 +61,7 @@ export function ColorModeProvider({
   storageKey = DEFAULT_STORAGE_KEY,
   defaultMode = 'auto',
 }: ColorModeProviderProps) {
-  const [mode, setMode] = useState<ColorMode>(() => readStoredMode(storageKey) || defaultMode)
+  const [mode, setMode] = useState<ColorMode>(() => readStoredMode(storageKey) ?? defaultMode)
   const [systemDark, setSystemDark] = useState<boolean>(() =>
     typeof window === 'undefined' ? false : window.matchMedia('(prefers-color-scheme: dark)').matches,
   )
@@ -82,7 +96,7 @@ export function ColorModeProvider({
   }, [mode, storageKey])
 
   const cycle = useCallback(() => {
-    setMode((m) => CYCLE[(CYCLE.indexOf(m) + 1) % CYCLE.length] ?? m)
+    setMode((m) => CYCLE[(CYCLE.indexOf(m) + 1) % CYCLE.length] ?? 'auto')
   }, [])
 
   useEffect(() => {
