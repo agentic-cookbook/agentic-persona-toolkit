@@ -5,11 +5,7 @@ name: web-tests
 
 on:
   push:
-    # open-source-etc is included because every phase of this migration lands
-    # directly on that branch with no PR open; with [main] alone this workflow
-    # would never fire until the branch merges, and Tasks 4-11 need the gate to
-    # exist before then. Remove the open-source-etc entry when this branch merges.
-    branches: [main, open-source-etc]
+    branches: [main]
     # The filter must cover every root the guards below SCAN, not just the code they
     # were originally written for. It listed `packages/web/**` alone, so a leak or a
     # dangling citation landing in `recipes/`, `docs/`, `websites/` or a root doc
