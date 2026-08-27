@@ -18,6 +18,9 @@ on:
     # in step: `check_no_private_scope.py` scans packages/web/packages, recipes, docs,
     # websites plus README.md, AGENTS.md and .claude/CLAUDE.md; `check_doc_links.py`
     # scans the whole repo; `check_recipe_scope.py` scans recipes and docs.
+    # `check_site_deps.py` scans websites — which nothing else in this job enters:
+    # the install/build/test steps below all run inside packages/web, so the demo
+    # site's own manifest and imports are checked by that guard and nothing else.
     # `tools/**` is here because a change to a guard must re-run that guard.
     paths:
       - "packages/web/**"
@@ -64,6 +67,8 @@ jobs:
           python3 tools/check_doc_links.py
           python3 tools/check_doc_subpaths_test.py
           python3 tools/check_doc_subpaths.py
+          python3 tools/check_site_deps_test.py
+          python3 tools/check_site_deps.py
 
       # Eight packages are arriving here from a PRIVATE repo, each carrying the
       # prose its old home wrote about it. The per-package arrival checks scan
