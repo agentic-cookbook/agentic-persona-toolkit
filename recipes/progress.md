@@ -137,7 +137,7 @@ telemetry around a job's progress belong to the consumer, not the bar.
 
 ## Platform Notes
 
-- File: `websites/shared/ui/src/components/progress.tsx`.
+- File: `packages/web/packages/ui/src/components/progress.tsx`.
 - Carries `"use client"` because it renders an inline `style` transform, but holds no
   internal state — `value` is controlled by the consumer.
 - Demo: `ui-showcase` Topic `progress` (regenerate `sources.generated.ts` after source

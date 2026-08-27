@@ -147,8 +147,8 @@ button.
 
 ## Platform Notes
 
-- Files: `websites/shared/ui/src/components/copy-button.tsx`; hook
-  `websites/shared/ui/src/hooks/useClipboard.ts`.
+- Files: `packages/web/packages/ui/src/components/copy-button.tsx`; hook
+  `packages/web/packages/ui/src/hooks/useClipboard.ts`.
 - Carries `"use client"` — it reads `navigator.clipboard` and holds the transient
   `copied` state.
 - Composes the shared `Button` and the lucide `Copy` / `Check` icons; no bespoke chrome.

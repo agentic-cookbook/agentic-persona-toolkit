@@ -172,7 +172,7 @@ No logging. ResizableSplit is a presentational layout primitive; it emits no str
 
 ## Platform Notes
 
-- New file: `websites/shared/ui/src/components/resizable-split.tsx`.
+- New file: `packages/web/packages/ui/src/components/resizable-split.tsx`.
 - Demo: `ui-showcase` (regenerate sources afterward).
 - Consumed by: `ListWithDetailsPane`.
 

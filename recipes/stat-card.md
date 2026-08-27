@@ -48,8 +48,7 @@ line, a sparkline), and `footnote` renders last as a small dim mono qualifier (e
 `InfoPanel`'s default (non-scroll) mode, so it grows to its content rather than
 scrolling.
 
-It was extracted from the status site's Traffic/Errors telemetry cards
-(`websites/status-backend/web/src/components/TelemetrySections.tsx`), so every site's
+It was extracted from a status site's Traffic/Errors telemetry cards, so every site's
 "figure card with a deep link into the source tool" shares one component.
 
 ## Ingredients
@@ -157,13 +156,12 @@ into a composed part; nothing flows back up except the browser navigation an
 
 ## Platform Notes
 
-- **React / Web (TypeScript):** `websites/shared/ui/src/blocks/stat-card.tsx`,
+- **React / Web (TypeScript):** `packages/web/packages/ui/src/blocks/stat-card.tsx`,
   exported from `@agenticdevelopertoolkit/ui` (`@agenticdevelopertoolkit/ui/blocks/stat-card`). Composes
   `InfoPanel` (`../blocks/info-panel`), `StatRow` (`../components/stat`), and
   `ExternalLink` (`../components/external-link`). Exports `StatCard`, `StatCardProps`,
   and the `StatCardStat` type.
-- Historical source: the status site's Traffic/Errors telemetry cards
-  (`websites/status-backend/web/src/components/TelemetrySections.tsx`) — StatCard
+- Historical source: a status site's Traffic/Errors telemetry cards — StatCard
   generalizes that pattern for every site.
 - Demo: `ui-showcase` Topic `stat-card` (group "Blocks — cards & sections"); the demo
   shows a Traffic card (declarative stats + footnote), an Errors card (stats +

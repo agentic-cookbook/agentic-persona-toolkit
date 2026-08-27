@@ -126,7 +126,7 @@ composed `StatusDot`; nothing flows back up.
 
 ## Platform Notes
 
-- **React / Web (TypeScript):** `websites/shared/ui/src/blocks/stat-list.tsx`,
+- **React / Web (TypeScript):** `packages/web/packages/ui/src/blocks/stat-list.tsx`,
   exported from `@agenticdevelopertoolkit/ui` (`@agenticdevelopertoolkit/ui/blocks/stat-list`). Composes
   `StatusDot` (`../components/status-dot`). Exports `StatList`, `StatListRow`,
   `StatListProps`, `StatListRowProps`.

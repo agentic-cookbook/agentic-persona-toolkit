@@ -196,8 +196,9 @@ handling (it transitions to error and reveals `Avatar.Fallback`).
 - **Source file**: `packages/web/packages/ui/src/blocks/user-card.tsx`
 - **Dist**: `@agenticdevelopertoolkit/ui/blocks/user-card` (covered by the `./blocks/*` entry in
   the package's `package.json`).
-- **Live demo**: `websites/local/ui-showcase/app/_ui/user-card-demo.tsx`
-  (already exists — spec "Full card", "Identity only", and "Loading skeleton").
+- **Live demo**: the UI showcase app's `user-card` demo (spec "Full card",
+  "Identity only", and "Loading skeleton"). The showcase is a consumer of this
+  package and lives outside this repo.
 - **Hub-style consumer**: a hub-style profile page wraps `UserCard` with an
   edit-profile affordance and a client-side upgrade fetch for the HUB+PUBLIC
   variant.

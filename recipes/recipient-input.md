@@ -149,7 +149,7 @@ feature (e.g. an invitation-sending modal), not by the input.
 ## Platform Notes
 
 - **React / Web (TypeScript):** New component at
-  `websites/shared/ui/src/components/recipient-input.tsx`. Add a demo to
+  `packages/web/packages/ui/src/components/recipient-input.tsx`. Add a demo to
   `ui-showcase` and regenerate sources. Consumed by invitation-sending features.
 - **SwiftUI / Compose:** Not applicable — this is a web-only shared component.
 

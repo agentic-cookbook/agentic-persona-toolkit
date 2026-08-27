@@ -178,7 +178,7 @@ telemetry.
 
 ## Platform Notes
 
-- File: `websites/shared/ui/src/components/text-bubble.tsx`.
+- File: `packages/web/packages/ui/src/components/text-bubble.tsx`.
 - `"use client"` — it uses `useEffect`/`useRef`, `requestAnimationFrame`, and a
   `ResizeObserver`, all guarded for SSR (`typeof ResizeObserver`).
 - Uses `color-mix(in oklab, …)` for the colour shift — a modern-CSS feature; older

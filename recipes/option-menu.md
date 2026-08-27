@@ -165,9 +165,10 @@ No logging. OptionMenu is a presentational form control; it emits no structured 
 
 ## Platform Notes
 
-- New file: `websites/shared/ui/src/components/option-menu.tsx`.
-- Export: covered by the existing `./components/*` wildcard in `websites/shared/ui/package.json` (no export change needed).
-- Demo: `websites/local/ui-showcase/app/page.tsx` (+ showcase source registry).
+- New file: `packages/web/packages/ui/src/components/option-menu.tsx`.
+- Export: covered by the existing `./components/*` wildcard in `packages/web/packages/ui/package.json` (no export change needed).
+- Demo: the UI showcase app's demo page (+ showcase source registry). The
+  showcase is a consumer of this package and lives outside this repo.
 - Consumed first by: the invitation modal (hub).
 - Responsive: verify via Playwright (ui-showcase) at 375 / 768 / 1440 — keyboard-only and pointer flows on each.
 

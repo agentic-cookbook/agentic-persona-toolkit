@@ -148,7 +148,7 @@ any telemetry belong to the control and the owning form, not to `Field`.
 
 ## Platform Notes
 
-- **React / Web (TypeScript):** `websites/shared/ui/src/blocks/field.tsx`, exported
+- **React / Web (TypeScript):** `packages/web/packages/ui/src/blocks/field.tsx`, exported
   via `@agenticdevelopertoolkit/ui/blocks/field`. Composes the shared `Label`
   (`components/label`) and the `fieldCaptionClass` from `lib/typography`.
 - The row is deliberately server-safe (no `"use client"` directive): it is pure

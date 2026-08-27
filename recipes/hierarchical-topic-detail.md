@@ -620,8 +620,8 @@ Rules specific to `disclosureStyle="cascading"` (the `HierarchicalMenuDetail` ve
 Everything above still applies; these pin the parts that are unique to a nested-menu shape.
 
 **These rules are EXECUTABLE.** Each id below is a test name in
-`packages/ui/src/__tests__/cascadeRules.test.ts` (pure rules) or `cascadeInteraction.test.ts` (the
-DOM wiring), and the decisions themselves live as pure functions in `packages/ui/src/blocks/
+`packages/web/packages/ui/src/__tests__/cascadeRules.test.ts` (pure rules) or `cascadeInteraction.test.ts` (the
+DOM wiring), and the decisions themselves live as pure functions in `packages/web/packages/ui/src/blocks/
 cascade-rules.ts` rather than as expressions inside the 3000-line component. That is deliberate and
 it is the point of this section: every rule here was reported, fixed, and then silently REGRESSED by
 a later fix, because nothing named it and nothing could test it. **Before changing the cascade, run
@@ -783,7 +783,7 @@ arguments — the measuring stays in the component, the deciding is tested.
 ### General
 
 - **must-respect-reduced-motion**: All animations (disclosure, resize snap, auto-disclosure, the narrow push/pop) MUST be disabled when the user's "reduce animation" preference is set. **SUSPENDED** for both hierarchical views by a standing instruction from the block's owner to ignore `prefers-reduced-motion` until further notice — HTDV's `motion-reduce:` gates were removed so the two views cannot disagree once one flag picks between them. Restore both together when the instruction is lifted. (This is not a claim about anyone's OS configuration.)
-- **must-source-help-from-config**: All help content (the breadcrumb help button and every detail-pane help icon) MUST come from a single unified help config in `websites/site-config`, keyed by the route to the detail page + the ui element.
+- **must-source-help-from-config**: All help content (the breadcrumb help button and every detail-pane help icon) MUST come from a single unified help config owned by the consuming application, keyed by the route to the detail page + the ui element.
 
 ## Layout
 
@@ -840,7 +840,7 @@ arguments — the measuring stays in the component, the deciding is tested.
 | Hidden (off-screen) count | window size (ONE ResizeObserver) | the drill-down + Back | layout → frame | summed list widths vs the detail min; capped at the frontier |
 | Disclosure (collapsed?) per list | user toggle | each `TopicRail` | frame ↔ rail | manual `«` toggle (`override`); counts as icon width, then hides |
 | New-item result | the new-topic modal | the owning topic list | modal → list | dialog returns the created id; the list selects it |
-| Help text | `websites/site-config` help store | breadcrumb help icon | config → view | keyed by route + ui element |
+| Help text | the application's help config store | breadcrumb help icon | config → view | keyed by route + ui element |
 
 ## Integration Test Vectors
 

@@ -128,7 +128,7 @@ None — a presentational block. Callers own any selection telemetry.
 
 ## Platform Notes
 
-- **React / Web (TypeScript):** `websites/shared/ui/src/blocks/topic-detail.tsx`. A 1:1 port of hub's `SettingsLayout` rail. `"use client"`.
+- **React / Web (TypeScript):** `packages/web/packages/ui/src/blocks/topic-detail.tsx`. A 1:1 port of hub's `SettingsLayout` rail. `"use client"`.
 - **Responsive:** the ≤768px horizontal-wrap behavior is built in; verify via Playwright (ui-showcase) at 375 / 768 / 1440.
 - **SwiftUI / Compose:** Not applicable — web-only shared block.
 

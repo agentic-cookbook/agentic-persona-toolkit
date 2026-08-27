@@ -239,7 +239,7 @@ is surfaced to the user via the error state rather than logged.
 ## Platform Notes
 
 - **React / Web (TypeScript):** Component at
-  `websites/shared/ui/src/components/markdown-spellcheck.tsx`, exported from
+  `packages/web/packages/ui/src/components/markdown-spellcheck.tsx`, exported from
   `@agenticdevelopertoolkit/ui/components/markdown-spellcheck`. Built on the shared `Popover` +
   `Button` + `Badge` + `Spinner`. harper.js is a dependency of `@agenticdevelopertoolkit/ui`,
   marked `external` in `tsup.config.ts` so the dist re-emits the dynamic

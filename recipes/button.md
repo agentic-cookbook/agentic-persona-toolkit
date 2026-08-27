@@ -152,8 +152,8 @@ telemetry belong to the consumer's handler, not the button.
 
 ## Platform Notes
 
-- Files: `websites/shared/ui/src/components/button.tsx` (variants + server-safe
-  wrapper) and `websites/shared/ui/src/components/button-pressable.tsx` (the
+- Files: `packages/web/packages/ui/src/components/button.tsx` (variants + server-safe
+  wrapper) and `packages/web/packages/ui/src/components/button-pressable.tsx` (the
   `"use client"` pressed-state layer).
 - `button.tsx` intentionally has NO `"use client"` so `buttonVariants` stays
   callable from server components; the hooks live in `button-pressable.tsx`.

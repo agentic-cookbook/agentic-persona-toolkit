@@ -161,7 +161,7 @@ and any telemetry around it belong to the host, not the display element.
 
 ## Platform Notes
 
-- File: `websites/shared/ui/src/components/stat.tsx`.
+- File: `packages/web/packages/ui/src/components/stat.tsx`.
 - No `"use client"` — it renders static spans with no state or effects, so it works
   in a server component.
 - Styled with the family `apt-*` token utilities registered centrally via `@source`,

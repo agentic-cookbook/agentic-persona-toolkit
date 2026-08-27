@@ -151,7 +151,7 @@ tone, not the dot.
 
 ## Platform Notes
 
-- File: `websites/shared/ui/src/components/status-dot.tsx`.
+- File: `packages/web/packages/ui/src/components/status-dot.tsx`.
 - No `"use client"` — it is a stateless span with inline style; it renders fine
   in a server component.
 - Uses CSS `color-mix(in srgb, …)` for the glow; supported by the evergreen

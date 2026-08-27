@@ -175,7 +175,7 @@ fetch + telemetry), not by the bar.
 ## Platform Notes
 
 - **React / Web (TypeScript):** Component at
-  `websites/shared/ui/src/components/search-filter-bar.tsx`, composing the shared
+  `packages/web/packages/ui/src/components/search-filter-bar.tsx`, composing the shared
   `Input` and `Select` primitives. Demoed in `ui-showcase` (Forms group). The hub
   `ResearchFilters` adapts its `{ q, category, tag }` `FilterState` onto it.
 - **SwiftUI / Compose:** Not applicable — web-only shared component.

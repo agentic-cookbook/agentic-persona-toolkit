@@ -146,7 +146,7 @@ actions + Delete), `Input` (filter box), and `Separator` (`dividerBefore`).
 ## Platform Notes
 
 - **React / Web (TypeScript):** New block at
-  `websites/shared/ui/src/blocks/list-with-details-pane.tsx` (exported via
+  `packages/web/packages/ui/src/blocks/list-with-details-pane.tsx` (exported via
   `./blocks/*`). Composes `DataTable`, `ResizableSplit`, `AlertModal`, `Button`,
   `Input`, `Separator`. Add a demo to `ui-showcase` (+ regenerate sources).
   Consumed by the admin "Invitations" topics (Requests / Pending Users / Invites)

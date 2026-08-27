@@ -150,7 +150,7 @@ no action.
 
 ## Platform Notes
 
-- File: `websites/shared/ui/src/components/section-label.tsx`.
+- File: `packages/web/packages/ui/src/components/section-label.tsx`.
 - No `"use client"` — it is a stateless div; it renders in a server component.
 - Sibling treatments live in `lib/typography.ts` (`fieldCaptionClass`) and
   `blocks/section-header.tsx` (`SectionHeader`); do not collapse them together.

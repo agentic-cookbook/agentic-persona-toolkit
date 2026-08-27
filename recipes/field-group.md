@@ -136,7 +136,7 @@ group.
 
 ## Platform Notes
 
-- **React / Web (TypeScript):** `websites/shared/ui/src/blocks/field-group.tsx`,
+- **React / Web (TypeScript):** `packages/web/packages/ui/src/blocks/field-group.tsx`,
   exported via `@agenticdevelopertoolkit/ui/blocks/field-group`. Carries `"use client"` (it ships
   alongside interactive form content) and composes `Field`
   (`agenticdeveloperhub://recipes/field`) as its children plus the shared

@@ -192,7 +192,7 @@ interaction telemetry belongs to the host content it wraps.
 
 ## Platform Notes
 
-- File: `websites/shared/ui/src/blocks/info-panel.tsx`.
+- File: `packages/web/packages/ui/src/blocks/info-panel.tsx`.
 - `"use client"` (uses `Ref` typing / client composition), though it holds no state
   itself.
 - Styled with the family `apt-*` token utilities (`apt-border`, `apt-surface`,

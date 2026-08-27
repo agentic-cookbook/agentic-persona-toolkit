@@ -100,7 +100,7 @@ None — a presentational primitive. Callers own open/close analytics.
 
 ## Platform Notes
 
-- **React / Web (TypeScript):** `websites/shared/ui/src/components/dialog.tsx`, on `@base-ui/react/dialog`. `"use client"`.
+- **React / Web (TypeScript):** `packages/web/packages/ui/src/components/dialog.tsx`, on `@base-ui/react/dialog`. `"use client"`.
 - **Responsive:** `w-[calc(100%-2rem)]` preserves side margins on small screens; verify via Playwright (ui-showcase) at 375 / 768 / 1440.
 - **SwiftUI / Compose:** Not applicable — web-only shared component.
 

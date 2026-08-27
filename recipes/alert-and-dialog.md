@@ -34,7 +34,7 @@ references: []
 
 The canonical styled alert / confirm / modal-dialog treatment for ADH. It is
 realized by evolving `@agenticdevelopertoolkit/ui`'s existing `AlertModal`
-(`websites/shared/ui/src/components/alert-modal.tsx`) **backward-compatibly** —
+(`packages/web/packages/ui/src/components/alert-modal.tsx`) **backward-compatibly** —
 current call-sites (`LoginCard`, `ProviderLinkHandler`, `SsoCallback`, admin
 `authentication/page.tsx`, tests) keep working. Larger modal dialogs (e.g. the hub
 invitation modal) reuse the same header + footer-button system on top of the base
@@ -134,7 +134,7 @@ Wide dialog (content wider than 2× the max button width → buttons keep natura
 
 ## Platform Notes
 
-- **React / Web (TypeScript):** Evolve `websites/shared/ui/src/components/alert-modal.tsx`; reuse `websites/shared/ui/src/components/dialog.tsx` (Base UI) unchanged. Extend (not replace) `websites/shared/ui/src/__tests__/alertModal.test.tsx`. Demo in `websites/local/ui-showcase`. Reused by the hub `InvitationModal` (header + footer-button system).
+- **React / Web (TypeScript):** Evolve `packages/web/packages/ui/src/components/alert-modal.tsx`; reuse `packages/web/packages/ui/src/components/dialog.tsx` (Base UI) unchanged. Extend (not replace) `packages/web/packages/ui/src/__tests__/alertModal.test.tsx`. Demo in the UI showcase app (a consumer of this package, outside this repo). Reused by the hub `InvitationModal` (header + footer-button system).
 - **Responsive:** Verify via Playwright (ui-showcase) — each variant rendered, keyboard flows exercised, at 375 / 768 / 1440.
 - **SwiftUI / Compose:** Not applicable — web-only shared system.
 

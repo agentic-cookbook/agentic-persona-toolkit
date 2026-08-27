@@ -98,7 +98,7 @@ None — a presentational primitive. Callers own any open/close telemetry.
 
 ## Platform Notes
 
-- **React / Web (TypeScript):** `websites/shared/ui/src/components/disclosure.tsx`, lucide `ChevronRight`. `"use client"`.
+- **React / Web (TypeScript):** `packages/web/packages/ui/src/components/disclosure.tsx`, lucide `ChevronRight`. `"use client"`.
 - **Responsive:** the header truncates rather than wrapping; verify via Playwright (ui-showcase) at 375 / 768 / 1440.
 - **SwiftUI / Compose:** Not applicable — web-only shared component.
 

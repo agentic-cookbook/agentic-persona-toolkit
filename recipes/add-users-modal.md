@@ -133,7 +133,7 @@ Composed shared primitives without their own recipe domains: `Input` and `Field`
 ## Platform Notes
 
 - **React / Web (TypeScript):** New block at
-  `websites/shared/ui/src/blocks/add-users-modal.tsx`. Composes `Dialog*`,
+  `packages/web/packages/ui/src/blocks/add-users-modal.tsx`. Composes `Dialog*`,
   `DataTable`, `Input`, `Field`, `AlertModal`, `Button`. Consumed by the admin
   "Pending Users" topic (sub-project 4) "Add users" action. Add a demo to
   `ui-showcase` (+ regenerate sources).

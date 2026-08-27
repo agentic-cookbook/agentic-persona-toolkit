@@ -194,7 +194,7 @@ belongs to the host's `onConfirm`/`onCancel` handlers, not to the component.
 
 ## Platform Notes
 
-- File: `websites/shared/ui/src/components/dialog-actions.tsx`.
+- File: `packages/web/packages/ui/src/components/dialog-actions.tsx`.
 - `"use client"` — it uses `useEffect` and refs for the initial-focus placement.
   It holds no layout state and starts no observers.
 - Depends on the shared `Button` (`./button`) and `Loader2` from `lucide-react`.

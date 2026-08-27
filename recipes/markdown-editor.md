@@ -155,7 +155,7 @@ title, category, or classification fields — those stay with the consuming form
 ## Platform Notes
 
 - **React / Web (TypeScript):** Block at
-  `websites/shared/ui/src/blocks/markdown-editor.tsx`, exported from
+  `packages/web/packages/ui/src/blocks/markdown-editor.tsx`, exported from
   `@agenticdevelopertoolkit/ui/blocks`. Composes `Textarea` + `Label` + `EditorToolbar`
   (`components/editor-toolbar`) + `MarkdownQuickReference`
   (`components/markdown-quick-reference`) + `Button`. Consumed by hub's

@@ -149,7 +149,7 @@ at the call site.
 
 ## Platform Notes
 
-- File: `websites/shared/ui/src/components/external-link.tsx`.
+- File: `packages/web/packages/ui/src/components/external-link.tsx`.
 - No `"use client"` — it is a stateless anchor; it renders in a server component.
 - Consumed by `blocks/user-card.tsx` (social links, `glyph={false}` + lucide
   icon) and `blocks/stat-card.tsx` (header actions deep link, default skin).

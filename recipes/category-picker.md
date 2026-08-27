@@ -205,7 +205,8 @@ drives and owns any telemetry for it.
 
 - **React / Web (TypeScript):** `packages/web/packages/ui/src/blocks/category-picker-dialog.tsx`. `"use client"`.
 - Consumes `buildCategoryTree`, `categoryKey`, `CategoryNode`, `CategoryTreeNode` from the sibling `category-tree.ts` — the single fold every hierarchical category surface reads.
-- Demo: `local/ui-showcase/app/page.tsx` (Topic id `category-picker`) + the showcase source registry.
+- Demo: the UI showcase app's demo page (Topic id `category-picker`) + the showcase
+  source registry. The showcase is a consumer of this package and lives outside this repo.
 - First (and so far only) consumer: a hierarchical category browser's Move action.
 - Responsive: verify via the ui-showcase demo at 375 / 768 / 1440 — the dialog's own `max-w-md` and internal scroll (`max-h-72`) keep it usable at phone width; keyboard-only and pointer flows both apply at every width.
 

@@ -15,7 +15,7 @@ packages/windows/
   PersonaToolkit.sln
   src/PersonaToolkit/
     PersonaToolkit.csproj              # net8.0, C# 12, <Nullable>enable</Nullable>
-    Contract/                          # mirrors packages/apple/.../Sources one-to-one
+    Contract/                          # mirrors packages/apple/PersonaToolkit/Sources one-to-one
       Backend/IBackend.cs
       Backend/InboundEvent.cs
       Messages/IMessage.cs

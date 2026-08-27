@@ -144,7 +144,7 @@ telemetry belong to the consumer's `onRemove` handler, not the chip.
 
 ## Platform Notes
 
-- File: `websites/shared/ui/src/components/removable-chip.tsx`.
+- File: `packages/web/packages/ui/src/components/removable-chip.tsx`.
 - Composes the shared `Badge` (`./badge`) for the body and a lucide `X` icon for the
   affordance; carries `"use client"`.
 - Consumed by `RecipientInput` and `EntityChooser` — the single source of the

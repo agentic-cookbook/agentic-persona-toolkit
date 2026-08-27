@@ -262,21 +262,18 @@ at this call site.
 
 ## Platform Notes
 
-- **Core (`AgenticToolkitSync`):** `packages/apple/AgenticToolkit/Sync/*` —
-  `SyncEngine.swift`, `SyncEvents.swift`, `SyncWire.swift`, `SyncProtocols.swift`,
-  `ADHSyncCatalog.swift`, `JSONValue.swift`, `SyncID.swift`, the `Triggers/*`
-  trigger sources, and `Testing/*` (`InMemorySyncStore`, `ScriptedSyncTransport`).
-- **On-disk store (`AgenticToolkitSyncGRDB`):**
-  `packages/apple/AgenticToolkit/SyncGRDB/GRDBSyncStore.swift` — the SQLite/GRDB
-  `SyncStore` on a `BoundedDatabase` WAL pool.
-- **Conformance = the two XCTest bundles:**
-  `Tests/AgenticToolkitSyncTests/*` (engine, wire, catalog, events, in-memory
-  store) and `Tests/AgenticToolkitSyncGRDBTests/*` (the GRDB store + a
-  SyncEngine-over-GRDB integration test).
-- **No TypeScript / web implementation exists yet.** The wire types and the
-  vendored fixtures (`Tests/AgenticToolkitSyncTests/Fixtures/*.json`) are the
-  cross-language contract a future web client would conform to; the fixtures must
-  not be edited locally.
+- **Core (a Swift sync module):** the engine, the wire types, the sync catalog, the
+  event stream, the trigger sources, and the testing doubles (an in-memory store and
+  a scripted transport). This recipe describes the contract, not a checked-in
+  implementation — no Swift sync module ships in this repo.
+- **On-disk store (a GRDB-backed variant):** the same `SyncStore` protocol implemented
+  over a SQLite/GRDB WAL pool.
+- **Conformance = two XCTest bundles:** one over the engine, wire, catalog, events and
+  the in-memory store; one over the GRDB store plus a SyncEngine-over-GRDB integration
+  test.
+- **No TypeScript / web implementation exists yet.** The wire types and the JSON
+  fixtures the XCTest bundles carry are the cross-language contract a future web
+  client would conform to; the fixtures must not be edited locally.
 
 ## Design Decisions
 

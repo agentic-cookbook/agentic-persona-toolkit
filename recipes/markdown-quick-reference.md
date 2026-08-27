@@ -167,7 +167,7 @@ dismissing the reference is local UI state and is not reported to the consumer.
 ## Platform Notes
 
 - **React / Web (TypeScript):** Component at
-  `websites/shared/ui/src/components/markdown-quick-reference.tsx`, built on the
+  `packages/web/packages/ui/src/components/markdown-quick-reference.tsx`, built on the
   shared `Popover` + `Button`. Demo lives in `ui-showcase` (Overlays group);
   re-run `gen-sources.py` after edits.
 - **SwiftUI / Compose:** Not applicable — this is a web-only shared component.

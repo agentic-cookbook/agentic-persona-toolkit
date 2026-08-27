@@ -140,7 +140,7 @@ analytics belong to the host that owns the list and the `page` state, not the pa
 
 ## Platform Notes
 
-- File: `websites/shared/ui/src/components/pagination.tsx`.
+- File: `packages/web/packages/ui/src/components/pagination.tsx`.
 - Carries `"use client"` because it composes the client `Button`; it holds no internal
   state.
 - Composes the shared `Button` (outline/sm); no bespoke chrome.

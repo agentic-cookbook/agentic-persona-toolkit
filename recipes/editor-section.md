@@ -179,7 +179,7 @@ Composed shared primitives without their own recipe domains: `Badge`
 ## Platform Notes
 
 - **React / Web (TypeScript):** Block at
-  `websites/shared/ui/src/blocks/editor-section.tsx`, exported via `./blocks/*`.
+  `packages/web/packages/ui/src/blocks/editor-section.tsx`, exported via `./blocks/*`.
   Assembles `ButtonBar`, `TopicDetail` (+ `TopicDetailItem`), `EmptyState`, and
   `Badge` — all from `@agenticdevelopertoolkit/ui`. Adds no new visual primitives.
 - Demo: `ui-showcase` Topic `editor-section` (regenerate `sources.generated.ts`

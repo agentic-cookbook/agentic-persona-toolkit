@@ -141,10 +141,11 @@ No logging. Combobox is a presentational form control; it emits no structured lo
 
 ## Platform Notes
 
-- New file: `websites/shared/ui/src/components/combobox.tsx`.
-- Export: covered by the existing `./components/*` wildcard in `websites/shared/ui/package.json` (no export change needed).
+- New file: `packages/web/packages/ui/src/components/combobox.tsx`.
+- Export: covered by the existing `./components/*` wildcard in `packages/web/packages/ui/package.json` (no export change needed).
 - Dependency: `@base-ui/react/autocomplete` (already a dependency of `@agenticdevelopertoolkit/ui`).
-- Demo: `websites/local/ui-showcase/app/page.tsx` (+ showcase source registry).
+- Demo: the UI showcase app's demo page (+ showcase source registry). The
+  showcase is a consumer of this package and lives outside this repo.
 - Replaces: ad-hoc site-local `<input list>` / `<datalist>` usages.
 - Responsive: verify via Playwright (ui-showcase) at 375 / 768 / 1440 — keyboard-only and pointer flows on each.
 

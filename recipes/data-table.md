@@ -144,8 +144,9 @@ No logging. DataTable is a presentational primitive; it emits no structured log 
 
 ## Platform Notes
 
-- New file: `websites/shared/ui/src/components/data-table.tsx` (exported via the `./components/*` wildcard).
-- Demo: `websites/local/ui-showcase/app/page.tsx` (regenerate the source registry afterward).
+- New file: `packages/web/packages/ui/src/components/data-table.tsx` (exported via the `./components/*` wildcard).
+- Demo: the UI showcase app's demo page (regenerate the source registry afterward).
+  The showcase is a consumer of this package and lives outside this repo.
 - Consumed by: `ListWithDetailsPane`, `AddUsersModal`.
 - Responsive: verify via Playwright (ui-showcase) at 375 / 768 / 1440 — columns and selection stay usable on mobile.
 

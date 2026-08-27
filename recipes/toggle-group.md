@@ -162,7 +162,7 @@ any telemetry belong to the consumer's `onValueChange` handler, not the control.
 
 ## Platform Notes
 
-- File: `websites/shared/ui/src/components/toggle-group.tsx`.
+- File: `packages/web/packages/ui/src/components/toggle-group.tsx`.
 - Built on `@base-ui/react/toggle-group` + `@base-ui/react/toggle`; the group sits on
   `fieldShellClass` exported from `./input`, keeping it visually aligned with the
   other field-shell inputs.
