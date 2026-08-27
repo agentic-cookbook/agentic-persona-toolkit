@@ -3,6 +3,7 @@ export { EditorSection, type EditorSectionItem } from "./editor-section";
 export { MarkdownEditor, type MarkdownEditorProps } from "./markdown-editor";
 export { Field } from "./field";
 export { FieldGroup } from "./field-group";
+export { GearMenuTrigger, type GearMenuTriggerProps } from "./gear-menu-trigger";
 // What a document is called and where it lives — the title/slug pair, with a live
 // "available / unavailable" verdict for the slug. The slug rule is injected, so a host's
 // route alphabet stays the host's.
@@ -264,7 +265,11 @@ export {
 // choices — no pager, no per-row buttons, error replaces the table only when there is nothing to
 // replace — is on the component. `./editable-list-types` and `./use-editable-list` are `.ts`, so
 // they reach a consumer through THIS barrel rather than the `./blocks/*` wildcard, which is `.tsx`.
-export { EditableList, type EditableListProps } from "./editable-list"
+export {
+  EditableList,
+  type EditableListProps,
+  type EditableListDetails,
+} from "./editable-list"
 export { FacetMenu, type FacetMenuProps } from "./facet-menu"
 export {
   useEditableList,
@@ -279,3 +284,19 @@ export type {
   EditableListTextFilter,
   ListSort,
 } from "./editable-list-types"
+
+// The tab / split-view control — one pane at a time or both side by side. The state is the
+// host's (`useSplitView`) because the host renders the panes; the control is just the two
+// toggle groups, left-aligned, meant to sit BELOW a surface's header rather than inside it.
+// Shared out of the markdown document editor once the registry signup-form builder had
+// written the same thing a second time.
+export {
+  SplitViewControl,
+  useSplitView,
+  SPLIT_VIEW_MIN_WIDTH,
+  type SplitView,
+  type SplitViewControlProps,
+  type SplitViewLayout,
+  type SplitViewPane,
+  type UseSplitViewOptions,
+} from "./split-view-control"
