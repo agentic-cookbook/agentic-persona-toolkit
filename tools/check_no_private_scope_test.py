@@ -93,6 +93,94 @@ def test_private_repo_path_is_caught() -> None:
             assert "private repo path" in result.stderr, result.stderr
 
 
+def test_private_repo_name_is_caught() -> None:
+    """The bare, unhyphenated name of the private REPOSITORY.
+
+    The scope pattern only ever matched `@agentic-toolkit/` — an import specifier.
+    The repo is named in PROSE, unhyphenated, and every such mention walked past a
+    guard that reported "no private references" over five live ones. All four
+    shapes below are verbatim from the tree the guard was green on.
+    """
+    cases = [
+        "// the sibling `agentictoolkit` repo's `chat-status.ts` exports one that adds tags\n",
+        '"comment:lint": "In agentictoolkit, `lint` failed on pre-existing type rot."\n',
+        "# the same Model A contract as `agentictoolkit`\n",
+        '"face. If the agentictoolkit submodule is not checked out, run "\n',
+        "/// Vendored from agentictoolkit's `KeychainHelper`.\n",
+    ]
+    for source in cases:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "src").mkdir()
+            (root / "src" / "thing.ts").write_text(source, encoding="utf-8")
+            result = run(root)
+            assert result.returncode == 1, f"private repo name survived: {source!r}"
+            assert "private repo name" in result.stderr, result.stderr
+
+
+def test_private_repo_name_is_case_insensitive() -> None:
+    """`AgenticToolkit` is the same repository with a capital letter on it — a
+    README saying "ported from the macOS AgenticToolkit" is the same coordinate."""
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        (root / "src").mkdir()
+        (root / "src" / "README.md").write_text(
+            "A web port of the `LogView` model from the macOS AgenticToolkit.\n",
+            encoding="utf-8",
+        )
+        result = run(root)
+        assert result.returncode == 1, f"capitalised repo name survived: {result.stderr}"
+        assert "private repo name" in result.stderr, result.stderr
+
+
+def test_repo_name_pattern_is_word_bounded() -> None:
+    """The negative half, and the reason for the `\\b`: THIS repo is
+    `agenticdevelopertoolkit`, its packages are `@agenticdevelopertoolkit/*`, and a
+    Swift module may merely start with the private name (`AgenticToolkitSync`). A
+    pattern without word boundaries would fire on all of them and be deleted."""
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        (root / "src").mkdir()
+        (root / "src" / "index.ts").write_text(
+            "export { Button } from '@agenticdevelopertoolkit/ui'\n"
+            "// agenticdevelopertoolkit ships these packages\n"
+            "// AgenticToolkitSync is a module name, not a bare repo mention\n",
+            encoding="utf-8",
+        )
+        result = run(root)
+        assert result.returncode == 0, f"false positive on this repo's own name: {result.stderr}"
+
+
+def test_private_product_log_prefix_is_caught() -> None:
+    """`[adh]` on a thrown Error is the private product's name in output a public
+    consumer reads. A package labels its own output with its own name."""
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        (root / "src").mkdir()
+        (root / "src" / "fonts.mjs").write_text(
+            "throw new Error(`[adh] cannot create ${dest}.`)\n", encoding="utf-8"
+        )
+        result = run(root)
+        assert result.returncode == 1, f"[adh] prefix survived the guard: {result.stderr}"
+        assert "private product log prefix" in result.stderr, result.stderr
+
+
+def test_log_prefix_pattern_is_the_bracketed_form_only() -> None:
+    """The negative half: bare `adh` in prose is legitimate here (see the docstring
+    and test_naming_adh_as_a_service_is_not_a_leak), and a package prefixing with
+    its OWN name must stay clean."""
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        (root / "src").mkdir()
+        (root / "src" / "fonts.mjs").write_text(
+            "// adh's chat endpoint carries a message and nothing else.\n"
+            "throw new Error(`[@agenticdevelopertoolkit/themes] cannot create ${dest}.`)\n",
+            encoding="utf-8",
+        )
+        result = run(root)
+        assert result.returncode == 0, f"false positive on a self-named prefix: {result.stderr}"
+
+
 def test_naming_adh_as_a_service_is_not_a_leak() -> None:
     """The narrow half of the rule, and the reason the pattern is about paths.
 

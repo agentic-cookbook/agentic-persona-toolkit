@@ -26,19 +26,36 @@ first — `README.md`, `AGENTS.md`, `.claude/CLAUDE.md` — are named individual
 and scanned alongside the four directories, without pulling in the Apple/terminal
 noise the rest of the root would bring.
 
-Three patterns, for three different failures:
+Five patterns, for five different failures:
 
   @agentic-toolkit/   a private package name. Fatal wherever it appears, including
                       in prose about a package that no longer exists — a public
                       repo should not be publishing another repo's history.
+  agentictoolkit      the bare, unhyphenated name of the private REPOSITORY these
+                      packages came from — the form that appears in prose rather
+                      than in an import ("the sibling agentictoolkit repo's ...").
+                      The scope pattern above only ever matched the hyphenated
+                      package scope, so every prose mention of the repo walked
+                      straight past it. Word-bounded on purpose: this repo's own
+                      name (`agenticdevelopertoolkit`) and Swift module names that
+                      merely start with it (`AgenticToolkitSync`) are not it.
   agenticdeveloperhub the product these packages were built for. The toolkit is
                       meant to be usable by anyone; a reference to the one product
                       it happens to serve is either a leak or a coupling, and both
                       are worth seeing.
+  [adh]               a log/error prefix carrying the private product's name into
+                      output a public consumer reads. It is a coordinate like any
+                      other: it tells a stranger their build failed inside someone
+                      else's product. A package prefixes with its OWN name.
   private repo paths  a filesystem path into a tree the reader does not have:
                       `backend/src/adh/src/lib/rdid.ts`,
                       `frontend/tools/verify_autofill_copies.py`,
                       `adh-site-config/content/help.en.json`.
+
+The bracketed-prefix pattern is deliberately the bracketed form only. Bare `adh`
+stays legal for the same reason the path pattern is about paths (below): naming
+adh as a service is correct here. `[adh]` is not a mention of a service, it is
+this code labelling its own output with a name that is not its own.
 
 That third pattern is deliberately about PATHS and not about the word "adh". Naming
 adh as a service is correct and this repo does it in twenty-one places on purpose —
@@ -86,9 +103,15 @@ DEFAULT_FILES = ("README.md", "AGENTS.md", ".claude/CLAUDE.md")
 
 PATTERNS = {
     "private package scope": re.compile(r"@agentic-toolkit/"),
+    # The bare repo name, word-bounded (see the docstring): `agenticdevelopertoolkit`
+    # is this repo and must not match, and neither must `AgenticToolkitSync`.
+    "private repo name": re.compile(r"\bagentictoolkit\b", re.IGNORECASE),
     # (?!://recipes/) carves out the recipe corpus's own `agenticdeveloperhub://recipes/<slug>`
     # domain-URI scheme (see the docstring) — everything else still fires.
     "product name": re.compile(r"agenticdeveloperhub(?!://recipes/)", re.IGNORECASE),
+    # A shipped log/error prefix naming the private product rather than the package
+    # emitting it. Bracketed form only — bare `adh` is legitimate prose here.
+    "private product log prefix": re.compile(r"\[adh\]", re.IGNORECASE),
     "private repo path": re.compile(
         r"backend/src/(adh|builder|status)"
         r"|frontend/(src|tools)/"
