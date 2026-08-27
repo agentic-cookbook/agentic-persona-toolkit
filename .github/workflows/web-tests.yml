@@ -10,12 +10,38 @@ on:
     # would never fire until the branch merges, and Tasks 4-11 need the gate to
     # exist before then. Remove the open-source-etc entry when this branch merges.
     branches: [main, open-source-etc]
+    # The filter must cover every root the guards below SCAN, not just the code they
+    # were originally written for. It listed `packages/web/**` alone, so a leak or a
+    # dangling citation landing in `recipes/`, `docs/`, `websites/` or a root doc
+    # changed nothing the filter could see and the guards that police those trees
+    # never ran on the commit that broke them. Keep this list and the guards' roots
+    # in step: `check_no_private_scope.py` scans packages/web/packages, recipes, docs,
+    # websites plus README.md, AGENTS.md and .claude/CLAUDE.md; `check_doc_links.py`
+    # scans the whole repo; `check_recipe_scope.py` scans recipes and docs.
+    # `tools/**` is here because a change to a guard must re-run that guard.
     paths:
       - "packages/web/**"
+      - "recipes/**"
+      - "docs/**"
+      - "websites/**"
+      - "tools/**"
+      - "README.md"
+      - "AGENTS.md"
+      - ".claude/CLAUDE.md"
       - ".github/workflows/web-tests.yml"
   pull_request:
+    # Deliberately spelled out rather than sharing a YAML anchor with the push
+    # trigger: GitHub Actions does not guarantee anchor support in workflow files.
+    # The two lists must stay identical — edit both together.
     paths:
       - "packages/web/**"
+      - "recipes/**"
+      - "docs/**"
+      - "websites/**"
+      - "tools/**"
+      - "README.md"
+      - "AGENTS.md"
+      - ".claude/CLAUDE.md"
       - ".github/workflows/web-tests.yml"
 
 jobs:
@@ -36,6 +62,8 @@ jobs:
           python3 tools/check_recipe_scope.py --root docs
           python3 tools/check_doc_links_test.py
           python3 tools/check_doc_links.py
+          python3 tools/check_doc_subpaths_test.py
+          python3 tools/check_doc_subpaths.py
 
       # Eight packages are arriving here from a PRIVATE repo, each carrying the
       # prose its old home wrote about it. The per-package arrival checks scan
