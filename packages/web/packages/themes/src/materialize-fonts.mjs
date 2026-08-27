@@ -62,10 +62,11 @@ export function materializeThemeFonts(appRoot = process.cwd()) {
     manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
   } catch (err) {
     throw new Error(
-      `[adh] cannot read the theme font manifest at ${manifestPath}. Every app inlines an ` +
-        "@font-face block pointing into it, so a build without it ships a 404 for every " +
-        "face. If the agentictoolkit submodule is not checked out, run " +
-        "'git submodule update --init'.",
+      `[@agenticdevelopertoolkit/themes] cannot read the theme font manifest at ${manifestPath}. ` +
+        "Every app inlines an @font-face block pointing into it, so a build without it ships " +
+        "a 404 for every face. The manifest and the faces it names ship inside this package, " +
+        "at 'src/fonts/' — a missing one means an incomplete install or a truncated vendored " +
+        "copy, so reinstall the package (or re-copy it) rather than editing around it.",
       { cause: err },
     );
   }
@@ -79,8 +80,8 @@ export function materializeThemeFonts(appRoot = process.cwd()) {
     fs.mkdirSync(dest, { recursive: true });
   } catch (err) {
     throw new Error(
-      `[adh] cannot create ${dest}. The app's inlined @font-face block names this path, so ` +
-        "the build would ship a face that 404s.",
+      `[@agenticdevelopertoolkit/themes] cannot create ${dest}. The app's inlined ` +
+        "@font-face block names this path, so the build would ship a face that 404s.",
       { cause: err },
     );
   }
@@ -107,8 +108,9 @@ export function materializeThemeFonts(appRoot = process.cwd()) {
       }
     } catch (err) {
       throw new Error(
-        `[adh] cannot materialize theme font ${face.file} into ${dest}. The app's inlined ` +
-          "@font-face block names this path, so the build would ship a face that 404s.",
+        `[@agenticdevelopertoolkit/themes] cannot materialize theme font ${face.file} ` +
+          `into ${dest}. The app's inlined @font-face block names this path, so the ` +
+          "build would ship a face that 404s.",
         { cause: err },
       );
     }

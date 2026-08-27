@@ -5,7 +5,7 @@ import os
 /// Simple CRUD over macOS Keychain generic-password items, scoped to a
 /// configurable service identifier.
 ///
-/// Vendored from agentictoolkit's `KeychainHelper`, with the `Loggable`
+/// Vendored from an internal `KeychainHelper`, with the `Loggable`
 /// dependency dropped so this module stays dependency-free.
 public enum KeychainHelper {
 

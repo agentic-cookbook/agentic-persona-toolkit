@@ -14,12 +14,12 @@ const DEFAULT_DONE_GLYPH = '✱'
  * because no rule can turn "thinking" into "thought" and a rule that turns it into
  * "thinked" is worse than no rule.
  *
- * There is a SECOND, DIFFERENT `StatusWordPair` — the sibling `agentictoolkit` repo's
- * `data/src/personas/chat-status.ts` exports one that adds `tags` (so a persona's status
- * words can be scoped to a status `kind`). Both are reachable one import apart from the
- * persona editor. This one is the RENDERER's view: it deliberately does not know about
- * tags — `resolveChatStatus` over there strips them before handing words to this component.
- * Do not rename either; this one is a published prop type.
+ * A consuming application may define a SECOND, DIFFERENT `StatusWordPair` in its persona
+ * data layer — one that adds `tags`, so a persona's status words can be scoped to a status
+ * `kind`. Where it does, both are reachable one import apart from the persona editor, and
+ * this one is the RENDERER's view: it deliberately does not know about tags, because the
+ * data layer's status resolver strips them before handing words to this component. Do not
+ * rename this one; it is a published prop type.
  */
 export interface StatusWordPair {
   present: string

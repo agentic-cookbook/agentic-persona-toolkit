@@ -133,7 +133,7 @@ describe('TypingIndicator', () => {
     expect(short).toContain(glyph)
   })
 
-  // Fix 1 regression guard: `resolveChatStatus` (the sibling `agentictoolkit` repo) hands
+  // Fix 1 regression guard: a consuming application's status resolver typically hands
   // back a freshly `.filter()`ed array on every call, so a think->respond transition — or a
   // keystroke in the persona editor — mints a NEW array holding the exact same words. Keying
   // the bag's `useMemo` on that array's IDENTITY (pre-fix `TypingIndicator.tsx:159`) threw the

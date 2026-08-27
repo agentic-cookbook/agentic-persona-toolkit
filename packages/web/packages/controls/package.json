@@ -52,7 +52,7 @@
     "./source-code-panel/styles.css": "./dist/source-code-panel/styles/source-code-panel.css",
     "./user-settings/styles.css": "./dist/user-settings/styles.css"
   },
-  "comment:lint": "In agentictoolkit, `lint` failed on pre-existing type rot (implicit-any handler params, a couple of bare `React` namespace references) and AT's CI excluded this package from the gate for it. Checked again here rather than carried over on faith: with this package's version floors (@types/react bumped off AT's exact 19.2.16 pin), `tsc --noEmit` runs clean in this workspace as of the 2026-08 move. Left unlabelled would be worse than this note going stale — if `lint` starts failing again, fix or re-document it, don't silently drop this comment.",
+  "comment:lint": "This package was historically excluded from the `lint` gate for pre-existing type rot (implicit-any handler params, a couple of bare `React` namespace references). Checked again here rather than carried over on faith: with this package's current version floors, `tsc --noEmit` runs clean in this workspace as of the 2026-08 move. Left unlabelled would be worse than this note going stale — if `lint` starts failing again, fix or re-document it, don't silently drop this comment.",
   "scripts": {
     "build": "tsup && pnpm run build:types && pnpm run build:css",
     "build:types": "tsc --emitDeclarationOnly -p tsconfig.build.json",

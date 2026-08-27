@@ -3,9 +3,9 @@
 
 The demo site consumes `@agenticdevelopertoolkit/*` packages via their
 `file:` references. Those packages ship prebuilt `dist/` (compiled JS with
-`"use client"` preserved) — the same Model A contract as `agentictoolkit` —
-so the consumer needs no `transpilePackages`, but `dist/` is gitignored and
-must be built before `next build`.
+`"use client"` preserved) — the Model A contract every consumer of these
+packages relies on — so the consumer needs no `transpilePackages`, but
+`dist/` is gitignored and must be built before `next build`.
 
 This installs the toolkit's pnpm workspace under `packages/web/`, builds every
 package's `dist/`, then runs `next build`. It mirrors the build wrapper used by

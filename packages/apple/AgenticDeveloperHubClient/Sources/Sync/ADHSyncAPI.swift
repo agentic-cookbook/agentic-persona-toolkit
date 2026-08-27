@@ -6,10 +6,10 @@ import Foundation
 
 /// Authenticated wire client for the backend's offline-sync endpoints.
 ///
-/// Deliberately decodes NOTHING: the wire shapes live in the backend
-/// (src/sync/wire.ts) and in AgenticToolkitSync (SyncWire.swift); this type
-/// only owns URLs, auth, and HTTP error mapping, so this package needs no
-/// agentictoolkit dependency. Hosts adapt it to SyncTransport in ~20 lines.
+/// Deliberately decodes NOTHING: the wire shapes are owned by the backend and
+/// by the native sync core; this type only owns URLs, auth, and HTTP error
+/// mapping, so this package needs no sync-core dependency. Hosts adapt it to
+/// SyncTransport in ~20 lines.
 public struct ADHSyncAPI: Sendable {
 
     public enum Failure: Error, Sendable, Equatable {

@@ -1,7 +1,7 @@
 # `@agenticdevelopertoolkit/controls/logging-panel`
 
-A configurable, themeable log/event panel — a web port of the
-`LogView` / `LogColumn` / `LogLine` model from the macOS AgenticToolkit.
+A configurable, themeable log/event panel — a web port of a native macOS
+`LogView` / `LogColumn` / `LogLine` model.
 Configure columns when you instantiate the panel; the panel renders rows
 using cell values keyed by column id.
 
