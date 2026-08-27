@@ -109,4 +109,79 @@ with tempfile.TemporaryDirectory() as tmp:
         1,
     )
 
-print("check_doc_links_test: 8 passed")
+    # (9) THE WIDENING. A recipe citing a source path that does not exist fails —
+    #     the shape that sat green in this repo 42 times over, because the old
+    #     regex only ever looked at `.md`.
+    root = Path(tmp) / "source-dangling"
+    (root / "recipes").mkdir(parents=True)
+    (root / "websites").mkdir()
+    (root / "recipes" / "button.md").write_text(
+        "- **React / Web:** `websites/shared/ui/src/components/button.tsx`\n"
+    )
+    bad = run(root)
+    check("dangling source citation exits 1", bad.returncode, 1)
+    check(
+        "names the cited source path",
+        "websites/shared/ui/src/components/button.tsx" in bad.stdout + bad.stderr,
+        True,
+    )
+    check("names the citing recipe", "recipes/button.md:1" in bad.stdout + bad.stderr, True)
+
+    # (10) The same citation, repointed at where the file actually lives, is silent.
+    root = Path(tmp) / "source-ok"
+    (root / "recipes").mkdir(parents=True)
+    (root / "packages" / "web" / "packages" / "ui" / "src" / "components").mkdir(parents=True)
+    (root / "packages" / "web" / "packages" / "ui" / "src" / "components" / "button.tsx").write_text("x\n")
+    (root / "recipes" / "button.md").write_text(
+        "- **React / Web:** `packages/web/packages/ui/src/components/button.tsx`\n"
+    )
+    check("resolving source citation exits 0", run(root).returncode, 0)
+
+    # (11) The false-positive containment, and the only reason the widening is safe:
+    #      a path whose FIRST SEGMENT is not a real top-level directory of this repo
+    #      is not a citation into this repo and is never checked. Illustrative
+    #      snippets are full of them.
+    root = Path(tmp) / "not-top-level"
+    (root / "recipes").mkdir(parents=True)
+    (root / "packages").mkdir()
+    (root / "recipes" / "guide.md").write_text(
+        "Put it in `src/components/thing.ts`, or `your-app/pages/index.tsx`.\n"
+        "Import order is `parser/renderer`, and the flag is `and/or`.\n"
+    )
+    check("non-top-level first segment ignored", run(root).returncode, 0)
+
+    # (12) Scope: source paths are checked in docs/ and recipes/ ONLY. A manifest,
+    #      an ignore file or a build script names paths relative to ITSELF, and
+    #      resolving those against the repo root would be a guard that cried wolf
+    #      on every package in the tree.
+    root = Path(tmp) / "prose-dirs-only"
+    (root / "recipes").mkdir(parents=True)
+    (root / "packages").mkdir()
+    (root / ".npmignore").write_text("packages/chat/base.css\n")
+    (root / "packages" / "uninstall.sh").write_text("rm -f packages/ui/src/lib/utils.ts\n")
+    (root / "recipes" / "guide.md").write_text("nothing to see\n")
+    check("source paths outside docs/recipes are not checked", run(root).returncode, 0)
+
+    # (13) Three shapes that name no single file, so there is nothing to resolve and
+    #      nothing a reader could fix: an elision, a glob, and a parent hop.
+    root = Path(tmp) / "unresolvable-shapes"
+    (root / "recipes").mkdir(parents=True)
+    (root / "packages").mkdir()
+    (root / "recipes" / "guide.md").write_text(
+        "mirrors `packages/apple/.../Sources` one-to-one\n"
+        "reads `packages/themes/src/styles/*.css`\n"
+        "see `packages/../packages/gone.ts`\n"
+    )
+    check("elision, glob and parent hop are skipped", run(root).returncode, 0)
+
+    # (14) An empty scan is STILL exit 2 after the widening — the property that keeps
+    #      a mis-rooted run from looking like a pass. Distinct from case (4): here the
+    #      tree is non-empty and every file in it is skipped, which is the way a real
+    #      run reaches zero.
+    root = Path(tmp) / "everything-skipped"
+    (root / "node_modules" / "dep").mkdir(parents=True)
+    (root / "node_modules" / "dep" / "index.js").write_text("// docs/gone.md\n")
+    (root / "logo.png").write_bytes(b"\x89PNG\r\n")
+    check("a tree of nothing but skipped files exits 2", run(root).returncode, 2)
+
+print("check_doc_links_test: 14 passed")
