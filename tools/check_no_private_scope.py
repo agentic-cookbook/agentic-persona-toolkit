@@ -121,7 +121,11 @@ PATTERNS = {
     ),
 }
 
-SKIP_DIRS = {"node_modules", "dist", ".turbo", ".git", "coverage"}
+SKIP_DIRS = {"node_modules", "dist", ".turbo", ".git", "coverage",
+             # Git-ignored scratch: plan ledgers and captured review diffs,
+             # which quote the very leaks this guard exists to remove and are
+             # not part of what the repo publishes.
+             ".superpowers"}
 
 # Binary and lockfile noise: a lockfile legitimately names whatever the manifests
 # name, and is regenerated rather than edited, so it is not where a leak is fixed.
@@ -133,16 +137,51 @@ SKIP_SUFFIXES = {
 }
 
 
-def _scan_lines(text: str, rel: Path) -> list[str]:
+# The product name is legitimate branding outside the web tree: the sibling
+# platform packages ship a client NAMED for the product and call its PUBLIC API
+# host, so `AgenticDeveloperHubClient` and `api.agenticdeveloperhub.com` are the
+# thing itself, not a coordinate into anything private. Every other pattern names
+# the PRIVATE repo, and those are a leak wherever they sit — so they sweep
+# repo-wide while the product name stays scoped to DEFAULT_ROOTS.
+WIDE_PATTERNS = {k: v for k, v in PATTERNS.items() if k != "product name"}
+
+# The wide sweep reaches tools/, where the guards' own self-tests keep synthetic
+# leak fixtures in their source. Those strings are proof-of-behaviour, not
+# references — skip the files rather than the strings inside them, the same way
+# check_doc_links.py skips its own.
+WIDE_SKIP_NAMES = {
+    "check_no_private_scope_test.py",
+    "check_doc_links_test.py",
+    "check_recipe_scope_test.py",
+    "check_doc_subpaths_test.py",
+    # And the guards themselves. A guard that hunts a string necessarily contains
+    # that string — in its regex, and in the prose explaining what it catches and
+    # why. Those occurrences are the definition of the rule, not a violation of it;
+    # scanning them would make every guard permanently unable to describe its own
+    # job. This is a narrow allowance by FILENAME, so a leak in any other file
+    # under tools/ still fires.
+    "check_no_private_scope.py",
+    "check_doc_links.py",
+    "check_recipe_scope.py",
+    "check_doc_subpaths.py",
+}
+
+
+def _scan_lines(text: str, rel: Path, patterns: dict | None = None) -> list[str]:
     hits: list[str] = []
     for lineno, line in enumerate(text.splitlines(), start=1):
-        for label, pattern in PATTERNS.items():
+        for label, pattern in (patterns or PATTERNS).items():
             if pattern.search(line):
                 hits.append(f"{rel}:{lineno}: {label}: {line.strip()}")
     return hits
 
 
-def scan(root: Path) -> tuple[list[str], int]:
+def scan(root: Path, seen: set[Path] | None = None) -> tuple[list[str], int]:
+    """Scan one root with the full pattern set.
+
+    `seen`, when given, collects every file actually read, so the repo-wide sweep
+    can skip what this pass already covered.
+    """
     hits: list[str] = []
     scanned = 0
     for path in sorted(root.rglob("*")):
@@ -157,6 +196,8 @@ def scan(root: Path) -> tuple[list[str], int]:
         except (UnicodeDecodeError, OSError):
             continue
         scanned += 1
+        if seen is not None:
+            seen.add(path)
         hits.extend(_scan_lines(text, path.relative_to(root)))
     return hits, scanned
 
@@ -171,6 +212,32 @@ def scan_file(path: Path, label_root: Path) -> tuple[list[str], int]:
     except (UnicodeDecodeError, OSError):
         return [], 0
     return _scan_lines(text, path.relative_to(label_root)), 1
+
+
+def scan_wide(repo_root: Path, already: set[Path]) -> tuple[list[str], int]:
+    """Sweep whatever the scoped roots did not reach, for the private tier only.
+
+    `already` is the set of files the scoped pass read, so each file is checked by
+    exactly one pass and a leak inside DEFAULT_ROOTS is never reported twice.
+    """
+    hits: list[str] = []
+    scanned = 0
+    for path in sorted(repo_root.rglob("*")):
+        if not path.is_file() or path in already:
+            continue
+        if any(part in SKIP_DIRS for part in path.parts):
+            continue
+        if path.name in SKIP_NAMES or path.name in WIDE_SKIP_NAMES:
+            continue
+        if path.suffix.lower() in SKIP_SUFFIXES:
+            continue
+        try:
+            text = path.read_text(encoding="utf-8")
+        except (UnicodeDecodeError, OSError):
+            continue
+        scanned += 1
+        hits.extend(_scan_lines(text, path.relative_to(repo_root), WIDE_PATTERNS))
+    return hits, scanned
 
 
 def main() -> int:
@@ -206,12 +273,13 @@ def main() -> int:
 
     all_hits: list[str] = []
     total_scanned = 0
+    seen: set[Path] = set()
     for root in roots:
         if not root.exists():
             print(f"check_no_private_scope: no such path: {root}", file=sys.stderr)
             return 2
 
-        hits, scanned = scan(root)
+        hits, scanned = scan(root, seen)
         all_hits.extend(hits)
         total_scanned += scanned
 
@@ -219,6 +287,16 @@ def main() -> int:
         if not file_path.exists():
             continue
         hits, scanned = scan_file(file_path, repo_root)
+        all_hits.extend(hits)
+        total_scanned += scanned
+        seen.add(file_path)
+
+    # The private tier sweeps the whole repo, not just the web tree: the sibling
+    # platform packages were unpoliced, and a private repo name is a leak there
+    # too. Rides along only with the default invocation — explicit roots mean the
+    # caller is asking about those roots and nothing else.
+    if not args.roots:
+        hits, scanned = scan_wide(repo_root, seen)
         all_hits.extend(hits)
         total_scanned += scanned
 

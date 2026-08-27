@@ -320,6 +320,101 @@ def test_lookahead_does_not_swallow_the_whole_scheme() -> None:
         assert "product name" in result.stderr, result.stderr
 
 
+def test_private_name_outside_default_roots_is_caught() -> None:
+    """The gap this tier exists to close.
+
+    DEFAULT_ROOTS names the web tree, so the sibling platform packages were never
+    scanned at all — a private repo name could sit in packages/apple indefinitely
+    with the guard reporting a clean tree. It is a leak wherever it sits.
+    """
+    with tempfile.TemporaryDirectory() as tmp:
+        repo_root = Path(tmp)
+        _stub_default_roots(repo_root)
+        apple = repo_root / "packages" / "apple" / "Client"
+        apple.mkdir(parents=True)
+        (apple / "README.md").write_text(
+            "Build the agentictoolkit submodule first.\n", encoding="utf-8"
+        )
+        result = run_default(repo_root)
+        assert result.returncode == 1, f"private name outside the roots missed: {result.stdout}"
+        assert "private repo name" in result.stderr
+
+
+def test_product_name_outside_default_roots_is_not_a_leak() -> None:
+    """The other half, and the reason the tiers are split rather than the roots widened.
+
+    The platform packages ship a client NAMED for the product and call its PUBLIC
+    API host. Sweeping the product-name pattern repo-wide would condemn the thing
+    itself as a leak, so that pattern stays scoped while the private ones widen.
+    """
+    with tempfile.TemporaryDirectory() as tmp:
+        repo_root = Path(tmp)
+        _stub_default_roots(repo_root)
+        apple = repo_root / "packages" / "apple" / "AgenticDeveloperHubClient"
+        apple.mkdir(parents=True)
+        (apple / "README.md").write_text(
+            "# AgenticDeveloperHubClient\n\nTalks to https://api.agenticdeveloperhub.com\n",
+            encoding="utf-8",
+        )
+        result = run_default(repo_root)
+        assert result.returncode == 0, f"public branding condemned: {result.stderr}"
+
+
+def test_product_name_inside_default_roots_still_fires() -> None:
+    """Splitting the tiers must not weaken the product-name rule where it applies."""
+    with tempfile.TemporaryDirectory() as tmp:
+        repo_root = Path(tmp)
+        _stub_default_roots(repo_root)
+        (repo_root / "docs" / "guide.md").write_text(
+            "Deployed at agenticdeveloperhub.com\n", encoding="utf-8"
+        )
+        result = run_default(repo_root)
+        assert result.returncode == 1, f"scoped product name missed: {result.stdout}"
+        assert "product name" in result.stderr
+
+
+def test_explicit_roots_do_not_trigger_the_wide_sweep() -> None:
+    """Passing roots means "ask about these roots" — it must not silently widen.
+
+    Without this, a per-package invocation would start reporting hits from the rest
+    of the repo, and the caller could not tell which root they came from.
+    """
+    with tempfile.TemporaryDirectory() as tmp:
+        repo_root = Path(tmp)
+        clean = repo_root / "packages" / "web" / "packages" / "ui"
+        clean.mkdir(parents=True)
+        (clean / "index.ts").write_text("export const a = 1\n", encoding="utf-8")
+        stray = repo_root / "packages" / "apple"
+        stray.mkdir(parents=True)
+        (stray / "README.md").write_text("agentictoolkit\n", encoding="utf-8")
+        result = run(clean)
+        assert result.returncode == 0, f"explicit root widened: {result.stderr}"
+
+
+def test_the_guards_own_source_is_not_scanned_as_a_leak() -> None:
+    """A guard that hunts a string necessarily contains it, in regex and in prose.
+
+    The allowance is by filename and deliberately narrow: any OTHER file under
+    tools/ is swept like the rest of the repo.
+    """
+    with tempfile.TemporaryDirectory() as tmp:
+        repo_root = Path(tmp)
+        _stub_default_roots(repo_root)
+        # One clean file, so a 0 here means "scanned and found nothing" rather
+        # than the empty-scan 2 the guard returns when it read nothing at all.
+        (repo_root / "docs" / "guide.md").write_text("All public.\n", encoding="utf-8")
+        tools = repo_root / "tools"
+        tools.mkdir()
+        (tools / "check_no_private_scope.py").write_text(
+            'PATTERN = "@agentic-toolkit/"\n', encoding="utf-8"
+        )
+        assert run_default(repo_root).returncode == 0, "the guard condemned itself"
+
+        (tools / "helper.py").write_text('SCOPE = "@agentic-toolkit/"\n', encoding="utf-8")
+        result = run_default(repo_root)
+        assert result.returncode == 1, f"a non-guard file under tools/ was skipped: {result.stdout}"
+
+
 def main() -> int:
     tests = [v for k, v in sorted(globals().items()) if k.startswith("test_")]
     for test in tests:
