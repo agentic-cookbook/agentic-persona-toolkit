@@ -12,19 +12,39 @@ and imports are not where this leaks. It leaks in README.md, in CHANGELOG.md, in
 a doc comment at the top of a config file: the files nobody greps because they do
 not compile.
 
-This guard scans four directories, not the repo root: `packages/web/packages`
-(the library — the packages that arrived from the private repo), `recipes` and
-`docs` (the prose that describes them), and `websites` (the demo sites, which
-ship too). The true repo root was tried and rejected: ADT's Apple
-and terminal trees legitimately reference `api.agenticdeveloperhub.com` as a real
-service endpoint, and this file's own source and self-test contain every pattern
-they exist to detect — a root that floods with expected hits is a guard nobody
-reads past. These four are exactly the trees that hold shipped prose and shipped
-code and nothing else that this guard can tell apart from a leak. So instead of
-widening to the root, three root-level files that a public reader actually opens
-first — `README.md`, `AGENTS.md`, `.claude/CLAUDE.md` — are named individually
-and scanned alongside the four directories, without pulling in the Apple/terminal
-noise the rest of the root would bring.
+The scan runs in two tiers, because the patterns below are not all the same kind
+of thing.
+
+The FULL pattern set runs over four directories: `packages/web/packages` (the
+library — the packages that arrived from the private repo), `recipes` and `docs`
+(the prose that describes them), and `websites` (the demo sites, which ship too),
+plus three root-level files a public reader opens first — `README.md`,
+`AGENTS.md`, `.claude/CLAUDE.md`. These are the trees that hold shipped prose and
+shipped code and nothing else this guard can tell apart from a leak.
+
+The PRIVATE tier — every pattern except the product name — then sweeps whatever
+those roots did not reach, which is most of the repo: `packages/apple`,
+`packages/android`, `packages/terminal`, `packages/windows`, `cookbook/`,
+`tools/`. Those four sibling package trees were scanned by nothing at all before,
+so a private repo name could sit in the Swift client indefinitely with this guard
+reporting a clean tree.
+
+The product name is what keeps the tiers apart rather than merely widening the
+roots. Those same sibling trees ship a client NAMED for the product and call its
+PUBLIC API host: `AgenticDeveloperHubClient` and `api.agenticdeveloperhub.com` are
+the thing itself, not a coordinate into anything private. Sweeping the product
+name over them would condemn the product for existing. Every OTHER pattern names
+the private repo, and those are a leak wherever they sit.
+
+The wide sweep skips each guard's own source by filename, and the self-tests that
+keep synthetic leak fixtures in theirs. A guard that hunts a string necessarily
+contains that string — in its regex, and in the prose explaining what it catches
+and why. The allowance is by filename and nothing wider: a leak in any other file
+under `tools/` fires like anywhere else.
+
+Passing `--roots` explicitly means "ask about these roots", so it runs the scoped
+pass only. The wide sweep rides along with the default invocation, where the
+question is "is this repo clean".
 
 Five patterns, for five different failures:
 
@@ -95,8 +115,9 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_ROOTS = ("packages/web/packages", "recipes", "docs", "websites")
-# Root-level files scanned individually rather than by widening to the repo root
-# (see the docstring). A listed file that does not exist is skipped, not an error —
+# Root-level files scanned with the FULL pattern set, named individually because
+# the rest of the root gets the private tier only (see the docstring). A listed
+# file that does not exist is skipped, not an error —
 # these three are the ones this repo happens to ship; a fork of this guard might not
 # ship all of them.
 DEFAULT_FILES = ("README.md", "AGENTS.md", ".claude/CLAUDE.md")

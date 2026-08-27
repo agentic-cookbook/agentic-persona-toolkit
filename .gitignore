@@ -32,3 +32,6 @@ packages/*/dist/
 # Xcode per-user state
 **/xcuserdata/
 *.xcuserstate
+
+# Python bytecode from tools/
+__pycache__/
