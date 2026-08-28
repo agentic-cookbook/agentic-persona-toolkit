@@ -35,10 +35,15 @@ describe('the topic list busy spinner', () => {
 
   // The title must not move when the spinner appears (Mike). It hangs OFF the title's left edge,
   // absolutely positioned, exactly as the `+` hangs off its right edge.
-  it('is taken out of flow so the title does not shift', () => {
+  it('rides in flow after the title, and cannot be clipped by it', () => {
+    // It used to hang out of flow off the header's left edge, because a CENTRED title moved
+    // sideways the moment a spinner appeared beside it. The title is left-justified now
+    // (its leading edge on the row-label column), so there is nothing left to protect: the
+    // spinner is an in-flow sibling that pushes nothing, and being a sibling rather than an
+    // absolutely-positioned escapee is what keeps it outside the title's `truncate` box.
     render(<TopicRail {...props} busy />)
-    expect(spinner()?.className).toContain('absolute')
-    expect(spinner()?.className).toContain('right-full')
+    expect(spinner()?.className).not.toContain('absolute')
+    expect(spinner()?.className).toContain('shrink-0')
   })
 
   // Collapsing a rail to an icon strip is a first-class gesture, and the strip has no title for

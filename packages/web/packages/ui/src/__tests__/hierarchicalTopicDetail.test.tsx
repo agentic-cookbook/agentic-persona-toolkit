@@ -769,6 +769,40 @@ describe('HierarchicalTopicDetail — narrow (navigation-stack) layout', () => {
     expect(modeAt(620, levelsFor({ region: 'us', eco: 'core', topic: 'apps' }))).toBe(false)
   })
 
+  it('is what `auto` lands on at phone width however little detail the host asked for', () => {
+    // `minDetailWidth` is a request about the DETAIL PANE. Read as the whole mode's threshold it
+    // let a host declare, without meaning to, that two panes side by side are fine at 320px — and
+    // shipr, asking for 24rem so six ladder columns could sit beside a rail, declared exactly that.
+    // The stack then stayed wide all the way down: on a real phone only the user-agent check
+    // rescued it, and a desktop window dragged to phone width has no user agent to rescue it (Mike:
+    // "this completely breaks the site on iPhone"). So the floor is never below phone width,
+    // whatever was asked for — 480 is above the widest phone in portrait and well below any window
+    // someone reads two panes in.
+    const modeAt = (px: number) => {
+      const harness = installResizeHarness(px)
+      try {
+        const { container, unmount } = render(
+          <HierarchicalTopicDetail
+            minDetailWidth="12rem"
+            levels={levelsFor({ region: 'us', eco: 'core', topic: 'apps' })}
+          >
+            <p>detail</p>
+          </HierarchicalTopicDetail>,
+        )
+        const narrow = isNarrow(container)
+        unmount()
+        return narrow
+      } finally {
+        harness.restore()
+      }
+    }
+    // 12rem + a 32px strip is 224 — the width the old floor would have flipped at, and narrower
+    // than any phone. It flips at the phone floor instead.
+    expect(modeAt(300)).toBe(true)
+    expect(modeAt(430)).toBe(true)
+    expect(modeAt(500)).toBe(false)
+  })
+
   it('gives every selectable row a trailing disclosure chevron — the pane has no peeking sibling column left to hint that a tap pushes further', () => {
     render(
       <HierarchicalTopicDetail layoutMode="narrow" levels={levelsFor({})}>
@@ -947,5 +981,67 @@ describe('HierarchicalTopicDetail — the covered stack during a live container 
     } finally {
       vi.useRealTimers()
     }
+  })
+})
+
+/**
+ * THE VIEW TELLS THE PAGE IT IS MEASURED, NOT FLOWED.
+ *
+ * "the HTDV content should be pinned to the top of the footer, there is currently a gap — this is
+ * likely a code in the shared code, fixing it here will fix it everywhere" (Mike).
+ *
+ * The gap was the app shell's bitbag reservation: `.adh-app-shell__main` reserves 6rem at the
+ * bottom of every page for the fixed dock to overhang. On a scrolling page that is free slack you
+ * scroll past once. On a page whose height is MEASURED against the viewport — this one, `min-h-0
+ * flex-1` the whole way down — it is a permanent band of empty above the footer, and the view has
+ * already shrunk itself to fit above it, so the band is content the page gave up rather than room
+ * it had spare.
+ *
+ * `data-fills-viewport` is how this view says so, and `.adh-app-shell__main:has([data-fills-
+ * viewport])` in adh-site.css is how the shell hands the space back. The attribute is therefore a
+ * PUBLIC CONTRACT with a stylesheet in another package, which is exactly the kind of coupling that
+ * dies silently: nothing imports it, no type mentions it, and a rename here breaks a rule over
+ * there with no error anywhere. Hence a test for an attribute.
+ *
+ * The other half of the pair — that the stylesheet still cancels the band, and that the shell's
+ * main still carries the class it cancels it on — is pinned in
+ * `adh/src/layout/__tests__/viewportFillingPage.test.tsx`, and the whole chain is measured in a
+ * real browser by `sites/shipr/tests/smoke.spec.ts` ("hands its bottom band back…").
+ */
+describe('HierarchicalTopicDetail — the viewport-filling claim', () => {
+  const resizeTo = containerWidth(W3_NONE_COVERED)
+  const allSelected = () => levelsFor({ region: 'us', eco: 'core', topic: 'apps' })
+
+  it('declares data-fills-viewport on its outermost element', () => {
+    const { container } = render(
+      <HierarchicalTopicDetail levels={allSelected()}>
+        <p>detail</p>
+      </HierarchicalTopicDetail>,
+    )
+
+    // The OUTERMOST element, not merely some element: `:has()` is satisfied by any descendant, but
+    // a claim about the whole view's height belongs on the box that HAS that height — and anywhere
+    // deeper is inside a stack that a resize can unmount, which would make the claim flicker.
+    const root = container.firstElementChild
+    expect(root).toHaveAttribute('data-fills-viewport')
+
+    // The claim has to be TRUE, and these are what make it true: a root that could grow past the
+    // height it is handed would be asking the shell for space it then overflows.
+    expect(root?.className).toMatch(/\bmin-h-0\b/)
+    expect(root?.className).toMatch(/\bflex-1\b/)
+  })
+
+  it('keeps the claim when the container narrows into the navigation stack', () => {
+    // The narrow layout is a different subtree, and the attribute belongs to neither subtree — it
+    // is the view's own fact. A regression that pushed it down into the covered stack would fold
+    // the band back in on a phone, which is where a wasted 6rem costs the most.
+    const { container } = render(
+      <HierarchicalTopicDetail levels={allSelected()}>
+        <p>detail</p>
+      </HierarchicalTopicDetail>,
+    )
+    resizeTo(360)
+    expect(isNarrow(container)).toBe(true)
+    expect(container.firstElementChild).toHaveAttribute('data-fills-viewport')
   })
 })

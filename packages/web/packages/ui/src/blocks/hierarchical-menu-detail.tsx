@@ -36,7 +36,14 @@ import {
 } from "lucide-react"
 
 import { cn } from "../lib/utils"
-import { TopicRail, FULL_RAIL, COLLAPSED_RAIL, type TopicDetailItem, type RailSlot } from "./topic-detail"
+import {
+  TopicRail,
+  FULL_RAIL,
+  COLLAPSED_RAIL,
+  rootFontPx,
+  type TopicDetailItem,
+  type RailSlot,
+} from "./topic-detail"
 import { TopicSelectHint } from "./topic-select-hint"
 import { deepestSelectedLevel } from "./stack-frontier"
 import { DETAIL_PANE_ATTR } from "../lib/detail-pane"
@@ -682,11 +689,15 @@ export function HierarchicalMenuDetail({
   // cascade borrows covered's peeking), matching HTDV. Flipping at `minDetail + FULL_RAIL` instead
   // would turn the stack narrow while the wide layout still had lists to cover progressively, so
   // every list vanished at once as the window shrank (see hierarchical-topic-detail.tsx's floor).
+  //
+  // And never below phone width, whatever the host asked for: `minDetailWidth` is a request about
+  // the DETAIL pane, and reading it as the whole mode's threshold lets a host declare — without
+  // meaning to — that two panes side by side are fine on a phone (see HTDV's PHONE_FLOOR).
   const stripPx = disclosureStyle === "minimized" ? COLLAPSED_RAIL : COVERED_PEEK
+  const wideFloor = Math.max(minDetailPx(minDetailWidth) + stripPx, PHONE_FLOOR)
   const narrow =
     layoutMode === "narrow" ||
-    (layoutMode === "auto" &&
-      (phone || (containerW > 0 && containerW < minDetailPx(minDetailWidth) + stripPx)))
+    (layoutMode === "auto" && (phone || (containerW > 0 && containerW < wideFloor)))
 
   // THE AUTOMATIC FRONTIER DETAIL: while the frontier list has no selection, the detail pane is
   // owned by the package — an almost-empty centered nudge to select something (TopicSelectHint),
@@ -997,6 +1008,10 @@ export function HierarchicalMenuDetail({
 // a PARTIAL cover, so the stack reads as physically layered cards (not a full cover / off-screen).
 // FULL_RAIL / COLLAPSED_RAIL are imported from topic-detail (the one authoritative home).
 const COVERED_PEEK = 40
+
+/** The width at or below which a container is phone-shaped and the stack is ALWAYS narrow. See
+ *  hierarchical-topic-detail.tsx's copy for why it is a raw CSS px count. */
+const PHONE_FLOOR = 480
 
 // The cascading style's cover indent: how far a covering child sits RIGHT of the list it covers.
 // Deliberately tighter than COVERED_PEEK and sized to the rail's row anatomy (border 2 + pl-2 8 +
@@ -1325,16 +1340,22 @@ const SHADOW_RIGHT = "8px 0 24px -6px var(--color-shadow)"
 const SHADOW_LEFT = "-10px 0 22px -8px var(--color-shadow)"
 
 /** Parse `minDetailWidth` (a CSS length) to px for the fit math. Handles the units that make sense
- *  for a fixed minimum — `rem`/`em` (×16, the app's root size) and `px`. Viewport/percent units
- *  (`vw`/`%`/`vh`/`ch`) can't be resolved to a fixed px here, so they fall back to a sane default
- *  rather than being silently mis-read as raw px. */
+ *  for a fixed minimum — `rem`/`em` (× the DOCUMENT's root size, see `rootFontPx`) and `px`.
+ *  Viewport/percent units (`vw`/`%`/`vh`/`ch`) can't be resolved to a fixed px here, so they fall
+ *  back to a sane default rather than being silently mis-read as raw px.
+ *
+ *  The root size is read, not assumed: this hard-coded 16 while the adh family sets `html` to 12px,
+ *  so every minimum was a THIRD too wide and the stack flipped to narrow ~100px early. Its sibling
+ *  in hierarchical-topic-detail.tsx had the identical bug. */
 function minDetailPx(minDetailWidth: string): number {
+  const rem = rootFontPx()
+  const fallback = 28 * rem // the 28rem default, in this document's units
   const s = minDetailWidth.trim()
   const n = parseFloat(s)
-  if (Number.isNaN(n)) return 28 * 16 // unparseable → the 28rem default
-  if (s.endsWith("rem") || s.endsWith("em")) return n * 16
+  if (Number.isNaN(n)) return fallback // unparseable → the default
+  if (s.endsWith("rem") || s.endsWith("em")) return n * rem
   if (s.endsWith("px") || /^\d*\.?\d+$/.test(s)) return n // explicit px or a bare number
-  return 28 * 16 // a relative/viewport unit we can't resolve to fixed px → the 28rem default
+  return fallback // a relative/viewport unit we can't resolve to fixed px → the default
 }
 
 /** The measured width of `ref`'s element, tracked by a ResizeObserver. `useLayoutEffect` (not

@@ -27,7 +27,14 @@ import { getSlowAnimations, SLOW_ANIM_FACTOR } from "./debug-options"
 import { hlog } from "./htdv-log"
 import { UnsavedChangesAlert } from "../components/unsaved-changes-alert"
 import { useExitGate, type PaneExitGuard } from "../hooks/useExitGate"
-import { TopicRail, FULL_RAIL, COLLAPSED_RAIL, type TopicDetailItem, type RailSlot } from "./topic-detail"
+import {
+  TopicRail,
+  FULL_RAIL,
+  COLLAPSED_RAIL,
+  rootFontPx,
+  type TopicDetailItem,
+  type RailSlot,
+} from "./topic-detail"
 import { TopicSelectHint } from "./topic-select-hint"
 import { DETAIL_PANE_ATTR } from "../lib/detail-pane"
 import { deepestSelectedLevel } from "./stack-frontier"
@@ -304,6 +311,21 @@ const detailSwapMemory = new Map<
 >()
 
 /**
+ * Drop every snapshot past its adoption window — the containment sweep, run on each mount and on
+ * a timer set by each unmount. A `clone` is a deep copy of one pane's rendered DATA, so the map
+ * must never be a place where a departed surface's data waits around: past
+ * {@link DETAIL_CROSSFADE_STASH_MS} no mount may adopt it, and from here on none HOLDS it either.
+ * `token`/`tokenAt` are kept — they are a selection id and a timestamp, and they are what tells a
+ * returning surface "you were already showing this" so it doesn't fade in over itself.
+ */
+function forgetStaleSnapshots(now: number): void {
+  for (const [key, mem] of detailSwapMemory) {
+    if (mem.clone && now - mem.cloneAt >= DETAIL_CROSSFADE_STASH_MS)
+      detailSwapMemory.set(key, { ...mem, clone: null, cloneAt: 0 })
+  }
+}
+
+/**
  * THE DETAIL SWAP (Mike): when a selection replaces what the detail pane shows, the two contents
  * CROSSFADE briefly — the outgoing pane dissolves over the incoming one — instead of a hard cut.
  * When nothing was showing yet (the surface's first paint), the content simply appears: no fade,
@@ -322,7 +344,10 @@ const detailSwapMemory = new Map<
  * above) covers the selections that remount the subtree instead of updating it.
  */
 class DetailCrossfade extends Component<{
-  /** The surface's stable identity (the stack's root level id) — the memory key. */
+  /** WHAT THIS PANE IS A PANE OF — the whole containment story, so read the note on
+   *  `detailSwapMemory` before changing it. Two mounts share a stashed snapshot if and only if
+   *  they pass the same string, so this must name the CONTENT, not just the widget: the owner
+   *  (`surfaceScope`), the root list's id, and a fingerprint of the rows that list is showing. */
   memoryKey: string
   /** What the detail is showing: the per-level selection signature. A change = a swap. */
   token: string
@@ -331,6 +356,8 @@ class DetailCrossfade extends Component<{
   private contentRef = createRef<HTMLDivElement>()
   private overlayRef = createRef<HTMLDivElement>()
   private anims: Animation[] = []
+  /** Deadline that drops an unadopted snapshot (see `componentWillUnmount`). */
+  private stashTimer: ReturnType<typeof setTimeout> | null = null
 
   /** A static, inert copy of the pane as it looks RIGHT NOW — null when nothing is showing. */
   private snapshotContent(): HTMLElement | null {
@@ -369,6 +396,7 @@ class DetailCrossfade extends Component<{
     const { memoryKey, token } = this.props
     const mem = detailSwapMemory.get(memoryKey)
     const now = Date.now()
+    forgetStaleSnapshots(now)
     detailSwapMemory.set(memoryKey, {
       token,
       tokenAt: mem?.token === token ? mem.tokenAt : now,
@@ -413,16 +441,21 @@ class DetailCrossfade extends Component<{
   override componentWillUnmount(): void {
     this.anims.forEach((a) => a.cancel())
     this.anims = []
+    if (this.stashTimer !== null) clearTimeout(this.stashTimer)
     // The DOM is still attached here — stash the pane for the remount half of a swap. The stash
-    // self-expires (see `componentDidMount`); a departure that never remounts just leaves a small
-    // stale clone that the next visit's mount overwrites.
-    const mem = detailSwapMemory.get(this.props.memoryKey)
-    detailSwapMemory.set(this.props.memoryKey, {
+    // is adoptable only for {@link DETAIL_CROSSFADE_STASH_MS}, and it is DROPPED at that deadline
+    // rather than merely refused: a departure that never comes back must not leave a picture of
+    // its data sitting in a module map waiting for whoever mounts next.
+    const key = this.props.memoryKey
+    const mem = detailSwapMemory.get(key)
+    const at = Date.now()
+    detailSwapMemory.set(key, {
       token: this.props.token,
-      tokenAt: mem?.token === this.props.token ? mem.tokenAt : Date.now(),
+      tokenAt: mem?.token === this.props.token ? mem.tokenAt : at,
       clone: this.snapshotContent(),
-      cloneAt: Date.now(),
+      cloneAt: at,
     })
+    this.stashTimer = setTimeout(() => forgetStaleSnapshots(Date.now()), DETAIL_CROSSFADE_STASH_MS)
   }
 
   override render(): ReactElement {
@@ -479,10 +512,23 @@ export function HierarchicalTopicDetail({
   disclosureStyle = "covered",
   layoutMode = "auto",
   ssrDetail = false,
+  surfaceScope,
   children,
 }: {
   /** The rail levels, outermost first. Each level's selection scopes the next. */
   levels: TopicLevel[]
+  /**
+   * WHOSE stack this is — the id of the account, workspace, org or tenant whose data the levels
+   * describe. It is not decoration: this component keeps per-surface memory OUTSIDE React (see
+   * `surfaceStates` and `detailSwapMemory`, both of which have to outlive the remount that a
+   * selection causes), and that memory is keyed by what it is told. Given two stacks that differ
+   * only in whose rows they list — the same feature under two workspaces — a key built from the
+   * level ids alone is the SAME key, and the second stack inherits the first's memory.
+   *
+   * Pass it wherever a surface can be looked at under more than one owner, and pass the owner's
+   * id, not its name. Omitting it is right only for a stack there is exactly one of.
+   */
+  surfaceScope?: string
   /** Leading breadcrumb (e.g. the feature/workspace name); its crumb deselects
    *  everything (clears level 0). Omit to start the trail at the first selection. */
   rootLabel?: string
@@ -620,7 +666,18 @@ export function HierarchicalTopicDetail({
   // level a surface keeps across its own navigations. The key resolves late where a host registers
   // its levels in an effect (the first render has none), which is harmless: there is nothing to
   // toggle or hover before the stack exists.
-  const surfaceKey = levels[0]?.id ?? ""
+  // ...and scoped by `surfaceScope`, so "the same surface" means the same LIST OF THE SAME
+  // OWNER'S rows. Without that, switching workspace hands the next workspace's stack everything
+  // this one remembered, up to and including the outgoing detail pane's DOM (found live).
+  const rootLevelId = levels[0]?.id ?? ""
+  const surfaceKey = rootLevelId ? `${surfaceScope ?? ""}::${rootLevelId}` : ""
+  // The DETAIL pane's memory is keyed harder still, because what it stashes across a remount is a
+  // copy of rendered data rather than a pin or a hover: the root list's actual rows join the key,
+  // so a snapshot can only ever be adopted by a stack showing THE SAME ROWS. A scope someone
+  // forgot to pass therefore still cannot leak a pane between two different lists — and the
+  // fingerprint is the ids themselves, never a hash of them, because a hash collision here would
+  // be precisely the bug this key exists to make impossible.
+  const detailMemoryKey = `${surfaceKey}::${levels[0]?.items.map((it) => it.id).join(",") ?? ""}`
   const [, bumpSurface] = useReducer((n: number) => n + 1, 0)
   const surface = surfaceStates.get(surfaceKey) ?? {
     pins: {},
@@ -746,8 +803,16 @@ export function HierarchicalTopicDetail({
   // math, not to the mode. Selection-independent also makes the mode STABLE across a navigation:
   // a selection-dependent floor could flip the stack on the click itself, and the lost selection
   // then lowered the floor the decision was re-made on and bounced it straight back to wide.
+  //
+  // The floor is also never allowed BELOW phone width, whatever the host asked for. `minDetailWidth`
+  // is a request about the DETAIL pane; read as the whole mode's threshold it let a host declare,
+  // without meaning to, that two panes side by side are fine at 320px. shipr passing `24rem` (288px
+  // at this family's 12px root, +32 strip = 320) is exactly that: a floor narrower than any phone,
+  // so the stack stayed wide all the way down and the site was unusable on an iPhone — rescued only
+  // by the user-agent check, and a desktop window dragged to phone width has no user agent to
+  // rescue it (Mike: "this completely breaks the site on iPhone").
   const stripPx = disclosureStyle === "minimized" ? COLLAPSED_RAIL : COVERED_PEEK
-  const wideFloor = minDetailPx(minDetailWidth) + stripPx
+  const wideFloor = Math.max(minDetailPx(minDetailWidth) + stripPx, PHONE_FLOOR)
   const narrow =
     layoutMode === "narrow" ||
     (layoutMode === "auto" && (phone || (containerW > 0 && containerW < wideFloor)))
@@ -845,7 +910,10 @@ export function HierarchicalTopicDetail({
     // The swap wrapper: a selection replacing the pane's content crossfades briefly; a first paint
     // just shows. Keyed on the SELECTION signature — the one thing that changes what this pane is
     // showing from the stack's point of view.
-    <DetailCrossfade memoryKey={surfaceKey} token={levels.map((l) => l.selectedId ?? "·").join("|")}>
+    <DetailCrossfade
+      memoryKey={detailMemoryKey}
+      token={levels.map((l) => l.selectedId ?? "·").join("|")}
+    >
       {overview}
       <div
         style={overview ? { display: "none" } : undefined}
@@ -897,7 +965,18 @@ export function HierarchicalTopicDetail({
   return (
     // The dev-only animation scale is applied to <html> by the host app, not here: portaled
     // dialogs/menus escape this subtree, so a container-level variable could never reach them.
-    <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+    //
+    // `data-fills-viewport` is this view telling the page it is MEASURED, not flowed: every
+    // stack under here is `min-h-0 flex-1`, so the whole block sizes itself to whatever
+    // height it is given and scrolls internally. The app shell reserves a band at the bottom
+    // of every page for the bitbag dock to overhang (`.adh-app-shell__main`), which is free
+    // slack on a scrolling page and a permanent strip of empty above the footer on one like
+    // this — so the shell hands that space back when it sees this attribute. Declared here
+    // rather than by each host page because this component is what makes the fact true.
+    <div
+      data-fills-viewport=""
+      className="flex min-h-0 min-w-0 flex-1 flex-col"
+    >
       <TopBar
         rootLabel={rootLabel}
         crumbs={crumbs}
@@ -932,6 +1011,38 @@ export function HierarchicalTopicDetail({
 // Covered (stacked) style: how much of a covered list still peeks out on the left under its child —
 // a PARTIAL cover, so the stack reads as physically layered cards (not a full cover / off-screen).
 // FULL_RAIL / COLLAPSED_RAIL are imported from topic-detail (the one authoritative home).
+
+/**
+ * Each rail's own answer to "how wide do my rows want to be", collected from `TopicRail`'s
+ * `onFit` (which measures and clamps — see there), and kept PER RAIL.
+ *
+ * WHY PER RAIL. This used to pool the answers and render every rail at the widest one any of
+ * them had given, to stop columns moving under the pointer. The cost turned out to be the
+ * thing you actually see: shipr's `Projects` rail holds `adh` and `sites`, wants 73px, and was
+ * drawn at 217px because a sibling rail full of `agenticdeveloperhub…` had once asked for that
+ * — 144px of slack on a two-word column, on every rail, forever, because the pool was also
+ * sticky and an unmounted rail still counted. Auto-sizing that never sizes anything down is
+ * not auto-sizing (Mike).
+ *
+ * The movement it was buying against is smaller than it looks. Rails lay out left to right, so
+ * a rail changing width moves only the rails to its RIGHT — which are exactly the lists that
+ * just changed because of the selection that resized it. Everything left of the selection, the
+ * part already read, holds still.
+ *
+ * A `width` on the level still wins, for rails whose width is a deliberate choice rather than a
+ * consequence of their rows.
+ */
+function useRailFit() {
+  const [fit, setFit] = useState<Record<string, number>>({})
+  // Same-value writes are dropped rather than re-rendering: the measurement re-runs whenever
+  // a list's rows change, and most of those changes do not move the width. Dropping them also
+  // keeps `fit`'s identity stable, so it is safe as an effect dependency.
+  const onFit = useCallback(
+    (id: string, px: number) => setFit((f) => (f[id] === px ? f : { ...f, [id]: px })),
+    [],
+  )
+  return { fit, onFit }
+}
 //
 // 32, not the 40 this shipped with: the peek must show each row's ICON and nothing after it. A row
 // is [10px padding][16px icon][gap][label…], so a 40px window reached ~6px INTO the label and every
@@ -939,6 +1050,13 @@ export function HierarchicalTopicDetail({
 // list sits those few points further left and the slice is covered; the icon (ending at ~26px)
 // keeps a little air after it.
 const COVERED_PEEK = 32
+
+/** The width at or below which a container is phone-shaped and the stack is ALWAYS narrow, however
+ *  little the host claims its detail pane needs. Above the widest phone in portrait (~430) and well
+ *  below any window someone reads two panes in. Deliberately a raw CSS px count and not scaled by
+ *  the root font: it is a statement about the DEVICE, and a device does not get narrower because a
+ *  theme chose a smaller type size. */
+const PHONE_FLOOR = 480
 
 // The z-floor of a hover-revealed branch: its members lift to REVEAL_Z + i so the whole cascade
 // floats over the detail. The connector overlay rides just above the highest member (see below), so
@@ -955,19 +1073,20 @@ const SHADOW_LEFT = "-10px 0 22px -8px var(--color-shadow)"
  *  (~390-430px) — a desktop detail squeezed to phone width reads as broken, not compact. Phones
  *  never consult it: a phone is always NARROW, where the detail is the device's full width. */
 const MIN_DETAIL_DEFAULT = "36rem"
-const MIN_DETAIL_DEFAULT_PX = 36 * 16
 
 /** Parse `minDetailWidth` (a CSS length) to px for the fit math. Handles the units that make sense
- *  for a fixed minimum — `rem`/`em` (×16, the app's root size) and `px`. Viewport/percent units
- *  (`vw`/`%`/`vh`/`ch`) can't be resolved to a fixed px here, so they fall back to the default
- *  rather than being silently mis-read as raw px. */
+ *  for a fixed minimum — `rem`/`em` (× the document's root size, see `rootFontPx`) and `px`.
+ *  Viewport/percent units (`vw`/`%`/`vh`/`ch`) can't be resolved to a fixed px here, so they fall
+ *  back to the default rather than being silently mis-read as raw px. */
 function minDetailPx(minDetailWidth: string): number {
+  const rem = rootFontPx()
+  const fallback = 36 * rem // MIN_DETAIL_DEFAULT, in this document's units
   const s = minDetailWidth.trim()
   const n = parseFloat(s)
-  if (Number.isNaN(n)) return MIN_DETAIL_DEFAULT_PX // unparseable → the default
-  if (s.endsWith("rem") || s.endsWith("em")) return n * 16
+  if (Number.isNaN(n)) return fallback // unparseable → the default
+  if (s.endsWith("rem") || s.endsWith("em")) return n * rem
   if (s.endsWith("px") || /^\d*\.?\d+$/.test(s)) return n // explicit px or a bare number
-  return MIN_DETAIL_DEFAULT_PX // a relative/viewport unit we can't resolve to fixed px → the default
+  return fallback // a relative/viewport unit we can't resolve to fixed px → the default
 }
 
 /** The measured width of `ref`'s element, tracked by a ResizeObserver. `useLayoutEffect` (not
@@ -1019,11 +1138,22 @@ function usePhoneUserAgent(): boolean {
  *  (a sibling swap that replaces the open leaf editor). Only a forward drill-down into a
  *  not-yet-selected level (`selectedId == null`) is unguarded: there is no open detail to
  *  lose. Because selections are contiguous from the top, `selectedId != null` is exactly
- *  "this level is at or above the deepest selection". */
-function railOnSelect(level: TopicLevel, attemptExit: (action: () => void) => void) {
+ *  "this level is at or above the deepest selection".
+ *
+ *  RE-CLICKING A SELECTED ROW POPS ONE LEVEL, NOT ALL OF THEM (Mike). Clicking `adh` while
+ *  `adh > backend` is open used to clear `adh` itself and collapse the whole path in one go,
+ *  which is the opposite of what the click looks like: the row you clicked is the one you
+ *  meant to keep. So it deselects the CHILD first, and only a second click on the (now leaf)
+ *  row deselects the row itself — the same walk back up the path the Back button makes, driven
+ *  from the row under the pointer. */
+function railOnSelect(
+  level: TopicLevel,
+  attemptExit: (action: () => void) => void,
+  child?: TopicLevel,
+) {
   return (id: string) =>
     id === level.selectedId
-      ? attemptExit(() => level.onClear())
+      ? attemptExit(() => (child?.selectedId != null ? child.onClear() : level.onClear()))
       : level.selectedId != null
         ? attemptExit(() => level.onSelect(id))
         : level.onSelect(id)
@@ -1287,6 +1417,7 @@ function MinimizedStack({
   // instead of a peek. `widths` is a dragged column width (≤ FULL).
   const [widths, setWidths] = useState<Record<string, number>>({})
   const [dragging, setDragging] = useState(false)
+  const { fit, onFit } = useRailFit()
   const override = pins
   const setOverride = setPins
 
@@ -1303,7 +1434,11 @@ function MinimizedStack({
   const [auto, setAuto] = useState<Set<string>>(new Set())
   const [hidden, setHidden] = useState(0)
 
-  const naturalWidth = (level: TopicLevel) => widths[level.id] ?? level.width ?? FULL_RAIL
+  // A width the user DRAGGED wins over a width the caller CHOSE, which wins over the width the
+  // rows measured to; FULL_RAIL is only what is left when a rail has told us nothing at all
+  // (the frame before the first measurement, and a rail with no rows to measure).
+  const naturalWidth = (level: TopicLevel) =>
+    widths[level.id] ?? level.width ?? fit[level.id] ?? FULL_RAIL
   // Intent: the user's pin (`«`) if they set one, else disclosed. Width pressure (`auto`) only ever
   // ADDS a collapse on top of this.
   const pinned = (level: TopicLevel) => override[level.id] ?? false
@@ -1351,7 +1486,7 @@ function MinimizedStack({
       prev.size === collapsed.size && [...collapsed].every((id) => prev.has(id)) ? prev : collapsed,
     )
     setHidden((prev) => (prev === h ? prev : h))
-  }, [rendered, frontier, firstUnselected, override, widths, minPx])
+  }, [rendered, frontier, firstUnselected, override, widths, fit, minPx])
 
   // Re-run on container resize (the window) and whenever the rendered lists / manual collapse change.
   useEffect(() => {
@@ -1497,7 +1632,7 @@ function MinimizedStack({
               selectionStyle="marker"
               items={level.items}
               selectedId={level.selectedId}
-              onSelect={railOnSelect(level, attemptExit)}
+              onSelect={railOnSelect(level, attemptExit, rendered[i + 1])}
               emptyLabel={level.emptyLabel ?? "Nothing here yet."}
               onNew={level.onNew}
               newLabel={level.newLabel}
@@ -1511,6 +1646,7 @@ function MinimizedStack({
               onResize={(w) => onResizeLevel(level, w)}
               onResizeStart={() => setDragging(true)}
               onResizeEnd={() => setDragging(false)}
+              onFit={(w) => onFit(level.id, w)}
               // Nothing rides the root rail's leading slot any more (the auto-hide toggle was the
               // only tenant); Back lands on the leftmost VISIBLE rail via `backSlot` below.
               leftControl={undefined}
@@ -1594,7 +1730,8 @@ function CoveredStack({
   // True mid-drag, so the left/width transitions are suppressed (the rail tracks the pointer 1:1
   // instead of easing) and restored on release.
   const [dragging, setDragging] = useState(false)
-  const railWidth = (l: TopicLevel) => widths[l.id] ?? l.width ?? FULL_RAIL
+  const { fit, onFit } = useRailFit()
+  const railWidth = (l: TopicLevel) => widths[l.id] ?? l.width ?? fit[l.id] ?? FULL_RAIL
   const onResizeLevel = (level: TopicLevel, w: number) =>
     setWidths((wd) => ({ ...wd, [level.id]: Math.max(MIN_DRAG_RAIL, Math.min(w, MAX_DRAG_RAIL)) }))
   const containerRef = useRef<HTMLDivElement>(null)
@@ -1644,7 +1781,8 @@ function CoveredStack({
     while (pressure < coverableCount && listsWidth(pressure) + detailMin > containerW) pressure++
   }
   const isCovered = (i: number) => pinned(i) || i < pressure
-  const widthOf = (i: number) => (isCovered(i) ? COVERED_PEEK : railWidth(rendered[i]!))
+  // The width a list wants before the last-resort squeeze below.
+  const rawWidth = (i: number) => (isCovered(i) ? COVERED_PEEK : railWidth(rendered[i]!))
 
   // PHASE 2 — OFF-SCREEN. Every list is down to its peek and they STILL don't leave the detail its
   // minimum: slide the leftmost list off the left edge and shift the whole stack by exactly THAT
@@ -1655,12 +1793,28 @@ function CoveredStack({
   let offshift = 0
   if (containerW > 0) {
     const widthFrom = (h: number) =>
-      rendered.reduce((w, _l, i) => (i < h ? w : w + widthOf(i)), 0) + detailMin
+      rendered.reduce((w, _l, i) => (i < h ? w : w + rawWidth(i)), 0) + detailMin
     while (hidden < coverableCount && widthFrom(hidden) > containerW) {
-      offshift += widthOf(hidden)
+      offshift += rawWidth(hidden)
       hidden++
     }
   }
+
+  // PHASE 3 — SQUEEZE THE LAST OPEN RAIL. Both phases above stop at `coverableCount`, which excludes
+  // the FRONTIER list: while it has no selection the user is choosing from it, so it is never
+  // covered and never slid off. When that one list is what does not fit, its own WIDTH is the only
+  // thing left to give — and uncapped it simply ran past the container's right edge, where the
+  // stack's `overflow-hidden` sliced it. A rail cut in half reads as a broken layout; a narrower
+  // rail whose rows ellipsize reads as a tight one (Mike: "the automatic sizing of the HTDV is not
+  // working"). Never below a peek: by that width the frame has already flipped to the narrow
+  // one-pane layout (`wideFloor`), so there is nothing under it to fall through to.
+  const lastOpen = rendered.reduce((k, _l, i) => (i < hidden || isCovered(i) ? k : i), -1)
+  let squeeze = 0
+  if (containerW > 0 && lastOpen >= 0) {
+    const laid = rendered.reduce((w, _l, i) => (i < hidden ? w : w + rawWidth(i)), 0) + detailMin
+    squeeze = Math.max(0, Math.min(laid - containerW, rawWidth(lastOpen) - COVERED_PEEK))
+  }
+  const widthOf = (i: number) => rawWidth(i) - (i === lastOpen ? squeeze : 0)
 
   // Layout pass (running x): each list's natural left. A covered list advances x only by its PEEK (it
   // stays visible as a stacked-card edge under its child), so the next list / the detail slides left
@@ -2021,7 +2175,7 @@ function CoveredStack({
               // that ends up covering nothing is dropped as meaningless (see the reveal group above).
               onSelect={(id) => {
                 if (!inGroup(i)) setHoverId(level.id, false)
-                railOnSelect(level, attemptExit)(id)
+                railOnSelect(level, attemptExit, rendered[i + 1])(id)
               }}
               emptyLabel={level.emptyLabel ?? "Nothing here yet."}
               onNew={level.onNew}
@@ -2051,6 +2205,7 @@ function CoveredStack({
               onResize={(w) => onResizeLevel(level, w)}
               onResizeStart={() => setDragging(true)}
               onResizeEnd={() => setDragging(false)}
+              onFit={(w) => onFit(level.id, w)}
               showToggle={false}
               // The header's leading control slot: the `«`/`»` that covers/uncovers THIS list's
               // PARENT (the list to its left). The ROOT list has no parent, so it carries nothing.
@@ -2268,7 +2423,7 @@ function NarrowStack({
             rowDisclosure
             items={level.items}
             selectedId={level.selectedId}
-            onSelect={railOnSelect(level, attemptExit)}
+            onSelect={railOnSelect(level, attemptExit, levels[i + 1])}
             emptyLabel={level.emptyLabel ?? "Nothing here yet."}
             onNew={level.onNew}
             newLabel={level.newLabel}

@@ -5,6 +5,7 @@ import {
   useCallback,
   useEffect,
   useId,
+  useLayoutEffect,
   useRef,
   useState,
   type CSSProperties,
@@ -30,6 +31,13 @@ import { cn } from "../lib/utils"
 export interface TopicDetailItem {
   id: string
   label: string
+  /** Part of the NAME, set beside it at the same size and weight — a shard, a variant, a
+   *  qualifier without which two rows are indistinguishable. Distinct from {@link sublabel},
+   *  which is metadata ABOUT the row and is drawn small and dim: a word the reader needs in
+   *  order to tell this row from the one under it is not metadata, and shrinking and greying
+   *  it makes two rows that differ only there read as duplicates. Truncates last, after both
+   *  the label and the sublabel, for the same reason. */
+  labelSuffix?: ReactNode
   /** Small dim second line (e.g. a reverse-domain identifier). */
   sublabel?: string
   /** Render `sublabel` INLINE after the label on ONE line (dim), instead of stacked on a
@@ -121,6 +129,37 @@ const PREVIEW_CLAMP: Record<number, string> = {
 // HierarchicalTopicDetail's fit math uses the SAME contract (one authoritative home).
 export const FULL_RAIL = 240
 export const COLLAPSED_RAIL = 48
+
+/**
+ * The range an AUTO-FIT rail is allowed to land in (see `TopicRail`'s `onFit`).
+ *
+ * A rail measured to its longest row would otherwise be as unreadable as one that truncates
+ * everything: a list of one-word rows would come out as a sliver with a header that no
+ * longer fits, and a list holding one pathological row would eat the detail pane. So the
+ * measurement decides WITHIN these, and the floor is what a titled header with its collapse
+ * toggle and `+` needs rather than a number picked for the rows.
+ */
+export const MIN_FIT_RAIL = 150
+export const MAX_FIT_RAIL = 420
+
+/** The root font size this family's layout math resolves `rem` against — READ FROM THE DOCUMENT,
+ *  not assumed. 16 is the browser default, and it is what every hard-coded number here was written
+ *  for; the adh family sets `html` to 12px, so each of them was a THIRD too generous. The visible
+ *  consequence was a fit range whose FLOOR (150px, "what a titled header needs") was really 200
+ *  design px at a 12px root — wide enough to swallow every short rail, so a two-row rail came out
+ *  as wide as a forty-row one. It is the same bug `minDetailPx` was already fixed for.
+ *  SSR has no document; 16 is the only answer available there, and the first client measurement
+ *  corrects the layout before paint. */
+export function rootFontPx(): number {
+  if (typeof document === "undefined") return 16
+  const px = parseFloat(getComputedStyle(document.documentElement).fontSize)
+  return Number.isFinite(px) && px > 0 ? px : 16
+}
+
+/** A layout number written against a 16px root, expressed in THIS document's units. */
+export function railPx(designPx: number): number {
+  return (designPx * rootFontPx()) / 16
+}
 
 // How long a pointer (or the keyboard focus) must rest on a row before it counts as intent.
 // Short enough to be invisible ahead of a click, long enough that sweeping down a list warms
@@ -354,7 +393,10 @@ function TopicList({
         {!hideLabel && (
           <span
             data-htd-label
-            className={cn("min-w-0", item.inlineSublabel && item.sublabel && "flex-1")}
+            className={cn(
+              "min-w-0",
+              ((item.inlineSublabel && item.sublabel) || item.labelSuffix) && "flex-1",
+            )}
           >
             {item.inlineSublabel && item.sublabel ? (
               // Single-line row: label + dim sublabel share one line. The label grows and
@@ -362,9 +404,17 @@ function TopicList({
               // truncates after it so a long secondary string can't crowd the label out.
               <span className="flex min-w-0 items-baseline gap-2">
                 <span className="min-w-0 flex-1 truncate">{item.label}</span>
+                {item.labelSuffix && (
+                  <span className="min-w-0 shrink-0 truncate">{item.labelSuffix}</span>
+                )}
                 <span className="min-w-0 shrink truncate text-[0.7rem] text-apt-text-dim">
                   {item.sublabel}
                 </span>
+              </span>
+            ) : item.labelSuffix ? (
+              <span className="flex min-w-0 items-baseline gap-2">
+                <span className="min-w-0 shrink truncate">{item.label}</span>
+                <span className="min-w-0 shrink-0 truncate">{item.labelSuffix}</span>
               </span>
             ) : (
               <>
@@ -566,6 +616,7 @@ export function TopicRail({
   hoverBar = true,
   hideItemIcons = false,
   onPrefetch,
+  onFit,
 }: {
   items: TopicDetailItem[]
   selectedId: string | null
@@ -662,8 +713,25 @@ export function TopicRail({
    *  through; this component neither calls it nor knows what it warms (data, a route, or both).
    *  It cannot: warming a ROUTE needs a router, and this package owns no router instance. */
   onPrefetch?: (id: string) => void
+  /**
+   * Report the width this rail's ROWS actually want, in px, already clamped to
+   * [MIN_FIT_RAIL, MAX_FIT_RAIL].
+   *
+   * WHY THE RAIL MEASURES ITSELF. Only this component knows what a row is made of — an icon,
+   * a gap, a two-line preview, a trailing status dot, a trash button that appears on hover —
+   * and all of it moves with the theme's font. Anything measuring from outside would be
+   * re-deriving that from the row markup and would fall out of date the first time a row
+   * gained a badge. So the parent asks "how wide do you want to be", not "how many
+   * characters is your longest label".
+   *
+   * The measurement is of INTRINSIC content width (`max-content`), which is independent of
+   * the width the parent then gives back — so this cannot oscillate. Omit the prop for a
+   * fixed-width rail; a collapsed rail (icon strip) never reports.
+   */
+  onFit?: (widthPx: number) => void
 }) {
   const asideRef = useRef<HTMLElement>(null)
+  const listRef = useRef<HTMLDivElement>(null)
   const listId = useId()
   const draggingRef = useRef(false)
   const onDragStart = (e: PointerEvent<HTMLDivElement>) => {
@@ -681,6 +749,84 @@ export function TopicRail({
     onResizeEnd?.()
     e.currentTarget.releasePointerCapture?.(e.pointerId)
   }
+
+  /**
+   * MEASURE THE ROWS, before paint.
+   *
+   * The list box is briefly given `width: max-content` — which asks the layout engine the one
+   * question worth asking, "how wide would you be if nothing constrained you" — read, and put
+   * back inside the same layout effect, so no frame is ever painted with it. Reading
+   * `scrollWidth` alone would only ever say "the content OVERFLOWS", never "the content has
+   * room to spare", so it could widen a rail and never narrow one.
+   *
+   * `sig` deliberately does not include the labels: a row keeps its identity when its label
+   * is re-rendered, and the alternative — re-measuring on every render that rebuilt an equal
+   * array — costs two forced reflows per rail for a width that did not move.
+   */
+  const sig = items.map((it) => it.id).join("\u0000")
+  // Held in a ref, and NOT a dependency: a parent that passes an inline arrow would otherwise
+  // re-run this on every render, and every run costs two forced reflows for a width that has
+  // not moved.
+  const onFitRef = useRef(onFit)
+  onFitRef.current = onFit
+  useLayoutEffect(() => {
+    const el = listRef.current
+    const report = onFitRef.current
+    // A collapsed rail is an icon strip whose width is COLLAPSED_RAIL by definition, and
+    // measuring one would report the width of icons — so the last real answer stands.
+    if (!report || collapsed || !el) return
+    const measure = () => {
+      const restore = el.style.width
+      el.style.width = "max-content"
+      // The gutter a vertical scrollbar takes out of the box (0 with overlay scrollbars).
+      const scrollbar = el.offsetWidth - el.clientWidth
+      // What we measure is the LIST; what we report is the RAIL, and the rail is border-box
+      // with a hairline right border the list never gets. Reporting the list's width hands
+      // the list one pixel less than it asked for, and the longest label ellipsises — the
+      // whole rail looks a hair too narrow for exactly one row. So add back the aside's OWN
+      // box: its borders and its padding.
+      //
+      // NOT `aside.offsetWidth - el.offsetWidth`, which is what this used to read. The list is
+      // `max-content` at this instant while the aside is still at its CURRENT width, so that
+      // difference is the SLACK between the two — and `natural` then came out identically equal
+      // to the width the rail already had. Every rail reported back the answer it was given, the
+      // shared max never moved off its first-render fallback, and no rail ever resized. Measured
+      // live on a two-row rail: content 72px, slack 168px, reported 240px — FULL_RAIL exactly.
+      const box = asideRef.current
+      const boxStyle = box ? getComputedStyle(box) : null
+      const chrome =
+        box && boxStyle
+          ? box.offsetWidth -
+            box.clientWidth + // its borders (plus any scrollbar gutter of the aside itself)
+            parseFloat(boxStyle.paddingLeft || "0") +
+            parseFloat(boxStyle.paddingRight || "0")
+          : 0
+      const natural = el.scrollWidth + scrollbar + Math.max(0, chrome)
+      el.style.width = restore
+      // A box with no layout measures 0 — a rail rendered inside a `display:none` ancestor,
+      // and every rail under jsdom. Zero is not an answer, and clamping it up to the floor
+      // would dress it as one: say nothing and leave the caller's own width standing.
+      if (natural <= 0) return
+      // The range is written against a 16px root; this document may not have one.
+      report(
+        Math.max(
+          railPx(MIN_FIT_RAIL),
+          Math.min(railPx(MAX_FIT_RAIL), Math.ceil(natural)),
+        ),
+      )
+    }
+    measure()
+    // Rows are measured in a font that may still be loading, and a fallback face is a
+    // different width. One re-measure when the real one lands; `document.fonts` is absent in
+    // jsdom, so the optional chain is the test environment as much as an old browser.
+    let live = true
+    void document.fonts?.ready.then(() => {
+      if (live) measure()
+    })
+    return () => {
+      live = false
+    }
+  }, [collapsed, sig])
 
   // The create affordance: a compact `+` right-justified in the header (replaces the old leading
   // "New…" rail row). Gold while a create is in progress (`newActive`). Icon-only, so its label
@@ -732,7 +878,7 @@ export function TopicRail({
     ) : null
 
   // The titled header's inner content. The control slot is a fixed width matching where item icons
-  // start; the title is CENTERED in the remaining header width with the New `+` immediately after it;
+  // start; the title is LEFT-JUSTIFIED on the column where item labels start;
   // The read indicator, in two parts on purpose.
   //
   // This is the VISUAL half, and it is decoration: `aria-hidden`, because the live region mounted
@@ -755,41 +901,29 @@ export function TopicRail({
   // the toggle/close controls are right-justified.
   const headerInner = (
     <>
-      <div className="flex w-8 shrink-0 items-center justify-center">{leftControl ?? backSlot ?? null}</div>
-      {/* THE TITLE IS CENTERED ON THE HEADER ITSELF (Mike) — not on the space left over between the
-          controls. As a `flex-1` item it centred within [leftControl … rightControls], so its centre
-          sat `(32 - rightWidth) / 2` off the header's: it drifted whenever the trailing controls
-          changed, and since only the frontier menu carries a ✕, sibling menus in one cascade centred
-          their titles differently. Taking it OUT OF FLOW and pinning it to the header's midpoint makes
-          it independent of every other icon, which is the rule asked for.
-          The `+` HANGS off the title's right edge (absolute, `left-full`) rather than sitting beside it
-          in flow, so "immediately after the title" costs the title no centring. It must live outside
-          the `truncate` box — that box is `overflow-hidden` and would clip it. */}
+      {/* THE TITLE IS LEFT-JUSTIFIED, AND ITS LEADING EDGE LANDS ON THE COLUMN WHERE THE ROW
+          LABELS START (Mike). A row is [10px inset][16px icon][8px gap][label…], so the header is
+          built out of the same three pieces: `pl-2.5` on the header, a `w-4` control slot, and the
+          header's own `gap-2`. The control then sits concentric with the row icons and the title
+          sits exactly over `data-htd-label` — every rail in a cascade reads down one left edge
+          instead of each finding its own centre. */}
+      <div className="flex w-4 shrink-0 items-center justify-center">{leftControl ?? backSlot ?? null}</div>
       {title !== undefined && (
-        <span className="pointer-events-none absolute left-1/2 flex max-w-[calc(100%-6rem)] -translate-x-1/2 items-center font-mono text-[0.8rem] tracking-[0.02em] text-apt-text-muted">
-          <span className="relative flex min-w-0 items-center">
-            {/* Hangs OFF the title's left edge, out of flow — the mirror of the `+` on the right.
-                In flow it would shift the title sideways every time a read started, and the title
-                is CENTRED on the header (see the note above), so the shift would be visible on
-                every click. It must also live outside the `truncate` box, which would clip it. */}
-            {busy && (
-              <span
-                data-htd-busy
-                className="absolute top-1/2 right-full mr-1.5 -translate-y-1/2"
-              >
-                {busyIcon}
-              </span>
-            )}
-            <span className="truncate">{title}</span>
-            {newButton && (
-              <span className="pointer-events-auto absolute top-1/2 left-full ml-1 -translate-y-1/2">
-                {newButton}
-              </span>
-            )}
-          </span>
+        <span className="pointer-events-none flex min-w-0 items-center font-mono text-[0.8rem] tracking-[0.02em] text-apt-text-muted">
+          {/* Both riders sit AFTER the title, in flow. They used to hang out of flow off either
+              edge because a CENTRED title moved sideways whenever one appeared; anchored on the
+              left there is nothing to protect, and in-flow siblings cannot be clipped by the
+              `truncate` box the way absolutely-positioned ones had to escape it. */}
+          <span className="truncate">{title}</span>
+          {newButton && <span className="pointer-events-auto ml-1 shrink-0">{newButton}</span>}
+          {busy && (
+            <span data-htd-busy className="ml-1.5 flex shrink-0 items-center">
+              {busyIcon}
+            </span>
+          )}
         </span>
       )}
-      {/* Eats the row so the trailing controls stay right-justified now the title is out of flow. */}
+      {/* Eats the row so the trailing controls stay right-justified. */}
       <div className="min-w-0 flex-1" />
       {rightControls}
       {closeButton}
@@ -827,8 +961,8 @@ export function TopicRail({
       )}
       {/* Top of the list. With a `title` (and not collapsed to an icon strip) this is the titled
           HEADER: a fixed control slot (the covered `«`/`»` or a minimized Back) where item icons
-          start, the left-aligned title where item labels start, the right-justified New `+` / collapse
-          toggle, and a divider beneath — so every titled list reserves the same header height and
+          start, the left-aligned title where item labels start, the New `+` riding just after it,
+          the right-justified collapse toggle, and a divider beneath — so every titled list reserves the same header height and
           their rows line up. Without a title (standalone TopicDetail) or when collapsed, fall back to
           the bare control strip (priority: leftControl → backSlot → toggle/`+` → busy alone → nothing).
           EVERY shape carries the busy icon: collapsing a rail to make room for the detail pane is a
@@ -837,8 +971,9 @@ export function TopicRail({
       {title !== undefined && !collapsed ? (
         <div
           data-htd-header
-          // `relative` anchors the absolutely-centred title in `headerInner`.
-          className="relative flex min-h-[2.15rem] shrink-0 items-center gap-2 border-b border-apt-border pr-2"
+          // `pl-2.5` + the `w-4` slot + `gap-2` land the title's leading edge on the row-label
+          // column (34px); see `headerInner`.
+          className="relative flex min-h-[2.15rem] shrink-0 items-center gap-2 border-b border-apt-border pr-2 pl-2.5"
         >
           {headerInner}
         </div>
@@ -895,6 +1030,7 @@ export function TopicRail({
       )}
       <div
         id={listId}
+        ref={listRef}
         className={cn(
           "min-h-0 flex-1 overflow-y-auto",
           denseBottom ? "pb-2" : "pb-8",

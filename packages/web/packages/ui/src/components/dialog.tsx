@@ -31,7 +31,11 @@ function DialogContent({
 }: DialogPrimitive.Popup.Props & { showClose?: boolean }) {
   return (
     <DialogPrimitive.Portal>
-      <DialogPrimitive.Backdrop className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm" />
+      {/* HALF the dim this shipped with — 60% black put the page behind the dialog out of
+          reach of reading, and a modal that hides its own context is answering a question
+          you can no longer see (Mike). At 30% the page is plainly subordinate and still
+          legible, which is what the blur is for as well. */}
+      <DialogPrimitive.Backdrop className="fixed inset-0 z-50 bg-black/30 backdrop-blur-sm" />
       <DialogPrimitive.Popup
         data-slot="dialog-content"
         className={cn(
