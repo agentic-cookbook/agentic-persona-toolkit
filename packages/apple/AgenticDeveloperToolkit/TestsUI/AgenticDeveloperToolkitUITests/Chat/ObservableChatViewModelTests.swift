@@ -401,4 +401,34 @@ struct ObservableChatViewModelTests {
         try await waitUntil { !viewModel.messages.isEmpty }
         #expect(viewModel.messages.first?.text == "hi there")
     }
+
+    // MARK: A whole turn through ScriptedBackend — the end-to-end contract proof
+
+    /// Drives `ObservableChatViewModel` from a real `ScriptedBackend` through
+    /// a whole turn — user message, status `think`, status `respond`, draft
+    /// updates, `draftCleared`, `messageReceived` — the same shape a live
+    /// `PersonaChatCoordinator` turn takes. Proves the contract is wired
+    /// end to end, not just that individual `InboundEvent` cases apply.
+    @Test("a whole turn — think, respond, draft, clear, receive — ends with the user message and the reply, and no draft left over")
+    func wholeTurnThroughScriptedBackend() async throws {
+        let backend = ScriptedBackend(script: [
+            .statusChanged(participantID: "persona-1", status: ChatStatus(kind: .think)),
+            .statusChanged(participantID: "persona-1", status: ChatStatus(kind: .respond)),
+            .draftUpdated(participantID: "persona-1", text: "Hel", attachments: []),
+            .draftUpdated(participantID: "persona-1", text: "Hello!", attachments: []),
+            .draftCleared(participantID: "persona-1"),
+            .messageReceived(FixtureMessage(
+                id: "server-1", localID: "server-1", senderID: "persona-1",
+                text: "Hello!", timestamp: Date())),
+            .statusChanged(participantID: "persona-1", status: nil),
+        ])
+        let viewModel = ObservableChatViewModel(backend: backend, localParticipantID: "user-1")
+
+        _ = try await viewModel.submitMessage(text: "hi", attachments: [])
+        try await waitUntil { viewModel.messages.count == 2 }
+
+        #expect(viewModel.messages.count == 2)
+        #expect(viewModel.messages.map(\.text) == ["hi", "Hello!"])
+        #expect(viewModel.activeDrafts.isEmpty)
+    }
 }

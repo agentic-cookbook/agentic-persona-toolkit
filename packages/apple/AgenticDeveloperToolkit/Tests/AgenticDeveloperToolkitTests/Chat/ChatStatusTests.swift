@@ -63,21 +63,16 @@ struct ChatStatusTests {
         #expect(bag.next() == "only")
     }
 
-    // "a status event never becomes a message" is written but not compiled:
-    // it depends on `ScriptedBackend`, which does not exist until Task 9
-    // (see the plan, Task 5 Step 7). Task 9 should un-comment this verbatim
-    // once `ScriptedBackend` lands rather than reinvent it.
-    //
-    // @Test("a status event never becomes a message")
-    // func statusStaysOutOfTranscript() async {
-    //     let backend = ScriptedBackend(script: [
-    //         .statusChanged(participantID: "p", status: ChatStatus(kind: .think)),
-    //         .statusChanged(participantID: "p", status: nil),
-    //     ])
-    //     var messages: [any Message] = []
-    //     for await event in backend.inboundEvents {
-    //         if case .messageReceived(let m) = event { messages.append(m) }
-    //     }
-    //     #expect(messages.isEmpty)
-    // }
+    @Test("a status event never becomes a message")
+    func statusStaysOutOfTranscript() async {
+        let backend = ScriptedBackend(script: [
+            .statusChanged(participantID: "p", status: ChatStatus(kind: .think)),
+            .statusChanged(participantID: "p", status: nil),
+        ])
+        var messages: [any Message] = []
+        for await event in backend.inboundEvents {
+            if case .messageReceived(let m) = event { messages.append(m) }
+        }
+        #expect(messages.isEmpty)
+    }
 }

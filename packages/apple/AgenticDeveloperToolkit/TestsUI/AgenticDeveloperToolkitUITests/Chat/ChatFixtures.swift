@@ -2,11 +2,12 @@ import Foundation
 import AgenticDeveloperToolkit
 @testable import AgenticDeveloperToolkitUI
 
-// Local, test-scoped fixtures for the Chat suite. `ScriptedBackend` is
-// explicitly reserved for a future task (see the comment in
-// `AgenticDeveloperToolkitTests/Chat/ChatStatusTests.swift`), and duplicated
-// test doubles per test target is the established pattern here (mirrors
-// `InMemoryThemeStorage` existing once in each of
+// Local, test-scoped fixtures for the Chat suite. `FakeBackend` stays even
+// though `ScriptedBackend` (Sources/Backend/) now exists: this suite drives
+// events by hand mid-test (`emit(_:)` after the view model is already
+// constructed), which a fixed-script replayer doesn't support, and
+// duplicated test doubles per test target is the established pattern here
+// (mirrors `InMemoryThemeStorage` existing once in each of
 // `AgenticDeveloperToolkitTests` and `AgenticDeveloperToolkitUITests`) —
 // `@testable import` doesn't cross the framework boundary.
 
