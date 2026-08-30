@@ -7,12 +7,19 @@ struct BuiltInThemesTests {
 
     @Test("ships the full curated theme set")
     func count() {
-        #expect(BuiltInThemes.all.count == 15)
+        // 15 hand-authored terminal palettes + 21 ported from the web theme
+        // catalogue (`BuiltInThemes+Web.swift`, Task 4 of the Swift chat
+        // parity plan).
+        #expect(BuiltInThemes.all.count == 36)
     }
 
-    @Test("every theme defines authentic app-chrome role overrides")
+    /// Only the hand-authored 15 make the "authentic panel colors" promise —
+    /// they were hand-picked per scheme. The 21 web-ported themes carry chat
+    /// overrides straight from the web CSS instead and let chrome derive
+    /// (see `BuiltInThemes.handAuthored`'s doc comment).
+    @Test("every hand-authored theme defines authentic app-chrome role overrides")
     func chromeOverrides() {
-        for theme in BuiltInThemes.all {
+        for theme in BuiltInThemes.handAuthored {
             for role in [ThemeRole.surface, .elevatedSurface, .controlBackground, .border, .outline] {
                 #expect(theme.roleOverrides[role.rawValue] != nil, "\(theme.name) missing \(role.rawValue)")
             }

@@ -15,12 +15,23 @@ import Foundation
 /// profile IDs) so persisted "active theme" selections survive upgrades.
 public enum BuiltInThemes {
 
-    /// All built-in themes, in display order.
-    public static let all: [ColorTheme] = [
+    /// The original, hand-authored curated set — terminal palettes with
+    /// authentic app-chrome `roleOverrides` (surface / elevatedSurface /
+    /// controlBackground / border / outline) hand-picked from each scheme's
+    /// own published colors. Exposed separately from `all` so tests that
+    /// check for those chrome overrides can scope to the themes that make
+    /// that promise — `webPorted` (below) instead carries chat overrides
+    /// straight from the web CSS and lets chrome derive.
+    static let handAuthored: [ColorTheme] = [
         solarizedDark, solarizedLight, dracula, nord, tokyoNight,
         oneDark, monokaiPro, rosePine, catppuccinMocha, catppuccinLatte,
         ayuDark, githubDark, githubLight, gruvboxDark, gruvboxLight
     ]
+
+    /// All built-in themes, in display order: the hand-authored set followed
+    /// by the themes ported from the web catalogue (`webPorted`, in
+    /// `BuiltInThemes+Web.swift`).
+    public static let all: [ColorTheme] = handAuthored + webPorted
 
     /// The default theme ID (Solarized Dark).
     public static let defaultID = "A1B2C3D4-0001-4000-8000-000000000001"
