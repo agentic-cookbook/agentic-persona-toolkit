@@ -36,6 +36,40 @@ struct AppKitAppearanceDriverTests {
         withExtendedLifetime(manager) {}
     }
 
+    @Test("drivesApplicationAppearance = true is a no-op when AppKit already drives")
+    func settingTrueTwiceKeepsTheSameDriver() {
+        let manager = makeManager()
+        let installed = manager.appearanceDriver
+        manager.drivesApplicationAppearance = true
+        #expect(manager.appearanceDriver === installed)
+        withExtendedLifetime(manager) {}
+    }
+
+    @Test("a host's own driver survives a write in either direction")
+    func aCustomDriverIsNeverClobbered() {
+        let custom = RecordingAppearanceDriver()
+        let manager = ThemeManager(
+            storage: InMemoryThemeStorage(activeThemeID: BuiltInThemes.githubLight.id),
+            appearanceDriver: custom
+        )
+        // The property is about the AppKit driver alone, so a host driver reads
+        // false — and neither write may discard it.
+        #expect(!manager.drivesApplicationAppearance)
+
+        manager.drivesApplicationAppearance = true
+        #expect(manager.appearanceDriver === custom)
+
+        manager.drivesApplicationAppearance = false
+        #expect(manager.appearanceDriver === custom)
+
+        // Still wired: the surviving driver is the one that gets applied. The
+        // manager applies once at init too, so this is the tail, not the whole
+        // list.
+        manager.selectTheme(id: BuiltInThemes.solarizedDark.id)
+        #expect(custom.appliedThemeIDs.last == BuiltInThemes.solarizedDark.id)
+        withExtendedLifetime(manager) {}
+    }
+
     @Test("the driver maps the theme's appearance onto NSApplication")
     func drivesApplicationAppearance() {
         // Must reference NSApplication.shared (not the NSApp implicitly-unwrapped
@@ -86,5 +120,16 @@ struct AppKitAppearanceDriverTests {
         AppKitAppearanceDriver().apply(theme, palette: palette)
 
         #expect(window.backgroundColor == NSColor(palette.windowBackground))
+    }
+}
+
+/// A stand-in for a host that supplies its own `ThemeAppearanceDriver` instead
+/// of the AppKit one — the case `drivesApplicationAppearance` must not trample.
+@MainActor
+private final class RecordingAppearanceDriver: ThemeAppearanceDriver {
+    private(set) var appliedThemeIDs: [String] = []
+
+    func apply(_ theme: ColorTheme, palette: SemanticPalette) {
+        appliedThemeIDs.append(theme.id)
     }
 }

@@ -28,15 +28,32 @@ extension ThemeManager {
         self.init(storage: storage, appearanceDriver: AppKitAppearanceDriver())
     }
 
-    /// When true (the default), the manager drives `NSApplication.shared.appearance`
-    /// and repaints themable window backgrounds as the active theme changes.
+    /// When true (the default on macOS), the manager drives
+    /// `NSApplication.shared.appearance` and repaints themable window
+    /// backgrounds as the active theme changes.
     ///
-    /// Now expressed as "is an AppKit driver installed?" — setting it to `false`
-    /// uninstalls the driver, `true` installs a fresh one. Like before, flipping
-    /// it does not itself repaint; the next theme change does.
+    /// Strictly "is *the AppKit* driver installed?", never "is *a* driver
+    /// installed?" — this property owns `AppKitAppearanceDriver` and nothing
+    /// else. A host that injected its own `ThemeAppearanceDriver` reads `false`
+    /// here and keeps its driver through a write in either direction: the
+    /// convenience of a boolean toggle is not worth silently discarding a
+    /// driver it knows nothing about. Such a host manages `appearanceDriver`
+    /// directly.
+    ///
+    /// Setting `true` when the AppKit driver is already installed is a no-op
+    /// rather than a fresh allocation. Like before, flipping it does not itself
+    /// repaint; the next theme change does.
     public var drivesApplicationAppearance: Bool {
-        get { appearanceDriver != nil }
-        set { appearanceDriver = newValue ? AppKitAppearanceDriver() : nil }
+        get { appearanceDriver is AppKitAppearanceDriver }
+        set {
+            if newValue {
+                // Only the empty slot is ours to fill: a non-nil driver is
+                // either already the AppKit one (no-op) or the host's (theirs).
+                if appearanceDriver == nil { appearanceDriver = AppKitAppearanceDriver() }
+            } else if appearanceDriver is AppKitAppearanceDriver {
+                appearanceDriver = nil
+            }
+        }
     }
 
     /// Filters out panels (color/font pickers, etc.) that should keep the
