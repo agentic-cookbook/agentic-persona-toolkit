@@ -210,6 +210,7 @@
 		BAC4FCAD2CA1DBFAAA491BFF /* MediaType.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5C4190A4334FDFDE14610AE /* MediaType.swift */; };
 		BB0B8B87321FD7029CE60259 /* BuiltInThemes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1097FDD8529BD40F91F5F702 /* BuiltInThemes.swift */; };
 		BB9FB0CFEE5923F32B05229C /* ChatViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E160BD7A5B8BB6303145768 /* ChatViewModel.swift */; };
+		BDDBCB66944CF60B47B1FCBC /* RGBAColorThemeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBDCC787B07E10482055FEAF /* RGBAColorThemeTests.swift */; };
 		BE37C9176852C3E01C44B462 /* AgenticDeveloperToolkit-macOS.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 51F3000976DA4DDF2A80876F /* AgenticDeveloperToolkit-macOS.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		BE61BA15B6B47117AA21662C /* InboundEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2965592E9CB664A69EB2E7D0 /* InboundEvent.swift */; };
 		BE8F209B6CC1FB795564CD5A /* AgenticDeveloperToolkit-macOS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 51F3000976DA4DDF2A80876F /* AgenticDeveloperToolkit-macOS.framework */; };
@@ -372,6 +373,7 @@
 		F5299466926678C96917AB0F /* InlineDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InlineDocument.swift; sourceTree = "<group>"; };
 		F599665182D8FAC22D7ADDF7 /* MessageDeliveryStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageDeliveryStatus.swift; sourceTree = "<group>"; };
 		FAC19556FC5D20FEBD794EBD /* TestSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestSupport.swift; sourceTree = "<group>"; };
+		FBDCC787B07E10482055FEAF /* RGBAColorThemeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RGBAColorThemeTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -500,6 +502,7 @@
 				8EE97A0B9263DBDE2631997B /* InMemoryThemeStorage.swift */,
 				13434278A7BB2514193D3415 /* ITermColorsParserTests.swift */,
 				2D4013C9FC63A47D23B461FD /* PortedThemeTests.swift */,
+				FBDCC787B07E10482055FEAF /* RGBAColorThemeTests.swift */,
 				8A59D84EDB7C659DDB64D0A3 /* SemanticPaletteRolesTests.swift */,
 				40AD9E623FC05DBE27370920 /* SemanticPaletteTests.swift */,
 				C8CEC8F5E3AC45C8CB54D69B /* ThemeStoreTests.swift */,
@@ -934,6 +937,7 @@
 				ACB917600E6F450F2AC8DD7A /* InMemoryThemeStorage.swift in Sources */,
 				E03EC3795B3D76134B5A4108 /* PersonaChatCoordinatorTests.swift in Sources */,
 				219DEC94966F6144B3637573 /* PortedThemeTests.swift in Sources */,
+				BDDBCB66944CF60B47B1FCBC /* RGBAColorThemeTests.swift in Sources */,
 				5BAB7DC35BFC3E8EBAB129F1 /* SemanticPaletteRolesTests.swift in Sources */,
 				5B3427AD209B77E52E6ABD20 /* SemanticPaletteTests.swift in Sources */,
 				E603D1C5457323EA639C7927 /* TestSupport.swift in Sources */,

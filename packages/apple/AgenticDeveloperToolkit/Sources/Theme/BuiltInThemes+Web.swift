@@ -677,11 +677,13 @@ extension BuiltInThemes {
     )
 
     /// "Whimsical" — ported from the web theme catalogue (`whimsical.css`).
-    /// Web defines `--pc-persona-bg`/`--pc-user-bg`/`--pc-send-bg` as
-    /// `linear-gradient(...)`, not solid colours. `ColorTheme` holds solid
-    /// `RGBAColor` values, so no override is emitted for those three roles here —
-    /// they derive from Task 3's rules instead. This is a deliberate divergence
-    /// from web, not an omission.
+    /// Web defines `--pc-persona-bg`, `--pc-user-bg`, `--pc-send-bg` as `linear-gradient(...)`, not solid colours.
+    /// `ColorTheme` holds solid `RGBAColor` values, so this theme renders a solid
+    /// where web renders a gradient — the gradient's first colour stop, sampled
+    /// deterministically:
+    ///   - `--pc-persona-bg` -> `.personaBubble` = `#c8506aff`
+    ///   - `--pc-user-bg` -> `.userBubble` = `#5a4a98ff`
+    ///   - `--pc-send-bg` -> `.sendButton` = `#c8506aff`
     static let whimsical = ColorTheme(
         id: "B1B6F0E2-0000-4000-8000-000000000115",
         name: "Whimsical",
@@ -715,10 +717,13 @@ extension BuiltInThemes {
             ThemeRole.chatInputBorder.rawValue: RGBAColor(hexString: "#4a3858ff")!,
             ThemeRole.chatInputFocus.rawValue: RGBAColor(hexString: "#a878c8ff")!,
             ThemeRole.chatSurface.rawValue: RGBAColor(hexString: "#1a1024b2")!,
+            ThemeRole.personaBubble.rawValue: RGBAColor(hexString: "#c8506aff")!,
             ThemeRole.personaName.rawValue: RGBAColor(hexString: "#f8c0d0ff")!,
             ThemeRole.personaText.rawValue: RGBAColor(hexString: "#ffffffff")!,
+            ThemeRole.sendButton.rawValue: RGBAColor(hexString: "#c8506aff")!,
             ThemeRole.sendButtonText.rawValue: RGBAColor(hexString: "#ffffffff")!,
             ThemeRole.timestampText.rawValue: RGBAColor(hexString: "#ffffff66")!,
+            ThemeRole.userBubble.rawValue: RGBAColor(hexString: "#5a4a98ff")!,
             ThemeRole.userName.rawValue: RGBAColor(hexString: "#c8b0e0ff")!,
             ThemeRole.userText.rawValue: RGBAColor(hexString: "#ffffffff")!
         ]

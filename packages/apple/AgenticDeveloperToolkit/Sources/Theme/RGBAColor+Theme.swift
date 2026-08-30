@@ -34,8 +34,29 @@ extension RGBAColor {
         )
     }
 
+    /// Source-over composite of `self` onto `backdrop`. A translucent colour has
+    /// no meaningful luminance or contrast on its own — it has one only against
+    /// the thing behind it, so resolve it here before measuring.
+    public func composited(over backdrop: RGBAColor) -> RGBAColor {
+        let outAlpha = alpha + backdrop.alpha * (1 - alpha)
+        guard outAlpha > 0 else { return RGBAColor(red: 0, green: 0, blue: 0, alpha: 0) }
+        func channel(_ source: Double, _ under: Double) -> Double {
+            (source * alpha + under * backdrop.alpha * (1 - alpha)) / outAlpha
+        }
+        return RGBAColor(
+            red: channel(red, backdrop.red),
+            green: channel(green, backdrop.green),
+            blue: channel(blue, backdrop.blue),
+            alpha: outAlpha
+        )
+    }
+
     /// WCAG contrast ratio between two colors (1 = identical … 21 = black/white).
     /// Symmetric. Used to keep derived text legible against its backdrop.
+    ///
+    /// Assumes both operands are opaque. A translucent operand's channel values
+    /// alone don't determine what a viewer sees — composite it over its real
+    /// backdrop with `composited(over:)` first, then compare the result.
     public func contrastRatio(against other: RGBAColor) -> Double {
         let lighter = Swift.max(relativeLuminance, other.relativeLuminance)
         let darker = Swift.min(relativeLuminance, other.relativeLuminance)
