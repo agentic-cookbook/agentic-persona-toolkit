@@ -53,6 +53,44 @@ public enum ThemeRole: String, CaseIterable, Sendable {
     case selectionText
     /// Text-insertion cursor.
     case cursor
+
+    // Chat — mirrors the web theme's `--pc-*` namespace so a theme reads the
+    // same on both platforms. Every one derives from a role above by default,
+    // so all built-in themes get a correct chat appearance without authoring
+    // sixteen colours per theme; a theme overrides only what should differ.
+
+    /// Fill behind a message from the persona/assistant.
+    case personaBubble
+    /// Hairline around a persona bubble.
+    case personaBubbleBorder
+    /// Text inside a persona bubble.
+    case personaText
+    /// The persona's display name above its bubble.
+    case personaName
+    /// Fill behind a message from the local user.
+    case userBubble
+    /// Hairline around a user bubble.
+    case userBubbleBorder
+    /// Text inside a user bubble.
+    case userText
+    /// The user's display name above their bubble.
+    case userName
+    /// Backdrop of the transcript region, behind the bubbles.
+    case chatSurface
+    /// Fill of the composer's text field.
+    case chatInputBackground
+    /// Composer border at rest.
+    case chatInputBorder
+    /// Composer border while focused.
+    case chatInputFocus
+    /// Send button fill at rest.
+    case sendButton
+    /// Glyph/text on the send button.
+    case sendButtonText
+    /// Send button fill on hover.
+    case sendButtonHover
+    /// Inline message timestamps.
+    case timestampText
 }
 
 /// Resolves every `ThemeRole` to a concrete `RGBAColor` for a given `ColorTheme`.
@@ -148,6 +186,38 @@ public struct SemanticPalette: Equatable, Sendable {
             return theme.selection.bestTextColor()
         case .cursor:
             return theme.cursor
+        case .personaBubble:
+            return background.blended(withFraction: 0.08, of: foreground)
+        case .personaBubbleBorder:
+            return background.blended(withFraction: 0.16, of: foreground)
+        case .personaText:
+            return foreground
+        case .personaName:
+            return derive(.accent, theme: theme)
+        case .userBubble:
+            return background.blended(withFraction: 0.18, of: derive(.accent, theme: theme))
+        case .userBubbleBorder:
+            return background.blended(withFraction: 0.34, of: derive(.accent, theme: theme))
+        case .userText:
+            return foreground
+        case .userName:
+            return foreground.dimmed(towards: background, by: 0.32, minContrast: 3.0)
+        case .chatSurface:
+            return background
+        case .chatInputBackground:
+            return background.blended(withFraction: 0.09, of: foreground)
+        case .chatInputBorder:
+            return background.blended(withFraction: 0.18, of: foreground)
+        case .chatInputFocus:
+            return derive(.accent, theme: theme)
+        case .sendButton:
+            return derive(.accent, theme: theme)
+        case .sendButtonText:
+            return derive(.accent, theme: theme).bestTextColor()
+        case .sendButtonHover:
+            return derive(.accent, theme: theme).blended(withFraction: 0.18, of: foreground)
+        case .timestampText:
+            return foreground.dimmed(towards: background, by: 0.55, minContrast: 2.0)
         }
     }
 
@@ -186,4 +256,20 @@ extension SemanticPalette {
     public var selection: RGBAColor { color(.selection) }
     public var selectionText: RGBAColor { color(.selectionText) }
     public var cursor: RGBAColor { color(.cursor) }
+    public var personaBubble: RGBAColor { color(.personaBubble) }
+    public var personaBubbleBorder: RGBAColor { color(.personaBubbleBorder) }
+    public var personaText: RGBAColor { color(.personaText) }
+    public var personaName: RGBAColor { color(.personaName) }
+    public var userBubble: RGBAColor { color(.userBubble) }
+    public var userBubbleBorder: RGBAColor { color(.userBubbleBorder) }
+    public var userText: RGBAColor { color(.userText) }
+    public var userName: RGBAColor { color(.userName) }
+    public var chatSurface: RGBAColor { color(.chatSurface) }
+    public var chatInputBackground: RGBAColor { color(.chatInputBackground) }
+    public var chatInputBorder: RGBAColor { color(.chatInputBorder) }
+    public var chatInputFocus: RGBAColor { color(.chatInputFocus) }
+    public var sendButton: RGBAColor { color(.sendButton) }
+    public var sendButtonText: RGBAColor { color(.sendButtonText) }
+    public var sendButtonHover: RGBAColor { color(.sendButtonHover) }
+    public var timestampText: RGBAColor { color(.timestampText) }
 }

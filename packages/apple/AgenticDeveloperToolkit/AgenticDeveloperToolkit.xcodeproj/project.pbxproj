@@ -88,6 +88,7 @@
 		49BCDB07C3DCDBF6BD500BEF /* HookDecision.swift in Sources */ = {isa = PBXBuildFile; fileRef = 586FFB82B2193C793BCE6F58 /* HookDecision.swift */; };
 		4BB724577E8A4208D049ECD5 /* GatingHook.swift in Sources */ = {isa = PBXBuildFile; fileRef = E12F9E9ADA915E8FDE42580F /* GatingHook.swift */; };
 		4CA996156809CF082AAD49B5 /* Participant.swift in Sources */ = {isa = PBXBuildFile; fileRef = B04F31FF3D59A7F93709900A /* Participant.swift */; };
+		4EFEFB5F42608A9ED5C7BD2C /* ChatRoleDerivationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BD55E07A9544C5158F2423D /* ChatRoleDerivationTests.swift */; };
 		50057F55B02D56EAADCDAB8A /* Tool.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEB3CD41150B1652B065BBAE /* Tool.swift */; };
 		51D4DBC3B58D26BFF2125CB4 /* InlineDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5299466926678C96917AB0F /* InlineDocument.swift */; };
 		51FA774381645CC02C47DF7B /* Conversation.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEE0D8CE3D35EBDE9E29573F /* Conversation.swift */; };
@@ -305,6 +306,7 @@
 		586FFB82B2193C793BCE6F58 /* HookDecision.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HookDecision.swift; sourceTree = "<group>"; };
 		5935D5EE66E4D967621A9C19 /* Command.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Command.swift; sourceTree = "<group>"; };
 		5A3BE00A0C21B97078CD1D70 /* SSEParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SSEParser.swift; sourceTree = "<group>"; };
+		5BD55E07A9544C5158F2423D /* ChatRoleDerivationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatRoleDerivationTests.swift; sourceTree = "<group>"; };
 		5EAAE1DA579983CBE71A090F /* ReadReceipt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadReceipt.swift; sourceTree = "<group>"; };
 		668B557C1626805746AA5DA0 /* PermissionDecision.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionDecision.swift; sourceTree = "<group>"; };
 		69306B6BBEFEEF54D775E0B8 /* BuiltInThemesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuiltInThemesTests.swift; sourceTree = "<group>"; };
@@ -469,6 +471,7 @@
 			isa = PBXGroup;
 			children = (
 				69306B6BBEFEEF54D775E0B8 /* BuiltInThemesTests.swift */,
+				5BD55E07A9544C5158F2423D /* ChatRoleDerivationTests.swift */,
 				8B24CCEA660ABAA725442DD4 /* ColorThemeTests.swift */,
 				13434278A7BB2514193D3415 /* ITermColorsParserTests.swift */,
 				8A59D84EDB7C659DDB64D0A3 /* SemanticPaletteRolesTests.swift */,
@@ -886,6 +889,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				DDF20EF6757C44CCFB986174 /* BuiltInThemesTests.swift in Sources */,
+				4EFEFB5F42608A9ED5C7BD2C /* ChatRoleDerivationTests.swift in Sources */,
 				C91B94277A82EA49FCFD6F08 /* ColorThemeTests.swift in Sources */,
 				9F8ABA5861EA4F2520851571 /* ITermColorsParserTests.swift in Sources */,
 				E03EC3795B3D76134B5A4108 /* PersonaChatCoordinatorTests.swift in Sources */,
