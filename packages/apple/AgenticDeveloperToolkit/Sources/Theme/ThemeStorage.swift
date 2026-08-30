@@ -21,4 +21,9 @@ public protocol ThemeStorage: AnyObject {
     /// writing must round-trip: what is written here is what a later read — or a
     /// later launch — returns.
     var customThemes: [ColorTheme] { get set }
+
+    /// The `ColorTheme.id` of the currently selected theme, or `nil` if none has
+    /// ever been chosen (a fresh install). Reading and writing must round-trip,
+    /// same as `customThemes`.
+    var activeThemeID: String? { get set }
 }

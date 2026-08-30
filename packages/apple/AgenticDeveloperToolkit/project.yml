@@ -41,6 +41,48 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.mikefullerton.AgenticDeveloperToolkit.tests.macos
         GENERATE_INFOPLIST_FILE: YES
 
+  AgenticDeveloperToolkitUI-macOS:
+    type: framework
+    platform: macOS
+    sources:
+      - path: SourcesUI/Shared
+        optional: true
+      - path: SourcesUI/macOS
+    dependencies:
+      - target: AgenticDeveloperToolkit-macOS
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.mikefullerton.AgenticDeveloperToolkitUI.lib.macos
+        PRODUCT_NAME: AgenticDeveloperToolkitUI
+
+  AgenticDeveloperToolkitUITests-macOS:
+    type: bundle.unit-test
+    platform: macOS
+    sources:
+      - path: TestsUI/AgenticDeveloperToolkitUITests
+    dependencies:
+      - target: AgenticDeveloperToolkitUI-macOS
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.mikefullerton.AgenticDeveloperToolkitUI.tests.macos
+        GENERATE_INFOPLIST_FILE: YES
+
+  AgenticDeveloperToolkitUI-iOS:
+    type: framework
+    platform: iOS
+    sources:
+      - path: SourcesUI/Shared
+        optional: true
+      - path: SourcesUI/iOS
+        optional: true
+    dependencies:
+      - target: AgenticDeveloperToolkit-iOS
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.mikefullerton.AgenticDeveloperToolkitUI.lib.ios
+        PRODUCT_NAME: AgenticDeveloperToolkitUI
+        TARGETED_DEVICE_FAMILY: "1,2"
+
   AgenticDeveloperToolkit-iOS:
     type: framework
     platform: iOS
@@ -93,6 +135,23 @@ schemes:
       config: Debug
       targets:
         - AgenticDeveloperToolkitTests-macOS
+    run:
+      config: Debug
+  AgenticDeveloperToolkitUI-macOS:
+    build:
+      targets:
+        AgenticDeveloperToolkitUI-macOS: all
+        AgenticDeveloperToolkitUITests-macOS: [test]
+    test:
+      config: Debug
+      targets:
+        - AgenticDeveloperToolkitUITests-macOS
+    run:
+      config: Debug
+  AgenticDeveloperToolkitUI-iOS:
+    build:
+      targets:
+        AgenticDeveloperToolkitUI-iOS: all
     run:
       config: Debug
   AgenticDeveloperToolkit-iOS:
