@@ -55,6 +55,7 @@
 		2EDFD624CE73EE669A76F1C7 /* ChatStateObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 324F7A2A1F2825AF2819494B /* ChatStateObserver.swift */; };
 		2F270F817BBB72F58BD838FB /* Conversation.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEE0D8CE3D35EBDE9E29573F /* Conversation.swift */; };
 		32AA66838FBCD2B8211CE8CE /* BuiltInThemes+Web.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0342581ED286AF016C0D3E5B /* BuiltInThemes+Web.swift */; };
+		32CE3148BBFBA04860E0356C /* ChatStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = AEE7094366CE24065D5610E1 /* ChatStatus.swift */; };
 		32DD43577DFA5E0D71897E66 /* RGBAColor+Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2B4C18604A247368CC9843B /* RGBAColor+Theme.swift */; };
 		3321D1C325EE874D6F836DF4 /* ReadReceipt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EAAE1DA579983CBE71A090F /* ReadReceipt.swift */; };
 		345C45E6CD4A77E1FA4462F0 /* ThemeStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19A4CF639C173D42F4C2D84C /* ThemeStore.swift */; };
@@ -111,6 +112,7 @@
 		63C24585F6423E8F4A62B044 /* CommandInvocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 921A502D60919736A569CA9D /* CommandInvocation.swift */; };
 		6436307014B1BB6A057A6EA0 /* ChatViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E160BD7A5B8BB6303145768 /* ChatViewModel.swift */; };
 		64DD3F566ED6AAA21E7B80F8 /* SSEParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A3BE00A0C21B97078CD1D70 /* SSEParser.swift */; };
+		65B065652AE03CDC12638045 /* ChatStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = AEE7094366CE24065D5610E1 /* ChatStatus.swift */; };
 		66F3300E3B6A6D48B5AF9BD5 /* WidgetResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2B1F0CD705E2F39ABCAD522 /* WidgetResponse.swift */; };
 		69B3C95505F2DFB48BC88168 /* RGBAColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56F91EDA42B3CA77E7D0EA90 /* RGBAColor.swift */; };
 		69DB78043440276E198144B6 /* PermissionDecision.swift in Sources */ = {isa = PBXBuildFile; fileRef = 668B557C1626805746AA5DA0 /* PermissionDecision.swift */; };
@@ -224,9 +226,11 @@
 		C36FC934D4FEF4C552D3CB1D /* WidgetResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2B1F0CD705E2F39ABCAD522 /* WidgetResponse.swift */; };
 		C45328C811681D1F21F6E29A /* Message.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECD74705DF1A654B3D2A0FDE /* Message.swift */; };
 		C4FA7DBC99C79BF13462D414 /* Participant.swift in Sources */ = {isa = PBXBuildFile; fileRef = B04F31FF3D59A7F93709900A /* Participant.swift */; };
+		C5711B8D9576AA17C48AF34B /* ChatStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = AEE7094366CE24065D5610E1 /* ChatStatus.swift */; };
 		C7FE36774015A05AC671222A /* ParticipantConversationState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F03748BB34A0E35724D2E33 /* ParticipantConversationState.swift */; };
 		C9064EE9EABC853A52CC8F6A /* CommandResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A8AA0CB093BFCE25D1EB7B9 /* CommandResult.swift */; };
 		C91B94277A82EA49FCFD6F08 /* ColorThemeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B24CCEA660ABAA725442DD4 /* ColorThemeTests.swift */; };
+		C97653B3EFB2973D7B61A6CA /* ChatStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = AEE7094366CE24065D5610E1 /* ChatStatus.swift */; };
 		C9A63C48DEA21ABA20BF8F02 /* ThemeStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19A4CF639C173D42F4C2D84C /* ThemeStore.swift */; };
 		CB66ED6622A1A10C55FDD64A /* Permission.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70D065AD66771AC6781C7510 /* Permission.swift */; };
 		CEAD9961E055673D8C141192 /* ThemeTypography.swift in Sources */ = {isa = PBXBuildFile; fileRef = 865EDA96C8B6EC33421F94C4 /* ThemeTypography.swift */; };
@@ -276,6 +280,8 @@
 		FA38D0506E1B15489639E805 /* HookContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C0F8ABE0C49F213B319AC5F /* HookContext.swift */; };
 		FA6A0BAA357AA487A8AAA53D /* Permission.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70D065AD66771AC6781C7510 /* Permission.swift */; };
 		FD976845A50955A7B6F0D073 /* PermissionStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43C0B0F3EDCA73FA5B3FCC0F /* PermissionStore.swift */; };
+		FDAC71DA5B0ADE9FF55E04E1 /* ChatStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = AEE7094366CE24065D5610E1 /* ChatStatus.swift */; };
+		FEC68398927D57C1D3079D0F /* ChatStatusTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78D031CBC7D7C09EE46897FA /* ChatStatusTests.swift */; };
 		FEF233600CC946030A4E24BF /* ThemeStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79CD337CEB28A97DEA271E23 /* ThemeStorage.swift */; };
 /* End PBXBuildFile section */
 
@@ -335,6 +341,7 @@
 		697B7CAA0A748175F4704066 /* Orchestrator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Orchestrator.swift; sourceTree = "<group>"; };
 		6A6F26C22365BD6810416BB9 /* AgenticDeveloperToolkitTests-macOS.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "AgenticDeveloperToolkitTests-macOS.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		70D065AD66771AC6781C7510 /* Permission.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Permission.swift; sourceTree = "<group>"; };
+		78D031CBC7D7C09EE46897FA /* ChatStatusTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatStatusTests.swift; sourceTree = "<group>"; };
 		79CD337CEB28A97DEA271E23 /* ThemeStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeStorage.swift; sourceTree = "<group>"; };
 		7BF3F818BC3B7717A2BF9E9B /* DisplayConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DisplayConfig.swift; sourceTree = "<group>"; };
 		84F106013CBB2C6DEC8EAB01 /* GatingPoint.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GatingPoint.swift; sourceTree = "<group>"; };
@@ -353,6 +360,7 @@
 		9838F461E43F3B3FA6A6E6F4 /* ActiveDraft.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActiveDraft.swift; sourceTree = "<group>"; };
 		A5C4190A4334FDFDE14610AE /* MediaType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaType.swift; sourceTree = "<group>"; };
 		AE2DF05B1C7491EE993DE13B /* ObservingPoint.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObservingPoint.swift; sourceTree = "<group>"; };
+		AEE7094366CE24065D5610E1 /* ChatStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatStatus.swift; sourceTree = "<group>"; };
 		B04F31FF3D59A7F93709900A /* Participant.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Participant.swift; sourceTree = "<group>"; };
 		B0D3CF9F8D4D78E70981042E /* PermissionPrompt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionPrompt.swift; sourceTree = "<group>"; };
 		B398EF744DC3E3E47933DB6A /* AgenticDeveloperToolkit-watchOS.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = "AgenticDeveloperToolkit-watchOS.framework"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -435,6 +443,7 @@
 			children = (
 				8659A16996D7018091C9512E /* PersonaChatCoordinatorTests.swift */,
 				FAC19556FC5D20FEBD794EBD /* TestSupport.swift */,
+				EC5CF54BCCF2DC0A34BBD645 /* Chat */,
 				7FC8EECB2653E8C0BD9B50BA /* Theme */,
 			);
 			path = AgenticDeveloperToolkitTests;
@@ -525,6 +534,7 @@
 			children = (
 				9838F461E43F3B3FA6A6E6F4 /* ActiveDraft.swift */,
 				324F7A2A1F2825AF2819494B /* ChatStateObserver.swift */,
+				AEE7094366CE24065D5610E1 /* ChatStatus.swift */,
 				4F111EA1BE73F7B73E95F759 /* ChatUpdate.swift */,
 				8E160BD7A5B8BB6303145768 /* ChatViewModel.swift */,
 			);
@@ -593,6 +603,14 @@
 				F2B1F0CD705E2F39ABCAD522 /* WidgetResponse.swift */,
 			);
 			path = Attachments;
+			sourceTree = "<group>";
+		};
+		EC5CF54BCCF2DC0A34BBD645 /* Chat */ = {
+			isa = PBXGroup;
+			children = (
+				78D031CBC7D7C09EE46897FA /* ChatStatusTests.swift */,
+			);
+			path = Chat;
 			sourceTree = "<group>";
 		};
 		EFEC3C86E7F92C582271BE30 /* Commands */ = {
@@ -765,6 +783,7 @@
 				0B1A98B954E6599D3F3B4F64 /* BuiltInThemes.swift in Sources */,
 				8E155EB0E1225160F344EBA7 /* ChatConfig.swift in Sources */,
 				6B9F9FD34E9593C7D984B177 /* ChatStateObserver.swift in Sources */,
+				65B065652AE03CDC12638045 /* ChatStatus.swift in Sources */,
 				E79F3FF8FB1CED089CEE99F3 /* ChatUpdate.swift in Sources */,
 				6436307014B1BB6A057A6EA0 /* ChatViewModel.swift in Sources */,
 				B72595772ECC76E1242675A1 /* ColorTheme.swift in Sources */,
@@ -823,6 +842,7 @@
 				AE72790AEF573342B63636B6 /* BuiltInThemes.swift in Sources */,
 				7012E2BD7F297E0DEF321823 /* ChatConfig.swift in Sources */,
 				16CD1ABE9A358D918F083A85 /* ChatStateObserver.swift in Sources */,
+				FDAC71DA5B0ADE9FF55E04E1 /* ChatStatus.swift in Sources */,
 				1613A1999D6D2B50D49CFC7F /* ChatUpdate.swift in Sources */,
 				374DA56D5E536486B8EA8D89 /* ChatViewModel.swift in Sources */,
 				383112CB69D1CF4EA1BADE24 /* ColorTheme.swift in Sources */,
@@ -881,6 +901,7 @@
 				0246D21ECBDBFF3D1946C168 /* BuiltInThemes.swift in Sources */,
 				40A98A2DB0D4EBC6DA4515EF /* ChatConfig.swift in Sources */,
 				F74C6D85BEE857C4A33E8405 /* ChatStateObserver.swift in Sources */,
+				C97653B3EFB2973D7B61A6CA /* ChatStatus.swift in Sources */,
 				0807945C48AEEBCE1909DC08 /* ChatUpdate.swift in Sources */,
 				BB9FB0CFEE5923F32B05229C /* ChatViewModel.swift in Sources */,
 				8A4D3703E84F41E920A214A3 /* ColorTheme.swift in Sources */,
@@ -932,6 +953,7 @@
 			files = (
 				DDF20EF6757C44CCFB986174 /* BuiltInThemesTests.swift in Sources */,
 				4EFEFB5F42608A9ED5C7BD2C /* ChatRoleDerivationTests.swift in Sources */,
+				FEC68398927D57C1D3079D0F /* ChatStatusTests.swift in Sources */,
 				C91B94277A82EA49FCFD6F08 /* ColorThemeTests.swift in Sources */,
 				9F8ABA5861EA4F2520851571 /* ITermColorsParserTests.swift in Sources */,
 				ACB917600E6F450F2AC8DD7A /* InMemoryThemeStorage.swift in Sources */,
@@ -959,6 +981,7 @@
 				BB0B8B87321FD7029CE60259 /* BuiltInThemes.swift in Sources */,
 				0D834EDF8407B7D0A3EE1D13 /* ChatConfig.swift in Sources */,
 				1DD25EE422041C7E60A52304 /* ChatStateObserver.swift in Sources */,
+				32CE3148BBFBA04860E0356C /* ChatStatus.swift in Sources */,
 				464E239F583896F908E235AA /* ChatUpdate.swift in Sources */,
 				EF7BF0F98E609ED1FB237DF5 /* ChatViewModel.swift in Sources */,
 				837F804EABA0B866FF6FE43A /* ColorTheme.swift in Sources */,
@@ -1017,6 +1040,7 @@
 				6FC3A71BA5301BC8F1322F17 /* BuiltInThemes.swift in Sources */,
 				C182CE549F5C75982E87B4A2 /* ChatConfig.swift in Sources */,
 				2EDFD624CE73EE669A76F1C7 /* ChatStateObserver.swift in Sources */,
+				C5711B8D9576AA17C48AF34B /* ChatStatus.swift in Sources */,
 				2BB83592DEE9EE8FECD6DE68 /* ChatUpdate.swift in Sources */,
 				B58D64ACB688DB7EB412CA72 /* ChatViewModel.swift in Sources */,
 				F46FC3991402228DCBC32FBA /* ColorTheme.swift in Sources */,

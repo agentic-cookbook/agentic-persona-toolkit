@@ -214,10 +214,10 @@ public actor PersonaChatCoordinator: Backend {
             // replies must not commit as though complete (ci-no-commit-on-abort).
             if !committed { emit(.draftCleared(participantID: participantID)) }
             openInvocations.removeAll()
-            status?(nil)
+            report(nil, via: status)
         }
 
-        status?(.thinking)
+        report(.thinking, via: status)
 
         let id: String
         do {
@@ -279,14 +279,14 @@ public actor PersonaChatCoordinator: Backend {
                     // happened in the conversation (ci-status-out-of-band).
                     case "status":
                         if decode(StatusPayload.self, block.data)?.phase == "retrying" {
-                            status?(.retrying)
+                            report(.retrying, via: status)
                         }
 
                     case "token":
                         let fragment = decode(TokenPayload.self, block.data)?.text ?? ""
                         if !responded {
                             responded = true
-                            status?(.responding)
+                            report(.responding, via: status)
                         }
                         accumulated += fragment
                         emit(.draftUpdated(
@@ -391,6 +391,17 @@ public actor PersonaChatCoordinator: Backend {
 
     private nonisolated func emit(_ event: InboundEvent) {
         events.yield(event)
+    }
+
+    /// Reports a turn-phase transition through both channels: the existing
+    /// `onStatus` callback (kept for its existing callers) and the
+    /// out-of-band `statusChanged` event (ci-status-out-of-band).
+    private nonisolated func report(_ status: TurnStatus?, via callback: (@Sendable (TurnStatus?) -> Void)?) {
+        callback?(status)
+        emit(.statusChanged(
+            participantID: participantID,
+            status: status.map { ChatStatus(kind: ChatStatusKind($0)) }
+        ))
     }
 
     private nonisolated func decode<T: Decodable>(_ type: T.Type, _ data: String) -> T? {

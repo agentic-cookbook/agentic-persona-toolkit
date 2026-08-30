@@ -102,7 +102,11 @@ final class PersonaChatCoordinatorTests: XCTestCase {
         let events = await f.collector.waitForTurnEnd()
 
         XCTAssertEqual(events.compactMap(\.draftText), ["hi"])
-        XCTAssertEqual(events.count, 3) // draftUpdated, messageReceived, draftCleared
+        // draftUpdated, messageReceived, draftCleared. statusChanged events also
+        // arrive on this stream (ci-status-out-of-band lives in the payload,
+        // not in keeping status off the stream) so they're excluded here rather
+        // than counted as transcript events.
+        XCTAssertEqual(events.filter { !$0.isStatusChanged }.count, 3)
     }
 
     func test_pcc008_unknownEvents_areIgnoredAndTheStreamContinues() async throws {
@@ -283,8 +287,12 @@ final class PersonaChatCoordinatorTests: XCTestCase {
 
         XCTAssertEqual(f.statuses.all, [.thinking, .retrying, .responding, nil])
         // Three transcript events: the draft, the commit, the clear. The retry
-        // is not one of them.
-        XCTAssertEqual(events.count, 3)
+        // is not one of them — it only ever reaches the transcript-shaped
+        // events by way of statusChanged, which is excluded here, and never as
+        // a Message (ci-status-out-of-band).
+        XCTAssertEqual(events.filter { !$0.isStatusChanged }.count, 3)
+        // Every callback-reported status also reached the stream as an event.
+        XCTAssertEqual(events.filter(\.isStatusChanged).count, f.statuses.all.count)
     }
 
     func test_statusClearsOnEveryExitPath() async throws {

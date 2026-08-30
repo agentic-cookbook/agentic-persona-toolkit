@@ -33,6 +33,15 @@ public enum InboundEvent: Sendable {
     case participantJoined(any Participant)
     case participantDeparted(participantID: String)
     case typing(participantID: String, isTyping: Bool)
+
+    /// A participant's work phase changed — thinking, searching, calling a
+    /// tool. `nil` clears the line.
+    ///
+    /// Out-of-band, deliberately (`ci-status-out-of-band`). Status is NOT a
+    /// transcript event: folding it into `draftUpdated` would commit a
+    /// spinner's text into a user-visible `Message`.
+    case statusChanged(participantID: String, status: ChatStatus?)
+
     case widgetPresented(messageID: String, widget: any InteractiveWidget)
     /// A participant invoked a command (tool call). Carries the whole
     /// `argumentsJSON` rather than streamed fragments, so there is no

@@ -140,6 +140,11 @@ extension InboundEvent {
         if case let .commandCompleted(_, result) = self { return result }
         return nil
     }
+
+    var isStatusChanged: Bool {
+        if case .statusChanged = self { return true }
+        return false
+    }
 }
 
 /// An SSE body delivered as one chunk. Chunk boundaries are the parser's
