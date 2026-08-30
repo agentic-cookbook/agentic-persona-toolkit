@@ -58,7 +58,7 @@ composition M1 delivers.
 
 The orchestrator is not an ingredient. It is contract machinery that every
 platform already has — `DefaultOrchestrator` in TypeScript, its Swift twin under
-`PersonaToolkit` — and this recipe consumes it rather than specifying it.
+`AgenticDeveloperToolkit` — and this recipe consumes it rather than specifying it.
 
 ## Integration Requirements
 

@@ -12,10 +12,10 @@ marked so it can be argued with before code exists.
 
 ```
 packages/windows/
-  PersonaToolkit.sln
-  src/PersonaToolkit/
-    PersonaToolkit.csproj              # net8.0, C# 12, <Nullable>enable</Nullable>
-    Contract/                          # mirrors packages/apple/PersonaToolkit/Sources one-to-one
+  AgenticDeveloperToolkit.sln
+  src/AgenticDeveloperToolkit/
+    AgenticDeveloperToolkit.csproj              # net8.0, C# 12, <Nullable>enable</Nullable>
+    Contract/                          # mirrors packages/apple/AgenticDeveloperToolkit/Sources one-to-one
       Backend/IBackend.cs
       Backend/InboundEvent.cs
       Messages/IMessage.cs
@@ -23,7 +23,7 @@ packages/windows/
       ...
     Coordinator/PersonaChatCoordinator.cs
     Coordinator/SseParser.cs
-  tests/PersonaToolkit.Tests/
+  tests/AgenticDeveloperToolkit.Tests/
     PersonaChatCoordinatorTests.cs
 ```
 

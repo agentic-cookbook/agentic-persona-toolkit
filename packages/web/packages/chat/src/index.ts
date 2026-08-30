@@ -62,7 +62,7 @@ export { useRotatingPhrase, useTransientEcho } from './hooks/useRotatingPhrase'
 export { ShuffleBag, streamTokens } from './backends/ShuffleBag'
 export type { StreamTokensOptions } from './backends/ShuffleBag'
 
-// Cross-platform chat contract (mirrors apple/PersonaToolkit/Sources/).
+// Cross-platform chat contract (mirrors apple/AgenticDeveloperToolkit/Sources/).
 export type * from './contract'
 
 // Reference TS implementations of the cross-platform contract.

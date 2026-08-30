@@ -15,10 +15,10 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "E2EA7C682F83E950B2FE8922"
-               BuildableName = "PersonaToolkitSampleApp-macOS.app"
-               BlueprintName = "PersonaToolkitSampleApp-macOS"
-               ReferencedContainer = "container:PersonaToolkitSampleApp.xcodeproj">
+               BlueprintIdentifier = "4694602D664368C5E5802043"
+               BuildableName = "AgenticDeveloperToolkit-visionOS.framework"
+               BlueprintName = "AgenticDeveloperToolkit-visionOS"
+               ReferencedContainer = "container:AgenticDeveloperToolkit.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -32,10 +32,10 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "E2EA7C682F83E950B2FE8922"
-            BuildableName = "PersonaToolkitSampleApp-macOS.app"
-            BlueprintName = "PersonaToolkitSampleApp-macOS"
-            ReferencedContainer = "container:PersonaToolkitSampleApp.xcodeproj">
+            BlueprintIdentifier = "4694602D664368C5E5802043"
+            BuildableName = "AgenticDeveloperToolkit-visionOS.framework"
+            BlueprintName = "AgenticDeveloperToolkit-visionOS"
+            ReferencedContainer = "container:AgenticDeveloperToolkit.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
       <Testables>
@@ -51,16 +51,15 @@
       debugDocumentVersioning = "YES"
       debugServiceExtension = "internal"
       allowLocationSimulation = "YES">
-      <BuildableProductRunnable
-         runnableDebuggingMode = "0">
+      <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "E2EA7C682F83E950B2FE8922"
-            BuildableName = "PersonaToolkitSampleApp-macOS.app"
-            BlueprintName = "PersonaToolkitSampleApp-macOS"
-            ReferencedContainer = "container:PersonaToolkitSampleApp.xcodeproj">
+            BlueprintIdentifier = "4694602D664368C5E5802043"
+            BuildableName = "AgenticDeveloperToolkit-visionOS.framework"
+            BlueprintName = "AgenticDeveloperToolkit-visionOS"
+            ReferencedContainer = "container:AgenticDeveloperToolkit.xcodeproj">
          </BuildableReference>
-      </BuildableProductRunnable>
+      </MacroExpansion>
       <CommandLineArguments>
       </CommandLineArguments>
    </LaunchAction>
@@ -70,18 +69,15 @@
       savedToolIdentifier = ""
       useCustomWorkingDirectory = "NO"
       debugDocumentVersioning = "YES">
-      <BuildableProductRunnable
-         runnableDebuggingMode = "0">
+      <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "E2EA7C682F83E950B2FE8922"
-            BuildableName = "PersonaToolkitSampleApp-macOS.app"
-            BlueprintName = "PersonaToolkitSampleApp-macOS"
-            ReferencedContainer = "container:PersonaToolkitSampleApp.xcodeproj">
+            BlueprintIdentifier = "4694602D664368C5E5802043"
+            BuildableName = "AgenticDeveloperToolkit-visionOS.framework"
+            BlueprintName = "AgenticDeveloperToolkit-visionOS"
+            ReferencedContainer = "container:AgenticDeveloperToolkit.xcodeproj">
          </BuildableReference>
-      </BuildableProductRunnable>
-      <CommandLineArguments>
-      </CommandLineArguments>
+      </MacroExpansion>
    </ProfileAction>
    <AnalyzeAction
       buildConfiguration = "Debug">

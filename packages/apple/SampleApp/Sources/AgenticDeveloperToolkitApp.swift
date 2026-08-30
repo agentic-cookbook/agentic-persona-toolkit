@@ -1,7 +1,7 @@
 import SwiftUI
 
 @main
-struct PersonaToolkitApp: App {
+struct AgenticDeveloperToolkitApp: App {
     #if os(macOS)
     @Environment(\.openWindow) var openWindow
     #endif

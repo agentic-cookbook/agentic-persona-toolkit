@@ -1,5 +1,5 @@
 import XCTest
-@testable import PersonaToolkit
+@testable import AgenticDeveloperToolkit
 
 /// Conformance vectors for the `persona-chat-coordinator` ingredient.
 /// docs/specs/ingredients/persona-chat-coordinator.md — one test per `pcc-*`

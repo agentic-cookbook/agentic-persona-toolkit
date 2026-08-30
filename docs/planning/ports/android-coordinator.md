@@ -16,8 +16,8 @@ packages/android/
   build.gradle.kts
   persona-toolkit/                     # library module
     build.gradle.kts
-    src/main/kotlin/com/agenticdevelopertoolkit/personatoolkit/
-      contract/                        # mirrors packages/apple/PersonaToolkit/Sources one-to-one
+    src/main/kotlin/com/agenticdevelopertoolkit/agenticdevelopertoolkit/
+      contract/                        # mirrors packages/apple/AgenticDeveloperToolkit/Sources one-to-one
         backend/Backend.kt
         backend/InboundEvent.kt
         messages/Message.kt

@@ -5,6 +5,6 @@
       location = "group:AgenticDeveloperHubClient/AgenticDeveloperHubClient.xcodeproj">
    </FileRef>
    <FileRef
-      location = "group:PersonaToolkit/PersonaToolkit.xcodeproj">
+      location = "group:AgenticDeveloperToolkit/AgenticDeveloperToolkit.xcodeproj">
    </FileRef>
 </Workspace>

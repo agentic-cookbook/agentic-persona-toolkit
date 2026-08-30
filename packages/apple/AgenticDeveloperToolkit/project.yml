@@ -1,0 +1,121 @@
+name: AgenticDeveloperToolkit
+options:
+  bundleIdPrefix: com.mikefullerton.AgenticDeveloperToolkit
+  createIntermediateGroups: true
+  deploymentTarget:
+    macOS: "14.0"
+    iOS: "17.0"
+    watchOS: "10.0"
+    tvOS: "17.0"
+    visionOS: "1.0"
+
+settings:
+  base:
+    SWIFT_VERSION: "5.10"
+    DEFINES_MODULE: YES
+    SKIP_INSTALL: YES
+    GENERATE_INFOPLIST_FILE: YES
+    CURRENT_PROJECT_VERSION: "1"
+    MARKETING_VERSION: "0.1.0"
+
+targets:
+  AgenticDeveloperToolkit-macOS:
+    type: framework
+    platform: macOS
+    sources:
+      - path: Sources
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.mikefullerton.AgenticDeveloperToolkit.lib.macos
+        PRODUCT_NAME: AgenticDeveloperToolkit
+
+  AgenticDeveloperToolkitTests-macOS:
+    type: bundle.unit-test
+    platform: macOS
+    sources:
+      - path: Tests
+    dependencies:
+      - target: AgenticDeveloperToolkit-macOS
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.mikefullerton.AgenticDeveloperToolkit.tests.macos
+        GENERATE_INFOPLIST_FILE: YES
+
+  AgenticDeveloperToolkit-iOS:
+    type: framework
+    platform: iOS
+    sources:
+      - path: Sources
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.mikefullerton.AgenticDeveloperToolkit.lib.ios
+        PRODUCT_NAME: AgenticDeveloperToolkit
+        TARGETED_DEVICE_FAMILY: "1,2"
+
+  AgenticDeveloperToolkit-watchOS:
+    type: framework
+    platform: watchOS
+    sources:
+      - path: Sources
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.mikefullerton.AgenticDeveloperToolkit.lib.watchos
+        PRODUCT_NAME: AgenticDeveloperToolkit
+
+  AgenticDeveloperToolkit-tvOS:
+    type: framework
+    platform: tvOS
+    sources:
+      - path: Sources
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.mikefullerton.AgenticDeveloperToolkit.lib.tvos
+        PRODUCT_NAME: AgenticDeveloperToolkit
+
+  AgenticDeveloperToolkit-visionOS:
+    type: framework
+    platform: visionOS
+    sources:
+      - path: Sources
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.mikefullerton.AgenticDeveloperToolkit.lib.visionos
+        PRODUCT_NAME: AgenticDeveloperToolkit
+        TARGETED_DEVICE_FAMILY: "7"
+
+schemes:
+  AgenticDeveloperToolkit-macOS:
+    build:
+      targets:
+        AgenticDeveloperToolkit-macOS: all
+        AgenticDeveloperToolkitTests-macOS: [test]
+    test:
+      config: Debug
+      targets:
+        - AgenticDeveloperToolkitTests-macOS
+    run:
+      config: Debug
+  AgenticDeveloperToolkit-iOS:
+    build:
+      targets:
+        AgenticDeveloperToolkit-iOS: all
+    run:
+      config: Debug
+  AgenticDeveloperToolkit-watchOS:
+    build:
+      targets:
+        AgenticDeveloperToolkit-watchOS: all
+    run:
+      config: Debug
+  AgenticDeveloperToolkit-tvOS:
+    build:
+      targets:
+        AgenticDeveloperToolkit-tvOS: all
+    run:
+      config: Debug
+  AgenticDeveloperToolkit-visionOS:
+    build:
+      targets:
+        AgenticDeveloperToolkit-visionOS: all
+    run:
+      config: Debug

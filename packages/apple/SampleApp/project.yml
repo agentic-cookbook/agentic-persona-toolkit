@@ -1,6 +1,6 @@
-name: PersonaToolkitSampleApp
+name: AgenticDeveloperToolkitSampleApp
 options:
-  bundleIdPrefix: com.mikefullerton.PersonaToolkit
+  bundleIdPrefix: com.mikefullerton.AgenticDeveloperToolkit
   createIntermediateGroups: true
   deploymentTarget:
     macOS: "14.0"
@@ -16,12 +16,12 @@ settings:
     CURRENT_PROJECT_VERSION: "1"
     MARKETING_VERSION: "0.1.0"
     CODE_SIGN_STYLE: Automatic
-    PRODUCT_NAME: "Persona Toolkit"
+    PRODUCT_NAME: "Agentic Developer Toolkit"
     ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
     ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
 
 targets:
-  PersonaToolkitSampleApp-macOS:
+  AgenticDeveloperToolkitSampleApp-macOS:
     type: application
     platform: macOS
     sources:
@@ -29,12 +29,12 @@ targets:
       - path: Resources
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.mikefullerton.PersonaToolkit.macos
+        PRODUCT_BUNDLE_IDENTIFIER: com.mikefullerton.AgenticDeveloperToolkit.macos
         CODE_SIGN_IDENTITY: "-"
         ENABLE_HARDENED_RUNTIME: YES
         INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.developer-tools
 
-  PersonaToolkitSampleApp-iOS:
+  AgenticDeveloperToolkitSampleApp-iOS:
     type: application
     platform: iOS
     sources:
@@ -42,13 +42,13 @@ targets:
       - path: Resources
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.mikefullerton.PersonaToolkit.ios
+        PRODUCT_BUNDLE_IDENTIFIER: com.mikefullerton.AgenticDeveloperToolkit.ios
         TARGETED_DEVICE_FAMILY: "1,2"
         INFOPLIST_KEY_UILaunchScreen_Generation: YES
         INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
         INFOPLIST_KEY_UISupportedInterfaceOrientations: "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight"
 
-  PersonaToolkitSampleApp-watchOS:
+  AgenticDeveloperToolkitSampleApp-watchOS:
     type: application
     platform: watchOS
     sources:
@@ -56,11 +56,11 @@ targets:
       - path: Resources
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.mikefullerton.PersonaToolkit.watchos
+        PRODUCT_BUNDLE_IDENTIFIER: com.mikefullerton.AgenticDeveloperToolkit.watchos
         INFOPLIST_KEY_WKApplication: YES
         INFOPLIST_KEY_WKRunsIndependentlyOfCompanionApp: YES
 
-  PersonaToolkitSampleApp-tvOS:
+  AgenticDeveloperToolkitSampleApp-tvOS:
     type: application
     platform: tvOS
     sources:
@@ -68,9 +68,9 @@ targets:
       - path: Resources
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.mikefullerton.PersonaToolkit.tvos
+        PRODUCT_BUNDLE_IDENTIFIER: com.mikefullerton.AgenticDeveloperToolkit.tvos
 
-  PersonaToolkitSampleApp-visionOS:
+  AgenticDeveloperToolkitSampleApp-visionOS:
     type: application
     platform: visionOS
     sources:
@@ -78,14 +78,14 @@ targets:
       - path: Resources
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.mikefullerton.PersonaToolkit.visionos
+        PRODUCT_BUNDLE_IDENTIFIER: com.mikefullerton.AgenticDeveloperToolkit.visionos
         TARGETED_DEVICE_FAMILY: "7"
 
 schemes:
-  PersonaToolkitSampleApp-macOS:
+  AgenticDeveloperToolkitSampleApp-macOS:
     build:
       targets:
-        PersonaToolkitSampleApp-macOS: all
+        AgenticDeveloperToolkitSampleApp-macOS: all
     run:
       config: Debug
     profile:
@@ -94,27 +94,27 @@ schemes:
       config: Debug
     archive:
       config: Release
-  PersonaToolkitSampleApp-iOS:
+  AgenticDeveloperToolkitSampleApp-iOS:
     build:
       targets:
-        PersonaToolkitSampleApp-iOS: all
+        AgenticDeveloperToolkitSampleApp-iOS: all
     run:
       config: Debug
-  PersonaToolkitSampleApp-watchOS:
+  AgenticDeveloperToolkitSampleApp-watchOS:
     build:
       targets:
-        PersonaToolkitSampleApp-watchOS: all
+        AgenticDeveloperToolkitSampleApp-watchOS: all
     run:
       config: Debug
-  PersonaToolkitSampleApp-tvOS:
+  AgenticDeveloperToolkitSampleApp-tvOS:
     build:
       targets:
-        PersonaToolkitSampleApp-tvOS: all
+        AgenticDeveloperToolkitSampleApp-tvOS: all
     run:
       config: Debug
-  PersonaToolkitSampleApp-visionOS:
+  AgenticDeveloperToolkitSampleApp-visionOS:
     build:
       targets:
-        PersonaToolkitSampleApp-visionOS: all
+        AgenticDeveloperToolkitSampleApp-visionOS: all
     run:
       config: Debug

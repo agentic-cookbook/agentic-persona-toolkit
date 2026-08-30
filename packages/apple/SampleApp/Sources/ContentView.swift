@@ -8,7 +8,7 @@ struct ContentView: View {
                 .foregroundStyle(.tint)
             Text("Hello, World!")
                 .font(.largeTitle)
-            Text("Persona Toolkit")
+            Text("Agentic Developer Toolkit")
                 .font(.title3)
                 .foregroundStyle(.secondary)
         }

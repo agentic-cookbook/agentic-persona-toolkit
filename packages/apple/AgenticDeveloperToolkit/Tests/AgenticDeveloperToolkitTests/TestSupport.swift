@@ -1,5 +1,5 @@
 import Foundation
-@testable import PersonaToolkit
+@testable import AgenticDeveloperToolkit
 
 /// Requests the fake transport saw, in order.
 final class RequestLog: @unchecked Sendable {

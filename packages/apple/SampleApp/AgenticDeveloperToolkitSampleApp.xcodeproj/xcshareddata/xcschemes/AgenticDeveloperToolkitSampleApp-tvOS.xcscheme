@@ -15,10 +15,10 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "B8A617404F25D23BCA39AB3D"
-               BuildableName = "PersonaToolkitSampleApp-watchOS.app"
-               BlueprintName = "PersonaToolkitSampleApp-watchOS"
-               ReferencedContainer = "container:PersonaToolkitSampleApp.xcodeproj">
+               BlueprintIdentifier = "38E32A5546467E558BFC179C"
+               BuildableName = "AgenticDeveloperToolkitSampleApp-tvOS.app"
+               BlueprintName = "AgenticDeveloperToolkitSampleApp-tvOS"
+               ReferencedContainer = "container:AgenticDeveloperToolkitSampleApp.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -32,10 +32,10 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "B8A617404F25D23BCA39AB3D"
-            BuildableName = "PersonaToolkitSampleApp-watchOS.app"
-            BlueprintName = "PersonaToolkitSampleApp-watchOS"
-            ReferencedContainer = "container:PersonaToolkitSampleApp.xcodeproj">
+            BlueprintIdentifier = "38E32A5546467E558BFC179C"
+            BuildableName = "AgenticDeveloperToolkitSampleApp-tvOS.app"
+            BlueprintName = "AgenticDeveloperToolkitSampleApp-tvOS"
+            ReferencedContainer = "container:AgenticDeveloperToolkitSampleApp.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
       <Testables>
@@ -55,10 +55,10 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "B8A617404F25D23BCA39AB3D"
-            BuildableName = "PersonaToolkitSampleApp-watchOS.app"
-            BlueprintName = "PersonaToolkitSampleApp-watchOS"
-            ReferencedContainer = "container:PersonaToolkitSampleApp.xcodeproj">
+            BlueprintIdentifier = "38E32A5546467E558BFC179C"
+            BuildableName = "AgenticDeveloperToolkitSampleApp-tvOS.app"
+            BlueprintName = "AgenticDeveloperToolkitSampleApp-tvOS"
+            ReferencedContainer = "container:AgenticDeveloperToolkitSampleApp.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
       <CommandLineArguments>
@@ -74,10 +74,10 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "B8A617404F25D23BCA39AB3D"
-            BuildableName = "PersonaToolkitSampleApp-watchOS.app"
-            BlueprintName = "PersonaToolkitSampleApp-watchOS"
-            ReferencedContainer = "container:PersonaToolkitSampleApp.xcodeproj">
+            BlueprintIdentifier = "38E32A5546467E558BFC179C"
+            BuildableName = "AgenticDeveloperToolkitSampleApp-tvOS.app"
+            BlueprintName = "AgenticDeveloperToolkitSampleApp-tvOS"
+            ReferencedContainer = "container:AgenticDeveloperToolkitSampleApp.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>
