@@ -1,5 +1,12 @@
 import Foundation
 
+/// `@MainActor` because this is a view model: every property here is read
+/// during a view's layout pass and every method is called from a control's
+/// action handler. Leaving it nonisolated would promise callers they may read
+/// `messages` from any thread while every conformer mutates it on the main
+/// one — a promise `ObservableChatViewModel` could only keep by declaring
+/// `@unchecked Sendable`, which silences the compiler rather than the race.
+@MainActor
 public protocol ChatViewModel: AnyObject, Sendable {
     var conversation: any Conversation { get }
     var participants: [any Participant] { get }

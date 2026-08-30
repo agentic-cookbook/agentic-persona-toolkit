@@ -20,7 +20,7 @@ import AgenticDeveloperToolkit
 ///   `ChatUpdate` case for it, by design (see `ChatUpdate.swift` and
 ///   `InboundEvent.statusChanged`'s doc comment, `ci-status-out-of-band`).
 @MainActor
-public final class ObservableChatViewModel: ChatViewModel, @unchecked Sendable {
+public final class ObservableChatViewModel: ChatViewModel {
 
     // MARK: ChatViewModel
 

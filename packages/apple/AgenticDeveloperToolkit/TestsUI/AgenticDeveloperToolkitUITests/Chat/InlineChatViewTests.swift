@@ -76,8 +76,8 @@ struct InlineChatViewTests {
         #expect(stack?.arrangedSubviews.count == 1)
     }
 
-    @Test("removing the view stops observing — a further update does not crash or repopulate")
-    func deinitRemovesObserver() {
+    @Test("a deallocated view stops observing — a further update does not crash")
+    func deallocatedViewStopsObserving() {
         _ = makeManager(activeThemeID: BuiltInThemes.solarizedDark.id)
         let backend = FakeBackend()
         let viewModel = ObservableChatViewModel(backend: backend, localParticipantID: "user-1")
@@ -86,8 +86,11 @@ struct InlineChatViewTests {
             view.frame = NSRect(x: 0, y: 0, width: 400, height: 500)
             view.layoutSubtreeIfNeeded()
         }
-        // `view` has deallocated and called `removeObserver` in `deinit`;
-        // this must not crash.
+        // `view` has deallocated without unregistering itself: `deinit` is
+        // nonisolated and cannot call the `@MainActor` `removeObserver`. The
+        // weak observer table is what makes that safe, so this is the test
+        // that the table really is weak -- a strong one would either keep the
+        // view alive or leave a dangling entry for `notify` to message.
         viewModel.handle(.messageReceived(FixtureMessage(
             id: "1", localID: "1", senderID: "persona-1", text: "hi", timestamp: Date())))
     }

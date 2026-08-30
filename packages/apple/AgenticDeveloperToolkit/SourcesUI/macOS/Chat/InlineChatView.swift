@@ -48,11 +48,13 @@ public final class InlineChatView: NSView, ChatStateObserver, Themeable, NSTextF
     public required init?(coder: NSCoder) { fatalError("init(coder:) is not supported") }
 
     deinit {
-        // `ChatStateObserver` isn't `@MainActor`-isolated at the protocol
-        // level, but every concrete `ChatViewModel` in this package is, and
-        // AppKit tears views down on the main thread in practice, so this
-        // runs safely against `ObservableChatViewModel`'s `NSHashTable`.
-        viewModel.removeObserver(self)
+        // No `viewModel.removeObserver(self)` here. `deinit` is nonisolated
+        // and `ChatStateObserver` is `@MainActor`, so the call would be
+        // unsound — and a view's last reference can be released off the main
+        // thread, which makes `MainActor.assumeIsolated` a trap rather than a
+        // fix. It is also unnecessary: `ObservableChatViewModel` holds its
+        // observers in an `NSHashTable.weakObjects()`, so this entry zeroes
+        // itself out and a later `notify` skips it.
         NotificationCenter.default.removeObserver(self)
     }
 
