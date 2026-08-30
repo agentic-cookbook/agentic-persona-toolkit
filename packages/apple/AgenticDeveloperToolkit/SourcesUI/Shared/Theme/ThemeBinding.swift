@@ -1,5 +1,5 @@
-import AppKit
 import Combine
+import Foundation
 import AgenticDeveloperToolkit
 
 /// A view (or other object) that recolors itself from a `SemanticPalette`.

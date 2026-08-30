@@ -1,4 +1,4 @@
-import AppKit
+import Foundation
 import OSLog
 import AgenticDeveloperToolkit
 
@@ -15,6 +15,11 @@ import AgenticDeveloperToolkit
 /// from another device — via `storage.onExternalChange`, which it hooks in
 /// `init` to call `reload()`. Without that hook, such a change persists but
 /// nothing repaints until relaunch.
+///
+/// Platform-neutral by construction: everything AppKit-shaped lives behind
+/// `ThemeAppearanceDriver`, the same seam shape `ThemeStorage` uses for
+/// persistence. macOS callers get `AppKitAppearanceDriver` installed for them
+/// by `init(storage:)`; see `AppKitAppearanceDriver.swift`.
 @MainActor
 public final class ThemeManager {
 
@@ -30,21 +35,22 @@ public final class ThemeManager {
     public private(set) var currentTheme: ColorTheme
     public private(set) var currentPalette: SemanticPalette
 
-    /// When true (the default), the manager drives `NSApplication.shared.appearance`
-    /// and repaints themable window backgrounds as the active theme changes.
-    public var drivesApplicationAppearance = true
+    /// Applies the active theme to app-wide chrome. `nil` means the manager
+    /// tracks the theme but paints no chrome of its own.
+    public var appearanceDriver: (any ThemeAppearanceDriver)?
 
     private let storage: any ThemeStorage
 
     private static let logger = Logger(subsystem: "com.mikefullerton.AgenticDeveloperToolkitUI", category: "ThemeManager")
 
-    public init(storage: any ThemeStorage) {
+    public init(storage: any ThemeStorage, appearanceDriver: (any ThemeAppearanceDriver)?) {
         self.storage = storage
         let store = ThemeStore(storage: storage)
         let theme = store.theme(withID: storage.activeThemeID ?? "") ?? BuiltInThemes.solarizedDark
         self.store = store
         self.currentTheme = theme
         self.currentPalette = SemanticPalette(theme: theme)
+        self.appearanceDriver = appearanceDriver
         ThemeManager.shared = self
         applyApplicationAppearance()
 
@@ -54,24 +60,7 @@ public final class ThemeManager {
     }
 
     private func applyApplicationAppearance() {
-        guard drivesApplicationAppearance else { return }
-        NSApplication.shared.appearance = currentTheme.appearance.nsAppearance
-        applyWindowBackgrounds()
-    }
-
-    private func applyWindowBackgrounds() {
-        let background = NSColor(currentPalette.windowBackground)
-        for window in NSApplication.shared.windows where Self.shouldThemeBackground(of: window) {
-            window.backgroundColor = background
-        }
-    }
-
-    /// Filters out panels (color/font pickers, etc.) that should keep the
-    /// system's own chrome rather than the app's theme.
-    static func shouldThemeBackground(of window: NSWindow) -> Bool {
-        guard window.styleMask.contains(.titled) else { return false }
-        if window is NSColorPanel || window is NSFontPanel { return false }
-        return true
+        appearanceDriver?.apply(currentTheme, palette: currentPalette)
     }
 
     /// Selects a theme by id (built-in or custom), persists the selection, and
@@ -96,15 +85,5 @@ public final class ThemeManager {
         applyApplicationAppearance()
         Self.logger.info("Active theme: \(theme.name, privacy: .public)")
         NotificationCenter.default.post(name: Self.didChangeNotification, object: self)
-    }
-}
-
-extension ThemeAppearance {
-    var nsAppearance: NSAppearance? {
-        switch self {
-        case .auto: return nil
-        case .dark: return NSAppearance(named: .darkAqua)
-        case .light: return NSAppearance(named: .aqua)
-        }
     }
 }

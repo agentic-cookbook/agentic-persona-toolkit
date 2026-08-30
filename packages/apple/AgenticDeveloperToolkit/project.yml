@@ -83,6 +83,18 @@ targets:
         PRODUCT_NAME: AgenticDeveloperToolkitUI
         TARGETED_DEVICE_FAMILY: "1,2"
 
+  AgenticDeveloperToolkitUITests-iOS:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: TestsUI/AgenticDeveloperToolkitUITests-iOS
+    dependencies:
+      - target: AgenticDeveloperToolkitUI-iOS
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.mikefullerton.AgenticDeveloperToolkitUI.tests.ios
+        GENERATE_INFOPLIST_FILE: YES
+
   AgenticDeveloperToolkit-iOS:
     type: framework
     platform: iOS
@@ -152,6 +164,17 @@ schemes:
     build:
       targets:
         AgenticDeveloperToolkitUI-iOS: all
+    run:
+      config: Debug
+  AgenticDeveloperToolkitUITests-iOS:
+    build:
+      targets:
+        AgenticDeveloperToolkitUI-iOS: all
+        AgenticDeveloperToolkitUITests-iOS: [test]
+    test:
+      config: Debug
+      targets:
+        - AgenticDeveloperToolkitUITests-iOS
     run:
       config: Debug
   AgenticDeveloperToolkit-iOS:
