@@ -9,6 +9,7 @@ import AgenticDeveloperToolkit
 final class InMemoryThemeStorage: ThemeStorage {
     var customThemes: [ColorTheme]
     var activeThemeID: String?
+    var onExternalChange: (() -> Void)?
 
     init(customThemes: [ColorTheme] = [], activeThemeID: String? = nil) {
         self.customThemes = customThemes

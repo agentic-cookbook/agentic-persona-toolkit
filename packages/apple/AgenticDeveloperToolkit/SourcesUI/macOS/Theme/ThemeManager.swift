@@ -10,9 +10,11 @@ import AgenticDeveloperToolkit
 /// Themeable controls read `ThemeManager.shared?.currentPalette` and observe
 /// `didChangeNotification` to repaint when the theme changes.
 ///
-/// This class does not observe `storage` for changes made outside itself —
-/// every live call site that changes the active theme already goes through
-/// `selectTheme(id:)` directly, so a passive observer would be dead weight.
+/// This class also reacts to changes made *outside* `selectTheme(id:)` — a
+/// settings panel bound straight to the underlying setting, or a sync arriving
+/// from another device — via `storage.onExternalChange`, which it hooks in
+/// `init` to call `reload()`. Without that hook, such a change persists but
+/// nothing repaints until relaunch.
 @MainActor
 public final class ThemeManager {
 
@@ -45,6 +47,10 @@ public final class ThemeManager {
         self.currentPalette = SemanticPalette(theme: theme)
         ThemeManager.shared = self
         applyApplicationAppearance()
+
+        // React to a different theme being selected, or the active theme's
+        // definition being edited in place, from outside `selectTheme(id:)`.
+        storage.onExternalChange = { [weak self] in self?.reload() }
     }
 
     private func applyApplicationAppearance() {
@@ -77,6 +83,13 @@ public final class ThemeManager {
 
     private func reload() {
         let theme = store.theme(withID: storage.activeThemeID ?? "") ?? BuiltInThemes.solarizedDark
+        // `selectTheme` both writes `storage.activeThemeID` (which fires
+        // `onExternalChange` → `reload()`, typically on a later runloop tick)
+        // and calls `reload()` synchronously itself, so `reload()` can run
+        // twice per selection. Bail when nothing actually changed: the second
+        // call is then a no-op (no duplicate notification / repaint), while an
+        // in-place edit of the active theme's own definition still differs and
+        // proceeds.
         guard theme != currentTheme else { return }
         currentTheme = theme
         currentPalette = SemanticPalette(theme: theme)

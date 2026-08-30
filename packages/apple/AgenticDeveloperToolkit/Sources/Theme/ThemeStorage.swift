@@ -26,4 +26,15 @@ public protocol ThemeStorage: AnyObject {
     /// ever been chosen (a fresh install). Reading and writing must round-trip,
     /// same as `customThemes`.
     var activeThemeID: String? { get set }
+
+    /// Invoked when `customThemes` or `activeThemeID` changes from outside this
+    /// seam — a settings panel bound straight to the underlying setting, a sync
+    /// arriving from another device, anything that isn't `ThemeStore`/`ThemeManager`
+    /// writing through this protocol. `ThemeManager` sets this to reload and
+    /// repaint; without it, a theme chosen elsewhere persists but nothing
+    /// redraws until relaunch.
+    ///
+    /// A conformer with nothing to observe (an in-memory test double, say) can
+    /// leave this a plain stored property that's simply never invoked.
+    var onExternalChange: (() -> Void)? { get set }
 }
