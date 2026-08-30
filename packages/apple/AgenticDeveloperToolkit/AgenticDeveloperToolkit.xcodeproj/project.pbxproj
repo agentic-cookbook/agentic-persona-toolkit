@@ -75,6 +75,7 @@
 		369FDB06D1D581BDC933447E /* ITermColorsParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A8799ED647AD3A915AFFEE1 /* ITermColorsParser.swift */; };
 		36E61B6274D121B8534E09BF /* Skill.swift in Sources */ = {isa = PBXBuildFile; fileRef = F05B078424AAA34464FE0F28 /* Skill.swift */; };
 		374DA56D5E536486B8EA8D89 /* ChatViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E160BD7A5B8BB6303145768 /* ChatViewModel.swift */; };
+		3792422B16BBB25EDA23E8B6 /* ScriptedBackendTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AD594997A88078EF93EF844 /* ScriptedBackendTests.swift */; };
 		37BC3D75C25E158B733BCCAB /* RGBAColor+Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2B4C18604A247368CC9843B /* RGBAColor+Theme.swift */; };
 		383112CB69D1CF4EA1BADE24 /* ColorTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = EECB68B9B9695826A3DCFDA4 /* ColorTheme.swift */; };
 		397A48AE969994C7B489C3ED /* RGBAColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56F91EDA42B3CA77E7D0EA90 /* RGBAColor.swift */; };
@@ -523,6 +524,7 @@
 		960BAA5C50E655FB1FF0FE50 /* SemanticPalette+UIColor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SemanticPalette+UIColor.swift"; sourceTree = "<group>"; };
 		96879EF5C75A6B913B3554E5 /* PersonaChatCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersonaChatCoordinator.swift; sourceTree = "<group>"; };
 		9838F461E43F3B3FA6A6E6F4 /* ActiveDraft.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActiveDraft.swift; sourceTree = "<group>"; };
+		9AD594997A88078EF93EF844 /* ScriptedBackendTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScriptedBackendTests.swift; sourceTree = "<group>"; };
 		9E4EE3E1AE1158EA28F79FF0 /* ObservableChatViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObservableChatViewModel.swift; sourceTree = "<group>"; };
 		9E8C7370C59143F10EB2C57A /* ThemeBinding.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeBinding.swift; sourceTree = "<group>"; };
 		A27EF4C1B3010508961C8718 /* CommandActivity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandActivity.swift; sourceTree = "<group>"; };
@@ -1009,6 +1011,7 @@
 			isa = PBXGroup;
 			children = (
 				78D031CBC7D7C09EE46897FA /* ChatStatusTests.swift */,
+				9AD594997A88078EF93EF844 /* ScriptedBackendTests.swift */,
 			);
 			path = Chat;
 			sourceTree = "<group>";
@@ -1532,6 +1535,7 @@
 				E03EC3795B3D76134B5A4108 /* PersonaChatCoordinatorTests.swift in Sources */,
 				219DEC94966F6144B3637573 /* PortedThemeTests.swift in Sources */,
 				BDDBCB66944CF60B47B1FCBC /* RGBAColorThemeTests.swift in Sources */,
+				3792422B16BBB25EDA23E8B6 /* ScriptedBackendTests.swift in Sources */,
 				5BAB7DC35BFC3E8EBAB129F1 /* SemanticPaletteRolesTests.swift in Sources */,
 				5B3427AD209B77E52E6ABD20 /* SemanticPaletteTests.swift in Sources */,
 				E603D1C5457323EA639C7927 /* TestSupport.swift in Sources */,

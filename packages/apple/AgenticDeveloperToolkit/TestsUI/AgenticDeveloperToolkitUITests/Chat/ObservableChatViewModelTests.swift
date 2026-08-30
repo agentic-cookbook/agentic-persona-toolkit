@@ -409,19 +409,30 @@ struct ObservableChatViewModelTests {
     /// updates, `draftCleared`, `messageReceived` — the same shape a live
     /// `PersonaChatCoordinator` turn takes. Proves the contract is wired
     /// end to end, not just that individual `InboundEvent` cases apply.
+    ///
+    /// `.onFirstSend` and a non-zero delay are what make the asserted *order*
+    /// meaningful rather than lucky. `submitMessage` appends its optimistic
+    /// local echo only after `await backend.send(...)` returns, and `messages`
+    /// is arrival-ordered with no sort, so a script replaying from `init` with
+    /// no delay is free to land its reply ahead of the message being replied
+    /// to — the transcript would read `["Hello!", "hi"]` on an unlucky
+    /// schedule. Waiting for the send, then pausing, pins the echo first.
     @Test("a whole turn — think, respond, draft, clear, receive — ends with the user message and the reply, and no draft left over")
     func wholeTurnThroughScriptedBackend() async throws {
-        let backend = ScriptedBackend(script: [
-            .statusChanged(participantID: "persona-1", status: ChatStatus(kind: .think)),
-            .statusChanged(participantID: "persona-1", status: ChatStatus(kind: .respond)),
-            .draftUpdated(participantID: "persona-1", text: "Hel", attachments: []),
-            .draftUpdated(participantID: "persona-1", text: "Hello!", attachments: []),
-            .draftCleared(participantID: "persona-1"),
-            .messageReceived(FixtureMessage(
-                id: "server-1", localID: "server-1", senderID: "persona-1",
-                text: "Hello!", timestamp: Date())),
-            .statusChanged(participantID: "persona-1", status: nil),
-        ])
+        let backend = ScriptedBackend(
+            script: [
+                .statusChanged(participantID: "persona-1", status: ChatStatus(kind: .think)),
+                .statusChanged(participantID: "persona-1", status: ChatStatus(kind: .respond)),
+                .draftUpdated(participantID: "persona-1", text: "Hel", attachments: []),
+                .draftUpdated(participantID: "persona-1", text: "Hello!", attachments: []),
+                .draftCleared(participantID: "persona-1"),
+                .messageReceived(FixtureMessage(
+                    id: "server-1", localID: "server-1", senderID: "persona-1",
+                    text: "Hello!", timestamp: Date())),
+                .statusChanged(participantID: "persona-1", status: nil),
+            ],
+            start: .onFirstSend,
+            delayBetweenEvents: .milliseconds(20))
         let viewModel = ObservableChatViewModel(backend: backend, localParticipantID: "user-1")
 
         _ = try await viewModel.submitMessage(text: "hi", attachments: [])

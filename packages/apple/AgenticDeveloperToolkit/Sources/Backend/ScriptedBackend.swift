@@ -15,11 +15,12 @@ import Foundation
 /// in Olylo's `OlyloChatConfig.swift` for how a host supplies its own.
 ///
 /// `send`/`setLocalTyping`/`submitWidgetResponse` only record what was
-/// called; the script never reacts to them; it plays start to finish exactly
-/// once, from `init`. Driving replies from the submitted text (matching a
-/// keyword the way `MockBackend.ts` does) is a real feature this type could
-/// grow, but widening today's "play this script" contract into "respond to
-/// this input" is not what either call site needs yet.
+/// called, and the script never reads them back: it plays start to finish
+/// exactly once, and `start` decides only *when* it begins. Driving replies
+/// from the submitted text (matching a keyword the way `MockBackend.ts` does)
+/// is a real feature this type could grow, but widening today's "play this
+/// script" contract into "respond to this input" is not what either call site
+/// needs yet.
 ///
 /// Modeled on `PersonaChatCoordinator`, the toolkit's other `Backend`
 /// conformer: a `public actor` whose `inboundEvents` and its
@@ -28,10 +29,39 @@ import Foundation
 /// wrapper here would silence the compiler rather than prove the isolation —
 /// the actor is what actually holds it.
 public actor ScriptedBackend: Backend {
+
+    /// When the script starts replaying.
+    ///
+    /// The distinction is not cosmetic. A demo host builds its backend when it
+    /// builds its chat surface — at launch — so `.immediately` makes the
+    /// persona think and answer with nothing typed, then fall silent forever
+    /// because the script is spent. `.onFirstSend` is the shape a live
+    /// `PersonaChatCoordinator` turn actually has, and it is what any host
+    /// showing a chat to a person wants.
+    public enum ScriptStart: Sendable {
+        /// Replay from `init`, with no `send` required. For a test that drains
+        /// `inboundEvents` to completion without submitting anything.
+        case immediately
+
+        /// Replay when `send` is first called; later sends do not replay it
+        /// again. For demo hosts, and for any test asserting on the order of
+        /// the local echo against the scripted reply.
+        case onFirstSend
+    }
+
     public nonisolated let inboundEvents: AsyncStream<InboundEvent>
 
     private nonisolated let events: AsyncStream<InboundEvent>.Continuation
     private nonisolated let localIDPrefix: String
+
+    private let script: [InboundEvent]
+    private let delayBetweenEvents: Duration
+
+    /// Guards the script against replaying twice. Actor isolation is what
+    /// makes the check race-free — two concurrent `send`s serialize here, so
+    /// no lock is needed. Already `true` for `.immediately`, whose replay
+    /// started in `init`.
+    private var hasStarted: Bool
 
     private var localIDSequence = 0
 
@@ -43,20 +73,27 @@ public actor ScriptedBackend: Backend {
     public private(set) var widgetResponses: [any WidgetResponse] = []
 
     /// - Parameters:
-    ///   - script: Replayed in order onto `inboundEvents`, once, starting
-    ///     immediately at `init`.
-    ///   - delayBetweenEvents: Pause before each event after the first.
-    ///     `.zero` (the default) replays the whole script on the next run
-    ///     loop turn, which is what a test wants; a demo host passes
-    ///     something felt — see `ScriptedBackend.olyloDemo`.
+    ///   - script: Replayed in order onto `inboundEvents`, once.
+    ///   - start: When replay begins. Defaults to `.immediately` so a test
+    ///     that just drains the stream needs no ceremony; a host showing the
+    ///     chat to a person wants `.onFirstSend`.
+    ///   - delayBetweenEvents: Pause before *each* event, the first included.
+    ///     `.zero` (the default) replays the whole script on the next run loop
+    ///     turn. Pair `.onFirstSend` with a non-zero delay when ordering
+    ///     matters: `ObservableChatViewModel` appends its optimistic local
+    ///     echo only after `send` returns, so a zero-delay script can land its
+    ///     reply into the transcript ahead of the message being replied to.
     ///   - localIDPrefix: Prefix for the deterministic ids `send` mints:
     ///     `"\(localIDPrefix)-1"`, `"\(localIDPrefix)-2"`, and so on.
     public init(
         script: [InboundEvent],
+        start: ScriptStart = .immediately,
         delayBetweenEvents: Duration = .zero,
         localIDPrefix: String = "local"
     ) {
         self.localIDPrefix = localIDPrefix
+        self.script = script
+        self.delayBetweenEvents = delayBetweenEvents
         let (stream, continuation) = AsyncStream<InboundEvent>.makeStream(
             of: InboundEvent.self,
             bufferingPolicy: .unbounded
@@ -64,15 +101,30 @@ public actor ScriptedBackend: Backend {
         self.inboundEvents = stream
         self.events = continuation
 
-        // Captures no `self` — only the three local values above — so this
-        // is safe to start before `init` finishes and needs no `[weak self]`.
-        // `AsyncStream`'s buffering is unbounded, so nothing is lost even if
-        // this races ahead of whatever starts consuming `inboundEvents`.
+        switch start {
+        case .immediately:
+            self.hasStarted = true
+            Self.replay(script, every: delayBetweenEvents, onto: continuation)
+        case .onFirstSend:
+            self.hasStarted = false
+        }
+    }
+
+    /// Yields the whole script and finishes the stream.
+    ///
+    /// `static`, taking everything it needs as parameters, so neither caller
+    /// captures `self`: `init` runs before `self` is fully formed, and `send`
+    /// would otherwise extend the actor's lifetime for the length of the
+    /// script. `AsyncStream`'s buffering is unbounded, so nothing is lost if
+    /// this races ahead of whatever consumes `inboundEvents`.
+    private static func replay(
+        _ script: [InboundEvent],
+        every delay: Duration,
+        onto continuation: AsyncStream<InboundEvent>.Continuation
+    ) {
         Task {
-            for (index, event) in script.enumerated() {
-                if index > 0, delayBetweenEvents > .zero {
-                    try? await Task.sleep(for: delayBetweenEvents)
-                }
+            for event in script {
+                if delay > .zero { try? await Task.sleep(for: delay) }
                 continuation.yield(event)
             }
             continuation.finish()
@@ -83,11 +135,23 @@ public actor ScriptedBackend: Backend {
         localIDSequence += 1
         let localID = "\(localIDPrefix)-\(localIDSequence)"
         sent.append((localID: localID, text: text, attachments: attachments))
+        startScriptIfNeeded()
         return localID
     }
 
+    /// Starts the script the first time something is sent. A no-op for
+    /// `.immediately`, and for every send after the first.
+    private func startScriptIfNeeded() {
+        guard !hasStarted else { return }
+        hasStarted = true
+        Self.replay(script, every: delayBetweenEvents, onto: events)
+    }
+
     /// The script drives everything; there is no local-typing channel to
-    /// report on, so this only records the call.
+    /// report on, so this only records the call — and deliberately does not
+    /// start the script, which belongs to `send`: a host that reports typing
+    /// on every keystroke would otherwise fire the reply before the message
+    /// was sent.
     public func setLocalTyping(_ isTyping: Bool) async throws {
         typingCalls.append(isTyping)
     }
