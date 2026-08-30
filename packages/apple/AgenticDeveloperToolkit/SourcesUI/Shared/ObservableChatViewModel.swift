@@ -33,6 +33,7 @@ public final class ObservableChatViewModel: ChatViewModel {
     public private(set) var typingParticipants: [String] = []
     public private(set) var readMarkers: [any ReadReceipt] = []
     public private(set) var activeDrafts: [any ActiveDraft] = []
+    public private(set) var commandActivity: [CommandActivity] = []
 
     // MARK: Extra state (outside the `ChatViewModel` contract)
 
@@ -243,15 +244,26 @@ public final class ObservableChatViewModel: ChatViewModel {
             pendingWidgets.append(widget)
             notify(.pendingWidgetsChanged)
 
-        case .commandInvoked, .commandCompleted:
-            // `ChatViewModel` exposes no stored property and `ChatUpdate` no
-            // case for command/tool-call activity — a protocol gap, not an
-            // oversight here. Task 7's tool-call pills need either a new
-            // `ChatUpdate` case + stored property, or command state folded
-            // onto `Message` itself; either is a `ChatViewModel.swift`/
-            // `ChatUpdate.swift` change out of this file's scope.
-            // Intentionally a no-op for now.
-            break
+        case .commandInvoked(_, let invocation):
+            commandActivity.append(CommandActivity(invocation: invocation))
+            notify(.commandActivityChanged)
+
+        case .commandCompleted(_, let result):
+            // Matched on `invocation.id`, never on `commandName`: two
+            // parallel invocations of the same command would otherwise
+            // resolve each other. A result whose invocation was never seen is
+            // dropped rather than synthesised into an activity with no
+            // invocation to name — see `orphanResultIsDropped`. The
+            // notification still fires either way, matching
+            // `respondToPermission`'s "notifies even with nothing pending":
+            // a rebuild from an unchanged array is idempotent, and a
+            // conditional notification would make the handler lie about
+            // whether it saw the event.
+            if let index = commandActivity.firstIndex(where: { $0.invocation.id == result.invocationID }) {
+                commandActivity[index] = CommandActivity(
+                    invocation: commandActivity[index].invocation, result: result)
+            }
+            notify(.commandActivityChanged)
 
         case .transportError(let message):
             notify(.error(message: message))

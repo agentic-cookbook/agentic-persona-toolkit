@@ -76,6 +76,26 @@ struct InlineChatViewTests {
         #expect(stack?.arrangedSubviews.count == 1)
     }
 
+    @Test("an invoked command adds a pill, and its result updates that same pill in place")
+    func rendersCommandActivityAsPill() {
+        _ = makeManager(activeThemeID: BuiltInThemes.solarizedDark.id)
+        let palette = ThemePaletteObserver.currentPalette
+        let (view, viewModel, _) = makeView()
+        let stack = transcriptStack(of: view)
+        let invocation = FixtureCommandInvocation(id: "inv-1", commandName: "grep", invokerID: "persona-1")
+
+        viewModel.handle(.commandInvoked(participantID: "persona-1", invocation: invocation))
+        let pills = { stack?.arrangedSubviews.compactMap { $0 as? ToolCallPillView } ?? [] }
+        #expect(pills().count == 1)
+        #expect(pills().first?.titleColor == palette.nsColor(.info))
+
+        viewModel.handle(.commandCompleted(
+            participantID: "persona-1",
+            result: FixtureCommandResult(invocationID: "inv-1", ok: true)))
+        #expect(pills().count == 1)
+        #expect(pills().first?.titleColor == palette.nsColor(.success))
+    }
+
     @Test("a deallocated view stops observing — a further update does not crash")
     func deallocatedViewStopsObserving() {
         _ = makeManager(activeThemeID: BuiltInThemes.solarizedDark.id)

@@ -12,16 +12,22 @@ import AgenticDeveloperToolkit
 /// resolves that by comparing `message.senderID` against the conversation's
 /// local participant id.
 ///
-/// Task 7 seams: a `.danger`-styled failure state for `deliveryStatus ==
-/// .failed`, a streaming caret while the owning draft is still live,
-/// markdown rendering, and a `CodeHighlighter` hook all attach inside
-/// `applyTheme`'s attributed-string build below.
+/// The attributed-string build in `applyTheme` is the whole rendering
+/// contract: `MarkdownRenderer` turns `message.text` into themed spans (and
+/// offers fenced blocks to an injected `CodeHighlighter`), a `.composing`
+/// message gets a streaming caret, and a `.failed` one gets a `.danger`
+/// border plus its reason spelled out beneath the text.
 @MainActor
 public final class MessageBubbleView: NSView, Themeable {
 
     public let message: any Message
     public let isLocalUser: Bool
     public let maxWidth: CGFloat
+
+    /// How `message.text` becomes an attributed string. Defaulted so callers
+    /// need not care, and injectable so a host with a `CodeHighlighter` can
+    /// pass one down — that is the only reason the seam exists.
+    public let renderer: MarkdownRenderer
 
     private let textView = NSTextView(frame: .zero)
     private var themeObserver: ThemePaletteObserver?
@@ -32,6 +38,19 @@ public final class MessageBubbleView: NSView, Themeable {
 
     private static let horizontalPadding: CGFloat = 12
     private static let verticalPadding: CGFloat = 8
+    private static let failureBorderWidth: CGFloat = 1
+
+    /// The block appended while a message is still streaming. A character
+    /// rather than a blinking sublayer: it goes into the same attributed
+    /// string as the text, so the measurement pass below sizes the bubble to
+    /// include it and the caret can never overhang the bubble it belongs to.
+    static let streamingCaret = "\u{258B}"
+
+    /// The exact attributed string the last `applyTheme` handed to the text
+    /// view. Internal rather than public: it exists so tests can assert on
+    /// what was rendered — fonts and colors included — without
+    /// screenshotting, and a host has `message` for everything else.
+    var renderedText: NSAttributedString { textView.attributedString() }
 
     private static let timeFormatter: DateFormatter = {
         let formatter = DateFormatter()
@@ -39,10 +58,16 @@ public final class MessageBubbleView: NSView, Themeable {
         return formatter
     }()
 
-    public init(message: any Message, maxWidth: CGFloat, isLocalUser: Bool) {
+    public init(
+        message: any Message,
+        maxWidth: CGFloat,
+        isLocalUser: Bool,
+        renderer: MarkdownRenderer = MarkdownRenderer()
+    ) {
         self.message = message
         self.maxWidth = maxWidth
         self.isLocalUser = isLocalUser
+        self.renderer = renderer
         super.init(frame: .zero)
 
         wantsLayer = true
@@ -90,14 +115,36 @@ public final class MessageBubbleView: NSView, Themeable {
         let textMaxWidth = max(maxWidth - hPad * 2, 1)
 
         let attrString = NSMutableAttributedString(
-            string: message.text,
-            attributes: [.font: palette.font(.body), .foregroundColor: textColor]
+            attributedString: renderer.render(message.text, palette: palette, textColor: textColor)
         )
+        if message.deliveryStatus == .composing {
+            // `InlineChatView`'s `DraftMessageAdapter` reports `.composing`
+            // for every live draft, so a streaming reply gets its caret with
+            // no extra plumbing, and a committed message never does.
+            attrString.append(NSAttributedString(
+                string: Self.streamingCaret,
+                attributes: [.font: palette.font(.body), .foregroundColor: palette.nsColor(.personaName)]
+            ))
+        }
         if let timestamp = message.timestamp {
             attrString.append(NSAttributedString(
                 string: "  " + Self.timeFormatter.string(from: timestamp),
                 attributes: [.font: palette.font(.caption), .foregroundColor: palette.nsColor(.timestampText)]
             ))
+        }
+        // The reason is spelled out rather than left encoded in the border
+        // color: the border says something went wrong, the caption says what,
+        // and the message text stays readable either way.
+        if case .failed(let reason) = message.deliveryStatus {
+            layer?.borderWidth = Self.failureBorderWidth
+            layer?.borderColor = palette.nsColor(.danger).cgColor
+            attrString.append(NSAttributedString(
+                string: "\n" + reason,
+                attributes: [.font: palette.font(.caption), .foregroundColor: palette.nsColor(.danger)]
+            ))
+        } else {
+            layer?.borderWidth = 0
+            layer?.borderColor = nil
         }
 
         let (textWidth, textHeight) = Self.measure(attrString, maxWidth: textMaxWidth)

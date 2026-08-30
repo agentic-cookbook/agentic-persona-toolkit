@@ -24,6 +24,7 @@ private func label(_ update: ChatUpdate) -> String {
     case .pendingPermissionsChanged: return "pendingPermissionsChanged"
     case .pendingWidgetsChanged: return "pendingWidgetsChanged"
     case .displayConfigChanged: return "displayConfigChanged"
+    case .commandActivityChanged: return "commandActivityChanged"
     case .error(let message): return "error(\(message))"
     }
 }
@@ -268,17 +269,70 @@ struct ObservableChatViewModelTests {
         #expect(observer.updates.map(label) == ["pendingPermissionsChanged"])
     }
 
-    // MARK: Commands (protocol gap: no state/notification destination)
+    // MARK: Commands
 
-    @Test("commandInvoked and commandCompleted are safe no-ops today")
-    func commandEventsAreNoOps() {
+    @Test("commandInvoked appends a running activity and notifies")
+    func commandInvokedAppendsRunningActivity() {
         let (viewModel, _) = makeViewModel()
         let observer = RecordingObserver()
         viewModel.addObserver(observer)
         let invocation = FixtureCommandInvocation(commandName: "search", invokerID: "persona-1")
+
         viewModel.handle(.commandInvoked(participantID: "persona-1", invocation: invocation))
-        viewModel.handle(.commandCompleted(participantID: "persona-1", result: FixtureCommandResult(invocationID: invocation.id)))
-        #expect(observer.updates.isEmpty)
+
+        #expect(viewModel.commandActivity.count == 1)
+        #expect(viewModel.commandActivity.first?.id == invocation.id)
+        #expect(viewModel.commandActivity.first?.isRunning == true)
+        #expect(observer.updates.map(label) == ["commandActivityChanged"])
+    }
+
+    @Test("commandCompleted fills the result in place rather than appending a second row")
+    func commandCompletedFillsResultInPlace() {
+        let (viewModel, _) = makeViewModel()
+        let observer = RecordingObserver()
+        viewModel.addObserver(observer)
+        let invocation = FixtureCommandInvocation(commandName: "search", invokerID: "persona-1")
+
+        viewModel.handle(.commandInvoked(participantID: "persona-1", invocation: invocation))
+        viewModel.handle(.commandCompleted(
+            participantID: "persona-1",
+            result: FixtureCommandResult(invocationID: invocation.id, ok: false, errorMessage: "no such file")))
+
+        #expect(viewModel.commandActivity.count == 1)
+        #expect(viewModel.commandActivity.first?.isRunning == false)
+        #expect(viewModel.commandActivity.first?.result?.ok == false)
+        #expect(viewModel.commandActivity.first?.result?.errorMessage == "no such file")
+        #expect(observer.updates.map(label) == ["commandActivityChanged", "commandActivityChanged"])
+    }
+
+    @Test("a result whose invocation was never seen is dropped, not synthesised")
+    func orphanResultIsDropped() {
+        let (viewModel, _) = makeViewModel()
+        let observer = RecordingObserver()
+        viewModel.addObserver(observer)
+
+        viewModel.handle(.commandCompleted(
+            participantID: "persona-1",
+            result: FixtureCommandResult(invocationID: "never-invoked")))
+
+        #expect(viewModel.commandActivity.isEmpty)
+        #expect(observer.updates.map(label) == ["commandActivityChanged"])
+    }
+
+    @Test("parallel invocations of the same command complete independently, matched by id")
+    func parallelInvocationsMatchByID() {
+        let (viewModel, _) = makeViewModel()
+        let first = FixtureCommandInvocation(id: "inv-1", commandName: "grep", invokerID: "persona-1")
+        let second = FixtureCommandInvocation(id: "inv-2", commandName: "grep", invokerID: "persona-1")
+
+        viewModel.handle(.commandInvoked(participantID: "persona-1", invocation: first))
+        viewModel.handle(.commandInvoked(participantID: "persona-1", invocation: second))
+        viewModel.handle(.commandCompleted(
+            participantID: "persona-1", result: FixtureCommandResult(invocationID: "inv-2")))
+
+        #expect(viewModel.commandActivity.map(\.id) == ["inv-1", "inv-2"])
+        #expect(viewModel.commandActivity[0].isRunning == true)
+        #expect(viewModel.commandActivity[1].isRunning == false)
     }
 
     // MARK: Transport errors

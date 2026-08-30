@@ -11,9 +11,12 @@ import AgenticDeveloperToolkit
 /// `ChatViewModel` has no notion of "me" — decides which side each bubble
 /// renders on; see `MessageBubbleView`'s doc for why.
 ///
+/// Command activity renders as a row of `ToolCallPillView`s below the
+/// transcript.
+///
 /// Kept structurally minimal on purpose: no participant rail, no permission
-/// prompts, no widgets, no commands. Task 7/8 seams are called out inline
-/// below, at the point each attaches.
+/// prompts, no widgets. Task 8 seams are called out inline below, at the
+/// point each attaches.
 @MainActor
 public final class InlineChatView: NSView, ChatStateObserver, Themeable, NSTextFieldDelegate {
 
@@ -131,11 +134,11 @@ public final class InlineChatView: NSView, ChatStateObserver, Themeable, NSTextF
 
     public func chatDidUpdate(_ update: ChatUpdate) {
         switch update {
-        case .messagesChanged, .activeDraftsChanged, .typingChanged:
+        case .messagesChanged, .activeDraftsChanged, .typingChanged, .commandActivityChanged:
             rebuildTranscript()
         case .participantsChanged, .readMarkersChanged, .pendingPermissionsChanged,
              .pendingWidgetsChanged, .displayConfigChanged, .error:
-            // Task 7/8 seams: a participant rail, unread badges from
+            // Task 8 seams: a participant rail, unread badges from
             // `readMarkers`, permission prompts, inline widgets, and
             // surfaced transport errors all attach here.
             break
@@ -159,6 +162,15 @@ public final class InlineChatView: NSView, ChatStateObserver, Themeable, NSTextF
         for draft in viewModel.activeDrafts where !draft.text.isEmpty {
             let adapter = DraftMessageAdapter(draft: draft)
             addBubbleRow(for: adapter, isLocalUser: draft.participantID == localParticipantID, maxBubbleWidth: maxBubbleWidth)
+        }
+
+        // Pills sit below the transcript rather than interleaved with it:
+        // `CommandActivity` carries no position in the message stream (only
+        // `invocation.requestedAt`), so anchoring a pill between two bubbles
+        // would be a guess. They stay in invocation order, above the
+        // thinking indicator that is usually spinning because of them.
+        for activity in viewModel.commandActivity {
+            transcriptStack.addArrangedSubview(ToolCallPillView(activity: activity))
         }
 
         if !viewModel.typingParticipants.isEmpty {

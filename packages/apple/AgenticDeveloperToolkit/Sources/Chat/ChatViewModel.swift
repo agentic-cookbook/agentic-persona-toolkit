@@ -28,6 +28,12 @@ public protocol ChatViewModel: AnyObject, Sendable {
     /// themselves.
     var activeDrafts: [any ActiveDraft] { get }
 
+    /// Commands invoked in this conversation, in invocation order. An entry
+    /// whose `result` is still `nil` is running; a finished one keeps its
+    /// place rather than moving, so a transcript's pills stay where the user
+    /// last saw them.
+    var commandActivity: [CommandActivity] { get }
+
     func addObserver(_ observer: any ChatStateObserver)
     func removeObserver(_ observer: any ChatStateObserver)
 
