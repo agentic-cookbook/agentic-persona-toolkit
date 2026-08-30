@@ -86,7 +86,7 @@ struct InlineChatViewSizingTests {
         #expect(view.engaged == false)
     }
 
-    @Test("a fixed active behaviour with a points cap resizes the transcript to the cap")
+    @Test("a points cap is installed as a cap, not a floor")
     func contentHuggingPointsCapSetsHeight() {
         _ = makeManager(activeThemeID: BuiltInThemes.solarizedDark.id)
         let (view, _, _) = makeView()
@@ -97,6 +97,61 @@ struct InlineChatViewSizingTests {
 
         #expect(view.transcriptScroll.isHidden == false)
         #expect(view.transcriptHeightConstraint.constant == 120)
+        // The relation is the whole point: `maxHeight` written into a `>=`
+        // constraint would make the cap a minimum instead.
+        #expect(view.transcriptHeightConstraint.relation == .lessThanOrEqual)
+    }
+
+    @Test("each behaviour installs its own relation: floor, cap, exact zero")
+    func eachBehaviourInstallsItsOwnRelation() {
+        _ = makeManager(activeThemeID: BuiltInThemes.solarizedDark.id)
+        let (view, _, _) = makeView()
+
+        // `.fixed` is the default, so this is also today's shipped behaviour.
+        #expect(view.transcriptHeightConstraint.relation == .greaterThanOrEqual)
+        #expect(view.transcriptHeightConstraint.constant == 200)
+
+        view.sizing = InlineChatSizing(active: .fixed, inactive: .minimal, transition: .none)
+        // Disengaged, so `.minimal` is in effect: an exact zero, because
+        // `isHidden` alone leaves the old height constraint in force.
+        #expect(view.transcriptHeightConstraint.relation == .equal)
+        #expect(view.transcriptHeightConstraint.constant == 0)
+
+        view.engaged = true
+        #expect(view.transcriptHeightConstraint.relation == .greaterThanOrEqual)
+        #expect(view.transcriptHeightConstraint.constant == 200)
+    }
+
+    @Test("a containerOffset cap tracks the view's height instead of freezing at init")
+    func containerOffsetCapTracksBounds() {
+        _ = makeManager(activeThemeID: BuiltInThemes.solarizedDark.id)
+        let (view, _, _) = makeView()
+        view.sizing = InlineChatSizing(
+            active: .contentHugging(maxHeight: .containerOffset(topInset: 60)),
+            inactive: .minimal, transition: .none)
+        view.engaged = true
+        view.layoutSubtreeIfNeeded()
+
+        // makeView() gave the view a 500pt height, so the cap is 500 - 60.
+        #expect(view.transcriptHeightConstraint.constant == 440)
+
+        view.frame = NSRect(x: 0, y: 0, width: 400, height: 300)
+        view.layoutSubtreeIfNeeded()
+        #expect(view.transcriptHeightConstraint.constant == 240)
+    }
+
+    @Test("focus moving into the transcript keeps the box engaged")
+    func focusMovingIntoTheTranscriptKeepsEngagement() {
+        _ = makeManager(activeThemeID: BuiltInThemes.solarizedDark.id)
+        let (view, _, _) = makeView()
+
+        #expect(view.shouldStayEngaged(afterFocusMovingTo: view.transcriptScroll))
+        #expect(view.shouldStayEngaged(afterFocusMovingTo: view.transcriptScroll.contentView))
+        #expect(!view.shouldStayEngaged(afterFocusMovingTo: NSView()))
+        #expect(!view.shouldStayEngaged(afterFocusMovingTo: nil))
+        // The composer's own field editor is a descendant of the view but not
+        // of the transcript, so ending editing there still disengages.
+        #expect(!view.shouldStayEngaged(afterFocusMovingTo: view))
     }
 
     @Test("animates is true only when the transition is .animated and inactive is configured")

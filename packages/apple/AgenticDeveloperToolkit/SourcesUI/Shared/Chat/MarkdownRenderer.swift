@@ -1,4 +1,9 @@
 import Foundation
+#if os(macOS)
+import AppKit
+#else
+import UIKit
+#endif
 import AgenticDeveloperToolkit
 
 /// Supplies syntax colouring for fenced code blocks. ADT ships no highlighter:
@@ -136,20 +141,20 @@ public struct MarkdownRenderer: Sendable {
                 attributes[.font] = palette.platformFont(.body).applying(bold: bold, italic: italic)
             }
         }
-        // `NSUnderlineStyle` itself lives in AppKit/UIKit, not Foundation,
-        // so it isn't available in this Shared, Foundation-only file — the
-        // platform bridge (amendment 4) only prescribes `PlatformColor`/
-        // `PlatformFont`/`applying(bold:italic:)`. `.single`'s raw value is
-        // `1` on both platforms, so it's used directly here rather than
-        // introducing a new cross-platform enum the plan didn't ask for.
-        let singleUnderlineStyleRawValue = 1
+        // `NSUnderlineStyle` is declared by AppKit on macOS and UIKit on iOS,
+        // so this file imports the platform framework the same way
+        // `PlatformAppearance.swift` does. Being in Shared means "one source
+        // for both platforms", not "Foundation only" — and the enum is worth
+        // the import: hardcoding `1` would pin a framework's raw value in a
+        // toolkit we ship, with nothing to catch it if that ever moved.
+        let singleUnderline = NSUnderlineStyle.single.rawValue
         if intent.contains(.strikethrough) {
-            attributes[.strikethroughStyle] = singleUnderlineStyleRawValue
+            attributes[.strikethroughStyle] = singleUnderline
         }
         if let link = run.link {
             attributes[.link] = link
             attributes[.foregroundColor] = palette.platformColor(.accent)
-            attributes[.underlineStyle] = singleUnderlineStyleRawValue
+            attributes[.underlineStyle] = singleUnderline
         }
         return attributes
     }

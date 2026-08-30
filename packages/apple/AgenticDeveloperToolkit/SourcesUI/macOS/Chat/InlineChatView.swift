@@ -53,10 +53,24 @@ public final class InlineChatView: NSView, ChatStateObserver, Themeable, NSTextF
     private var isAtBottom = true
     private var lastTranscriptWidth: CGFloat = 0
 
-    /// The transcript's height constraint, mutated by `applySizing()`.
-    /// Internal rather than private so `InlineChatViewSizingTests` can
-    /// assert on the resolved constant directly.
-    var transcriptHeightConstraint: NSLayoutConstraint!
+    /// The transcript's height constraint currently in effect, carrying the
+    /// resolved height: a floor for `.fixed`, a cap for `.contentHugging`,
+    /// an exact zero for `.minimal`.
+    ///
+    /// Rebuilt by `applySizing()` rather than mutated, because those three
+    /// behaviours need three different *relations* and
+    /// `NSLayoutConstraint.relation` is immutable after creation — writing a
+    /// cap into a `>=` constraint would turn a maximum into a minimum.
+    /// Internal rather than private so `InlineChatViewSizingTests` can assert
+    /// on both its constant and its relation.
+    private(set) var transcriptHeightConstraint: NSLayoutConstraint!
+
+    /// The companion constraint that makes `.contentHugging` actually hug:
+    /// the scroll view has no intrinsic content size, so its height is tied
+    /// to the document stack's at `.defaultHigh`, leaving the required cap in
+    /// `transcriptHeightConstraint` free to win when content overflows it.
+    /// `nil` for every other behaviour.
+    private var transcriptHugConstraint: NSLayoutConstraint?
 
     /// Watches for a click outside the view while engaged — the AppKit
     /// reading of the web hook's `pointerdown` half of its
@@ -140,14 +154,12 @@ public final class InlineChatView: NSView, ChatStateObserver, Themeable, NSTextF
         addSubview(divider)
         addSubview(inputRow)
 
-        transcriptHeightConstraint = transcriptScroll.heightAnchor.constraint(
-            greaterThanOrEqualToConstant: Self.defaultTranscriptHeight)
-
+        // No height constraint here: `applySizing()` — called at the end of
+        // `init`, right after this — owns it, and owns which relation it has.
         NSLayoutConstraint.activate([
             transcriptScroll.topAnchor.constraint(equalTo: topAnchor),
             transcriptScroll.leadingAnchor.constraint(equalTo: leadingAnchor),
             transcriptScroll.trailingAnchor.constraint(equalTo: trailingAnchor),
-            transcriptHeightConstraint,
             transcriptStack.widthAnchor.constraint(equalTo: transcriptScroll.widthAnchor),
 
             divider.topAnchor.constraint(equalTo: transcriptScroll.bottomAnchor),
@@ -168,6 +180,7 @@ public final class InlineChatView: NSView, ChatStateObserver, Themeable, NSTextF
 
     public override func layout() {
         super.layout()
+        updateContainerOffsetCapIfNeeded()
         let width = transcriptScroll.contentView.bounds.width
         if width > 0, abs(width - lastTranscriptWidth) > 1 {
             lastTranscriptWidth = width
@@ -306,6 +319,7 @@ public final class InlineChatView: NSView, ChatStateObserver, Themeable, NSTextF
     }
 
     public func controlTextDidEndEditing(_ obj: Notification) {
+        guard !shouldStayEngaged(afterFocusMovingTo: window?.firstResponder) else { return }
         engaged = false
     }
 
@@ -337,21 +351,42 @@ public final class InlineChatView: NSView, ChatStateObserver, Themeable, NSTextF
     /// tracks engagement.
     private func applySizing() {
         let resolved = sizing.resolve(engaged: engaged)
-        let height: CGFloat
+
+        let heightConstraint: NSLayoutConstraint
+        var hugConstraint: NSLayoutConstraint?
         switch resolved.behavior {
         case .minimal:
-            height = 0
+            // An exact zero, not a floor of zero: `isHidden` alone leaves an
+            // AppKit view's constraints in force, so the transcript would
+            // keep its old height behind a hidden view.
+            heightConstraint = transcriptScroll.heightAnchor.constraint(equalToConstant: 0)
         case .behavior(.fixed):
-            height = Self.defaultTranscriptHeight
-        case .behavior(.contentHugging(.points(let value))):
-            height = value
-        case .behavior(.contentHugging(.containerOffset(let topInset))):
-            height = max(bounds.height - topInset, 0)
+            heightConstraint = transcriptScroll.heightAnchor.constraint(
+                greaterThanOrEqualToConstant: Self.defaultTranscriptHeight)
+        case .behavior(.contentHugging(let cap)):
+            heightConstraint = transcriptScroll.heightAnchor.constraint(
+                lessThanOrEqualToConstant: capHeight(cap))
+            let hug = transcriptScroll.heightAnchor.constraint(equalTo: transcriptStack.heightAnchor)
+            hug.priority = .defaultHigh
+            hugConstraint = hug
         }
+
+        // Just below required. The transcript's height is also pinned by the
+        // top/divider/composer chain to whatever frame the host gives this
+        // view, so a host that hard-pins its height would otherwise make the
+        // cap — or `.minimal`'s exact zero — unsatisfiable. Yielding to the
+        // host is the honest outcome: it asked for that height, and it can
+        // collapse the box by giving the view a smaller frame.
+        heightConstraint.priority = .required - 1
 
         let apply = {
             self.transcriptScroll.isHidden = resolved.collapsed
-            self.transcriptHeightConstraint.constant = height
+            self.transcriptHeightConstraint?.isActive = false
+            self.transcriptHugConstraint?.isActive = false
+            self.transcriptHeightConstraint = heightConstraint
+            self.transcriptHugConstraint = hugConstraint
+            heightConstraint.isActive = true
+            hugConstraint?.isActive = true
             self.layoutSubtreeIfNeeded()
         }
         if resolved.animates {
@@ -363,6 +398,48 @@ public final class InlineChatView: NSView, ChatStateObserver, Themeable, NSTextF
         } else {
             apply()
         }
+    }
+
+    /// The cap in points. `.containerOffset` is measured against the view's
+    /// own height, which is why `layout()` re-reads it: at `init` — the first
+    /// `applySizing()` — `bounds` is still `.zero`, so a cap computed there
+    /// and never revisited would pin the transcript at 0 forever.
+    private func capHeight(_ cap: ChatSizeCap) -> CGFloat {
+        switch cap {
+        case .points(let value):
+            return value
+        case .containerOffset(let topInset):
+            return max(bounds.height - topInset, 0)
+        }
+    }
+
+    /// Keeps a `.containerOffset` cap current as the view resizes. Only the
+    /// constant changes — the relation is already the `<=` `applySizing()`
+    /// installed — so this cannot loop: the pass this triggers finds the
+    /// constant already correct and stops.
+    private func updateContainerOffsetCapIfNeeded() {
+        guard case .behavior(.contentHugging(.containerOffset(let topInset))) =
+            sizing.resolve(engaged: engaged).behavior else { return }
+        let cap = max(bounds.height - topInset, 0)
+        if abs(transcriptHeightConstraint.constant - cap) > 0.5 {
+            transcriptHeightConstraint.constant = cap
+        }
+    }
+
+    /// Whether focus leaving the composer should leave the box engaged.
+    /// Web's triad disengages on a `pointerdown` *outside*, so a click that
+    /// lands on the transcript — which on AppKit takes first responder away
+    /// from the field — must not collapse the box out from under it.
+    ///
+    /// Deliberately scoped to `transcriptScroll` rather than the whole view:
+    /// while the composer is editing, the window's first responder is its
+    /// field editor, itself a descendant of `self`, so a `self`-wide test
+    /// would answer "inside" for the very transition it is meant to judge.
+    /// Internal so `InlineChatViewSizingTests` can pass a responder directly
+    /// instead of driving real AppKit focus.
+    func shouldStayEngaged(afterFocusMovingTo responder: NSResponder?) -> Bool {
+        guard let view = responder as? NSView else { return false }
+        return view === transcriptScroll || view.isDescendant(of: transcriptScroll)
     }
 }
 
