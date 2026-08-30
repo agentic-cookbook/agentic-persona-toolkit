@@ -23,7 +23,27 @@ public final class InlineChatView: NSView, ChatStateObserver, Themeable, NSTextF
     public let viewModel: any ChatViewModel
     public let localParticipantID: String
 
-    private let transcriptScroll = ThemedScrollView()
+    /// How the box resizes between its active (engaged) and inactive
+    /// states. Defaulted so every existing call site is unchanged: with no
+    /// `inactive` configured, `resolve(engaged:)` never tracks engagement,
+    /// so `applySizing()` always applies `active` and reproduces today's
+    /// fixed `>= 200` height exactly — see `InlineChatSizing`'s doc.
+    public var sizing: InlineChatSizing = InlineChatSizing() { didSet { applySizing() } }
+
+    /// Whether the box is currently "engaged" — focused, or otherwise the
+    /// thing the user is interacting with. Internal rather than public: it
+    /// exists so tests can drive and assert on engagement transitions
+    /// directly (`InlineChatViewSizingTests`) without synthesizing real
+    /// AppKit focus/click events, and a host reads `sizing`/`applySizing()`
+    /// results instead of this flag.
+    var engaged: Bool = false {
+        didSet {
+            guard engaged != oldValue else { return }
+            applySizing()
+        }
+    }
+
+    let transcriptScroll = ThemedScrollView()
     private let transcriptStack = NSStackView()
     private let inputField = ThemedTextField()
     private let sendButton = NSButton()
@@ -33,9 +53,23 @@ public final class InlineChatView: NSView, ChatStateObserver, Themeable, NSTextF
     private var isAtBottom = true
     private var lastTranscriptWidth: CGFloat = 0
 
+    /// The transcript's height constraint, mutated by `applySizing()`.
+    /// Internal rather than private so `InlineChatViewSizingTests` can
+    /// assert on the resolved constant directly.
+    var transcriptHeightConstraint: NSLayoutConstraint!
+
+    /// Watches for a click outside the view while engaged — the AppKit
+    /// reading of the web hook's `pointerdown` half of its
+    /// `focusin`/`pointerdown`/`Escape` engagement triad. Removed in
+    /// `deinit` via a direct `NSEvent.removeMonitor` call, which — like the
+    /// existing `NotificationCenter.default.removeObserver(self)` below —
+    /// is safe to call from a nonisolated `deinit`.
+    private var clickOutsideMonitor: Any?
+
     private static let maxBubbleWidthFraction: CGFloat = 0.75
     private static let minBubbleWidth: CGFloat = 200
     private static let bubbleSideInset: CGFloat = 16
+    private static let defaultTranscriptHeight: CGFloat = 200
 
     public init(viewModel: any ChatViewModel, localParticipantID: String) {
         self.viewModel = viewModel
@@ -45,6 +79,11 @@ public final class InlineChatView: NSView, ChatStateObserver, Themeable, NSTextF
         viewModel.addObserver(self)
         themeObserver = ThemePaletteObserver { [weak self] palette in self?.applyTheme(palette) }
         rebuildTranscript()
+        clickOutsideMonitor = NSEvent.addLocalMonitorForEvents(matching: .leftMouseDown) { [weak self] event in
+            self?.disengageIfClickOutside(event)
+            return event
+        }
+        applySizing()
     }
 
     @available(*, unavailable)
@@ -59,6 +98,9 @@ public final class InlineChatView: NSView, ChatStateObserver, Themeable, NSTextF
         // observers in an `NSHashTable.weakObjects()`, so this entry zeroes
         // itself out and a later `notify` skips it.
         NotificationCenter.default.removeObserver(self)
+        if let clickOutsideMonitor {
+            NSEvent.removeMonitor(clickOutsideMonitor)
+        }
     }
 
     private func setupViews() {
@@ -98,11 +140,14 @@ public final class InlineChatView: NSView, ChatStateObserver, Themeable, NSTextF
         addSubview(divider)
         addSubview(inputRow)
 
+        transcriptHeightConstraint = transcriptScroll.heightAnchor.constraint(
+            greaterThanOrEqualToConstant: Self.defaultTranscriptHeight)
+
         NSLayoutConstraint.activate([
             transcriptScroll.topAnchor.constraint(equalTo: topAnchor),
             transcriptScroll.leadingAnchor.constraint(equalTo: leadingAnchor),
             transcriptScroll.trailingAnchor.constraint(equalTo: trailingAnchor),
-            transcriptScroll.heightAnchor.constraint(greaterThanOrEqualToConstant: 200),
+            transcriptHeightConstraint,
             transcriptStack.widthAnchor.constraint(equalTo: transcriptScroll.widthAnchor),
 
             divider.topAnchor.constraint(equalTo: transcriptScroll.bottomAnchor),
@@ -241,9 +286,83 @@ public final class InlineChatView: NSView, ChatStateObserver, Themeable, NSTextF
     }
 
     public func control(_ control: NSControl, textView: NSTextView, doCommandBy commandSelector: Selector) -> Bool {
+        // Escape disengages regardless of which control is reporting it —
+        // the third leg of the web hook's `focusin`/`pointerdown`/`Escape`
+        // engagement triad is about the view's engagement state, not about
+        // which field first-respondered the key event.
+        if commandSelector == #selector(NSResponder.cancelOperation(_:)) {
+            engaged = false
+            return true
+        }
         guard control === inputField, commandSelector == #selector(NSResponder.insertNewline(_:)) else { return false }
         sendTapped()
         return true
+    }
+
+    // MARK: Sizing & engagement
+
+    public func controlTextDidBeginEditing(_ obj: Notification) {
+        engaged = true
+    }
+
+    public func controlTextDidEndEditing(_ obj: Notification) {
+        engaged = false
+    }
+
+    /// Disengages when `event` (a `.leftMouseDown`) lands outside this
+    /// view's bounds. Internal rather than private so
+    /// `InlineChatViewSizingTests` can drive it directly with a synthesized
+    /// `NSEvent` — a local event monitor is not reliably triggerable from a
+    /// headless unit test.
+    func disengageIfClickOutside(_ event: NSEvent) {
+        guard engaged, let window else { return }
+        guard event.window === window else {
+            engaged = false
+            return
+        }
+        let locationInView = convert(event.locationInWindow, from: nil)
+        if !bounds.contains(locationInView) {
+            engaged = false
+        }
+    }
+
+    /// Applies `sizing.resolve(engaged:)` to the transcript: hides it when
+    /// `collapsed`, sizes its height constraint from the resolved
+    /// behaviour, and wraps the change in `NSAnimationContext.runAnimationGroup`
+    /// when `animates`. Called once at the end of `init` (after
+    /// `setupViews()`) and on every `sizing`/`engaged` change, so a freshly
+    /// constructed view with the default `InlineChatSizing()` already
+    /// reflects it — reproducing today's fixed `>= 200` height exactly,
+    /// since `resolve(engaged:)` with no `inactive` configured never
+    /// tracks engagement.
+    private func applySizing() {
+        let resolved = sizing.resolve(engaged: engaged)
+        let height: CGFloat
+        switch resolved.behavior {
+        case .minimal:
+            height = 0
+        case .behavior(.fixed):
+            height = Self.defaultTranscriptHeight
+        case .behavior(.contentHugging(.points(let value))):
+            height = value
+        case .behavior(.contentHugging(.containerOffset(let topInset))):
+            height = max(bounds.height - topInset, 0)
+        }
+
+        let apply = {
+            self.transcriptScroll.isHidden = resolved.collapsed
+            self.transcriptHeightConstraint.constant = height
+            self.layoutSubtreeIfNeeded()
+        }
+        if resolved.animates {
+            NSAnimationContext.runAnimationGroup { context in
+                context.duration = 0.2
+                context.allowsImplicitAnimation = true
+                apply()
+            }
+        } else {
+            apply()
+        }
     }
 }
 

@@ -1,4 +1,3 @@
-import AppKit
 import Foundation
 import AgenticDeveloperToolkit
 
@@ -12,11 +11,11 @@ public protocol CodeHighlighter: Sendable {
 
 /// Turns a message's markdown into a themed `NSAttributedString`.
 ///
-/// Lives in `SourcesUI/macOS` rather than `SourcesUI/Shared` because both
-/// accessors it depends on — `SemanticPalette.nsColor(_:)` and
-/// `SemanticPalette.font(_:)` — are macOS-only extensions, and `Shared`
-/// compiles into the iOS target too. Moving it down is Task 8's call, once a
-/// `SemanticPalette+UIColor` exists to move it onto.
+/// Moved here from `SourcesUI/macOS` in Task 8b, once
+/// `SemanticPalette.platformColor(_:)`/`platformFont(_:)` gave both platforms
+/// the same accessor shape (`PlatformColor`/`PlatformFont`) — this type reads
+/// a palette through those, never through `nsColor(_:)`/`font(_:)` directly,
+/// so it compiles unchanged into both the macOS and iOS UI targets.
 ///
 /// Block structure comes from `AttributedString(markdown:)`'s
 /// `presentationIntent`: runs are grouped by block, blocks are rejoined with a
@@ -33,9 +32,9 @@ public struct MarkdownRenderer: Sendable {
         self.highlighter = highlighter
     }
 
-    public func render(_ markdown: String, palette: SemanticPalette, textColor: NSColor) -> NSAttributedString {
+    public func render(_ markdown: String, palette: SemanticPalette, textColor: PlatformColor) -> NSAttributedString {
         let bodyAttributes: [NSAttributedString.Key: Any] = [
-            .font: palette.font(.body),
+            .font: palette.platformFont(.body),
             .foregroundColor: textColor
         ]
 
@@ -82,7 +81,7 @@ public struct MarkdownRenderer: Sendable {
         _ raw: String,
         language: String?,
         palette: SemanticPalette,
-        textColor: NSColor
+        textColor: PlatformColor
     ) -> NSAttributedString {
         // The parser leaves a fenced block's trailing newline in place; it
         // would render as a blank line on top of the blank line between
@@ -92,9 +91,9 @@ public struct MarkdownRenderer: Sendable {
             return highlighted
         }
         return NSAttributedString(string: code, attributes: [
-            .font: palette.font(.code),
+            .font: palette.platformFont(.code),
             .foregroundColor: textColor,
-            .backgroundColor: palette.nsColor(.controlBackground)
+            .backgroundColor: palette.platformColor(.controlBackground)
         ])
     }
 
@@ -122,29 +121,35 @@ public struct MarkdownRenderer: Sendable {
         for run: AttributedString.Runs.Run,
         base: [NSAttributedString.Key: Any],
         palette: SemanticPalette,
-        textColor: NSColor
+        textColor: PlatformColor
     ) -> [NSAttributedString.Key: Any] {
         var attributes = base
         let intent = run.inlinePresentationIntent ?? []
 
         if intent.contains(.code) {
-            attributes[.font] = palette.font(.code)
-            attributes[.backgroundColor] = palette.nsColor(.controlBackground)
+            attributes[.font] = palette.platformFont(.code)
+            attributes[.backgroundColor] = palette.platformColor(.controlBackground)
         } else {
-            var traits: NSFontTraitMask = []
-            if intent.contains(.stronglyEmphasized) { traits.insert(.boldFontMask) }
-            if intent.contains(.emphasized) { traits.insert(.italicFontMask) }
-            if !traits.isEmpty {
-                attributes[.font] = NSFontManager.shared.convert(palette.font(.body), toHaveTrait: traits)
+            let bold = intent.contains(.stronglyEmphasized)
+            let italic = intent.contains(.emphasized)
+            if bold || italic {
+                attributes[.font] = palette.platformFont(.body).applying(bold: bold, italic: italic)
             }
         }
+        // `NSUnderlineStyle` itself lives in AppKit/UIKit, not Foundation,
+        // so it isn't available in this Shared, Foundation-only file — the
+        // platform bridge (amendment 4) only prescribes `PlatformColor`/
+        // `PlatformFont`/`applying(bold:italic:)`. `.single`'s raw value is
+        // `1` on both platforms, so it's used directly here rather than
+        // introducing a new cross-platform enum the plan didn't ask for.
+        let singleUnderlineStyleRawValue = 1
         if intent.contains(.strikethrough) {
-            attributes[.strikethroughStyle] = NSUnderlineStyle.single.rawValue
+            attributes[.strikethroughStyle] = singleUnderlineStyleRawValue
         }
         if let link = run.link {
             attributes[.link] = link
-            attributes[.foregroundColor] = palette.nsColor(.accent)
-            attributes[.underlineStyle] = NSUnderlineStyle.single.rawValue
+            attributes[.foregroundColor] = palette.platformColor(.accent)
+            attributes[.underlineStyle] = singleUnderlineStyleRawValue
         }
         return attributes
     }
