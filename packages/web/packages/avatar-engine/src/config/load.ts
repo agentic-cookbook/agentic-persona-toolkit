@@ -259,6 +259,16 @@ export function loadConfig(input: RawFiles): CharacterConfig {
   };
 
   // --- poses --------------------------------------------------------------
+  // channel -> the command signature every pose driving it must share, and who
+  // established it. Poses form an ARBITRARY transition graph: the arbiter can
+  // move between any two moods, so a mood change morphs the live geometry into
+  // whichever pose is next. Every pose driving one `.shape` channel must
+  // therefore agree with every other — an all-pairs requirement, strictly
+  // STRONGER than the timelines' consecutive-step check below, which only has
+  // to hold along one authored order. Seeded from the node's rest shape,
+  // because rest is where frame 0 starts and is itself a reachable end of a
+  // transition.
+  const poseKind = new Map<string, { kind: string; where: string }>();
   for (const [poseName, pose] of Object.entries(poses.poses)) {
     const where = `pose "${poseName}"`;
     requireEase(pose.ease, where);
@@ -268,6 +278,27 @@ export function loadConfig(input: RawFiles): CharacterConfig {
       const to = canonicalise(first, colourise(first, authored, where), where);
       pose.channels[channel] = to;
       for (const c of expand(channel)) requireValue(c, to, where);
+      if (typeof to !== "string") continue;
+      for (const c of expand(channel)) {
+        if (!c.endsWith(".shape")) continue;
+        let known = poseKind.get(c);
+        if (known === undefined) {
+          const restD = rest.get(c);
+          if (typeof restD === "string") {
+            known = { kind: parsePath(restD).kind, where: "the rig's rest shape" };
+            poseKind.set(c, known);
+          }
+        }
+        const kind = parsePath(to).kind;
+        if (known === undefined) {
+          poseKind.set(c, { kind, where });
+        } else if (known.kind !== kind) {
+          fail(`${where} drives ${c} with path "${kind}", but ${known.where} ` +
+               `drives it with "${known.kind}"; the arbiter can morph between ` +
+               `any two poses, so every pose driving one channel must share ` +
+               `its command signature`);
+        }
+      }
     }
     if (pose.spin) {
       requireChannel(pose.spin.channel, `${where} spin`);
@@ -335,6 +366,17 @@ export function loadConfig(input: RawFiles): CharacterConfig {
                `where the family is "${known}"`);
         }
       }
+    }
+
+    // The declared `duration` is what the host waits on before firing `onDone`;
+    // the steps are what actually move. A step still running at `duration` means
+    // `onDone` fires mid-tween and the character is caught in motion — a defect
+    // no golden frame catches, because every individual frame is right. So the
+    // declaration is a FLOOR, not a hint, and the loader holds it to that.
+    let span = 0;
+    for (const step of tl.steps) span = Math.max(span, step.at + step.duration);
+    if (tl.duration < span) {
+      fail(`${where} declares duration ${tl.duration} but its steps run to ${span}`);
     }
   }
 

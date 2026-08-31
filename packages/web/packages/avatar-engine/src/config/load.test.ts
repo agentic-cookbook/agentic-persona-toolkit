@@ -21,7 +21,10 @@ type BadBehavior = {
   ladder: { moods: Record<string, string> };
 };
 type BadTimelines = {
-  timelines: Record<string, { steps: { channel: string; to: string; duration: number; family?: string }[] }>;
+  timelines: Record<string, {
+    duration: number;
+    steps: { channel: string; to: string; at: number; duration: number; family?: string }[];
+  }>;
 };
 
 describe("loadConfig", () => {
@@ -137,6 +140,37 @@ describe("loadConfig", () => {
       .find((s) => s.family !== undefined)!;
     snap.duration = 0.3;  // a *tweened* family change is exactly the bug
     expect(() => loadConfig(bad)).toThrow(/family/);
+  });
+
+  it("rejects a duplicate node id", () => {
+    // `walk` keys every node by id, so a duplicate silently overwrote the first
+    // — the losing node kept its channels in `rest` but was unreachable by id,
+    // and nothing downstream noticed.
+    const bad = clone();
+    const root = (bad.rig as unknown as { root: { id: string; children: { id: string }[] } }).root;
+    root.children[0]!.id = root.id;
+    expect(() => loadConfig(bad)).toThrow(/duplicate node id/);
+  });
+
+  it("rejects two poses that drive one channel with different path kinds", () => {
+    // The ALL-PAIRS rule, and the reason it is stronger than the timelines'
+    // consecutive-step check: the arbiter can morph between ANY two moods, so
+    // it is not enough for each pose to agree with the one authored next to it.
+    // Every pose driving `mouth.shape` rests at MLL; an ML here is a morph that
+    // would throw only when the arbiter happened to pick that pair at run time.
+    const bad = clone();
+    (bad.poses as unknown as { poses: Record<string, { channels: Record<string, string> }> })
+      .poses.bored!.channels["mouth.shape"] = "M188,241 L212,241";
+    expect(() => loadConfig(bad)).toThrow(/must share its command signature/);
+  });
+
+  it("rejects a timeline whose steps outrun its declared duration", () => {
+    // `duration` is what the host waits on before firing `onDone`. Declaring it
+    // short fires `onDone` mid-tween — every individual frame still correct, so
+    // no golden catches it.
+    const bad = clone();
+    (bad.timelines as BadTimelines).timelines.yawn!.duration = 1.0;
+    expect(() => loadConfig(bad)).toThrow(/declares duration 1 but its steps run to 2\.1/);
   });
 
   it("rejects an unknown ease name", () => {
