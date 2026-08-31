@@ -60,13 +60,42 @@ export function createReflexes(deps: ReflexDeps): Reflexes {
     }
   };
 
+  /** Whether a loop should be oscillating at this instant.
+   *
+   *  A ZERO AMPLITUDE IS NOT A LOOP THAT SWINGS BY NOTHING — it is a loop that
+   *  must not run at all, and the difference is visible. `faceBob`'s amplitude
+   *  is the active pose's `bob`, zero for eleven of the fourteen moods, and
+   *  `faceWiggle`'s is `wiggle`, zero for nine. A zero-amplitude loop that keeps
+   *  re-arming rewrites its channel to `restValue` every cycle, and by tween
+   *  rule 1 — newest wins — that write cancels whatever else is driving the
+   *  channel. What else drives it is the mood effect on the same channel:
+   *  `boredSag` yoyos `face.y` out to 2.5 over 3.5s while `faceBob` writes it
+   *  back to 0 every 0.5s, so the sag peaks around 0.12 and never completes one
+   *  cycle. The original had no such conflict because it never started the loop
+   *  — `if (bob > 0)` started it, and `else` ran ONE settle tween and then left
+   *  `face.y` alone for the sag to own. This predicate is that `if`.
+   *
+   *  `-0 !== 0` is false in JS and `-0.0 != 0.0` is false in Swift, so the
+   *  `{ "param": "bob", "scale": -1 }` amplitude reads as zero on both.
+   */
+  const loopLive = (loop: LoopDef, s: ParamScope): boolean =>
+    !reducedMotion()
+    && amplitude(config, s, loop.amplitude) !== 0
+    && gateOpen(config, s, loop);
+
+  /** Settle a running loop and take it out of the chain. Idempotent — a loop
+   *  already stopped writes nothing, so the poll can call it every tick without
+   *  re-settling a channel something else has since taken over. */
+  const stopLoop = (loop: LoopDef, when: number): void => {
+    if (running.get(loop.id) !== true) return;
+    running.set(loop.id, false);
+    settleLoop(loop, when);
+  };
+
   function armLoop(loop: LoopDef, when: number): void {
     const s = scope();
-    if (reducedMotion() || !gateOpen(config, s, loop)) {
-      if (running.get(loop.id) === true) {
-        running.set(loop.id, false);
-        settleLoop(loop, when);
-      }
+    if (!loopLive(loop, s)) {
+      stopLoop(loop, when);
       return; // the poll re-arms it; nothing idles in a chain it cannot use
     }
     running.set(loop.id, true);
@@ -346,26 +375,51 @@ export function createReflexes(deps: ReflexDeps): Reflexes {
   /* ── the one poll ────────────────────────────────────────────────── */
 
   let lastMood: string | null = null;
+  let lastReduced = false;
   let pollId: number | null = null;
 
   const pollTick = (when: number): void => {
     const m = mood();
-    if (m !== lastMood) {
+    const reduced = reducedMotion();
+    const s = scope();
+    // The ambient loops are settled BEFORE the mood block claims their channels,
+    // and that order is the original's: `applyPose` settled `face.y` first and
+    // only then did the expression register its sag, so the sag's tween is the
+    // newer one and wins. Run the mood block first and the settle, being newer,
+    // would cancel a sag armed microseconds earlier — leaving `face.y` flat for
+    // a whole 3.5s cycle until the sag's own chain re-armed.
+    for (const loop of b.loops) {
+      // Symmetric, and it has to be: `armLoop` can only stop a loop from inside
+      // its own chain, one whole cycle after the amplitude went to zero — up to
+      // 1.05s for the sway. The original stopped it the instant the pose applied,
+      // by killing the loops `applyPose` had returned. The poll is 400ms, so
+      // testing both directions here is what keeps the settle inside a delay the
+      // original would recognise.
+      if (loopLive(loop, s)) {
+        if (running.get(loop.id) !== true) armLoop(loop, when);
+      } else {
+        stopLoop(loop, when);
+      }
+    }
+    // Reduced motion is treated exactly like a mood change, and that is the
+    // whole of the mood-effect gate. `armLoop` gates a loop-shaped effect, but a
+    // once-shaped one (`sadDroop`) and a stir chain (`asleepStir`) reach their
+    // channels through `playSteps`, which has no gate of its own — so under
+    // reduced motion the sleeping body went on twitching. Stopping the effect
+    // rather than gating each shape settles every channel it touched through the
+    // path that already exists, and restarting it from the top when the setting
+    // clears replays the once-steps too, which a per-shape flag would not.
+    if (m !== lastMood || reduced !== lastReduced) {
       stopEffect(when);
       lastMood = m;
-      startEffect(m, when);
-    }
-    const s = scope();
-    for (const loop of b.loops) {
-      if (running.get(loop.id) !== true && !reducedMotion() && gateOpen(config, s, loop)) {
-        armLoop(loop, when);
-      }
+      lastReduced = reduced;
+      if (!reduced) startEffect(m, when);
     }
     if (activeEffect !== null) {
       const def = b.moodEffects[activeEffect];
       if (def?.loop !== undefined) {
         const loop = effectLoop(def);
-        if (running.get(loop.id) !== true && !reducedMotion()) armLoop(loop, when);
+        if (running.get(loop.id) !== true) armLoop(loop, when);
       }
     }
     if (!fidgetRunning && fidgetActive()) fidget(when);
@@ -376,13 +430,14 @@ export function createReflexes(deps: ReflexDeps): Reflexes {
   return {
     start(when) {
       lastMood = mood();
+      lastReduced = reducedMotion();
       for (const loop of b.loops) armLoop(loop, when);
       breathe(when);
       fidget(when);
       armBlink(when);
       at(when + b.gaze.wanderAfterMs / 1000, wander);
       at(when + b.speech.mutterMs / 1000, mutterTick);
-      startEffect(lastMood, when);
+      if (!lastReduced) startEffect(lastMood, when);
       pinprickTick(when);
       // `first` is absolute, so an omitted one means "0.4", not "0.4 from now".
       // Under a host clock in the hundreds of thousands of seconds that is a

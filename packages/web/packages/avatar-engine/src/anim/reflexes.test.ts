@@ -11,6 +11,7 @@ import { createChannels } from "../runtime/channels";
 import { createScheduler } from "../runtime/scheduler";
 import { createTweens } from "../runtime/tween";
 import { seedChannels } from "../scene/rig";
+import { amplitude } from "./params";
 import { createReflexes } from "./reflexes";
 
 const config = loadConfig({ character, rig, poses, timelines, behavior, sayings });
@@ -18,6 +19,21 @@ const B = config.behavior;
 const ACTIVE = B.ladder.moods.active!;
 const LIVELY = Object.keys(config.poses.poses)
   .find((m) => (config.poses.poses[m]!.loops?.wiggle ?? 0) > 0)!;
+/** The mood whose effect drives a channel an always-on ambient loop also owns —
+ *  the collision Ruling 39 is about, found from the config rather than named, so
+ *  that renaming the mood or moving the sag to another channel turns this into a
+ *  failure rather than quietly into a test of nothing. */
+const COLLIDING = Object.keys(B.moodEffects).find((m) => {
+  const l = B.moodEffects[m]!.loop;
+  return l !== undefined && B.loops.some((a) => a.channel === l.channel);
+})!;
+const SAG = B.moodEffects[COLLIDING]!.loop!;
+// Through `amplitude` rather than a cast: both fields are `AmplitudeRef`, so a
+// `as number` would compile happily against a config that had since moved the
+// sag's amplitude behind a param and then measure `NaN`.
+const SAG_SCOPE = { mood: COLLIDING, idleRung: 0 };
+const SAG_AMP = amplitude(config, SAG_SCOPE, SAG.amplitude);
+const SAG_PERIOD = amplitude(config, SAG_SCOPE, SAG.duration);
 
 interface Harness {
   mood: string;
@@ -208,6 +224,54 @@ describe("reflexes", () => {
     for (const name of a.channels.names()) {
       expect(b.channels.get(name)).toStrictEqual(a.channels.get(name));
     }
+  });
+
+  it("lets a mood effect own a channel whose ambient loop has zero amplitude", () => {
+    // `faceBob` is armed for every mood and its amplitude is the active pose's
+    // `bob`, which this one sets to 0. Before Ruling 39 that zero-amplitude loop
+    // kept re-arming and rewriting `face.y` to 0 every 0.5s; by tween rule 1 each
+    // write cancelled the sag, which peaked at 0.124 — 5% of its amplitude — and
+    // then sat flat. The lower bound is what fails if that loop comes back.
+    const c = make();
+    c.h.mood = COLLIDING;
+    c.reflexes.start(0);
+    // `start` arms the effect directly, so no poll is needed to begin; the window
+    // is one out-and-back of the sag.
+    const peak = swing(c, SAG.channel, 0, SAG_PERIOD * 2 + 1);
+    expect(peak).toBeGreaterThan(SAG_AMP * 0.9);
+    expect(peak).toBeLessThanOrEqual(SAG_AMP + 1e-6);
+  });
+
+  it("hands the channel over on a mood change, not only when it starts there", () => {
+    // The stop side of the same ruling, and the one that needs the poll: nothing
+    // tells the reflexes a pose was applied, so the loop whose amplitude just
+    // went to zero is noticed by `pollTick` and by nothing else.
+    const bob = B.loops.find((l) => l.channel === SAG.channel)!;
+    const c = make();
+    c.h.mood = LIVELY;
+    c.reflexes.start(0);
+    expect(swing(c, bob.channel, 0, 2)).toBeGreaterThan(0.5);
+    c.h.mood = COLLIDING;
+    // Deliberately NOT asserting a return to rest in between: the sag arms in the
+    // same poll that stops the bob and is the newer tween, so it takes the channel
+    // over from wherever the bob left it — which is what the original did too,
+    // both of its writes carrying `overwrite: "auto"`.
+    const peak = swing(c, SAG.channel, 2, 2 + SAG_PERIOD * 2 + 1);
+    expect(peak).toBeGreaterThan(SAG_AMP * 0.9);
+  });
+
+  it("suppresses a mood effect under reduced motion, and restores it when it clears", () => {
+    const c = make();
+    c.h.mood = COLLIDING;
+    c.h.reduced = true;
+    c.reflexes.start(0);
+    expect(swing(c, SAG.channel, 0, SAG_PERIOD * 2)).toBeLessThan(1e-6);
+    c.h.reduced = false;
+    // The poll treats the setting exactly like a mood change, so the effect
+    // restarts from the top and runs a whole cycle rather than resuming
+    // mid-stroke — which is also why a once-shaped effect gets replayed.
+    expect(swing(c, SAG.channel, SAG_PERIOD * 2, SAG_PERIOD * 4 + 1))
+      .toBeGreaterThan(SAG_AMP * 0.9);
   });
 
   it("cancels every pending one-shot on stop", () => {
