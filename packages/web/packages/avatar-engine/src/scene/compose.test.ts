@@ -61,6 +61,29 @@ describe("compose", () => {
     expect(Math.abs(d - 0)).toBeLessThan(1e-9);
   });
 
+  it("pins the multiply argument order — parent-then-local, not local-then-parent", () => {
+    // multiply(parent, local) and multiply(local, parent) agree whenever either
+    // operand is identity, which every node but the root is at rest — a single
+    // rotated ancestor isn't enough to tell them apart either, because a lone
+    // rotation still leaves the translation `e`/`f` matching both orders. Two
+    // ancestors are needed: a ROTATED one (body) and, further down the chain, a
+    // TRANSLATED one (face) whose own pivot is off-centre. `a,b,c,d` (the linear
+    // part) come out identical under either argument order — `e` and `f` are
+    // the ONLY pair that discriminates, which is exactly why the existing
+    // parent-transform test above, which never checks them, missed this. Do not
+    // "simplify" this back down to a,b,c,d.
+    const { scene, channels } = fresh();
+    channels.set("body.rotation", 90);
+    channels.set("face.y", 10);
+    const [a, b, c, d, e, f] = compose(scene, channels).find((i) => i.id === "irisLeft")!.m;
+    expect(a).toBeCloseTo(0, 9);
+    expect(b).toBeCloseTo(1, 9);
+    expect(c).toBeCloseTo(-1, 9);
+    expect(d).toBeCloseTo(0, 9);
+    expect(e).toBeCloseTo(390, 9);
+    expect(f).toBeCloseTo(0, 9);
+  });
+
   it("squashes only the eyes when eye.scaleY is driven", () => {
     const { scene, channels } = fresh();
     channels.set("eyeLeftRing.scaleY", 0.1);
@@ -174,6 +197,14 @@ describe("variants", () => {
   it("throws on an unknown variant rather than silently rendering the true rig", () => {
     expect(() => buildScene(config, "chunky")).toThrow(/chunky/);
   });
+
+  it("throws on a variant named after an Object.prototype member instead of rendering the true rig", () => {
+    // `character.variants` is a JSON-derived Record, so a plain index sees
+    // Object.prototype too — "constructor" resolves to a function, which is
+    // truthy, so a guard that only checks `=== undefined` never fires and this
+    // silently renders the true rig, exactly what the test above forbids.
+    expect(() => buildScene(config, "constructor")).toThrow(/constructor/);
+  });
 });
 
 describe("crops", () => {
@@ -207,8 +238,38 @@ describe("crops", () => {
     expect(kept).toEqual(list.filter((i) => !dropped.has(i.id)));
   });
 
+  it("drops an inherited feature the crop excludes — neither shipped crop can show this", () => {
+    // Both `full` and `browsAndEyes` include "eyes", so real inheritance and the
+    // no-feature-declared fallback produce the SAME output for every crop
+    // `character.json` ships — a crop that discriminates has to exclude "eyes"
+    // while a node still inherits it. Inventing that crop in the shipped config
+    // would put fiction nothing in the product wants into real data, so it is
+    // built here instead: a clone of the imported config with one extra crop,
+    // loaded through the real loader like any other config would be.
+    const patched = structuredClone(character) as typeof character;
+    (patched.crops as Record<string, string[]>).browsOnly = ["brows"];
+    const localConfig = loadConfig({ character: patched, rig, poses, timelines, behavior, sayings });
+    const { channels } = fresh();
+    const list = compose(buildScene(localConfig), channels);
+    const kept = cropList(localConfig, list, "browsOnly");
+    // Under inheritance, eyeLeft/eyeRight's six undeclared children inherit
+    // "eyes" and are dropped along with the pinpricks, which declare "eyes"
+    // directly. The no-feature fallback would have kept the six children
+    // regardless, since they declare nothing of their own.
+    expect(kept.map((i) => i.id)).toEqual(["browLeft", "browRight"]);
+  });
+
   it("throws on an unknown crop name rather than returning an empty list", () => {
     const { scene, channels } = fresh();
     expect(() => cropList(config, compose(scene, channels), "nope")).toThrow(/nope/);
+  });
+
+  it("throws on a crop named after an Object.prototype member instead of returning it", () => {
+    // `character.crops` is a JSON-derived Record, so a plain index sees
+    // Object.prototype too — "constructor" resolves to a function, which is
+    // truthy, so a guard that only checks `=== undefined` never fires and this
+    // silently returns garbage instead of throwing.
+    const { scene, channels } = fresh();
+    expect(() => cropList(config, compose(scene, channels), "constructor")).toThrow(/constructor/);
   });
 });

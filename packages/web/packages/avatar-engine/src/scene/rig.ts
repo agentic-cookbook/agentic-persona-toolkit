@@ -30,10 +30,14 @@ export interface Scene {
  *  patch names a real ink, or a real node that has no `.shape` channel and whose
  *  named fields exist with the same type and arity. */
 export function buildScene(config: CharacterConfig, variant?: string): Scene {
-  const patch = variant === undefined ? undefined : config.character.variants[variant];
-  if (variant !== undefined && patch === undefined) {
+  // `hasOwn`, not a plain index-then-`undefined` check: `variants` is a
+  // JSON-derived Record, so a plain index sees `Object.prototype` too, and
+  // `variants["constructor"]` comes back truthy without ever naming a real
+  // variant — exactly the silent-true-rig outcome this guard exists to forbid.
+  if (variant !== undefined && !Object.hasOwn(config.character.variants, variant)) {
     throw new Error(`avatar: unknown variant "${variant}"`);
   }
+  const patch = variant === undefined ? undefined : config.character.variants[variant];
 
   const flat: { node: RigNode; parents: string[] }[] = [];
   const walk = (node: RigNode, parents: string[]): void => {
@@ -47,8 +51,8 @@ export function buildScene(config: CharacterConfig, variant?: string): Scene {
     for (const child of node.children ?? []) walk(child, [...parents, node.id]);
   };
   walk(config.rig.root, []);
-  // The overlays are a second root, painted last and outside the body's
-  // transform chain — a pinprick must not inherit the body's scale.
+  // The overlays are a second root, painted last and outside the primary
+  // root's transform chain — an overlay item must not inherit the root's scale.
   for (const overlay of config.rig.overlays) walk(overlay, []);
 
   const base = config.character.inks;
@@ -137,11 +141,11 @@ function resolveInk(raw: string, scene: Scene, channels: Channels, depth = 0): s
  *  `config/types.ts`) it is always "#hex", "@nodeId", or a bare PALETTE key —
  *  never another ink key — so, unlike `resolveInk`, this never re-enters the
  *  ink table. That distinction matters for real data: an ink is routinely
- *  named after the very palette colour it points at (olylo's "eyeBg" ink has
- *  `color: "eyeBg"`, and "iris" the same), which is exactly the pattern
- *  `config/load.ts`'s `paletteColour` comment calls out. Recursing through the
- *  ink table here would find that same-named ink again and resolve to itself,
- *  looping until the depth guard fires instead of reaching the palette. */
+ *  named after the very palette entry it points at — `config/load.ts`'s
+ *  `paletteColour` comment gives `{ kind: "fill", color: "shell" }` under the
+ *  key `shell` as the shape of it — and recursing through the ink table here
+ *  would find that same-named ink again and resolve to itself, looping until
+ *  the depth guard fires instead of reaching the palette. */
 function resolveColourRef(raw: string, scene: Scene, channels: Channels, depth: number): string {
   if (depth > 8) throw new Error(`avatar: ink "${raw}" does not resolve to a colour`);
   if (raw.startsWith("#")) return raw;
@@ -207,11 +211,11 @@ export function compose(scene: Scene, channels: Channels): DisplayList {
 /** The display list, keeping only what the named crop asks for.
  *
  *  A crop names FEATURES (`character.crops`), and a feature is declared on a
- *  node — but not necessarily on the node that carries the shape. `eyeLeft`
- *  declares "eyes" while the interior, the ring and the iris underneath it
- *  declare nothing, because the feature is a property of the eye rather than of
- *  each disc it is built from. So a feature is INHERITED from the nearest
- *  ancestor that declares one.
+ *  node — but not necessarily on the node that carries the shape. A grouping
+ *  node (an eye, say) can declare a feature while the primitives underneath it
+ *  — its background, its ring, its interior — declare nothing, because the
+ *  feature is a property of the group rather than of each shape it is built
+ *  from. So a feature is INHERITED from the nearest ancestor that declares one.
  *
  *  An item whose chain declares none at all is kept by every crop: a node nobody
  *  assigned to a feature is structural, and a crop that silently subtracted
@@ -220,14 +224,21 @@ export function compose(scene: Scene, channels: Channels): DisplayList {
  *  It has no opinion about visibility either — `compose` emits an `alpha <= 0`
  *  item deliberately, and dropping one here would change what a golden log
  *  records. Deciding an invisible item is not worth painting belongs to the
- *  renderer, and `OlyloMark` (Plan B, Task 39) is where that decision is made. */
+ *  renderer, and the still-mark renderer (Plan B, Task 39) is where that
+ *  decision is made. */
 export function cropList(
   config: CharacterConfig,
   list: DisplayList,
   crop: string,
 ): DisplayList {
+  // `hasOwn`, not a plain index-then-`undefined` check: `crops` is a
+  // JSON-derived Record, so a plain index sees `Object.prototype` too, and
+  // `crops["constructor"]` comes back truthy and not iterable, throwing a
+  // `TypeError` instead of this function's own message.
+  if (!Object.hasOwn(config.character.crops, crop)) {
+    throw new Error(`avatar: unknown crop "${crop}"`);
+  }
   const wanted = config.character.crops[crop];
-  if (wanted === undefined) throw new Error(`avatar: unknown crop "${crop}"`);
   const features = new Set(wanted);
   const featureOf = new Map<string, string>();
 
