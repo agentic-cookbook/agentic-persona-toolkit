@@ -87,20 +87,48 @@ describe("engine", () => {
   });
 
   it("suppresses ambient motion under reduced motion", () => {
-    // The ambient loops and the idle fidget are what move the face layer, and
-    // `mouth` rides it — so the mouth's x translation is the cheapest honest
-    // measure of "is anything breathing".
-
-    const still = createEngine({ config, seed: 1, env: { reducedMotion: () => true } });
-    const moving = createEngine({ config, seed: 1, env: { reducedMotion: () => false } });
-    const spread = (e: ReturnType<typeof engine>): number => {
-      let lo = Infinity; let hi = -Infinity;
+    // A WIRING test, and only that (Ruling 42): what the preference *means* —
+    // the ambient loops settle and never re-arm, the idle fidget stops — is
+    // proved against the reflexes directly in `anim/reflexes.test.ts`. The only
+    // question left here is whether `env.reducedMotion` actually reaches
+    // `createReflexes`, so this measures the same two channels that test does,
+    // through the engine's own public surface.
+    //
+    // Each channel is measured against its own REST value, not against a second
+    // engine. Reduced motion deliberately leaves the gaze running, and the gaze
+    // is what dominates the composed geometry — so comparing the spread of a
+    // rendered item between a reduced-motion engine and a normal one asks which
+    // of the two happened to wander further, not whether anything is breathing.
+    // Worse, the two PRNG streams diverge the moment one of them stops drawing
+    // for the fidget, so the answer is a coin flip: on this config it inverts
+    // for 6 of the first 15 seeds.
+    const loop = "antennaLeft.bend"; // the sway loop's channel, and nothing else's
+    const fidget = "idle.rotation"; // the idle fidget's channel, and nothing else's
+    const swing = (reduced: boolean): Record<string, number> => {
+      const e = createEngine({ config, seed: 1, env: { reducedMotion: () => reduced } });
+      const out: Record<string, number> = { [loop]: 0, [fidget]: 0 };
       for (let t = 0; t <= 8; t += 1 / 60) {
-        const v = e.tick(t).find((i) => i.id === "mouth")!.m[4];
-        lo = Math.min(lo, v); hi = Math.max(hi, v);
+        e.tick(t);
+        for (const ch of [loop, fidget]) {
+          const rest = (config.rest.get(ch) as number) ?? 0;
+          const v = (e.channels().get(ch) as number) ?? rest;
+          out[ch] = Math.max(out[ch]!, Math.abs(v - rest));
+        }
       }
-      return hi - lo;
+      return out;
     };
-    expect(spread(still)).toBeLessThan(spread(moving));
+
+    const still = swing(true);
+    expect(still[loop]).toBe(0);
+    expect(still[fidget]).toBe(0);
+
+    // The other half of the claim, and what stops the zeros above from passing
+    // on a dead channel: both channels DO move with the preference off. The
+    // loop is not PRNG-driven — it reaches its configured `swayAmp` of 10.64
+    // exactly — while the fidget's magnitude is a draw inside ±3.5, so it is
+    // only asserted to be non-zero.
+    const moving = swing(false);
+    expect(moving[loop]).toBeGreaterThan(5);
+    expect(moving[fidget]).toBeGreaterThan(0);
   });
 });
