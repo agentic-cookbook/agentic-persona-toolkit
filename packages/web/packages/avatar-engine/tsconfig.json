@@ -5,7 +5,20 @@
     "rootDir": "./src",
     "lib": ["ES2022", "DOM"],
     "baseUrl": ".",
-    "paths": { "@character/*": ["../../../../../../../../characters/olylo/*"] }
+    // TWO candidates, because this repo is checked out twice in the olylo
+    // superproject at two different depths — once nested under
+    // whatsnow-toolkit/packages/web/external/ for the web app, once as a sibling
+    // at the superproject root for the Apple one. TypeScript tries each in
+    // order and takes the first that resolves, so one entry serves both; a
+    // single fixed run of ".." typechecks in exactly one of them. `vitest.config.ts`
+    // solves the same problem by searching upward, which is what a config that
+    // can run code should do — this one cannot, so it lists the depths.
+    "paths": {
+      "@character/*": [
+        "../../../../../../../../characters/olylo/*",
+        "../../../../../../external/whatsnow-toolkit/characters/olylo/*"
+      ]
+    }
   },
   "include": ["src"]
 }

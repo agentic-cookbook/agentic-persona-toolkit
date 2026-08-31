@@ -188,8 +188,14 @@ export function createReflexes(deps: ReflexDeps): Reflexes {
         duration: g.look.duration, ease: g.look.ease,
       }, when);
     }
+    // NEGATED, and the sign is the whole point: the head leans INTO whatever it
+    // is watching, not away from it. The original spells it `-x * tiltMax` at
+    // both of its call sites (`gaze.ts`), and `tiltMax` stays positive here so
+    // the config keeps reading as a magnitude rather than smuggling a direction
+    // into a field named "max". Flip this and the character mirrors — which is
+    // exactly the class of difference this port exists to not have.
     tweens.add({
-      channel: g.tilt.channel, to: tx * g.tiltMax,
+      channel: g.tilt.channel, to: -tx * g.tiltMax,
       duration: g.tilt.duration, ease: g.tilt.ease,
     }, when);
     for (const ch of g.lean.channels) {

@@ -147,7 +147,8 @@ describe("reflexes", () => {
     run(c, 0, 1);
     expect(c.channels.get("irisLeft.x")).toBeCloseTo(B.gaze.gazeMax, 4);
     expect(c.channels.get("irisLeft.y")).toBeCloseTo(-B.gaze.gazeMax, 4);
-    expect(c.channels.get("tilt.rotation")).toBeCloseTo(B.gaze.tiltMax, 4);
+    // Negated against the look: the head turns toward the pointer, not away.
+    expect(c.channels.get("tilt.rotation")).toBeCloseTo(-B.gaze.tiltMax, 4);
 
     // No further look: after wanderAfterMs the gaze picks its own targets, and
     // every one of them stays inside the configured reach.
