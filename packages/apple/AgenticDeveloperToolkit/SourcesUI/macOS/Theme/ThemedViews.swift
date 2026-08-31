@@ -279,6 +279,12 @@ public final class ThemedSeparatorView: NSView, Themeable {
         self.role = role
         super.init(frame: .zero)
         self.wantsLayer = true
+        // This class activates a constraint on itself, so it only ever makes
+        // sense under auto layout — and a caller who forgets this line gets a
+        // hairline pinned at (0, 0, 0, 0) by required autoresizing
+        // constraints, silently dragging every view positioned off its edges
+        // to zero along with it (`InlineChatView`'s composer, once).
+        self.translatesAutoresizingMaskIntoConstraints = false
         self.heightAnchor.constraint(equalToConstant: 1).isActive = true
         self.observer = ThemePaletteObserver { [weak self] palette in self?.applyTheme(palette) }
     }

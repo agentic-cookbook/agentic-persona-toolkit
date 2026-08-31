@@ -165,4 +165,48 @@ struct InlineChatViewSizingTests {
         view.sizing = InlineChatSizing(active: .fixed, inactive: nil, transition: .animated)
         #expect(view.sizing.resolve(engaged: view.engaged).animates == false)
     }
+
+    /// The three rows stack: transcript, hairline, composer. A `divider` left
+    /// with its autoresizing translation on had required constraints pinning
+    /// it to (0, 0, 0, 0), and because `divider.top == transcript.bottom` and
+    /// `composer.top == divider.bottom`, that zeroed the composer and gave the
+    /// transcript the entire view — a chat window with no place to type, and
+    /// no constraint conflict logged to say why.
+    @Test("the divider and composer get their own rows, so the transcript never fills the view")
+    func composerKeepsItsRow() {
+        _ = makeManager(activeThemeID: BuiltInThemes.solarizedDark.id)
+        let (view, _, _) = makeView()
+
+        #expect(view.transcriptScroll.frame.height < view.frame.height)
+
+        // `setupViews()` adds them in this order: transcript, divider, composer.
+        let divider = view.subviews[1]
+        let composer = view.subviews[2]
+        #expect(divider.frame.height == 1)
+        #expect(divider.frame.width == view.frame.width)
+        #expect(composer.frame.height > 0)
+        #expect(composer.frame.width == view.frame.width)
+    }
+
+    /// Every horizontal constraint in the view pins a subview to the view's
+    /// own edges, so width flows outward from the host and nothing inside
+    /// asks for any. Before the floor existed, `fittingSize.width` was 0 —
+    /// and an `NSWindow` given this as its `contentView` collapsed to a
+    /// zero-width window that drew nothing and could not be dragged open
+    /// again. The floor has to be *required*: at priority 999 it left
+    /// `fittingSize.width` at 0, because a view's fitting size is settled by
+    /// its required constraints alone.
+    @Test("the view has a required minimum width, so a host sizing to it never collapses")
+    func minimumWidthKeepsTheViewFromCollapsing() {
+        _ = makeManager(activeThemeID: BuiltInThemes.solarizedDark.id)
+        let (view, _, _) = makeView()
+
+        #expect(view.fittingSize.width == 232)
+
+        let floors = view.constraints.filter {
+            $0.firstItem === view && $0.firstAttribute == .width && $0.relation == .greaterThanOrEqual
+        }
+        #expect(floors.count == 1)
+        #expect(floors.first?.priority == .required)
+    }
 }

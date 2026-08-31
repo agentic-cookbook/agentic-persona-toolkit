@@ -85,6 +85,15 @@ public final class InlineChatView: NSView, ChatStateObserver, Themeable, NSTextF
     private static let bubbleSideInset: CGFloat = 16
     private static let defaultTranscriptHeight: CGFloat = 200
 
+    /// The narrowest width at which this view is still a chat: one minimum
+    /// bubble plus the transcript's side insets. Every horizontal constraint
+    /// in `setupViews()` pins a subview to *this* view's edges, so without
+    /// this floor the view's `fittingSize.width` is 0 — and a host that lets
+    /// auto layout size its container (an `NSWindow` whose `contentView` this
+    /// becomes, most of all) collapses to a zero-width window that renders
+    /// nothing and cannot be dragged back open.
+    private static let minContentWidth: CGFloat = minBubbleWidth + bubbleSideInset * 2
+
     public init(viewModel: any ChatViewModel, localParticipantID: String) {
         self.viewModel = viewModel
         self.localParticipantID = localParticipantID
@@ -154,9 +163,19 @@ public final class InlineChatView: NSView, ChatStateObserver, Themeable, NSTextF
         addSubview(divider)
         addSubview(inputRow)
 
+        // A floor on this view's own width. Required, unlike the transcript
+        // height `applySizing()` owns: that one yields to a host that pins a
+        // height because a shorter transcript is still a chat, while yielding
+        // on width produced a zero-width window — `NSWindow` sizes a content
+        // view whose width nothing else determines down to its fitting width,
+        // and at priority 999 this floor did not raise it off 0.
+        let minWidth = widthAnchor.constraint(greaterThanOrEqualToConstant: Self.minContentWidth)
+
         // No height constraint here: `applySizing()` — called at the end of
         // `init`, right after this — owns it, and owns which relation it has.
         NSLayoutConstraint.activate([
+            minWidth,
+
             transcriptScroll.topAnchor.constraint(equalTo: topAnchor),
             transcriptScroll.leadingAnchor.constraint(equalTo: leadingAnchor),
             transcriptScroll.trailingAnchor.constraint(equalTo: trailingAnchor),

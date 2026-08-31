@@ -77,6 +77,24 @@ struct ThemedControlsTests {
         #expect(table.usesAlternatingRowBackgroundColors == false)
     }
 
+    @Test("ThemedSeparatorView is an auto layout view, hairline height and all")
+    func separator() {
+        let separator = ThemedSeparatorView(role: .divider)
+        separator.applyTheme(palette)
+        #expect(separator.layer?.backgroundColor == palette.nsColor(.divider).cgColor)
+
+        // It activates a height constraint on itself in `init`, so it only
+        // works under auto layout — and a caller who left the autoresizing
+        // translation on got a hairline nailed to (0, 0, 0, 0) by required
+        // constraints, which dragged everything positioned off its edges to
+        // zero with it. `InlineChatView`'s composer was crushed to nothing
+        // that way, on screen, with no constraint conflict logged.
+        #expect(separator.translatesAutoresizingMaskIntoConstraints == false)
+        let heights = separator.constraints.filter { $0.firstAttribute == .height }
+        #expect(heights.count == 1)
+        #expect(heights.first?.constant == 1)
+    }
+
     @Test("ThemedTableView leaves the role of the scroll view hosting it alone")
     func tableViewDoesNotRestyleItsHost() {
         // A table fills its clip view, so the host's backdrop is the host's
