@@ -102,6 +102,18 @@ describe("loadConfig", () => {
     expect(() => loadConfig(bad)).toThrow(/ear\.wiggle/);
   });
 
+  it("rejects a spin targeting a group channel", () => {
+    const bad = clone();
+    const silly = (bad.poses as BadPoses).poses.silly;
+    (bad.poses as unknown as {
+      poses: Record<string, { channels: Record<string, unknown>; spin?: { channel: string; duration: number; ease: string; turns: number } }>;
+    }).poses.silly = {
+      channels: silly!.channels,
+      spin: { channel: "eye.scaleY", duration: 0.9, ease: "power3.inOut", turns: 1 },
+    };
+    expect(() => loadConfig(bad)).toThrow(/spin targets group "eye\.scaleY"/);
+  });
+
   it("rejects an unresolved ink", () => {
     const bad = clone();
     // Walk to the first inked node rather than assuming a depth — the rig is a tree.

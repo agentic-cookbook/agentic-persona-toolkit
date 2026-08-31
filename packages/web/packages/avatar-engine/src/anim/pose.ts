@@ -13,12 +13,6 @@ export interface PoseResult {
 }
 
 /**
- * The per-channel delay ladder. The face does not snap into a mood all at once:
- * eyes lead, antennae follow at 40 ms, brows at 60 ms, and colour/mouth at 80 ms.
- * That stagger is most of why the original reads as alive, so it lives in data
- * (`behavior.json.channelDelays`) and is matched here rather than re-invented.
- */
-/**
  * The node half of a `node.prop` channel name.
  *
  * Exported rather than local: `timeline.ts` needs it too, to find the `.family`
@@ -35,6 +29,14 @@ export function nodeOf(channel: string): string {
   return dot === -1 ? channel : channel.slice(0, dot);
 }
 
+/**
+ * The per-channel delay ladder. The face does not snap into a mood all at once:
+ * some parts lead and others lag, creating an animation that reads as alive and
+ * intentional rather than mechanical. The whole ladder lives in data
+ * (`behavior.json.channelDelays`) rather than hard-coded here, and exact
+ * channel matches take precedence over node-level entries so individual channels
+ * can be singled out for special timing.
+ */
 export function channelDelay(config: CharacterConfig, channel: string): number {
   const table = config.behavior.channelDelays;
   // Exact channel wins over the node, so `body.ink` can lag while `body.rotation`
@@ -76,10 +78,14 @@ export function applyPose(ctx: PoseContext, mood: string, now: number): PoseResu
   // one-shot. Keeping the one-tween-per-channel rule absolute is worth more than
   // saving a return value.
   // The spin runs from the pose's OWN target for that channel, not from wherever
-  // the channel is right now: `silly` sets body.rotation to 180 and spins one
-  // turn on top, so the tween runs to 540 and normalises back to 180 — the pose
-  // still lands upside down. Starting from `current` would make a second spin
-  // during the first one land somewhere the goldens could not predict.
+  // the channel is right now. This ensures that a pose which also rotates lands
+  // on its rotation plus the turns, and a second spin during the first one cannot
+  // land somewhere the goldens could not predict. Starting from `current` would
+  // violate this guarantee.
+  // Notably, there is deliberately no call to `config.expand()` here: the loader
+  // (load.ts) rejects grouped channels for spin, guaranteeing the channel is
+  // concrete. Expanding it would force `resetAt` to become a list, rippling into
+  // Task 17's engine and the Swift mirror for a case no character has.
   const channel = pose.spin.channel;
   const posed = pose.channels[channel];
   const from = typeof posed === "number"

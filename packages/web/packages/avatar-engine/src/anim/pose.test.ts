@@ -82,6 +82,22 @@ describe("applyPose", () => {
     expect(c.channels.get("eyeLeft.scaleY")).not.toBe(1);
   });
 
+  it("pins the exact-channel precedence over node-level entries", () => {
+    // Exact channel matches in channelDelays win over bare node names, so
+    // `body.ink` can lag while `body.rotation` does not. Mutating the precedence
+    // order would silently break without goldens catching it, since olylo has no
+    // colliding keys in its current behavior.json.
+    const c = ctx();
+    const clonedBehavior = structuredClone(behavior);
+    (clonedBehavior.channelDelays as Record<string, number>)["body"] = 0.02;  // distinct from the exact key
+    const testConfig = loadConfig({
+      character, rig, poses, timelines,
+      behavior: clonedBehavior, sayings,
+    });
+    expect(channelDelay(testConfig, "body.ink")).toBeCloseTo(0.08, 12);
+    expect(channelDelay(testConfig, "body.rotation")).toBeCloseTo(0.02, 12);
+  });
+
   it("spins the body a whole number of turns and reports the normalisation", () => {
     const c = ctx();
     const result = applyPose(c, "silly", 0);
@@ -94,6 +110,31 @@ describe("applyPose", () => {
     // The engine (Task 17) hands resetAt to the scheduler; here we apply it by hand.
     c.channels.set(result.resetAt!.channel, result.resetAt!.value);
     expect(c.channels.get("body.rotation")).toBe(180);
+  });
+
+  it("normalises spin rotations into (-180, 180] to prevent accumulation", () => {
+    // The wrap arithmetic `((end % 360) + 360) % 360` then `> 180 ? -360 : 0`
+    // drives both branches so a second spin cannot land on an unpredictable angle.
+    // Silly poses body.rotation at 180 (already on the boundary) and spins one
+    // turn, landing at 540 and normalising to 180. This test drives the other
+    // branch: pose at 270, spin one turn, land at 630, normalise to -90.
+    const bad = structuredClone({ character, rig, poses, timelines, behavior, sayings });
+    (bad.poses as { poses: Record<string, { channels: Record<string, unknown> }> })
+      .poses.silly!.channels["body.rotation"] = 270;
+    const testConfig = loadConfig(bad);
+    const channels = createChannels();
+    seedChannels(testConfig, channels);
+    const c = {
+      config: testConfig,
+      channels,
+      tweens: createTweens(channels),
+    };
+    const result = applyPose(c, "silly", 0);
+    c.tweens.tick(0.9);
+    // Spin is from 270 + (1 * 360) = 630
+    expect(c.channels.get("body.rotation")).toBeCloseTo(630, 9);
+    // Normalise: ((630 % 360) + 360) % 360 = 270, then > 180 → -90
+    expect(result.resetAt).toEqual({ at: 0.9, channel: "body.rotation", value: -90 });
   });
 
   it("lets a later pose interrupt an earlier one mid-flight", () => {

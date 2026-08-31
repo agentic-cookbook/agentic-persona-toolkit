@@ -316,6 +316,15 @@ export function loadConfig(input: RawFiles): CharacterConfig {
     }
     if (pose.spin) {
       requireChannel(pose.spin.channel, `${where} spin`);
+      // Spin needs a single concrete channel, not a group that expands to many.
+      // The resetAt normalisation cannot be a list, and fanning out spin would
+      // ripple into Task 17's engine and the Swift mirror without serving any
+      // character's need. Reject it at load time rather than silently writing a
+      // tween to a group-name string that nothing reads.
+      const expanded = expand(pose.spin.channel);
+      if (expanded.length !== 1 || expanded[0] !== pose.spin.channel) {
+        fail(`${where} spin targets group "${pose.spin.channel}"; spin needs a single concrete channel`);
+      }
       requireEase(pose.spin.ease, `${where} spin`);
     }
   }
