@@ -76,7 +76,7 @@ describe("loadConfig", () => {
   it("expands a group all the way to channels the rig actually reads", () => {
     const c = loadConfig(clone());
     // `iris.scale` names `irisLeft.scale` / `irisRight.scale`, and each of THOSE
-    // is the derived uniform-scale group -- so a single-level expand stops on a
+    // is the derived uniform-scale group — so a single-level expand stops on a
     // name that is in `concrete` (because `scale` is in ANIMATABLE) but has no
     // `rest` entry and is read by nothing. `iris.scale` is in all fourteen
     // poses, so stopping there would mean the iris never scales, with no error
@@ -104,13 +104,14 @@ describe("loadConfig", () => {
 
   it("rejects a spin targeting a group channel", () => {
     const bad = clone();
-    const silly = (bad.poses as BadPoses).poses.silly;
-    (bad.poses as unknown as {
-      poses: Record<string, { channels: Record<string, unknown>; spin?: { channel: string; duration: number; ease: string; turns: number } }>;
-    }).poses.silly = {
-      channels: silly!.channels,
-      spin: { channel: "eye.scaleY", duration: 0.9, ease: "power3.inOut", turns: 1 },
-    };
+    // Only `spin.channel` moves; the rest of the pose stays as authored. A
+    // wholesale replacement would drop the pose's own `duration` and `ease`, and
+    // then a green test would only prove the group guard runs before whichever
+    // check catches those — not that it fires at all.
+    const spun = (bad.poses as unknown as {
+      poses: Record<string, { spin: { channel: string } }>;
+    }).poses.silly!;
+    spun.spin.channel = "eye.scaleY";
     expect(() => loadConfig(bad)).toThrow(/spin targets group "eye\.scaleY"/);
   });
 

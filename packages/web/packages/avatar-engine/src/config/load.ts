@@ -195,13 +195,13 @@ export function loadConfig(input: RawFiles): CharacterConfig {
     for (const member of members) {
       if (!concrete.has(member)) fail(`group "${group}" names unknown channel "${member}"`);
     }
-    // Flattened through the derived map, not stored as authored. A group
-    // routinely names `<id>.scale` -- `iris.scale` names `irisLeft.scale` and
-    // `irisRight.scale` -- and `<id>.scale` is itself a group. `expand` is a
-    // single lookup at every call site, so an unflattened member would come
-    // back as the answer: `applyPose` would tween `irisLeft.scale`, a name
-    // `rest` has no entry for and `compose` never reads, and the iris would
-    // simply never scale on any mood. Nothing would fail -- not the loader,
+    // Flattened through the derived map, not stored as authored. An authored
+    // group routinely names `<id>.scale` for each of the nodes it covers, and
+    // `<id>.scale` is itself a group. `expand` is a single lookup at every call
+    // site, so an unflattened member would come back as the answer: `applyPose`
+    // would tween `<id>.scale`, a name `rest` has no entry for and `compose`
+    // never reads, and every node in the group would simply never scale on any
+    // pose. Nothing would fail — not the loader,
     // whose member check passes because `scale` is in ANIMATABLE and so
     // `<id>.scale` is in `concrete`; not the tween engine, which animates any
     // name it is handed; and not Swift, which would reproduce the same dead

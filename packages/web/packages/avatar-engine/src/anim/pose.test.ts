@@ -87,7 +87,6 @@ describe("applyPose", () => {
     // `body.ink` can lag while `body.rotation` does not. Mutating the precedence
     // order would silently break without goldens catching it, since olylo has no
     // colliding keys in its current behavior.json.
-    const c = ctx();
     const clonedBehavior = structuredClone(behavior);
     (clonedBehavior.channelDelays as Record<string, number>)["body"] = 0.02;  // distinct from the exact key
     const testConfig = loadConfig({
@@ -113,8 +112,9 @@ describe("applyPose", () => {
   });
 
   it("normalises spin rotations into (-180, 180] to prevent accumulation", () => {
-    // The wrap arithmetic `((end % 360) + 360) % 360` then `> 180 ? -360 : 0`
-    // drives both branches so a second spin cannot land on an unpredictable angle.
+    // The wrap arithmetic — `((end % 360) + 360) % 360`, then subtract 360 when
+    // that lands above 180 — needs both branches driven, or a Swift mirror whose
+    // `%` disagrees on negatives passes anyway.
     // Silly poses body.rotation at 180 (already on the boundary) and spins one
     // turn, landing at 540 and normalising to 180. This test drives the other
     // branch: pose at 270, spin one turn, land at 630, normalise to -90.
