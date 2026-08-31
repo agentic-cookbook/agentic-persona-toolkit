@@ -11,7 +11,7 @@ import { createChannels } from "../runtime/channels";
 import { createScheduler } from "../runtime/scheduler";
 import { createTweens } from "../runtime/tween";
 import { seedChannels } from "../scene/rig";
-import { amplitude } from "./params";
+import { amplitude, gateOpen } from "./params";
 import { createReflexes } from "./reflexes";
 
 const config = loadConfig({ character, rig, poses, timelines, behavior, sayings });
@@ -272,6 +272,60 @@ describe("reflexes", () => {
     // mid-stroke — which is also why a once-shaped effect gets replayed.
     expect(swing(c, SAG.channel, SAG_PERIOD * 2, SAG_PERIOD * 4 + 1))
       .toBeGreaterThan(SAG_AMP * 0.9);
+  });
+
+  it("re-arms a stopped loop on exactly one chain", () => {
+    // Ruling 41. `stopLoop` cannot cancel the event its own chain already
+    // scheduled — `at` hands back no id — so the generation is what stops that
+    // orphan from arming a SECOND chain beside the one the poll armed. Two
+    // chains are not a bigger swing; they are two writers on one channel at a
+    // fractional offset, each cancelling the other mid-stroke. So this counts
+    // DIRECTION REVERSALS, which one chain makes once per cycle and two make
+    // twice as often.
+    //
+    // The window is constructed rather than stumbled into: the loop has to arm
+    // at 0, be stopped by the poll at `poll`, be re-armed by the poll at
+    // `2*poll`, and only THEN have its orphan fire — which needs
+    // `period > 2*poll`, the same inequality that makes the bug reachable in
+    // the shipped config at all.
+    const poll = B.ladder.pollMs / 1000;
+    const cycle = (l: (typeof B.loops)[number], m: string): number =>
+      amplitude(config, { mood: m, idleRung: 0 }, l.duration) + (l.delay ?? 0);
+    const live = (l: (typeof B.loops)[number], m: string): boolean => {
+      const s = { mood: m, idleRung: 0 };
+      return amplitude(config, s, l.amplitude) !== 0 && gateOpen(config, s, l);
+    };
+    const gated = B.loops.find((l) =>
+      live(l, ACTIVE) && !live(l, B.eyesShutMood) && cycle(l, ACTIVE) > 2 * poll)!;
+    const p = cycle(gated, ACTIVE);
+    const ch = config.expand(gated.channel)[0]!;
+
+    const c = make();
+    c.reflexes.start(0);
+    run(c, 0, poll / 2);
+    c.h.mood = B.eyesShutMood; // the poll at `poll` stops it
+    run(c, poll / 2, poll + poll / 2);
+    c.h.mood = ACTIVE; // the poll at `2*poll` arms a fresh chain
+    run(c, poll + poll / 2, 3 * poll); // ... and the orphan fires at `p`
+
+    let prev = (c.channels.get(ch) as number) ?? 0;
+    let dir = 0;
+    let turns = 0;
+    for (let t = 3 * poll; t <= 3 * poll + 4 * p + 1e-12; t += 1 / 60) {
+      c.scheduler.tick(t); c.tweens.tick(t);
+      const v = (c.channels.get(ch) as number) ?? 0;
+      // The epsilon is not decoration: a `sine.inOut` stroke moves by less than
+      // a float's noise either side of its extreme, and counting that as a turn
+      // would find reversals in a perfectly single chain.
+      const d = Math.abs(v - prev) < 1e-9 ? 0 : Math.sign(v - prev);
+      if (d !== 0 && dir !== 0 && d !== dir) turns += 1;
+      if (d !== 0) dir = d;
+      prev = v;
+    }
+    // One chain turns once per cycle — four cycles, four turns, and a fifth
+    // only if the window's edge splits one. Two chains turn twice as often.
+    expect(turns).toBeGreaterThanOrEqual(3);
+    expect(turns).toBeLessThanOrEqual(5);
   });
 
   it("cancels every pending one-shot on stop", () => {

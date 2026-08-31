@@ -50,6 +50,29 @@ export function createReflexes(deps: ReflexDeps): Reflexes {
 
   const running = new Map<string, boolean>();
   const signs = new Map<string, number>();
+  /** Which arming of a loop is the current one.
+   *
+   *  A loop's chain schedules its own next cycle, and `stopLoop` cannot cancel
+   *  that pending event — `at` does not hand back an id. Before Ruling 39 it
+   *  never had to: a loop only ever stopped from INSIDE its chain, so the stop
+   *  and the chain's death were the same instant. The poll can now stop a loop
+   *  between two of its own ticks, and if the amplitude comes back before that
+   *  orphaned event fires, the poll has already armed a fresh chain — the
+   *  orphan then arms a SECOND one, and the loop oscillates on two chains at
+   *  once, forever, each re-arming the other's channel at a fractional offset.
+   *  Reachable whenever a loop's period exceeds `pollMs`: the sways are 0.97s
+   *  with their delay against a 400ms poll, and 0.97 and 0.4 share no useful
+   *  factor, so the two cadences drift into that window on their own.
+   *
+   *  The generation is what lets a pending event ask whether the chain that
+   *  scheduled it is still the current one. Every arm mints one; every stop
+   *  invalidates whatever is outstanding. */
+  const gen = new Map<string, number>();
+  const nextGen = (loop: LoopDef): number => {
+    const g = (gen.get(loop.id) ?? 0) + 1;
+    gen.set(loop.id, g);
+    return g;
+  };
 
   const settleLoop = (loop: LoopDef, when: number): void => {
     for (const ch of config.expand(loop.channel)) {
@@ -87,6 +110,7 @@ export function createReflexes(deps: ReflexDeps): Reflexes {
    *  already stopped writes nothing, so the poll can call it every tick without
    *  re-settling a channel something else has since taken over. */
   const stopLoop = (loop: LoopDef, when: number): void => {
+    nextGen(loop); // orphan any pending chain event, running or not
     if (running.get(loop.id) !== true) return;
     running.set(loop.id, false);
     settleLoop(loop, when);
@@ -115,7 +139,8 @@ export function createReflexes(deps: ReflexDeps): Reflexes {
       }, when);
     }
     signs.set(loop.id, loop.yoyo === true ? -sign : sign);
-    at(when + delay + dur, (t) => armLoop(loop, t));
+    const g = nextGen(loop);
+    at(when + delay + dur, (t) => { if (gen.get(loop.id) === g) armLoop(loop, t); });
   }
 
   /* ── blink ───────────────────────────────────────────────────────── */
@@ -328,11 +353,9 @@ export function createReflexes(deps: ReflexDeps): Reflexes {
     const def = b.moodEffects[activeEffect];
     activeEffect = null;
     if (def === undefined) return;
-    if (def.loop !== undefined) {
-      const loop = effectLoop(def);
-      running.set(loop.id, false);
-      settleLoop(loop, when);
-    }
+    // Through `stopLoop`, not by hand: an effect's loop is a chain like any
+    // other, so its pending event needs orphaning too (see `gen`).
+    if (def.loop !== undefined) stopLoop(effectLoop(def), when);
     // Sorted too, though nothing here depends on it: no PRNG is drawn, and every
     // channel gets exactly one tween at the same instant, so the order is
     // unobservable. It is sorted so that the Swift port — where an unsorted walk
