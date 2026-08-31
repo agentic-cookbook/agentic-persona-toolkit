@@ -179,9 +179,10 @@ struct InlineChatViewSizingTests {
 
         #expect(view.transcriptScroll.frame.height < view.frame.height)
 
-        // `setupViews()` adds them in this order: transcript, divider, composer.
-        let divider = view.subviews[1]
-        let composer = view.subviews[2]
+        // `setupViews()` adds them in this order: transcript, status row,
+        // divider, composer.
+        let divider = view.subviews[2]
+        let composer = view.subviews[3]
         #expect(divider.frame.height == 1)
         #expect(divider.frame.width == view.frame.width)
         #expect(composer.frame.height > 0)

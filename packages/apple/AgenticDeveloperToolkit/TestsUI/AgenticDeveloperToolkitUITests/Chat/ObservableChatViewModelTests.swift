@@ -25,6 +25,7 @@ private func label(_ update: ChatUpdate) -> String {
     case .pendingWidgetsChanged: return "pendingWidgetsChanged"
     case .displayConfigChanged: return "displayConfigChanged"
     case .commandActivityChanged: return "commandActivityChanged"
+    case .statusChanged: return "statusChanged"
     case .error(let message): return "error(\(message))"
     }
 }
@@ -93,7 +94,7 @@ struct ObservableChatViewModelTests {
 
     // MARK: statusChanged — the out-of-band invariant
 
-    @Test("statusChanged never produces a Message and never notifies observers")
+    @Test("statusChanged never produces a Message or a draft, but does notify")
     func statusChangedIsOutOfBand() {
         let (viewModel, _) = makeViewModel()
         let observer = RecordingObserver()
@@ -102,13 +103,18 @@ struct ObservableChatViewModelTests {
 
         viewModel.handle(.statusChanged(participantID: "persona-1", status: ChatStatus(kind: .think)))
         #expect(viewModel.messages.count == before)
-        #expect(observer.updates.isEmpty)
+        #expect(viewModel.activeDrafts.isEmpty)
         #expect(viewModel.statuses["persona-1"]?.kind == .think)
 
         viewModel.handle(.statusChanged(participantID: "persona-1", status: nil))
         #expect(viewModel.statuses["persona-1"] == nil)
-        #expect(observer.updates.isEmpty)
         #expect(viewModel.messages.count == before)
+        #expect(viewModel.activeDrafts.isEmpty)
+
+        // The half that was missing. Both edges are observable, because the
+        // indicator has to learn about the settle as well as the start —
+        // without the second one it spins forever on a finished turn.
+        #expect(observer.updates.map(label) == ["statusChanged", "statusChanged"])
     }
 
     // MARK: Message lifecycle

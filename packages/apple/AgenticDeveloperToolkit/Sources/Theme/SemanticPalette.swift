@@ -126,6 +126,22 @@ public struct SemanticPalette: Equatable, Sendable {
         resolved[role] ?? Self.resolve(role, theme: theme)
     }
 
+    /// Whether the theme states this role outright, rather than leaving it to
+    /// be derived from the terminal palette.
+    ///
+    /// For most roles the distinction does not matter — a derived surface is
+    /// as good as a declared one. It matters where the *presence* of the
+    /// element is the theme's decision rather than its colour: a bubble
+    /// outline is drawn only by themes that ask for one, and every role
+    /// derives to some opaque colour, so "is it visible" cannot answer "did
+    /// the theme want it". Web draws the same line — `.pc-bubble` gets its
+    /// `border: 1px solid var(--pc-persona-border)` from each theme's own
+    /// stylesheet, and a theme that declares no such variable has no border
+    /// rule at all.
+    public func declares(_ role: ThemeRole) -> Bool {
+        theme.roleOverrides[role.rawValue] != nil
+    }
+
     /// The default palette-derived color for `role`, ignoring overrides.
     ///
     /// Backgrounds layer toward the foreground (so panels read above the window

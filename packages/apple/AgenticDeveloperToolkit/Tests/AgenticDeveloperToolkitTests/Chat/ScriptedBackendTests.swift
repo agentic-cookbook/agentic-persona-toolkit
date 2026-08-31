@@ -9,6 +9,31 @@ import Testing
 private actor EventBox {
     private(set) var events: [InboundEvent] = []
     func append(_ event: InboundEvent) { events.append(event) }
+
+    /// Waits until at least `count` events have arrived, or gives up.
+    ///
+    /// Conversation mode never finishes its stream — a conversation has no
+    /// last turn — so `await drained.value` is not available to these tests
+    /// the way it is to the fixed-script ones above. Polling is the honest
+    /// alternative: a fixed sleep long enough for the slowest machine is
+    /// either flaky or slow, and this is neither.
+    func waitFor(count: Int, timeout: Duration = .seconds(2)) async -> [InboundEvent] {
+        let deadline = ContinuousClock.now + timeout
+        while events.count < count, ContinuousClock.now < deadline {
+            try? await Task.sleep(for: .milliseconds(5))
+        }
+        return events
+    }
+}
+
+/// The `participantID`/`text` of a `.draftUpdated`, which is what the
+/// conversation-mode tests below script: two strings per event, readable
+/// without a `Message` conformer.
+private func draftPairs(_ events: [InboundEvent]) -> [String] {
+    events.compactMap { event in
+        guard case .draftUpdated(let participantID, let text, _) = event else { return nil }
+        return "\(participantID)-\(text)"
+    }
 }
 
 @Suite("Scripted backend")
@@ -99,5 +124,83 @@ struct ScriptedBackendTests {
         await drained.value
         let afterSend = await box.events
         #expect(afterSend.count == 2)
+    }
+
+    // MARK: Conversation mode
+
+    @Test("an opening replays with nothing sent, and does not finish the stream")
+    func openingReplaysWithoutASend() async throws {
+        let backend = ScriptedBackend(
+            opening: [
+                ScriptedBackend.Beat(.draftUpdated(participantID: "p", text: "hello", attachments: [])),
+                ScriptedBackend.Beat(.draftCleared(participantID: "p"), after: .milliseconds(10)),
+            ],
+            turn: { text, _ in
+                [ScriptedBackend.Beat(.draftUpdated(participantID: text, text: "reply", attachments: []))]
+            }
+        )
+        let box = EventBox()
+        let drained = Task {
+            for await event in backend.inboundEvents { await box.append(event) }
+        }
+        defer { drained.cancel() }
+
+        let opened = await box.waitFor(count: 2)
+        #expect(draftPairs(opened) == ["p-hello"])
+        let sent = await backend.sent
+        #expect(sent.isEmpty)
+
+        // And the stream is still open afterwards: a fixed script finishes its
+        // continuation once replayed, and a conversation that cannot take a
+        // turn after its welcome is not a conversation.
+        _ = try await backend.send(text: "q", attachments: [])
+        let afterSend = await box.waitFor(count: 3)
+        #expect(draftPairs(afterSend) == ["p-hello", "q-reply"])
+    }
+
+    @Test("each send replays that turn's beats, with the submitted text and index")
+    func eachSendReplaysATurn() async throws {
+        let backend = ScriptedBackend(turn: { text, index in
+            [ScriptedBackend.Beat(.draftUpdated(participantID: text, text: "\(index)", attachments: []))]
+        })
+        let box = EventBox()
+        let drained = Task {
+            for await event in backend.inboundEvents { await box.append(event) }
+        }
+        defer { drained.cancel() }
+
+        _ = try await backend.send(text: "first", attachments: [])
+        _ = try await backend.send(text: "second", attachments: [])
+
+        let events = await box.waitFor(count: 2)
+        #expect(draftPairs(events) == ["first-1", "second-2"])
+    }
+
+    /// Two sends in quick succession must produce two turns in order, not two
+    /// interleaved ones — a reply's tokens landing inside another reply's is
+    /// the one way a scripted transcript can end up incoherent. The delay on
+    /// each turn's *first* beat is what makes an unchained implementation
+    /// fail: the second turn's task would wake during the first turn's pause.
+    @Test("two quick sends do not interleave their turns")
+    func turnsDoNotInterleave() async throws {
+        let backend = ScriptedBackend(turn: { text, _ in
+            [
+                ScriptedBackend.Beat(
+                    .draftUpdated(participantID: text, text: "a", attachments: []),
+                    after: .milliseconds(40)),
+                ScriptedBackend.Beat(.draftUpdated(participantID: text, text: "b", attachments: [])),
+            ]
+        })
+        let box = EventBox()
+        let drained = Task {
+            for await event in backend.inboundEvents { await box.append(event) }
+        }
+        defer { drained.cancel() }
+
+        _ = try await backend.send(text: "one", attachments: [])
+        _ = try await backend.send(text: "two", attachments: [])
+
+        let events = await box.waitFor(count: 4)
+        #expect(draftPairs(events) == ["one-a", "one-b", "two-a", "two-b"])
     }
 }

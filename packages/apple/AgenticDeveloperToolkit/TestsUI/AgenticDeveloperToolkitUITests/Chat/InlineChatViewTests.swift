@@ -48,17 +48,36 @@ struct InlineChatViewTests {
         #expect(stack?.arrangedSubviews.first is MessageBubbleView)
     }
 
-    @Test("shows a ThinkingIndicatorView while a participant is typing, and removes it once typing stops")
-    func showsThinkingIndicatorWhileTyping() {
+    /// The indicator is a permanent fixture of the status row above the
+    /// composer, not a transcript entry that appears and disappears.
+    ///
+    /// It used to be appended to the transcript stack and thrown away on the
+    /// next rebuild — which is why the phase machine never advanced past its
+    /// first frame, and why nobody ever saw a word change from "fleeping…" to
+    /// "flooping…". One long-lived view keeps the phase, the shuffle bag and
+    /// the frame timer alive across every update; typing just drives it.
+    @Test("typing drives the persistent status line, not a transcript entry")
+    func typingDrivesThePersistentStatusLine() {
         _ = makeManager(activeThemeID: BuiltInThemes.solarizedDark.id)
         let (view, viewModel, _) = makeView()
-        let stack = transcriptStack(of: view)
+
+        var configuration = ThinkingIndicatorConfiguration()
+        configuration.words = [ChatStatusWordPair(present: "fleeping", past: "fleeped")]
+        view.thinkingIndicator.configure(configuration)
+
+        #expect(view.thinkingIndicator.superview != nil)
+        #expect(view.thinkingIndicator.currentPhase == .idle)
 
         viewModel.handle(.typing(participantID: "persona-1", isTyping: true))
-        #expect(stack?.arrangedSubviews.contains { $0 is ThinkingIndicatorView } == true)
+        #expect(view.thinkingIndicator.currentPhase == .thinking)
+        #expect(view.thinkingIndicator.label.stringValue.contains("fleeping"))
+        // Never in the transcript: a status line that scrolled away with the
+        // messages would be gone the moment the reply it describes arrives.
+        #expect(transcriptStack(of: view)?.arrangedSubviews.contains { $0 is ThinkingIndicatorView } == false)
 
         viewModel.handle(.typing(participantID: "persona-1", isTyping: false))
-        #expect(stack?.arrangedSubviews.contains { $0 is ThinkingIndicatorView } == false)
+        #expect(view.thinkingIndicator.currentPhase == .done)
+        #expect(view.thinkingIndicator.label.stringValue.contains("fleeped"))
     }
 
     @Test("renders an in-progress draft as a bubble")

@@ -54,9 +54,10 @@ struct PortedThemeTests {
     }
 
     /// Only the nine chat properties every web theme defines are required.
-    /// The bubble fills are NOT among them — `--pc-persona-bg` and friends
-    /// exist in 14 of the 21, and the rest are meant to derive. Asserting them
-    /// here would force seven themes to invent colours the web never gave them.
+    /// The bubble *borders* and the send-button roles are NOT among them —
+    /// they exist in some themes and derive in the rest. (The bubble fills
+    /// are always present now, but as an explicit transparency where web
+    /// declares none; see `themesWithoutWebBubbleFillsAreFlat`.)
     @Test("ported themes carry the web chat colours that exist")
     func chatOverridesArePresent() {
         let universal: [ThemeRole] = [
@@ -73,20 +74,61 @@ struct PortedThemeTests {
         }
     }
 
-    /// The seven themes without web bubble fills must still render a bubble
-    /// distinguishable from the transcript behind it — that is the derive
-    /// rules doing their job, and it is the reason they are allowed to be
-    /// absent above.
-    @Test("themes without web bubble fills still derive a visible bubble")
-    func derivedBubblesAreVisible() {
-        for theme in BuiltInThemes.webPorted
-        where theme.roleOverrides[ThemeRole.personaBubble.rawValue] == nil {
+    /// The seven flat terminal themes — the ones whose CSS declares no
+    /// `--pc-persona-bg` / `--pc-user-bg` — must resolve both fills fully
+    /// transparent, so `MessageBubbleView` drops the padding and the corner
+    /// radius and draws a plain transcript line.
+    ///
+    /// This inverts what this suite used to assert. The old rule ("the derive
+    /// rules must invent a *visible* bubble") was reasoning about the port in
+    /// isolation; against the web page it is simply wrong. `.pc-bubble` in
+    /// `packages/web/packages/chat/src/css/base.css` sets `width`,
+    /// `max-width`, `min-width`, `word-wrap` and `position` and nothing else,
+    /// so a web theme that names no fill renders no box. Deriving one gave
+    /// `old-school-terminal` a grey slab the website has never drawn.
+    @Test("themes without web bubble fills are flat, not derived")
+    func themesWithoutWebBubbleFillsAreFlat() {
+        let flat: Set<String> = [
+            "Terminal", "Terminal Split", "Green Matrix", "Green Matrix (Glass)",
+            "Old School Terminal", "CRT Monitor", "Handheld Communicator",
+        ]
+        var seen: Set<String> = []
+        for theme in BuiltInThemes.webPorted {
             let palette = SemanticPalette(theme: theme)
-            #expect(
-                palette.color(.personaBubble) != palette.color(.chatSurface),
-                "\(theme.name): the persona bubble vanishes into the transcript"
-            )
+            let isFlat = palette.color(.personaBubble).alpha == 0
+                && palette.color(.userBubble).alpha == 0
+            if isFlat { seen.insert(theme.name) }
         }
+        #expect(seen == flat)
+    }
+
+    /// Every ported theme carries web's font stack, reduced to the two things
+    /// `FontStyle` can hold: the first named family and whether the stack is
+    /// monospaced. An uninstalled family is not a defect — `VT323` is a web
+    /// font and almost certainly absent — because `nsFont(scaledSize:)` falls
+    /// through to the system face, which is what the browser does with the
+    /// same stack's `ui-monospace` fallback.
+    @Test("ported themes carry web's typography")
+    func typographyIsPorted() {
+        for theme in BuiltInThemes.webPorted {
+            for role in TextRole.allCases {
+                #expect(
+                    theme.typography.styles[role.rawValue] != nil,
+                    "\(theme.name) has no style for \(role)"
+                )
+            }
+        }
+        let terminal = BuiltInThemes.webPorted.first { $0.name == "Old School Terminal" }!
+        #expect(terminal.typography.style(.body).family == "VT323")
+        #expect(terminal.typography.style(.body).monospaced)
+
+        // A sans theme keeps its face and is *not* forced monospaced — the
+        // flag comes from the stack's own generic fallback, not from a guess.
+        let professional = BuiltInThemes.webPorted.first { $0.name == "Professional" }!
+        #expect(professional.typography.style(.body).family == "Inter")
+        #expect(!professional.typography.style(.body).monospaced)
+        #expect(professional.typography.style(.code).family == "JetBrains Mono")
+        #expect(professional.typography.style(.code).monospaced)
     }
 
     @Test("ported themes are in the catalog")

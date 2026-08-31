@@ -15,10 +15,12 @@ import AgenticDeveloperToolkit
 /// - `InboundEvent.draftUpdated`'s `text` is the whole draft so far.
 ///   `handle(_:)` **assigns** the draft's text (`upsertDraft` rebuilds the
 ///   draft from the event's `text` verbatim); it never appends fragments.
-/// - Status (`statusChanged`) is out-of-band: it updates `statuses` but never
-///   produces a `Message` and never calls `notify(_:)` — there is no
-///   `ChatUpdate` case for it, by design (see `ChatUpdate.swift` and
-///   `InboundEvent.statusChanged`'s doc comment, `ci-status-out-of-band`).
+/// - Status (`statusChanged`) is out-of-band: it updates `statuses` and
+///   notifies `.statusChanged(participantID:)`, but never produces a
+///   `Message` and never commits a draft (`ci-status-out-of-band`). The
+///   notification is what lets a view draw the line at all — see
+///   `ChatUpdate.statusChanged`'s doc for why "out-of-band" was never meant
+///   to mean "unobservable".
 @MainActor
 public final class ObservableChatViewModel: ChatViewModel {
 
@@ -38,9 +40,9 @@ public final class ObservableChatViewModel: ChatViewModel {
     // MARK: Extra state (outside the `ChatViewModel` contract)
 
     /// The most recent status per participant, keyed by participant id.
-    /// Out-of-band, deliberately: see the type doc above. A host reads this
-    /// directly (e.g. from the same runloop tick that handles
-    /// `.activeDraftsChanged`) rather than through `ChatStateObserver`.
+    /// Out-of-band in the sense that matters — no `Message`, no draft — but
+    /// observed like everything else: `.statusChanged(participantID:)` fires
+    /// and the observer re-reads this map.
     public private(set) var statuses: [String: ChatStatus] = [:]
 
     /// The local participant this view model submits messages as, used to
@@ -224,16 +226,17 @@ public final class ObservableChatViewModel: ChatViewModel {
             notify(.typingChanged)
 
         case .statusChanged(let participantID, let status):
-            // Out-of-band by design: update held state only. No `Message` is
-            // produced and `notify(_:)` is never called for this case — see
-            // `ObservableChatViewModelTests
-            // .statusChangedNeverProducesAMessageOrNotification`, which fails
-            // if this ever routes through `notify(_:)` or `messages`.
+            // Out-of-band: no `Message` is produced and no draft is touched —
+            // `ObservableChatViewModelTests.statusChangedIsOutOfBand` fails if
+            // this ever reaches `messages` or `activeDrafts`. It does notify,
+            // because a status nobody can observe is a status that does not
+            // render; that was the actual defect, not the invariant.
             if let status {
                 statuses[participantID] = status
             } else {
                 statuses.removeValue(forKey: participantID)
             }
+            notify(.statusChanged(participantID: participantID))
 
         case .widgetPresented(let messageID, let widget):
             // Task 7/8 seam: `messageID` isn't retained anywhere yet, so a

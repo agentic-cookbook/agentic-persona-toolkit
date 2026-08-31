@@ -34,6 +34,15 @@ public protocol ChatViewModel: AnyObject, Sendable {
     /// last saw them.
     var commandActivity: [CommandActivity] { get }
 
+    /// The most recent status per participant, keyed by participant id. A
+    /// participant absent from the map is doing nothing right now.
+    ///
+    /// On the protocol, not just on `ObservableChatViewModel`, because the
+    /// status line is part of the chat surface every conformer has to be able
+    /// to drive: `InlineChatView` reads this on `ChatUpdate.statusChanged`,
+    /// and it holds `any ChatViewModel`.
+    var statuses: [String: ChatStatus] { get }
+
     func addObserver(_ observer: any ChatStateObserver)
     func removeObserver(_ observer: any ChatStateObserver)
 

@@ -35,10 +35,20 @@ public final class MessageBubbleView: NSView, Themeable {
     private var textWidthConstraint: NSLayoutConstraint!
     private var textHeightConstraint: NSLayoutConstraint!
     private var bubbleWidthConstraint: NSLayoutConstraint!
+    private var textLeading: NSLayoutConstraint!
+    private var textTrailing: NSLayoutConstraint!
+    private var textTop: NSLayoutConstraint!
+    private var textBottom: NSLayoutConstraint!
 
     private static let horizontalPadding: CGFloat = 12
     private static let verticalPadding: CGFloat = 8
+    private static let cornerRadius: CGFloat = 12
     private static let failureBorderWidth: CGFloat = 1
+
+    /// Whether the active theme asked for no bubble fill, so this message is
+    /// drawn as a flat transcript line. Internal so tests can assert on the
+    /// geometry rule without reading back a layer.
+    private(set) var isFlat = false
 
     /// The block appended while a message is still streaming. A character
     /// rather than a blinking sublayer: it goes into the same attributed
@@ -71,7 +81,7 @@ public final class MessageBubbleView: NSView, Themeable {
         super.init(frame: .zero)
 
         wantsLayer = true
-        layer?.cornerRadius = 12
+        layer?.cornerRadius = Self.cornerRadius
         translatesAutoresizingMaskIntoConstraints = false
 
         textView.isEditable = false
@@ -90,11 +100,16 @@ public final class MessageBubbleView: NSView, Themeable {
         textHeightConstraint = textView.heightAnchor.constraint(equalToConstant: 20)
         bubbleWidthConstraint = widthAnchor.constraint(equalToConstant: maxWidth)
 
+        textTop = textView.topAnchor.constraint(equalTo: topAnchor, constant: vPad)
+        textLeading = textView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: hPad)
+        textTrailing = textView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -hPad)
+        textBottom = textView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -vPad)
+
         NSLayoutConstraint.activate([
-            textView.topAnchor.constraint(equalTo: topAnchor, constant: vPad),
-            textView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: hPad),
-            textView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -hPad),
-            textView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -vPad),
+            textTop,
+            textLeading,
+            textTrailing,
+            textBottom,
             textWidthConstraint,
             textHeightConstraint,
             bubbleWidthConstraint
@@ -108,10 +123,29 @@ public final class MessageBubbleView: NSView, Themeable {
 
     public func applyTheme(_ palette: SemanticPalette) {
         let bubbleRole: ThemeRole = isLocalUser ? .userBubble : .personaBubble
+        let borderRole: ThemeRole = isLocalUser ? .userBubbleBorder : .personaBubbleBorder
         let textColor = palette.nsColor(isLocalUser ? .userText : .personaText)
+        let fill = palette.color(bubbleRole)
         layer?.backgroundColor = palette.nsColor(bubbleRole).cgColor
 
-        let hPad = Self.horizontalPadding
+        // A theme that asks for no fill is asking for no bubble, and the
+        // padding and the corner radius are part of the bubble. Web says the
+        // same thing by omission: `.pc-bubble` in `chat/src/css/base.css` sets
+        // width, wrapping and position and *nothing else* — no background, no
+        // padding, no radius — so a theme that declares no `--pc-persona-bg`
+        // (`old-school-terminal`, `terminal`, `crt-monitor`) renders a flat
+        // transcript. Keeping the geometry here would leave those themes with
+        // an invisible box holding their text 12 points off the edge that
+        // every other line aligns to.
+        isFlat = fill.alpha <= 0.001
+        let hPad = isFlat ? 0 : Self.horizontalPadding
+        let vPad = isFlat ? 0 : Self.verticalPadding
+        layer?.cornerRadius = isFlat ? 0 : Self.cornerRadius
+        textLeading.constant = hPad
+        textTrailing.constant = -hPad
+        textTop.constant = vPad
+        textBottom.constant = -vPad
+
         let textMaxWidth = max(maxWidth - hPad * 2, 1)
 
         let attrString = NSMutableAttributedString(
@@ -142,6 +176,18 @@ public final class MessageBubbleView: NSView, Themeable {
                 string: "\n" + reason,
                 attributes: [.font: palette.font(.caption), .foregroundColor: palette.nsColor(.danger)]
             ))
+        } else if !isFlat, palette.declares(borderRole), palette.color(borderRole).alpha > 0.001 {
+            // Themes that draw an outlined bubble *declare* `*BubbleBorder`
+            // (`charcoal`, `techy`, `fishlamp`, `mikefullerton` …). It was
+            // ported for all of them and read by nothing.
+            //
+            // `declares`, not merely "resolves to something visible": every
+            // role derives an opaque colour when a theme leaves it out, so
+            // reading the resolved colour would put a hairline around every
+            // bubble in every theme — including the fifteen that say nothing
+            // about one and, on the website, draw none.
+            layer?.borderWidth = 1
+            layer?.borderColor = palette.nsColor(borderRole).cgColor
         } else {
             layer?.borderWidth = 0
             layer?.borderColor = nil

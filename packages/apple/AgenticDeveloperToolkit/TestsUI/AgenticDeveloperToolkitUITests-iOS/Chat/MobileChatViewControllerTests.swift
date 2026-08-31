@@ -51,17 +51,33 @@ struct MobileChatViewControllerTests {
         #expect(stack?.arrangedSubviews.first is MobileMessageBubbleView)
     }
 
-    @Test("shows a MobileThinkingIndicatorView while a participant is typing, and removes it once typing stops")
-    func showsThinkingIndicatorWhileTyping() {
+    /// The mobile twin of `InlineChatViewTests.typingDrivesThePersistentStatusLine`:
+    /// the indicator is a permanent fixture of the status row above the
+    /// composer, driven by typing, never a transcript entry that is built and
+    /// thrown away on the next rebuild — which is why the phase machine used
+    /// to be stuck on its first frame.
+    @Test("typing drives the persistent status line, not a transcript entry")
+    func typingDrivesThePersistentStatusLine() {
         _ = makeManager(activeThemeID: BuiltInThemes.solarizedDark.id)
         let (controller, viewModel, _) = makeController()
-        let stack = transcriptStack(of: controller)
+
+        var configuration = MobileThinkingIndicatorConfiguration()
+        configuration.words = [ChatStatusWordPair(present: "fleeping", past: "fleeped")]
+        controller.thinkingIndicator.configure(configuration)
+
+        #expect(controller.thinkingIndicator.superview != nil)
+        #expect(controller.thinkingIndicator.currentPhase == .idle)
 
         viewModel.handle(.typing(participantID: "persona-1", isTyping: true))
-        #expect(stack?.arrangedSubviews.contains { $0 is MobileThinkingIndicatorView } == true)
+        #expect(controller.thinkingIndicator.currentPhase == .thinking)
+        #expect(controller.thinkingIndicator.label.text?.contains("fleeping") == true)
+        // Never in the transcript: a status line that scrolled away with the
+        // messages would be gone the moment the reply it describes arrives.
+        #expect(transcriptStack(of: controller)?.arrangedSubviews.contains { $0 is MobileThinkingIndicatorView } == false)
 
         viewModel.handle(.typing(participantID: "persona-1", isTyping: false))
-        #expect(stack?.arrangedSubviews.contains { $0 is MobileThinkingIndicatorView } == false)
+        #expect(controller.thinkingIndicator.currentPhase == .done)
+        #expect(controller.thinkingIndicator.label.text?.contains("fleeped") == true)
     }
 
     @Test("renders an in-progress draft as a bubble")

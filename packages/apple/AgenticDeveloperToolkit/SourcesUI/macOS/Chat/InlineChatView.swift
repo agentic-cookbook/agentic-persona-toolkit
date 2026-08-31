@@ -43,11 +43,33 @@ public final class InlineChatView: NSView, ChatStateObserver, Themeable, NSTextF
         }
     }
 
+    /// The status line, held for the life of the view rather than rebuilt
+    /// with the transcript.
+    ///
+    /// Public because its vocabulary is the host's to author: a host calls
+    /// `thinkingIndicator.configure(_:)` with its own `ChatStatusWordPair`s,
+    /// glyph frames and idle phrase, exactly as web passes `labels` and
+    /// `glyph` as props to `TypingIndicator`. Left unconfigured it draws the
+    /// three pulsing dots, which is the documented fallback.
+    ///
+    /// It used to be built fresh inside `rebuildTranscript()` and thrown away
+    /// on the next rebuild. That is why no phase ever advanced and no elapsed
+    /// time ever accumulated: `ThinkingPhase.Machine` has to outlive a single
+    /// message arriving, and a view rebuilt on every `ChatUpdate` cannot.
+    public let thinkingIndicator = ThinkingIndicatorView()
+
+    /// Presentation a `ColorTheme` cannot carry — the send affordance's glyph,
+    /// whether the composer is fenced off by a rule, the composer's corner
+    /// radius, the placeholder. Defaulted to today's appearance, so an
+    /// existing call site is unchanged.
+    public var chrome: InlineChatChrome = InlineChatChrome() { didSet { applyChrome() } }
+
     let transcriptScroll = ThemedScrollView()
     private let transcriptStack = NSStackView()
-    private let inputField = ThemedTextField()
+    private let inputField = ChatInputField()
     private let sendButton = NSButton()
     private let divider = ThemedSeparatorView()
+    private let statusRow = NSView()
 
     private var themeObserver: ThemePaletteObserver?
     private var isAtBottom = true
@@ -101,7 +123,9 @@ public final class InlineChatView: NSView, ChatStateObserver, Themeable, NSTextF
         setupViews()
         viewModel.addObserver(self)
         themeObserver = ThemePaletteObserver { [weak self] palette in self?.applyTheme(palette) }
+        applyChrome()
         rebuildTranscript()
+        refreshStatus()
         clickOutsideMonitor = NSEvent.addLocalMonitorForEvents(matching: .leftMouseDown) { [weak self] event in
             self?.disengageIfClickOutside(event)
             return event
@@ -142,7 +166,6 @@ public final class InlineChatView: NSView, ChatStateObserver, Themeable, NSTextF
             self, selector: #selector(transcriptDidScroll),
             name: NSView.boundsDidChangeNotification, object: transcriptScroll.contentView)
 
-        inputField.placeholderString = "Type a message..."
         inputField.delegate = self
         inputField.translatesAutoresizingMaskIntoConstraints = false
 
@@ -159,7 +182,18 @@ public final class InlineChatView: NSView, ChatStateObserver, Themeable, NSTextF
         inputRow.edgeInsets = NSEdgeInsets(top: 14, left: 16, bottom: 14, right: 16)
         inputRow.translatesAutoresizingMaskIntoConstraints = false
 
+        // Its own row between the transcript and the composer, outside the
+        // scroll view — web's `.pc-typing`, which is a sibling of
+        // `.pc-transcript` and not a child of it. Inside the transcript the
+        // line scrolled away with the history and could be missed entirely on
+        // a long conversation; here it is always where the eye already is,
+        // just above where the user types.
+        statusRow.translatesAutoresizingMaskIntoConstraints = false
+        thinkingIndicator.translatesAutoresizingMaskIntoConstraints = false
+        statusRow.addSubview(thinkingIndicator)
+
         addSubview(transcriptScroll)
+        addSubview(statusRow)
         addSubview(divider)
         addSubview(inputRow)
 
@@ -181,7 +215,15 @@ public final class InlineChatView: NSView, ChatStateObserver, Themeable, NSTextF
             transcriptScroll.trailingAnchor.constraint(equalTo: trailingAnchor),
             transcriptStack.widthAnchor.constraint(equalTo: transcriptScroll.widthAnchor),
 
-            divider.topAnchor.constraint(equalTo: transcriptScroll.bottomAnchor),
+            statusRow.topAnchor.constraint(equalTo: transcriptScroll.bottomAnchor),
+            statusRow.leadingAnchor.constraint(equalTo: leadingAnchor),
+            statusRow.trailingAnchor.constraint(equalTo: trailingAnchor),
+            thinkingIndicator.leadingAnchor.constraint(equalTo: statusRow.leadingAnchor, constant: 12),
+            thinkingIndicator.trailingAnchor.constraint(lessThanOrEqualTo: statusRow.trailingAnchor, constant: -12),
+            thinkingIndicator.topAnchor.constraint(equalTo: statusRow.topAnchor),
+            thinkingIndicator.bottomAnchor.constraint(equalTo: statusRow.bottomAnchor),
+
+            divider.topAnchor.constraint(equalTo: statusRow.bottomAnchor),
             divider.leadingAnchor.constraint(equalTo: leadingAnchor),
             divider.trailingAnchor.constraint(equalTo: trailingAnchor),
 
@@ -195,6 +237,38 @@ public final class InlineChatView: NSView, ChatStateObserver, Themeable, NSTextF
     public func applyTheme(_ palette: SemanticPalette) {
         wantsLayer = true
         layer?.backgroundColor = palette.nsColor(.chatSurface).cgColor
+        // The scroll view defaults to `.windowBackground`, which is the right
+        // answer for a list in a window and the wrong one here: the transcript
+        // *is* the chat surface, and against a theme whose `chatSurface`
+        // differs from its window fill it read as a panel sitting on the chat
+        // rather than as the chat itself.
+        transcriptScroll.backgroundColor = palette.nsColor(.chatSurface)
+        statusRow.wantsLayer = true
+        statusRow.layer?.backgroundColor = palette.nsColor(.chatSurface).cgColor
+        sendButton.contentTintColor = palette.nsColor(.sendButton)
+        if let glyph = chrome.sendGlyph {
+            sendButton.attributedTitle = NSAttributedString(string: glyph, attributes: [
+                .foregroundColor: palette.nsColor(.sendButton),
+                .font: palette.font(.title)
+            ])
+        }
+    }
+
+    /// Applies the parts of the look that live on `chrome` rather than in the
+    /// palette. Idempotent, and safe to call before the first layout.
+    private func applyChrome() {
+        divider.isHidden = !chrome.showsDivider
+        inputField.cornerRadius = chrome.inputCornerRadius
+        inputField.placeholderString = chrome.inputPlaceholder
+        if let glyph = chrome.sendGlyph {
+            sendButton.image = nil
+            sendButton.title = glyph
+        } else {
+            sendButton.title = ""
+            sendButton.image = NSImage(
+                systemSymbolName: "arrow.up.circle.fill", accessibilityDescription: "Send")
+        }
+        applyTheme(ThemePaletteObserver.currentPalette)
     }
 
     public override func layout() {
@@ -211,8 +285,17 @@ public final class InlineChatView: NSView, ChatStateObserver, Themeable, NSTextF
 
     public func chatDidUpdate(_ update: ChatUpdate) {
         switch update {
-        case .messagesChanged, .activeDraftsChanged, .typingChanged, .commandActivityChanged:
+        case .messagesChanged, .activeDraftsChanged, .commandActivityChanged:
             rebuildTranscript()
+        case .typingChanged:
+            rebuildTranscript()
+            refreshStatus()
+        case .statusChanged:
+            // Deliberately *not* a transcript rebuild: a status is not a
+            // message, and rebuilding the whole stack four times a turn to
+            // repaint one line is what made the old transient indicator
+            // impossible to animate.
+            refreshStatus()
         case .participantsChanged, .readMarkersChanged, .pendingPermissionsChanged,
              .pendingWidgetsChanged, .displayConfigChanged, .error:
             // Task 8 seams: a participant rail, unread badges from
@@ -250,14 +333,33 @@ public final class InlineChatView: NSView, ChatStateObserver, Themeable, NSTextF
             transcriptStack.addArrangedSubview(ToolCallPillView(activity: activity))
         }
 
-        if !viewModel.typingParticipants.isEmpty {
-            let indicator = ThinkingIndicatorView()
-            transcriptStack.addArrangedSubview(indicator)
-            indicator.startAnimating()
-        }
-
         if isAtBottom {
             DispatchQueue.main.async { [weak self] in self?.scrollToBottom() }
+        }
+    }
+
+    /// Pushes the current remote status into the persistent status line.
+    ///
+    /// The local participant is skipped: a status is what someone *else* is
+    /// doing, and echoing the user's own back at them is not something web
+    /// does either. With several remote participants the map has no ordering,
+    /// so the ids are sorted — an arbitrary but stable pick beats a line that
+    /// flickers between two personas as the dictionary rehashes.
+    ///
+    /// `typingParticipants` stays as a fallback rather than the driver it used
+    /// to be: a backend that reports typing but emits no `statusChanged` still
+    /// gets a spinning line, while one that emits real statuses gets its own
+    /// authored words instead of a synthesised "think".
+    private func refreshStatus() {
+        let remote = viewModel.statuses
+            .filter { $0.key != localParticipantID }
+            .sorted { $0.key < $1.key }
+        if let status = remote.first?.value {
+            thinkingIndicator.update(status: status)
+        } else if viewModel.typingParticipants.contains(where: { $0 != localParticipantID }) {
+            thinkingIndicator.update(status: ChatStatus(kind: .think))
+        } else {
+            thinkingIndicator.update(status: nil)
         }
     }
 
@@ -335,9 +437,11 @@ public final class InlineChatView: NSView, ChatStateObserver, Themeable, NSTextF
 
     public func controlTextDidBeginEditing(_ obj: Notification) {
         engaged = true
+        inputField.isFocused = true
     }
 
     public func controlTextDidEndEditing(_ obj: Notification) {
+        inputField.isFocused = false
         guard !shouldStayEngaged(afterFocusMovingTo: window?.firstResponder) else { return }
         engaged = false
     }

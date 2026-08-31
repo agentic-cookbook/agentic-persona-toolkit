@@ -97,6 +97,12 @@ struct MessageBubbleViewTests {
         #expect(attributes[.foregroundColor] as? NSColor == palette.nsColor(.danger))
     }
 
+    // MARK: Bubble outline
+
+    /// Solarized Dark declares no `personaBubbleBorder`, and on the website a
+    /// theme that declares none draws none — every role still *derives* an
+    /// opaque colour, so the outline has to follow what the theme said, not
+    /// what its palette resolves to.
     @Test("a delivered message has no border and no failure text")
     func deliveredMessageHasNoBorder() {
         _ = makeManager(activeThemeID: BuiltInThemes.solarizedDark.id)
@@ -107,6 +113,30 @@ struct MessageBubbleViewTests {
 
         #expect((bubble.layer?.borderWidth ?? 0) == 0)
         #expect(bubble.renderedText.string == "hi")
+    }
+
+    /// The other half of that rule: `techy` ports web's
+    /// `--pc-persona-border: rgba(0, 255, 136, 0.3)`, so its persona bubbles
+    /// are outlined in exactly that colour.
+    @Test("a theme that declares a bubble border draws it in that color")
+    func declaredBubbleBorderIsDrawn() throws {
+        // By name rather than by symbol: the web-ported themes are
+        // `internal` on `BuiltInThemes`, and `all` is the public way in.
+        let techy = try #require(BuiltInThemes.all.first { $0.name == "Techy" })
+        // Held, not discarded: `ThemeManager.shared` is weak, so a manager
+        // nobody retains is gone before the bubble asks for its palette and
+        // the view falls back to the Solarized Dark default.
+        let manager = makeManager(activeThemeID: techy.id)
+        let palette = manager.currentPalette
+        let message = FixtureMessage(
+            id: "1", localID: "1", senderID: "persona-1", text: "hi", timestamp: nil,
+            deliveryStatus: .received)
+        let bubble = MessageBubbleView(message: message, maxWidth: 300, isLocalUser: false)
+
+        #expect(palette.declares(.personaBubbleBorder))
+        #expect(bubble.layer?.borderWidth == 1)
+        #expect(bubble.layer?.borderColor == palette.nsColor(.personaBubbleBorder).cgColor)
+        withExtendedLifetime(manager) {}
     }
 
     @Test("a composing message appends a streaming caret in the persona-name color")
