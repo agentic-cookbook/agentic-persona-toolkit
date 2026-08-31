@@ -37,20 +37,35 @@ describe("playTimeline", () => {
     expect(h.endsAt).toBeCloseTo(12.1, 12);
   });
 
-  it("snaps the mouth family at 0 and back at 1.85, never tweening it", () => {
+  it("snaps the mouth family at 0.35 and back at 1.85, never tweening it", () => {
     const c = ctx();
     expect(c.channels.get("mouth.family")).toBe("mouth");   // the rest seed
     playTimeline(c, "yawn", 0);
-    // The snap is authored at `at: 0`, sharing its instant with the 0.85s morph
-    // that opens the O; it survives that morph's `add` only because a
+    // The yawn spends its first 0.35s FLATTENING the polyline mouth, and only
+    // then crosses into `mouthO`. That ordering is the whole point: a family
+    // crossing is a snap, so it is only invisible when the two families already
+    // agree, and the flatten is what makes them agree. Assert the mouth is
+    // still in its own family mid-flatten, or a regression that moved the snap
+    // back to `at: 0` would pass everything below unchanged.
+    step(c, 0, 0.3);
+    expect(c.channels.get("mouth.family")).toBe("mouth");
+    const flattening = c.channels.get("mouth.shape");
+    expect(flattening).not.toBe("M187,233L200,246L213,233");   // left the rest V
+    expect(flattening).not.toBe("M189,235L200,235L211,235");   // not there yet
+    // The snap is authored at `at: 0.35`, sharing its instant with the 0.5s
+    // morph that opens the O; it survives that morph's `add` only because a
     // duration-0 tween lands at add time (Task 10, rule 4).
-    step(c, 0, 0.5);
+    step(c, 0.3, 0.5);
     expect(c.channels.get("mouth.family")).toBe("mouthO");
-    // The EXACT curve the 0.85s open reaches at 0.5, not merely "some closed
+    // The EXACT curve the 0.5s open reaches at 0.5, not merely "some closed
     // path". `/^M.*Z$/` is true of the closing snap too, so it stays true when
     // the steps are expanded in the wrong order and the open never happens.
+    // Derived, not copied off a run: 0.15s of 0.5 is p = 0.3, and `power2.in`
+    // is GSAP's naming for a CUBIC ease, so the morph is 0.3^3 = 0.027 of the
+    // way from the closed slit to the small O — e.g. its half-height is
+    // 1.4 + 0.027 * (11 - 1.4) = 1.6592, giving 235.027 +/- 1.6592.
     expect(c.channels.get("mouth.shape")).toBe(
-      "M200,231.849542C206.730236,231.849542,212.185834,233.351128,212.185834,235.203542C212.185834,237.055956,206.730236,238.557541,200,238.557541C193.269764,238.557541,187.814166,237.055956,187.814166,235.203542C187.814166,233.351128,193.269764,231.849542,200,231.849542Z",
+      "M200,233.3678C207.120252,233.3678,212.892,234.110624,212.892,235.027C212.892,235.943376,207.120252,236.6862,200,236.6862C192.879748,236.6862,187.108,235.943376,187.108,235.027C187.108,234.110624,192.879748,233.3678,200,233.3678Z",
     );
     step(c, 0.5, 1.8);
     expect(c.channels.get("mouth.family")).toBe("mouthO");   // still open at 1.8
@@ -67,8 +82,9 @@ describe("playTimeline", () => {
     // A step that DID cross families would not throw — `lerpValue` snaps such a
     // pair (Task 10) — so "it ran without throwing" proves nothing here. What a
     // snap cannot fake is movement: it writes one value and holds it. Sampling
-    // inside the 0.85s open and requiring every sample to differ is therefore
-    // the assertion, and it fails the moment any of these steps stops morphing.
+    // across the 0.35s flatten and the 0.5s open that follows it, and requiring
+    // every sample to differ, is therefore the assertion — it fails the moment
+    // either of those morphs degenerates into a snap.
     const seen = new Set<unknown>();
     let at = 0;
     for (const t of [0.2, 0.4, 0.6, 0.8]) {
