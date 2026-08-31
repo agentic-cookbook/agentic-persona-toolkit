@@ -95,4 +95,18 @@ describe("tweens", () => {
     tw.tick(0.85);
     expect(tw.active()).toBe(0);
   });
+
+  it("starts from an explicit `from` instead of the channel's current value", () => {
+    // `from` is the escape hatch for a tween that must not begin where the
+    // channel happens to sit — a mood cross-fade that always starts neutral,
+    // say. Without it the tween would read 5 and land halfway at 7.5; with it
+    // the channel's value is ignored entirely and halfway is 5.
+    const ch = createChannels({ x: 5 });
+    const tw = createTweens(ch);
+    tw.add({ channel: "x", from: 0, to: 10, duration: 1, ease: "none" }, 0);
+    tw.tick(0.5);
+    near(ch.get("x") as number, 5);
+    tw.tick(1);
+    near(ch.get("x") as number, 10);
+  });
 });
