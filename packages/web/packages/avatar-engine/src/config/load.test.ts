@@ -73,6 +73,23 @@ describe("loadConfig", () => {
     expect(() => loadConfig(bad)).toThrow(/schemaVersion/);
   });
 
+  it("expands a group all the way to channels the rig actually reads", () => {
+    const c = loadConfig(clone());
+    // `iris.scale` names `irisLeft.scale` / `irisRight.scale`, and each of THOSE
+    // is the derived uniform-scale group -- so a single-level expand stops on a
+    // name that is in `concrete` (because `scale` is in ANIMATABLE) but has no
+    // `rest` entry and is read by nothing. `iris.scale` is in all fourteen
+    // poses, so stopping there would mean the iris never scales, with no error
+    // anywhere to say so. The `rest` assertion is the one that generalises:
+    // every name `expand` yields must be a channel the rig actually holds.
+    expect(c.expand("iris.scale")).toEqual([
+      "irisLeft.scaleX", "irisLeft.scaleY", "irisRight.scaleX", "irisRight.scaleY",
+    ]);
+    for (const channel of c.expand("iris.scale")) {
+      expect(c.rest.has(channel)).toBe(true);
+    }
+  });
+
   it("rejects a group naming a channel that does not exist", () => {
     const bad = clone();
     (bad.rig as BadRig).groups["eye.scaleY"] = ["nope.scaleY"];
