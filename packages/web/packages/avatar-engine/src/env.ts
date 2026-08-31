@@ -1,16 +1,21 @@
 /**
- * Everything the engine needs from the outside world, and nothing more. Each
- * default is deliberately the *inert* answer, so an engine constructed with no
- * environment at all still runs deterministically — which is exactly what the
- * golden recorder wants.
+ * Everything the engine needs from the outside world, and nothing more.
+ *
+ * There is deliberately no `now()` here. The engine's only clock is the argument
+ * to `tick`, so an environment that could report a *second*, unrelated time
+ * would be an invitation to the bug Ruling 48 removed — the golden recorder
+ * driving frames on scenario time while every command it scripted landed at the
+ * environment's default of zero. One time source cannot disagree with itself.
+ *
+ * The one default left is deliberately the *inert* answer, so an engine
+ * constructed with no environment at all still runs deterministically — which is
+ * exactly what the golden recorder wants.
  */
 export interface Environment {
-  now(): number;
   reducedMotion(): boolean;
 }
 
 export const defaultEnvironment: Environment = {
-  now: () => 0,
   reducedMotion: () => false,
 };
 
@@ -27,7 +32,6 @@ export function browserEnvironment(): Environment {
     matchMedia?: (query: string) => { matches: boolean };
   }).matchMedia;
   return {
-    now: () => performance.now() / 1000,
     reducedMotion: () =>
       typeof matchMedia === "function" &&
       matchMedia("(prefers-reduced-motion: reduce)").matches,

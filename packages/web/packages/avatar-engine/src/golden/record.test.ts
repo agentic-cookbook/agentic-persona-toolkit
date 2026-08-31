@@ -35,10 +35,29 @@ describe("recordScenario", () => {
     expect(recordScenario(config, yawn)).toBe(recordScenario(config, yawn));
   });
 
-  it("runs every scenario without throwing", () => {
+  it("runs every scenario, and a scripted command unfolds over time", () => {
     for (const s of SCENARIOS) {
       expect(recordScenario(config, s).length).toBeGreaterThan(0);
     }
+
+    // `length > 0` is not a test. It passed while every scripted command in five
+    // of these nine scenarios landed already expired and snapped to its end
+    // state inside a single frame (Ruling 48) — the goldens were wrong and the
+    // suite was green. What that bug destroyed is DURATION, so duration is what
+    // is asserted here: the yawn is played at t=1 and takes about two and a half
+    // seconds (`engine.test.ts` pins that), so the mouth it drives must still be
+    // TRAVELLING a full second later. The window is deliberately t=2..3.4 rather
+    // than one starting at the command: a frozen command clock does not stop the
+    // mouth from moving right after the play, it stops it from moving *later*,
+    // because the tween is created already past its own deadline and completes
+    // in a single frame. Measured on this config the window holds 42 distinct
+    // mouth shapes; with the command clock frozen it holds exactly 1.
+    const frames = recordScenario(config, yawn).trimEnd().split("\n").map((l) => JSON.parse(l));
+    const shapes = new Set<string>();
+    for (let f = 120; f <= 204; f += 1) {
+      shapes.add(JSON.stringify(frames[f].items.find((i: { id: string }) => i.id === "mouth").pts));
+    }
+    expect(shapes.size).toBeGreaterThan(10);
   });
 
   it("covers every mood in poses.json", () => {

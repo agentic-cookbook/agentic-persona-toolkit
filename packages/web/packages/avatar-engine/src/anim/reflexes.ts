@@ -462,10 +462,11 @@ export function createReflexes(deps: ReflexDeps): Reflexes {
       at(when + b.speech.mutterMs / 1000, mutterTick);
       if (!lastReduced) startEffect(lastMood, when);
       pinprickTick(when);
-      // `first` is absolute, so an omitted one means "0.4", not "0.4 from now".
-      // Under a host clock in the hundreds of thousands of seconds that is a
-      // million catch-up iterations on the first tick, capped by the scheduler's
-      // 1000-iteration guard into ~1000 spurious polls and a visible hitch.
+      // `first` is absolute, so an omitted one means "0.4", not "0.4 later".
+      // This arms in the MIDDLE of a run — `when` is whatever moment the mood
+      // changed at — so an unanchored deadline is one that went by long ago, and
+      // the scheduler's catch-up loop runs to its 1000-iteration guard instead
+      // of the poll: ~1000 spurious polls and a visible hitch.
       pollId = scheduler.every(poll, pollTick, { first: when + poll });
     },
 

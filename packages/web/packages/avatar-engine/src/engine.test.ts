@@ -79,6 +79,57 @@ describe("engine", () => {
     expect(e.tick(2.5).find((i) => i.id === "mouth")!.d).toBe(ASLEEP);
   });
 
+  it("stamps a command with the frame that just passed, not a clock of its own", () => {
+    // The regression guard for Ruling 48, and the shape of the bug it closed:
+    // `play` issued two seconds in must still take the yawn its configured time
+    // to reach the closing shape. An engine that stamped commands from a second
+    // clock — one the golden recorder never advanced — would compute a deadline
+    // two seconds in the PAST and snap to the end state on the very next frame.
+    const ASLEEP = "M189,235L200,235L211,235";
+    const e = engine();
+    for (let t = 0; t <= 2; t += 1 / 60) e.tick(t);
+    e.play("yawn");
+    let firstAsleep = Infinity;
+    for (let f = 120; f <= 300; f += 1) {
+      const mouth = e.tick(f / 60).find((i) => i.id === "mouth")!.d;
+      if (mouth === ASLEEP && firstAsleep === Infinity) firstAsleep = f / 60 - 2;
+    }
+    // Bounded on BOTH sides. The upper bound is what the timeline is worth; the
+    // lower bound is the whole point — under the old two-clock engine this
+    // measured a single frame.
+    expect(firstAsleep).toBeGreaterThan(1);
+    expect(firstAsleep).toBeLessThanOrEqual(2.6);
+  });
+
+  it("normalises the host's epoch away", () => {
+    // A browser drives `tick` from `performance.now() / 1000`, a Mac from
+    // `CACurrentMediaTime()` — both seconds since some arbitrary boot-ish epoch,
+    // and neither anywhere near zero. The engine anchors on its own first frame,
+    // so the same frame SEQUENCE composes the same list whatever the epoch, and
+    // a command issued before that first frame lands at the start rather than an
+    // epoch-length interval in the past.
+    const run = (epoch: number): number[][] => {
+      const e = engine();
+      e.setMood("sad");
+      let last = e.tick(epoch);
+      for (let f = 1; f <= 120; f += 1) last = e.tick(epoch + f / 60);
+      return last.map((i) => [...i.m]);
+    };
+    const here = run(0);
+    const faraway = run(1e6);
+    expect(faraway).toHaveLength(here.length);
+    // Compared numerically, and honestly so. `epoch + f / 60` is a double, so a
+    // six-digit epoch costs the fraction a few of its low bits and the
+    // normalised clock lands within ~1e-9 of the frame time rather than exactly
+    // on it. The claim is that the epoch does not MATTER, at the same 1e-6 the
+    // golden differ tolerates — not that IEEE-754 addition is associative.
+    for (let i = 0; i < here.length; i += 1) {
+      for (let k = 0; k < 6; k += 1) {
+        expect(Math.abs(faraway[i]![k]! - here[i]![k]!)).toBeLessThan(1e-6);
+      }
+    }
+  });
+
   it("picks sayings deterministically from the seed", () => {
     const a = createEngine({ config, seed: 42 });
     const b = createEngine({ config, seed: 42 });

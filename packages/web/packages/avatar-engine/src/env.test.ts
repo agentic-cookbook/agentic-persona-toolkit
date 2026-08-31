@@ -2,12 +2,18 @@ import { describe, expect, it } from "vitest";
 import { browserEnvironment, defaultEnvironment } from "./env";
 
 describe("environment", () => {
-  it("defaults every answer to the inert one", () => {
+  it("defaults every answer to the inert one, and offers no clock", () => {
     // The golden recorder builds an engine with no environment at all and drives
     // it entirely through `tick(now)`. That is only deterministic if each default
     // here is the answer that changes nothing.
-    expect(defaultEnvironment.now()).toBe(0);
     expect(defaultEnvironment.reducedMotion()).toBe(false);
+    // And there is exactly one answer to default. `Environment` carries no
+    // `now()` by construction (Ruling 48) — the engine's only clock is `tick`'s
+    // argument — so this asserts the *absence*, which a type alone cannot: a
+    // host object with a stray `now` would still satisfy the interface
+    // structurally, and this is what would catch one being re-added by habit.
+    expect(Object.keys(defaultEnvironment)).toEqual(["reducedMotion"]);
+    expect(Object.keys(browserEnvironment())).toEqual(["reducedMotion"]);
   });
 
   it("asks the platform for reduced motion with the right query, and reports both answers", () => {
@@ -49,16 +55,5 @@ describe("environment", () => {
     } finally {
       if (saved !== undefined) g.matchMedia = saved;
     }
-  });
-
-  it("reports the host clock in seconds", () => {
-    // `tick` is given seconds, so `now()` owes it seconds. A milliseconds slip
-    // here would run every animation a thousand times fast, and nothing else in
-    // the suite would notice — every other test supplies its own clock.
-    const before = performance.now() / 1000;
-    const t = browserEnvironment().now();
-    const after = performance.now() / 1000;
-    expect(t).toBeGreaterThanOrEqual(before);
-    expect(t).toBeLessThanOrEqual(after);
   });
 });

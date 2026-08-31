@@ -65,34 +65,57 @@ export function createEngine(options: EngineOptions): Engine {
   });
 
   let started = false;
+  /** The host's timestamp at the first frame, and the engine's own clock —
+   *  seconds since that frame.
+   *
+   *  `tick`'s argument is the ONLY time this engine ever reads. There is no
+   *  second clock: a command lands at the time of the frame that just passed,
+   *  which is at most one frame early and is identically one frame early on
+   *  every platform. That is the property a golden can prove. An engine that
+   *  asked the host for the time separately would be exact instead, and the
+   *  exactness would be worthless — the recorder that generates the goldens has
+   *  no host clock to be exact about, so its commands would all land at whatever
+   *  the environment's default happened to be while its frames advanced on
+   *  scenario time, and every scripted command after the first would arrive
+   *  already past its own deadline. That is not hypothetical: it is exactly what
+   *  this engine did until Ruling 48.
+   *
+   *  Normalising to the first frame is the other half. A host is free to drive
+   *  `tick` with `performance.now() / 1000` or `CACurrentMediaTime()` — epochs
+   *  in the thousands — and a command issued before the loop's first frame still
+   *  lands at 0, the start, rather than an epoch-length interval in the past. */
+  let origin = 0;
+  let clock = 0;
 
   return {
     tick(now) {
       if (!started) {
         started = true;
+        origin = now;
         // Arbiter first, and not for tidiness: registration order is scheduler
         // id order is fire order, so the ladder must settle the opening mood
         // before the reflexes' first poll reads it.
-        arbiter.start(now);
-        reflexes.start(now);
+        arbiter.start(0);
+        reflexes.start(0);
       }
+      clock = now - origin;
       // Fixed order, and the same four on every platform: the scheduler fires
       // this frame's events, the arbiter reads the mood they set, the tweens
       // advance to `now`, and only then is the frame composed. Reorder any pair
       // and the two implementations stop producing the same golden.
-      scheduler.tick(now);
-      arbiter.tick(now);
-      tweens.tick(now);
+      scheduler.tick(clock);
+      arbiter.tick(clock);
+      tweens.tick(clock);
       return compose(scene, channels);
     },
 
-    setMood: (mood) => arbiter.setMood(mood, env.now()),
-    notice: () => arbiter.notice(env.now()),
-    look: (x, y) => reflexes.look(x, y, env.now()),
-    poke: () => arbiter.poke(env.now()),
-    say: (text) => arbiter.say(text, env.now()),
+    setMood: (mood) => arbiter.setMood(mood, clock),
+    notice: () => arbiter.notice(clock),
+    look: (x, y) => reflexes.look(x, y, clock),
+    poke: () => arbiter.poke(clock),
+    say: (text) => arbiter.say(text, clock),
     play: (name) => {
-      playTimeline({ config, channels, tweens, scheduler }, name, env.now());
+      playTimeline({ config, channels, tweens, scheduler }, name, clock);
     },
 
     randomSaying: pickSaying,

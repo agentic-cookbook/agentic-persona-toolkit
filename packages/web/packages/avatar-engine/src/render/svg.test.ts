@@ -154,4 +154,32 @@ describe("createSvgRenderer", () => {
     expect(root.children).toHaveLength(n);
     expect(created).toHaveLength(2 * n + 1);
   });
+
+  it("paints exactly what renderToString writes, attribute for attribute", () => {
+    // The two render paths now share one attribute source, and this is what
+    // holds them there. It is the one property the file cares about that neither
+    // describe block above can see: each tests its own path against its own
+    // expectations, so a paint attribute added to one path and not the other
+    // leaves every other test in this file green while the live avatar and the
+    // menu-bar still render diverge.
+    const list = createEngine({ config, seed: 1 }).tick(0);
+    const { doc } = fakeDoc();
+    const r = createSvgRenderer(config, doc);
+    const root = r.element as unknown as FakeEl;
+    r.render(list);
+
+    const fromString = [...renderToString(config, list).matchAll(/<path ([^>]*)\/>/g)]
+      .map((m) => Object.fromEntries(
+        [...m[1]!.matchAll(/([\w-]+)="([^"]*)"/g)].map((a) => [a[1]!, a[2]!]),
+      ));
+
+    expect(fromString).toHaveLength(root.children.length);
+    for (let i = 0; i < fromString.length; i += 1) {
+      expect(fromString[i]).toEqual(root.children[i]!.attrs);
+    }
+    // Both branches are actually exercised, so the agreement above is not the
+    // agreement of two paths that only ever saw stroked shapes.
+    expect(list.some((i) => i.paint.fill)).toBe(true);
+    expect(list.some((i) => !i.paint.fill)).toBe(true);
+  });
 });

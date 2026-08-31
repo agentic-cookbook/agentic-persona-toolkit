@@ -115,9 +115,12 @@ export function createArbiter(deps: ArbiterDeps): Arbiter {
       // what makes the evaluation instants frame-rate independent.
       //
       // `first` is absolute and MUST be anchored on `now`. Omitting it sets the
-      // first instant to the INTERVAL (0.4), and under a host clock in the
-      // hundreds of thousands of seconds the catch-up loop would then run a
-      // million times on the very first tick.
+      // first instant to the INTERVAL (0.4) on the engine's own clock, which is
+      // the same instant only when `start` runs at zero. It does today — Ruling
+      // 48 normalises the clock to the first frame — but `start` is public and
+      // re-callable, and the identical spelling in the reflexes re-arms in the
+      // middle of a run, where an unanchored deadline is one already in the past
+      // and the catch-up loop runs instead of the poll. One rule, both places.
       evaluate(now);
       if (pollId !== null) scheduler.cancel(pollId);
       pollId = scheduler.every(poll, (at) => evaluate(at), { first: now + poll });
