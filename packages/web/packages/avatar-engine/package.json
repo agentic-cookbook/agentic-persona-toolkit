@@ -7,8 +7,16 @@
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
-    ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" },
-    "./render/svg": { "types": "./dist/render/svg.d.ts", "import": "./dist/render/svg.js" }
+    ".": {
+      "types": "./dist/index.d.ts",
+      "development": "./src/index.ts",
+      "import": "./dist/index.js"
+    },
+    "./render/svg": {
+      "types": "./dist/render/svg.d.ts",
+      "development": "./src/render/svg.ts",
+      "import": "./dist/render/svg.js"
+    }
   },
   "files": ["dist"],
   "scripts": {
