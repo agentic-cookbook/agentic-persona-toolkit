@@ -39,7 +39,28 @@ function lerpValue(from: ChannelValue, to: ChannelValue, t: number): ChannelValu
   if (typeof from === "number" && typeof to === "number") return from + (to - from) * t;
   if (isHex(from) && isHex(to)) return mixColor(from, to, t);
   if (isPath(from) && isPath(to)) {
-    return emitPath(morphPath(parsePath(from), parsePath(to), t));
+    const a = parsePath(from);
+    const b = parsePath(to);
+    // Two paths in different shape families cannot morph — there is no
+    // anchor-for-anchor mapping between "MLL" and "MCCCCZ", which is exactly what
+    // `morphPath` refuses. So the crossing SNAPS: the same answer rule 4 gives
+    // an authored crossing, arrived at from the other direction.
+    //
+    // This is not a softening of the morph guard. Every crossing an author can
+    // write is already caught statically by the loader (Task 11), on both
+    // sides: `poseKind` forces every pose driving a channel to share the rig's
+    // rest command signature, precisely because the arbiter may morph between
+    // any two poses; and a timeline's family change must be a duration-0 step
+    // whose paths match the family it declares. A mismatch that reaches HERE is
+    // therefore one nobody authored — a pose applied while a timeline holds the
+    // mouth open, or a timeline step landing after a pose took the mouth back.
+    // Both are legitimate and both are reachable (`behavior.waking` plays the
+    // 2.1s yawn while a poke can change the mood under it), so the only answer
+    // that is defined, identical on every platform, and not a crash is the snap.
+    // `morphPath` keeps its throw — it is that function's contract and its own
+    // test still covers it; it simply stops being reachable from here.
+    if (a.kind !== b.kind) return to;
+    return emitPath(morphPath(a, b, t));
   }
   return t >= 1 ? to : from;
 }
@@ -85,9 +106,14 @@ export function createTweens(channels: Channels): Tweens {
       cancel(spec.channel);
       const delay = spec.delay ?? 0;
       // Rule 4. A snap lands HERE, not at the next tick, and it writes `spec.to`
-      // verbatim rather than routing through `lerpValue` — a family snap's two
-      // paths are by definition un-morphable, so `lerpValue(from, to, 1)` would
-      // throw on exactly the step whose job is to make that crossing safe.
+      // verbatim rather than routing through `lerpValue`. Two reasons, and the
+      // second is the one that bites: a family snap's two paths are by
+      // definition un-morphable, so `lerpValue` would take its snap branch and
+      // return `to` — the right VALUE, one tick late, and only after the morph
+      // authored at the same instant has already cancelled this tween under
+      // rule 1. The authored crossing would vanish and the shape it was making
+      // safe would pop instead of animating. Landing at `add` time is what makes
+      // the authored pair mean what it reads as.
       if (spec.duration === 0 && delay === 0) {
         channels.set(spec.channel, spec.to);
         return;

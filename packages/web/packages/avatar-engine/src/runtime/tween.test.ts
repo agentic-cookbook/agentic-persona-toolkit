@@ -104,10 +104,42 @@ describe("tweens", () => {
     expect(ch.get("mouth.shape")).toBe(CLOSED);      // verbatim, not re-emitted
     tw.add({ channel: "mouth.shape", to: SMALL, duration: 0.85, ease: "none" }, 0);
     expect(tw.active()).toBe(1);
-    // MCCCCZ -> MCCCCZ. Without rule 4 this would be MLL -> MCCCCZ and throw.
-    expect(() => tw.tick(0.425)).not.toThrow();
+    // MCCCCZ -> MCCCCZ, so it really interpolates: the exact midpoint of CLOSED
+    // and SMALL under `ease: "none"` at half of 0.85. Without rule 4 the pair is
+    // MLL -> MCCCCZ, which `lerpValue` snaps — the channel would hold SMALL here
+    // and the assertion is what catches it. `not.toThrow()` would NOT: nothing
+    // throws any more, which is exactly why this test asserts a value instead.
+    tw.tick(0.425);
+    expect(ch.get("mouth.shape")).toBe(
+      "M200,229.3C206.075,229.3,211,232.17,211,235.5C211,238.83,206.075,241.7,200,241.7C193.925,241.7,189,238.83,189,235.5C189,232.17,193.925,229.3,200,229.3Z",
+    );
     tw.tick(0.85);
     expect(tw.active()).toBe(0);
+  });
+
+  it("snaps a path across shape families instead of throwing", () => {
+    // The crossing nobody authored. `yawn` holds `mouth.shape` in family
+    // `mouthO` ("MCCCCZ") for 1.85s; every one of the 14 poses drives that same
+    // channel with an "MLL" polyline. A poke during a yawn — which
+    // `behavior.waking` makes reachable — therefore asks for MCCCCZ -> MLL, and
+    // the reverse asks for MLL -> MCCCCZ when the yawn's own later steps fire
+    // after the pose. Neither may throw, and both must land on `to` at once.
+    const POLY = "M189,235L200,235L211,235";
+    const OPEN = "M200,225C204.97,225 209,229.97 209,236C209,242.03 204.97,247 200,247C195.03,247 191,242.03 191,236C191,229.97 195.03,225 200,225Z";
+    const ch = createChannels({ "mouth.shape": OPEN });
+    const tw = createTweens(ch);
+    tw.add({ channel: "mouth.shape", to: POLY, duration: 0.3, ease: "none" }, 0);
+    // Written on the FIRST tick, not held until the end: a family crossing is a
+    // snap, and a snap that waited 300ms would read as a freeze.
+    expect(() => tw.tick(0.1)).not.toThrow();
+    expect(ch.get("mouth.shape")).toBe(POLY);
+    tw.tick(0.3);
+    expect(ch.get("mouth.shape")).toBe(POLY);
+    expect(tw.active()).toBe(0);
+    // ...and back the other way.
+    tw.add({ channel: "mouth.shape", to: OPEN, duration: 0.3, ease: "none" }, 0.3);
+    expect(() => tw.tick(0.4)).not.toThrow();
+    expect(ch.get("mouth.shape")).toBe(OPEN);
   });
 
   it("settles the tween it replaces at the instant of the handoff", () => {

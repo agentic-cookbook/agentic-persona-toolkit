@@ -64,9 +64,19 @@ describe("playTimeline", () => {
   it("never asks the morph to cross families", () => {
     const c = ctx();
     playTimeline(c, "yawn", 0);
-    // If any step tried to tween between an "MLL" and an "MCCCCZ", the morph
-    // guard throws — so simply running the whole timeline is the assertion.
-    expect(() => step(c, 0, 2.1)).not.toThrow();
+    // A step that DID cross families would not throw — `lerpValue` snaps such a
+    // pair (Task 10) — so "it ran without throwing" proves nothing here. What a
+    // snap cannot fake is movement: it writes one value and holds it. Sampling
+    // inside the 0.85s open and requiring every sample to differ is therefore
+    // the assertion, and it fails the moment any of these steps stops morphing.
+    const seen = new Set<unknown>();
+    let at = 0;
+    for (const t of [0.2, 0.4, 0.6, 0.8]) {
+      step(c, at, t);
+      seen.add(c.channels.get("mouth.shape"));
+      at = t;
+    }
+    expect(seen.size).toBe(4);
   });
 
   it("ends on the asleep mouth, back in family `mouth`", () => {
