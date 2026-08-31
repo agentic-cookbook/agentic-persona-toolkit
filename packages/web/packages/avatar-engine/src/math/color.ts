@@ -2,9 +2,10 @@
  * sRGB <-> OKLab (Bjorn Ottosson's matrices), and a perceptual mix.
  *
  * The engine interpolates every colour channel here rather than componentwise in
- * sRGB, because olylo's mood colours are fully saturated and an sRGB lerp between
- * two of them dips through grey. Both endpoints are identical in either space, so
- * only the middle of a transition differs from the original.
+ * sRGB, because a saturated palette is exactly where the two disagree: an sRGB
+ * lerp between two fully saturated mood colours dips through grey. Both endpoints
+ * are identical in either space, so only the middle of a transition differs from
+ * the original.
  */
 export type Rgb = readonly [number, number, number];
 

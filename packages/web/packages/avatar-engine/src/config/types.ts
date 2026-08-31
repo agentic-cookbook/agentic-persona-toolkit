@@ -67,7 +67,7 @@ export const shapeFamily = (s: Shape): string | undefined =>
 
 export interface RigNode {
   id: string;
-  /** Crop membership: brows | antennae | mouth | descender | eyes. */
+  /** Crop membership: names a `character.crops` group this node belongs to. */
   feature?: string;
   /** A pure transform layer, no geometry. */
   layer?: boolean;
@@ -84,8 +84,8 @@ export interface RigNode {
 export interface RigFile {
   schemaVersion: number;
   root: RigNode;
-  /** Painted after `root`, outside its transform chain — the pinpricks, which
-   *  must not inherit the body's scale or the face's bob. Same node shape, same
+  /** Painted after `root`, outside its transform chain — for anything that must
+   *  not inherit the body's scale or the face's bob. Same node shape, same
    *  channels; they are a second root, not a special case. */
   overlays: RigNode[];
   /** group name -> its "<nodeId>.<prop>" members. */

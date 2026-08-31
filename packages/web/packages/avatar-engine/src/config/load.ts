@@ -68,14 +68,14 @@ export function loadConfig(input: RawFiles): CharacterConfig {
   const paletteDriven = new Set<string>();
   /** A name resolves to a COLOUR only if it is not also an ink key.
    *
-   *  `character.inks` and `character.palette` share one namespace here, and they
-   *  collide in olylo's real config: `eyeBg` and `iris` are BOTH the name of an
-   *  ink (`{ kind: "fill", color: "eyeBg" }`) and the name of the palette entry
-   *  that ink points at. Checking the palette first would classify the four
-   *  nodes painted with them — both eye backgrounds and both irises — as
-   *  colour-driven, seeding `rest` with `"#06140d"` instead of `"eyeBg"`. The
-   *  colour would still come out right; `compose` would then look up
-   *  `scene.inks["#06140d"]`, find nothing, and paint a FILL as a stroke.
+   *  `character.inks` and `character.palette` share one namespace here, and a
+   *  collision is not exotic — it is what happens whenever a character names an
+   *  ink after the palette entry that ink points at, which is the obvious thing
+   *  to call it (`{ kind: "fill", color: "shell" }` under the key `shell`).
+   *  Checking the palette first would classify every node painted with such an
+   *  ink as colour-driven, seeding `rest` with the resolved hex instead of the
+   *  ink name. The colour would still come out right; `compose` would then look
+   *  up that hex in `scene.inks`, find nothing, and paint a FILL as a stroke.
    *  Inks-first is not a preference: it is the precedence `resolveInk`
    *  (Task 12) already applies at paint time, and the two have to agree. */
   const paletteColour = (name: string): string | undefined =>
@@ -124,15 +124,16 @@ export function loadConfig(input: RawFiles): CharacterConfig {
       if (ink === undefined) throw fail(`node "${node.id}" has a shape but no ink`);
       // A shape needs an INK, not a bare colour. `character.inks` is what
       // carries fill-vs-stroke and the stroke width; `character.palette` is only
-      // a colour. Paint a shaped node with `"green"` and everything downstream
-      // succeeds quietly: the `.ink` channel is seeded with the hex (correct,
-      // and what node `body` relies on), `compose` then looks up
-      // `scene.inks["#00ff41"]`, finds nothing, and emits `fill: false` with no
-      // width — a stroke of zero width, in the right colour, drawing nothing.
-      // Swift's compositor does the identical thing, so the two platforms agree
-      // on an invisible node and every parity test passes. olylo's rig cannot
-      // catch a regression here either: `body` is its only palette-driven node
-      // and carries no shape. Hence a guard rather than a test.
+      // a colour. Paint a shaped node with a palette name and everything
+      // downstream succeeds quietly: the `.ink` channel is seeded with the hex,
+      // which is correct and is what a bare transform layer relies on; `compose`
+      // then looks that hex up in `scene.inks`, finds nothing, and emits
+      // `fill: false` with no width — a stroke of zero width, in the right
+      // colour, drawing nothing. Swift's compositor does the identical thing, so
+      // the two platforms agree on an invisible node and every parity test
+      // passes. A character whose only palette-driven node happens to be a
+      // shapeless layer cannot catch the regression either, which is why this is
+      // a guard rather than a test.
       if (paletteColour(ink) !== undefined) {
         fail(`node "${node.id}" has a shape but is painted with the palette colour ` +
              `"${ink}"; a shape needs an ink, which is what carries ` +
@@ -145,7 +146,7 @@ export function loadConfig(input: RawFiles): CharacterConfig {
         rest.set(`${node.id}.family`, family);
         // A bend-driven node is REBUILT from its points every frame (Task 12), so
         // it deliberately gets no `.shape` channel: two authorities over one
-        // node's geometry is exactly how the antennae would stop bending.
+        // node's geometry is exactly how a bend-driven node would stop bending.
         if ("bend" in node.shape && node.shape.bend !== undefined) {
           bendDriven.add(node.id);
         } else {
@@ -224,14 +225,14 @@ export function loadConfig(input: RawFiles): CharacterConfig {
 
   // Every authored `d` is re-emitted through the engine's own printer, so a
   // config author's spacing and precision can never reach a channel or a golden
-  // log. The yawn's closing snap and the `asleep` pose author the SAME mouth,
-  // and they author it with different whitespace: `timelines.json` writes
-  // `"M189,235 L200,235 L211,235"` and `poses.json` writes the same polyline.
+  // log. A timeline's closing snap and the pose that timeline lands on author
+  // the SAME geometry, and they routinely author it with different whitespace —
+  // `timelines.json` spacing its polyline out, `poses.json` writing it tight.
   // Those must become ONE string, because the snap writes `to` verbatim
-  // (Task 10, rule 4) and a mood change to `asleep` afterwards must be a no-op
-  // rather than a one-frame flicker. (It is NOT the rig's resting mouth: the
-  // rig rests at `M187,233L200,246L213,233`, which is the `idle` mouth. The
-  // yawn ends on the asleep mouth, not on rest.)
+  // (Task 10, rule 4) and a later mood change to that pose must be a no-op
+  // rather than a one-frame flicker. Note the claim is about the pose a timeline
+  // ENDS on, which is routinely not the rig's rest pose; comparing against rest
+  // would be the wrong test.
   const canonicalise = (channel: string, to: number | string, where: string): number | string => {
     if (typeof to !== "string" || !channel.endsWith(".shape")) return to;
     try {
@@ -488,7 +489,7 @@ export function loadConfig(input: RawFiles): CharacterConfig {
   // a patch there is dead config that renders identically and says nothing.
   // `rest` already knows which is which; this block is why it is checked
   // here rather than by listing shape kinds, which would get the bend-driven
-  // antennae (bezier, but channel-less) exactly backwards.
+  // nodes (bezier, but channel-less) exactly backwards.
   const INK_FIELDS = new Set(["kind", "color", "width"]);
   for (const [vName, patch] of Object.entries(character.variants)) {
     for (const [inkName, fields] of Object.entries(patch.inks ?? {})) {

@@ -3,8 +3,9 @@
  * only M/L/C/Z, so the whole system speaks one path grammar.
  *
  * `ring` takes an OUTER radius and a BAND, not an outer and an inner radius:
- * olylo's single-weight invariant is `band = r - innerR = 8`, and making the band
- * the datum means the invariant lives in the data rather than in a comment.
+ * a character drawn at a single stroke weight holds that band constant across
+ * every ring it has, and making the band the datum means the invariant lives in
+ * the data rather than in a comment.
  */
 const K = 0.5523; // cubic approximation of a quarter circle
 const DEG = Math.PI / 180;
