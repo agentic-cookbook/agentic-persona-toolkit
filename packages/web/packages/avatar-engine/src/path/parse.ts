@@ -25,7 +25,6 @@ export function parsePath(d: string): ParsedPath {
   for (const m of d.matchAll(TOKEN)) {
     if (m[1] !== undefined) {
       const letter = m[1];
-      if (!(letter in ARITY)) throw new Error(`unsupported path command: ${letter}`);
       if (need > 0) throw new Error(`truncated ${pending} in path: ${d}`);
       pending = letter;
       need = ARITY[letter]!;
