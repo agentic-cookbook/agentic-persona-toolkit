@@ -1,0 +1,569 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agenticdevelopertoolkit.dev/schemas/avatar-character-1.json",
+  "description": "Documentation and an editor aid for olylo's six character-config files. The runtime gate is src/config/load.ts — half of these rules (channel resolution, family consistency, ink late-binding) are cross-file and cannot be expressed here at all.",
+  "oneOf": [
+    { "$ref": "#/$defs/CharacterFile" },
+    { "$ref": "#/$defs/RigFile" },
+    { "$ref": "#/$defs/PosesFile" },
+    { "$ref": "#/$defs/TimelinesFile" },
+    { "$ref": "#/$defs/BehaviorFile" },
+    { "$ref": "#/$defs/SayingsFile" }
+  ],
+  "$defs": {
+    "Ink": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "color"],
+      "properties": {
+        "kind": { "enum": ["stroke", "fill"] },
+        "color": { "type": "string", "description": "A palette key, or \"@<nodeId>\" for an ink late-bound to that node's `ink` channel." },
+        "width": { "type": "number" }
+      }
+    },
+    "VariantField": {
+      "oneOf": [
+        { "type": "number" },
+        { "type": "array", "items": { "type": "array", "items": { "type": "number" }, "minItems": 2, "maxItems": 2 } }
+      ]
+    },
+    "Variant": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "inks": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "kind": { "enum": ["stroke", "fill"] },
+              "color": { "type": "string" },
+              "width": { "type": "number" }
+            }
+          }
+        },
+        "shapes": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": { "$ref": "#/$defs/VariantField" }
+          }
+        }
+      }
+    },
+    "CharacterFile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schemaVersion", "id", "canvas", "strokeStyle", "palette", "inks", "crops", "variants", "files"],
+      "properties": {
+        "$schema": { "type": "string" },
+        "schemaVersion": { "const": 1 },
+        "id": { "type": "string" },
+        "canvas": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["w", "h"],
+          "properties": { "w": { "type": "number" }, "h": { "type": "number" } }
+        },
+        "strokeStyle": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["width", "linecap", "linejoin"],
+          "properties": {
+            "width": { "type": "number" },
+            "linecap": { "enum": ["round", "butt"] },
+            "linejoin": { "enum": ["round", "miter"] }
+          }
+        },
+        "palette": { "type": "object", "additionalProperties": { "type": "string" } },
+        "inks": { "type": "object", "additionalProperties": { "$ref": "#/$defs/Ink" } },
+        "crops": {
+          "type": "object",
+          "description": "crop name -> the `feature` names it includes (NOT node ids).",
+          "additionalProperties": { "type": "array", "items": { "type": "string" } }
+        },
+        "variants": { "type": "object", "additionalProperties": { "$ref": "#/$defs/Variant" } },
+        "files": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["rig", "poses", "timelines", "behavior", "sayings"],
+          "properties": {
+            "rig": { "type": "string" },
+            "poses": { "type": "string" },
+            "timelines": { "type": "string" },
+            "behavior": { "type": "string" },
+            "sayings": { "type": "string" }
+          }
+        }
+      }
+    },
+    "Transform": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "x": { "type": "number" },
+        "y": { "type": "number" },
+        "rotation": { "type": "number" },
+        "scaleX": { "type": "number" },
+        "scaleY": { "type": "number" },
+        "pivot": {
+          "type": "array",
+          "description": "ABSOLUTE design units — a point on the 400x400 canvas, not an offset.",
+          "items": { "type": "number" }, "minItems": 2, "maxItems": 2
+        }
+      }
+    },
+    "Bend": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["axis", "weights", "inwardDamp", "inwardSign"],
+      "properties": {
+        "axis": { "enum": ["x", "y"] },
+        "weights": { "type": "array", "items": { "type": "number" } },
+        "inwardDamp": { "type": "number" },
+        "inwardSign": { "enum": [1, -1] }
+      }
+    },
+    "Point": { "type": "array", "items": { "type": "number" }, "minItems": 2, "maxItems": 2 },
+    "Shape": {
+      "oneOf": [
+        {
+          "type": "object", "additionalProperties": false,
+          "required": ["kind", "cx", "cy", "r", "band"],
+          "properties": {
+            "kind": { "const": "ring" }, "cx": { "type": "number" }, "cy": { "type": "number" },
+            "r": { "type": "number" }, "band": { "type": "number" }
+          }
+        },
+        {
+          "type": "object", "additionalProperties": false,
+          "required": ["kind", "cx", "cy", "r"],
+          "properties": {
+            "kind": { "const": "disc" }, "cx": { "type": "number" }, "cy": { "type": "number" },
+            "r": { "type": "number" }
+          }
+        },
+        {
+          "type": "object", "additionalProperties": false,
+          "required": ["kind", "cx", "cy", "r", "from", "to"],
+          "properties": {
+            "kind": { "const": "arc" }, "cx": { "type": "number" }, "cy": { "type": "number" },
+            "r": { "type": "number" }, "from": { "type": "number" }, "to": { "type": "number" }
+          }
+        },
+        {
+          "type": "object", "additionalProperties": false,
+          "required": ["kind", "family", "points"],
+          "properties": {
+            "kind": { "const": "polyline" }, "family": { "type": "string" },
+            "points": { "type": "array", "items": { "$ref": "#/$defs/Point" } }
+          }
+        },
+        {
+          "type": "object", "additionalProperties": false,
+          "required": ["kind", "family", "cx", "cy", "rx", "ry"],
+          "properties": {
+            "kind": { "const": "cubicO" }, "family": { "type": "string" },
+            "cx": { "type": "number" }, "cy": { "type": "number" },
+            "rx": { "type": "number" }, "ry": { "type": "number" }
+          }
+        },
+        {
+          "type": "object", "additionalProperties": false,
+          "required": ["kind", "family", "points"],
+          "properties": {
+            "kind": { "const": "bezier" }, "family": { "type": "string" },
+            "points": { "type": "array", "items": { "$ref": "#/$defs/Point" } },
+            "bend": { "$ref": "#/$defs/Bend" }
+          }
+        }
+      ]
+    },
+    "RigNode": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id"],
+      "properties": {
+        "id": { "type": "string" },
+        "feature": { "type": "string", "description": "Crop membership: brows | antennae | mouth | descender | eyes." },
+        "layer": { "type": "boolean" },
+        "transform": { "$ref": "#/$defs/Transform" },
+        "shape": { "$ref": "#/$defs/Shape" },
+        "ink": { "type": "string" },
+        "alpha": { "type": "number" },
+        "children": { "type": "array", "items": { "$ref": "#/$defs/RigNode" } }
+      }
+    },
+    "RigFile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schemaVersion", "root", "overlays", "groups"],
+      "properties": {
+        "schemaVersion": { "const": 1 },
+        "root": { "$ref": "#/$defs/RigNode" },
+        "overlays": { "type": "array", "items": { "$ref": "#/$defs/RigNode" } },
+        "groups": { "type": "object", "additionalProperties": { "type": "array", "items": { "type": "string" } } }
+      }
+    },
+    "PoseDef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["duration", "ease", "channels"],
+      "properties": {
+        "duration": { "type": "number" },
+        "ease": { "type": "string" },
+        "channels": { "type": "object", "additionalProperties": { "type": ["number", "string"] } },
+        "loops": { "type": "object", "additionalProperties": { "type": "number" } },
+        "spin": {
+          "type": "object", "additionalProperties": false,
+          "required": ["channel", "turns", "duration", "ease"],
+          "properties": {
+            "channel": { "type": "string" }, "turns": { "type": "number" },
+            "duration": { "type": "number" }, "ease": { "type": "string" }
+          }
+        }
+      }
+    },
+    "PosesFile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schemaVersion", "order", "poses"],
+      "properties": {
+        "schemaVersion": { "const": 1 },
+        "order": { "type": "array", "items": { "type": "string" } },
+        "poses": { "type": "object", "additionalProperties": { "$ref": "#/$defs/PoseDef" } }
+      }
+    },
+    "TimelineStep": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["at", "channel", "to", "duration", "ease"],
+      "properties": {
+        "at": { "type": "number" },
+        "channel": { "type": "string" },
+        "to": { "type": ["number", "string"] },
+        "duration": { "type": "number" },
+        "ease": { "type": "string" },
+        "family": { "type": "string" }
+      }
+    },
+    "TimelineDef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["duration", "steps"],
+      "properties": {
+        "duration": { "type": "number" },
+        "steps": { "type": "array", "items": { "$ref": "#/$defs/TimelineStep" } }
+      }
+    },
+    "TimelinesFile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schemaVersion", "timelines"],
+      "properties": {
+        "schemaVersion": { "const": 1 },
+        "timelines": { "type": "object", "additionalProperties": { "$ref": "#/$defs/TimelineDef" } }
+      }
+    },
+    "ParamDef": {
+      "oneOf": [
+        {
+          "type": "object", "additionalProperties": false, "required": ["gt"],
+          "properties": {
+            "gt": { "type": "array", "prefixItems": [{ "type": "string" }, { "type": "number" }], "minItems": 2, "maxItems": 2 }
+          }
+        },
+        {
+          "type": "object", "additionalProperties": false, "required": ["select", "then", "else"],
+          "properties": {
+            "select": { "type": "string" }, "then": { "type": "number" }, "else": { "type": "number" }
+          }
+        }
+      ]
+    },
+    "AmplitudeRef": {
+      "oneOf": [
+        { "type": "number" },
+        {
+          "type": "object", "additionalProperties": false, "required": ["param"],
+          "properties": { "param": { "type": "string" }, "scale": { "type": "number" } }
+        }
+      ]
+    },
+    "LoopDef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "channel", "mode", "amplitude", "duration", "ease", "restValue"],
+      "properties": {
+        "id": { "type": "string" },
+        "channel": { "type": "string" },
+        "mode": { "enum": ["symmetric", "zeroTo"] },
+        "amplitude": { "$ref": "#/$defs/AmplitudeRef" },
+        "duration": { "$ref": "#/$defs/AmplitudeRef" },
+        "ease": { "type": "string" },
+        "yoyo": { "type": "boolean" },
+        "delay": { "type": "number" },
+        "phase": { "enum": ["negativeFirst", "positiveFirst"] },
+        "enabledWhen": { "type": "string" },
+        "disabledWhen": { "type": "string" },
+        "restValue": { "type": "number" },
+        "restDuration": { "type": "number" },
+        "restEase": { "type": "string" }
+      }
+    },
+    "BlinkDef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["channel", "shut", "durationMs", "minMs", "maxMs", "tweenDuration", "ease", "suppressedIn"],
+      "properties": {
+        "channel": { "type": "string" },
+        "shut": { "type": "number" },
+        "durationMs": { "type": "number" },
+        "minMs": { "type": "number" },
+        "maxMs": { "type": "number" },
+        "tweenDuration": { "type": "number" },
+        "ease": { "type": "string" },
+        "suppressedIn": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "GazeDef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["gazeMax", "tiltMax", "leanMax", "look", "tilt", "lean",
+        "wanderAfterMs", "wanderMinMs", "wanderMaxMs",
+        "centreChanceCurious", "centreChanceIdle", "reachCurious", "reachIdle"],
+      "properties": {
+        "gazeMax": { "type": "number" }, "tiltMax": { "type": "number" }, "leanMax": { "type": "number" },
+        "look": {
+          "type": "object", "additionalProperties": false, "required": ["channels", "duration", "ease"],
+          "properties": {
+            "channels": { "type": "array", "items": { "type": "string" } },
+            "duration": { "type": "number" }, "ease": { "type": "string" }
+          }
+        },
+        "tilt": {
+          "type": "object", "additionalProperties": false, "required": ["channel", "duration", "ease"],
+          "properties": {
+            "channel": { "type": "string" }, "duration": { "type": "number" }, "ease": { "type": "string" }
+          }
+        },
+        "lean": {
+          "type": "object", "additionalProperties": false, "required": ["channels", "duration", "ease"],
+          "properties": {
+            "channels": { "type": "array", "items": { "type": "string" } },
+            "duration": { "type": "number" }, "ease": { "type": "string" }
+          }
+        },
+        "wanderAfterMs": { "type": "number" }, "wanderMinMs": { "type": "number" }, "wanderMaxMs": { "type": "number" },
+        "centreChanceCurious": { "type": "number" }, "centreChanceIdle": { "type": "number" },
+        "reachCurious": { "$ref": "#/$defs/Point" }, "reachIdle": { "$ref": "#/$defs/Point" },
+        "disabledWhen": { "type": "string" }
+      }
+    },
+    "IdleFidgetDef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["activeWhen", "breath", "sway", "brow", "durationRange", "rearm", "ease", "settle"],
+      "properties": {
+        "activeWhen": { "type": "string" },
+        "breath": {
+          "type": "object", "additionalProperties": false,
+          "required": ["channel", "from", "to", "duration", "ease", "yoyo"],
+          "properties": {
+            "channel": { "type": "string" }, "from": { "type": "number" }, "to": { "type": "number" },
+            "duration": { "type": "number" }, "ease": { "type": "string" }, "yoyo": { "type": "boolean" }
+          }
+        },
+        "sway": {
+          "type": "object", "additionalProperties": false, "required": ["channel", "amplitude"],
+          "properties": { "channel": { "type": "string" }, "amplitude": { "type": "number" } }
+        },
+        "brow": {
+          "type": "object", "additionalProperties": false,
+          "required": ["nodes", "rotationAmplitude", "yAmplitude"],
+          "properties": {
+            "nodes": { "type": "array", "items": { "type": "string" } },
+            "rotationAmplitude": { "type": "number" }, "yAmplitude": { "type": "number" }
+          }
+        },
+        "durationRange": { "$ref": "#/$defs/Point" },
+        "rearm": {
+          "type": "object", "additionalProperties": false, "required": ["gapMs", "jitterMs"],
+          "properties": { "gapMs": { "$ref": "#/$defs/Point" }, "jitterMs": { "type": "number" } }
+        },
+        "ease": { "type": "string" },
+        "settle": {
+          "type": "object", "additionalProperties": false, "required": ["duration", "ease"],
+          "properties": { "duration": { "type": "number" }, "ease": { "type": "string" } }
+        }
+      }
+    },
+    "LadderDef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["boredAfterMs", "asleepAfterMs", "alertAfterTypingMs", "pollMs", "moods"],
+      "properties": {
+        "boredAfterMs": { "type": "number" }, "asleepAfterMs": { "type": "number" },
+        "alertAfterTypingMs": { "type": "number" }, "pollMs": { "type": "number" },
+        "moods": { "type": "object", "additionalProperties": { "type": "string" } }
+      }
+    },
+    "EffectValue": {
+      "oneOf": [
+        { "type": "number" },
+        {
+          "type": "object", "additionalProperties": false, "required": ["rnd"],
+          "properties": { "rnd": { "type": "number" } }
+        }
+      ]
+    },
+    "EffectStep": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["channels", "ease"],
+      "properties": {
+        "channels": { "type": "object", "additionalProperties": { "$ref": "#/$defs/EffectValue" } },
+        "duration": { "type": "number" },
+        "durationRange": { "$ref": "#/$defs/Point" },
+        "ease": { "type": "string" }
+      }
+    },
+    "EffectDef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "target", "settle"],
+      "properties": {
+        "id": { "type": "string" },
+        "target": { "type": "string" },
+        "firstDelayMs": { "$ref": "#/$defs/Point" },
+        "rearmMs": { "$ref": "#/$defs/Point" },
+        "branch": {
+          "type": "object", "additionalProperties": false, "required": ["probability", "then", "else"],
+          "properties": {
+            "probability": { "type": "number" }, "then": { "type": "string" }, "else": { "type": "string" }
+          }
+        },
+        "twitch": { "type": "array", "items": { "$ref": "#/$defs/EffectStep" } },
+        "drift": { "type": "array", "items": { "$ref": "#/$defs/EffectStep" } },
+        "once": { "type": "array", "items": { "$ref": "#/$defs/EffectStep" } },
+        "loop": {
+          "type": "object", "additionalProperties": false,
+          "required": ["channel", "mode", "amplitude", "duration", "ease"],
+          "properties": {
+            "channel": { "type": "string" },
+            "mode": { "enum": ["symmetric", "zeroTo"] },
+            "amplitude": { "$ref": "#/$defs/AmplitudeRef" },
+            "duration": { "$ref": "#/$defs/AmplitudeRef" },
+            "ease": { "type": "string" },
+            "yoyo": { "type": "boolean" },
+            "delay": { "type": "number" },
+            "phase": { "enum": ["negativeFirst", "positiveFirst"] },
+            "enabledWhen": { "type": "string" },
+            "disabledWhen": { "type": "string" },
+            "restValue": { "type": "number" },
+            "restDuration": { "type": "number" },
+            "restEase": { "type": "string" }
+          }
+        },
+        "settle": {
+          "type": "object", "additionalProperties": false, "required": ["duration", "ease"],
+          "properties": { "duration": { "type": "number" }, "ease": { "type": "string" } }
+        }
+      }
+    },
+    "BubbleDef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["x", "y", "angleDeg", "distance", "spin", "in", "out"],
+      "properties": {
+        "x": { "type": "number" }, "y": { "type": "number" },
+        "angleDeg": {
+          "type": "object", "additionalProperties": false, "required": ["base", "jitter"],
+          "properties": { "base": { "type": "number" }, "jitter": { "type": "number" } }
+        },
+        "distance": { "$ref": "#/$defs/Point" },
+        "spin": { "type": "number" },
+        "in": {
+          "type": "object", "additionalProperties": false, "required": ["from", "to", "duration", "ease"],
+          "properties": {
+            "from": { "type": "object", "additionalProperties": { "type": "number" } },
+            "to": { "type": "object", "additionalProperties": { "type": "number" } },
+            "duration": { "type": "number" }, "ease": { "type": "string" }
+          }
+        },
+        "out": {
+          "type": "object", "additionalProperties": false, "required": ["duration", "delay", "ease", "to"],
+          "properties": {
+            "duration": { "type": "number" }, "delay": { "type": "number" }, "ease": { "type": "string" },
+            "to": { "type": "object", "additionalProperties": { "type": "number" } }
+          }
+        }
+      }
+    },
+    "BehaviorFile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schemaVersion", "channelDelays", "params", "loops", "blink", "gaze",
+        "idleFidget", "ladder", "poke", "waking", "moodEffects", "eyesShutMood", "pinpricks", "speech"],
+      "properties": {
+        "schemaVersion": { "const": 1 },
+        "channelDelays": { "type": "object", "additionalProperties": { "type": "number" } },
+        "params": { "type": "object", "additionalProperties": { "$ref": "#/$defs/ParamDef" } },
+        "loops": { "type": "array", "items": { "$ref": "#/$defs/LoopDef" } },
+        "blink": { "$ref": "#/$defs/BlinkDef" },
+        "gaze": { "$ref": "#/$defs/GazeDef" },
+        "idleFidget": { "$ref": "#/$defs/IdleFidgetDef" },
+        "ladder": { "$ref": "#/$defs/LadderDef" },
+        "poke": {
+          "type": "array",
+          "items": {
+            "type": "object", "additionalProperties": false, "required": ["from", "expression", "ms"],
+            "properties": {
+              "from": { "type": "string" }, "expression": { "type": "string" }, "ms": { "type": "number" }
+            }
+          }
+        },
+        "waking": {
+          "type": "object", "additionalProperties": false, "required": ["from", "to", "play", "ms"],
+          "properties": {
+            "from": { "type": "string" }, "to": { "type": "string" },
+            "play": { "type": "string" }, "ms": { "type": "number" }
+          }
+        },
+        "moodEffects": { "type": "object", "additionalProperties": { "$ref": "#/$defs/EffectDef" } },
+        "eyesShutMood": { "type": "string" },
+        "pinpricks": {
+          "type": "object", "additionalProperties": false,
+          "required": ["nodes", "shownWhen", "alpha", "showDuration", "hideDuration", "ease"],
+          "properties": {
+            "nodes": { "type": "array", "items": { "type": "string" } },
+            "shownWhen": { "type": "string" },
+            "alpha": { "type": "number" },
+            "showDuration": { "type": "number" },
+            "hideDuration": { "type": "number" },
+            "ease": { "type": "string" }
+          }
+        },
+        "speech": {
+          "type": "object", "additionalProperties": false,
+          "required": ["mutterMs", "loopingIn", "bubble"],
+          "properties": {
+            "mutterMs": { "type": "number" },
+            "loopingIn": { "type": "array", "items": { "type": "string" } },
+            "bubble": { "$ref": "#/$defs/BubbleDef" }
+          }
+        }
+      }
+    },
+    "SayingsFile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schemaVersion", "sayings"],
+      "properties": {
+        "schemaVersion": { "const": 1 },
+        "sayings": { "type": "object", "additionalProperties": { "type": "array", "items": { "type": "string" } } }
+      }
+    }
+  }
+}

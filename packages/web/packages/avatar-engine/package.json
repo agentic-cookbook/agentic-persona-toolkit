@@ -14,9 +14,11 @@
     "lint": "tsc --noEmit"
   },
   "devDependencies": {
+    "@types/node": "^24.13.3",
     "gsap": "^3.13.0",
     "tsup": "^8.3.5",
     "typescript": "^5.7.2",
+    "vite": "^8.2.2",
     "vitest": "^4.1.4"
   }
 }
