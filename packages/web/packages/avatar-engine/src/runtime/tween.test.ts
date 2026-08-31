@@ -42,6 +42,20 @@ describe("tweens", () => {
     near(ch.get("x") as number, 0.5);
   });
 
+  it("starts from an explicit `from` instead of the channel's current value", () => {
+    // `from` is the escape hatch for a tween that must not begin where the
+    // channel happens to sit — a mood cross-fade that always starts neutral,
+    // say. Without it the tween would read 5 and land halfway at 7.5; with it
+    // the channel's value is ignored entirely and halfway is 5.
+    const ch = createChannels({ x: 5 });
+    const tw = createTweens(ch);
+    tw.add({ channel: "x", from: 0, to: 10, duration: 1, ease: "none" }, 0);
+    tw.tick(0.5);
+    near(ch.get("x") as number, 5);
+    tw.tick(1);
+    near(ch.get("x") as number, 10);
+  });
+
   it("lets a newer tween cancel the older one on the same channel", () => {
     const ch = createChannels({ x: 0 });
     const tw = createTweens(ch);
@@ -96,17 +110,41 @@ describe("tweens", () => {
     expect(tw.active()).toBe(0);
   });
 
-  it("starts from an explicit `from` instead of the channel's current value", () => {
-    // `from` is the escape hatch for a tween that must not begin where the
-    // channel happens to sit — a mood cross-fade that always starts neutral,
-    // say. Without it the tween would read 5 and land halfway at 7.5; with it
-    // the channel's value is ignored entirely and halfway is 5.
-    const ch = createChannels({ x: 5 });
+  it("settles the tween it replaces at the instant of the handoff", () => {
+    // Rule 5. The outgoing tween writes what it shows AT the handoff instant, so
+    // the incoming tween's `from` is that value and not whatever the last tick
+    // left behind. Here the handoff at 0.75 falls between ticks on purpose.
+    const ch = createChannels({ x: 0 });
     const tw = createTweens(ch);
-    tw.add({ channel: "x", from: 0, to: 10, duration: 1, ease: "none" }, 0);
+    tw.add({ channel: "x", to: 10, duration: 1, ease: "none" }, 0);
     tw.tick(0.5);
     near(ch.get("x") as number, 5);
-    tw.tick(1);
-    near(ch.get("x") as number, 10);
+    tw.add({ channel: "x", to: 0, duration: 1, ease: "none" }, 0.75);
+    near(ch.get("x") as number, 7.5);    // settled to 0.75 — NOT left at 5
+    tw.tick(1.25);
+    near(ch.get("x") as number, 3.75);   // half way back from 7.5
+  });
+
+  it("hands off to the same value at 60, 240 and 1000 fps", () => {
+    // Rule 5 is what makes rule 2's promise survive an interrupt. Without it the
+    // incoming tween reads whichever tick happened to land last, so the same
+    // animation on the same clock ends up somewhere different at each rate:
+    // 0.5184 / 0.5514796875 / 0.5541852249. The interrupt instant 0.41 is
+    // deliberately off all three grids — an on-grid one hides the defect.
+    const at = (fps: number): number => {
+      const ch = createChannels({ x: 0 });
+      const tw = createTweens(ch);
+      tw.add({ channel: "x", to: 10, duration: 1, ease: "power2.in" }, 0);
+      for (let t = 0; t < 0.41; t += 1 / fps) tw.tick(t);
+      tw.add({ channel: "x", to: 0, duration: 1, ease: "none" }, 0.41);
+      for (let t = 0.41; t <= 0.6; t += 1 / fps) tw.tick(t);
+      tw.tick(0.6);
+      return ch.get("x") as number;
+    };
+    // 0.41^3 * 10 = 0.68921, then 81% of the way back: the value is analytic,
+    // not recorded from a run.
+    near(at(60), 0.5582601);
+    near(at(240), at(60));
+    near(at(1000), at(60));
   });
 });

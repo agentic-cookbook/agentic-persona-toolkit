@@ -46,7 +46,12 @@ describe("playTimeline", () => {
     // duration-0 tween lands at add time (Task 10, rule 4).
     step(c, 0, 0.5);
     expect(c.channels.get("mouth.family")).toBe("mouthO");
-    expect(c.channels.get("mouth.shape")).toMatch(/^M.*Z$/);
+    // The EXACT curve the 0.85s open reaches at 0.5, not merely "some closed
+    // path". `/^M.*Z$/` is true of the closing snap too, so it stays true when
+    // the steps are expanded in the wrong order and the open never happens.
+    expect(c.channels.get("mouth.shape")).toBe(
+      "M200,231.849542C206.730236,231.849542,212.185834,233.351128,212.185834,235.203542C212.185834,237.055956,206.730236,238.557541,200,238.557541C193.269764,238.557541,187.814166,237.055956,187.814166,235.203542C187.814166,233.351128,193.269764,231.849542,200,231.849542Z",
+    );
     step(c, 0.5, 1.8);
     expect(c.channels.get("mouth.family")).toBe("mouthO");   // still open at 1.8
     step(c, 1.8, 1.9);
@@ -100,14 +105,54 @@ describe("playTimeline", () => {
     expect(done).toBe(0);
   });
 
-  it("is frame-rate independent at the end state", () => {
-    const at = (fps: number) => {
+  it("holds each phase at the instant it was authored for", () => {
+    // t = 1.775 is 0.325s into the `back.out(1.6)` settle authored at 1.45 — deep
+    // enough into the overshoot to be a number no other schedule produces. If the
+    // expansion loses each step's own start instant (scheduling every tween at the
+    // timeline's start rather than at `fired`), the whole 2.1s structure collapses
+    // onto t=0 and this is the assertion that notices.
+    const c = ctx();
+    playTimeline(c, "yawn", 0);
+    step(c, 0, 1.775);
+    expect(c.channels.get("body.scaleX") as number).toBeCloseTo(0.991, 12);
+    expect(c.channels.get("body.scaleY") as number).toBeCloseTo(0.991, 12);
+  });
+
+  it("keeps the pose delay ladder out of a timeline", () => {
+    // `browLeft` carries a 0.06s ladder delay in behavior.json. The yawn authors
+    // its brow lift at `at: 0`, so under the ladder the tween would not have
+    // started at t = 0.04 and the channel would still read its rest 0. Timelines
+    // place their own steps in time; the ladder is a POSE mechanism, and applying
+    // it here would smear every phase by up to 80ms.
+    const c = ctx();
+    playTimeline(c, "yawn", 0);
+    step(c, 0, 0.04);
+    expect(c.channels.get("browLeft.rotation") as number)
+      .toBeCloseTo(-0.0006252798697333604, 15);
+  });
+
+  it("throws on an unknown timeline", () => {
+    const c = ctx();
+    expect(() => playTimeline(c, "shrug", 0)).toThrow("unknown timeline: shrug");
+  });
+
+  it("lands on identical numbers at 60 and 240 fps", () => {
+    // The whole store, not one channel, and MID-FLIGHT as well as at the end.
+    // An end-state-only comparison is true by construction under rule 2 — every
+    // tween has finished and written its literal `to` — so it passes no matter
+    // what the engine did in between. t = 1.0 sits 0.15s into the apex phase
+    // authored at 0.85, where every value depends both on when that phase fired
+    // and on what the phase it replaced had reached at that instant: it is rule
+    // 5's guarantee, read through the real config.
+    const snapshot = (fps: number, until: number): string => {
       const c = ctx();
       playTimeline(c, "yawn", 0);
-      for (let t = 0; t <= 2.1; t += 1 / fps) { c.scheduler.tick(t); c.tweens.tick(t); }
-      c.scheduler.tick(2.1); c.tweens.tick(2.1);
-      return c.channels.get("mouth.shape");
+      for (let t = 0; t <= until + 1e-12; t += 1 / fps) { c.scheduler.tick(t); c.tweens.tick(t); }
+      c.scheduler.tick(until); c.tweens.tick(until);
+      // `names()` sorts, so the snapshot is stable and a diff names the channel.
+      return JSON.stringify(c.channels.names().map((k) => [k, c.channels.get(k)]));
     };
-    expect(at(60)).toBe(at(240));
+    expect(snapshot(60, 1.0)).toBe(snapshot(240, 1.0));
+    expect(snapshot(60, 2.1)).toBe(snapshot(240, 2.1));
   });
 });

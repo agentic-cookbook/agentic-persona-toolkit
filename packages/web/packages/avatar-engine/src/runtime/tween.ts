@@ -27,7 +27,6 @@ interface Live {
   from: ChannelValue | undefined;
   to: ChannelValue;
   easeName: string;
-  started: boolean;
 }
 
 const isHex = (v: ChannelValue): v is string =>
@@ -54,11 +53,35 @@ export function createTweens(channels: Channels): Tweens {
     }
   };
 
+  /** Advance one tween to `now`: write what it shows at that instant, and report
+   *  whether it is finished there. `from` resolves on the first call rather than
+   *  at `add`, which is what makes a delayed tween pick up the channel as it is
+   *  when it actually starts. */
+  const write = (t: Live, now: number): boolean => {
+    if (t.from === undefined) t.from = channels.get(t.channel) ?? t.to;
+    const span = t.end - t.start;
+    const p = span <= 0 ? 1 : Math.min(1, (now - t.start) / span);
+    channels.set(t.channel, lerpValue(t.from, t.to, p >= 1 ? 1 : resolveEase(t.easeName)(p)));
+    return p >= 1;
+  };
+
+  /** Rule 5. Before a tween is replaced, the one it replaces writes the value it
+   *  would have shown AT `now` — the instant of the handoff, not the instant of
+   *  the last tick. Without this the incoming tween resolves its `from` against a
+   *  frame-quantised snapshot, so the same animation on the same clock lands
+   *  somewhere different at 60 fps than at 240. */
+  const settle = (channel: string, now: number): void => {
+    for (const t of live) {
+      if (t.channel === channel && now >= t.start) write(t, now);
+    }
+  };
+
   return {
     cancel,
     active: () => live.length,
 
     add(spec, now) {
+      settle(spec.channel, now);
       cancel(spec.channel);
       const delay = spec.delay ?? 0;
       // Rule 4. A snap lands HERE, not at the next tick, and it writes `spec.to`
@@ -81,7 +104,6 @@ export function createTweens(channels: Channels): Tweens {
         from: spec.from,
         to: spec.to,
         easeName: spec.ease ?? "power3.out",
-        started: false,
       });
     },
 
@@ -89,15 +111,7 @@ export function createTweens(channels: Channels): Tweens {
       for (let i = live.length - 1; i >= 0; i -= 1) {
         const t = live[i]!;
         if (now < t.start) continue;
-        if (!t.started) {
-          t.started = true;
-          if (t.from === undefined) t.from = channels.get(t.channel) ?? t.to;
-        }
-        const span = t.end - t.start;
-        const p = span <= 0 ? 1 : Math.min(1, (now - t.start) / span);
-        const eased = p >= 1 ? 1 : resolveEase(t.easeName)(p);
-        channels.set(t.channel, lerpValue(t.from!, t.to, eased));
-        if (p >= 1) live.splice(i, 1);
+        if (write(t, now)) live.splice(i, 1);
       }
     },
   };
