@@ -24,11 +24,14 @@ describe("resolveEase", () => {
   });
 
   it("pins the endpoints to within 1e-12", () => {
-    // 1e-12 rather than exact equality, and deliberately so: `back.out(s)`'s
-    // closed form evaluates to 2.2e-16 at t=0 (because `-(s+1) + s` is not
-    // exactly -1 in IEEE754) and `sine.in` lands 1ulp below 1 at t=1. GSAP has
-    // the same residue. Asserting `.toBe(0)` here would be pinning a rounding
-    // accident, and it would fail for six of the 24 names.
+    // 1e-12 rather than exact equality, and deliberately so: three of the 24
+    // carry a floating-point residue at an endpoint. `back.out` and
+    // `back.out(1.7)` evaluate to 2.2e-16 at t=0 (because `-(s+1) + s` is not
+    // exactly -1 in IEEE754); `sine.in` lands 1ulp below 1 at t=1. GSAP
+    // special-cases those two boundaries in its own source (`p === 1 ? 1 : ...`
+    // for Sine, `p ? ... : 0` for Back), so GSAP lands exactly on 0 and 1 where
+    // this port does not — the tolerance is what lets both be correct against
+    // each other. Asserting `.toBe(0)` here would pin a rounding accident.
     for (const name of NAMES) {
       const e = resolveEase(name);
       expect(Math.abs(e(0))).toBeLessThan(1e-12);
