@@ -1,2 +1,16 @@
-export type { Mat } from "./math/mat.js";
-export { IDENTITY, multiply, fromTransform, applyPoint } from "./math/mat.js";
+export { createEngine, type Engine, type EngineOptions } from "./engine";
+export { defaultEnvironment, browserEnvironment, type Environment } from "./env";
+export { loadConfig } from "./config/load";
+export { SCHEMA_VERSION } from "./config/types";
+export type { CharacterConfig, RawFiles, RigNode, Shape } from "./config/types";
+export { buildScene, compose, cropList, seedChannels } from "./scene/rig";
+export type { DisplayItem, DisplayList, Scene } from "./scene/rig";
+export type { ArbiterState, MoodSource } from "./anim/arbiter";
+export { createChannels, type Channels, type ChannelValue } from "./runtime/channels";
+export { resolveEase as ease } from "./math/ease";
+export { createPrng, type Prng } from "./math/prng";
+export { parsePath, emitPath, type ParsedPath } from "./path/parse";
+export { arc, disc, ring, polyline, bezier, cubicO } from "./path/build";
+export { morphPath } from "./path/morph";
+export { mixColor } from "./math/color";
+export { IDENTITY, multiply, fromTransform, applyPoint, type Mat } from "./math/mat";
