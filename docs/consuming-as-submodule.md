@@ -9,7 +9,7 @@ required — Next.js transpiles the package source on demand.
 Add the submodule wherever you want it to live:
 
 ```bash
-git submodule add git@github.com:agentic-cookbook/agenticdevelopertoolkit.git vendor/adt
+git submodule add git@github.com:agenticdevelopmentstudio/agenticdevelopertoolkit.git vendor/adt
 ```
 
 In the consumer's `package.json` (e.g. `sites/main/package.json`), add a

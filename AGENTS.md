@@ -12,8 +12,8 @@ Python package for Terminal. Android and Windows are port plans in
 
 Persona-chat wiring is one capability among them, not the toolkit's
 identity: the `chat` package's `PersonaChatBackend` wires apps to the
-[agentic registry](https://github.com/agentic-cookbook/agenticregistry) and
-[my-agentic-storage](https://github.com/agentic-cookbook/my-agentic-storage).
+[agentic registry](https://github.com/mfullerton-archive/agenticregistry) and
+[my-agentic-storage](https://github.com/mfullerton-archive/my-agentic-storage).
 
 Each platform folder under `packages/` is the **root of its native build
 system** — its conventional manifest file lives there.

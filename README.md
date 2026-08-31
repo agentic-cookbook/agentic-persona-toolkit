@@ -8,9 +8,9 @@ yet.
 
 Persona-chat wiring is one capability among them, not the toolkit's
 identity: the `chat` package's `PersonaChatBackend` splices the
-[official agentic registry](https://github.com/agentic-cookbook/agenticregistry)
+[official agentic registry](https://github.com/mfullerton-archive/agenticregistry)
 (persona definitions + LLM provider integrations) and
-[my-agentic-storage](https://github.com/agentic-cookbook/my-agentic-storage)
+[my-agentic-storage](https://github.com/mfullerton-archive/my-agentic-storage)
 (chat history + state) into the shape a chat UI expects, so a consumer app
 does not have to re-implement that orchestration.
 
