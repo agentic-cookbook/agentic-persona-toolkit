@@ -1,6 +1,6 @@
 import gsap from "gsap";
 import { describe, expect, it } from "vitest";
-import { resolveEase } from "./ease";
+import { resolveEase, EASE_NAMES } from "./ease";
 
 const NAMES = [
   "none",
@@ -39,5 +39,14 @@ describe("resolveEase", () => {
   it("rejects anything outside the vocabulary", () => {
     expect(() => resolveEase("elastic.out")).toThrow(/unknown ease/);
     expect(() => resolveEase("back.in(2)")).toThrow(/unknown ease/);
+    expect(() => resolveEase("back.out(2.2)")).toThrow(/unknown ease/);
+    expect(() => resolveEase("power2")).toThrow(/unknown ease/);
+  });
+
+  it("has exactly 24 names in the vocabulary", () => {
+    const easeNames = EASE_NAMES.slice().sort();
+    const expectedNames = NAMES.slice().sort();
+    expect(easeNames).toEqual(expectedNames);
+    expect(easeNames).toHaveLength(24);
   });
 });

@@ -5,7 +5,7 @@
  *   powerN.out(t)   = 1 - (1-t)^(N+1)
  *   powerN.inOut(t) = t < .5 ? 2^N * t^(N+1)
  *                            : 1 - 2^N * (1-t)^(N+1)
- *   a bare `powerN` means `.out` (GSAP's default direction)
+ *   a bare `powerN` means `.out` (GSAP's default direction) — only power3 is bare
  *
  *   sine.in    = 1 - cos(t*pi/2)
  *   sine.out   = sin(t*pi/2)
@@ -15,6 +15,7 @@
  *
  * `src/math/ease.test.ts` asserts every one of these against real GSAP at 201
  * sample points; that test is the specification, this file is the copy.
+ * The vocabulary is closed to exactly 24 names — no synthesis at runtime.
  */
 export type EaseFn = (t: number) => number;
 
@@ -36,25 +37,41 @@ const backOut = (s: number): EaseFn => (t) => {
 
 const TABLE: Record<string, EaseFn> = {
   none: (t) => t,
+  // power1 family
+  "power1.in": power(1, "in"),
+  "power1.out": power(1, "out"),
+  "power1.inOut": power(1, "inOut"),
+  // power2 family
+  "power2.in": power(2, "in"),
+  "power2.out": power(2, "out"),
+  "power2.inOut": power(2, "inOut"),
+  // power3 family (power3 bare is .out)
+  power3: power(3, "out"),
+  "power3.in": power(3, "in"),
+  "power3.out": power(3, "out"),
+  "power3.inOut": power(3, "inOut"),
+  // power4 family
+  "power4.in": power(4, "in"),
+  "power4.out": power(4, "out"),
+  "power4.inOut": power(4, "inOut"),
+  // sine family
   "sine.in": (t) => 1 - Math.cos(t * HALF_PI),
   "sine.out": (t) => Math.sin(t * HALF_PI),
   "sine.inOut": (t) => -(Math.cos(Math.PI * t) - 1) / 2,
+  // back.out family (explicit overshoots only)
+  "back.out": backOut(BACK_DEFAULT),
+  "back.out(1.5)": backOut(1.5),
+  "back.out(1.6)": backOut(1.6),
+  "back.out(1.7)": backOut(1.7),
+  "back.out(2)": backOut(2),
+  "back.out(2.4)": backOut(2.4),
+  "back.out(3)": backOut(3),
 };
 
-for (let n = 1; n <= 4; n += 1) {
-  TABLE[`power${n}.in`] = power(n, "in");
-  TABLE[`power${n}.out`] = power(n, "out");
-  TABLE[`power${n}.inOut`] = power(n, "inOut");
-  TABLE[`power${n}`] = power(n, "out"); // GSAP's bare default direction
-}
-
-const BACK_CALL = /^back\.out\(\s*(-?\d+(?:\.\d+)?)\s*\)$/;
+export const EASE_NAMES = Object.keys(TABLE);
 
 export function resolveEase(name: string): EaseFn {
-  const direct = TABLE[name];
-  if (direct) return direct;
-  if (name === "back.out") return backOut(BACK_DEFAULT);
-  const m = BACK_CALL.exec(name);
-  if (m) return backOut(Number(m[1]));
+  const ease = TABLE[name];
+  if (ease) return ease;
   throw new Error(`unknown ease: ${name}`);
 }
