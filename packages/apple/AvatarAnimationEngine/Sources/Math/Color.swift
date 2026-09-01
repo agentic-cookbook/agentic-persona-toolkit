@@ -22,17 +22,31 @@ public enum Color {
 
     private static func clamp01(_ v: Double) -> Double { v < 0 ? 0 : (v > 1 ? 1 : v) }
 
+    /// The web's guard is `/[^0-9a-fA-F]/.test(full)` — ASCII-only. Swift's
+    /// `Character.isHexDigit` follows Unicode's `Hex_Digit` property, which is
+    /// also true for the fullwidth digit and letter blocks (U+FF10-FF19,
+    /// U+FF21-FF26, U+FF41-FF46); using it here would accept a string the web
+    /// rejects, and one `UInt8(_:radix:)` then fails to parse.
+    private static func isAsciiHexDigit(_ c: Character) -> Bool {
+        ("0"..."9").contains(c) || ("a"..."f").contains(c) || ("A"..."F").contains(c)
+    }
+
     public static func parseHex(_ hex: String) throws -> Rgb {
         var h = hex.trimmingCharacters(in: .whitespaces)
         if h.hasPrefix("#") { h.removeFirst() }
         if h.count == 3 { h = h.map { "\($0)\($0)" }.joined() }
-        guard h.count == 6, h.allSatisfy(\.isHexDigit) else { throw Failure.badHex(hex) }
-        func byte(_ lo: Int) -> Double {
+        guard h.count == 6, h.allSatisfy(isAsciiHexDigit) else { throw Failure.badHex(hex) }
+        // No force-unwrap: a string that somehow slips past the guard above
+        // throws the same `Failure.badHex` rather than trapping the process —
+        // a crash is a strictly worse failure mode than the web's catchable
+        // `Error` on the same malformed input.
+        func byte(_ lo: Int) throws -> Double {
             let s = h.index(h.startIndex, offsetBy: lo)
             let e = h.index(s, offsetBy: 2)
-            return Double(UInt8(h[s..<e], radix: 16)!) / 255
+            guard let v = UInt8(h[s..<e], radix: 16) else { throw Failure.badHex(hex) }
+            return Double(v) / 255
         }
-        return (byte(0), byte(2), byte(4))
+        return (try byte(0), try byte(2), try byte(4))
     }
 
     public static func toHex(_ rgb: Rgb) -> String {

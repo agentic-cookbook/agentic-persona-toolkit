@@ -20,6 +20,9 @@ public enum PathError: Error, CustomStringConvertible {
     case truncated(String)
     case stray(String)
     case badPointCount(String)
+    /// Distinct from `badPointCount`: a morph attempted across two paths whose
+    /// `kind` differs, which is a shape-family mismatch, not a count mismatch.
+    case shapeMismatch(String)
 
     public var description: String {
         switch self {
@@ -27,72 +30,120 @@ public enum PathError: Error, CustomStringConvertible {
         case .truncated(let s): "truncated command in path: \(s)"
         case .stray(let s): "stray number in path: \(s)"
         case .badPointCount(let s): s
+        case .shapeMismatch(let s): s
         }
     }
 }
 
 private let arity: [Character: Int] = ["M": 2, "L": 2, "C": 6, "Z": 0]
 
-/// Hand-rolled rather than regex: the grammar is four letters and a number and
-/// the scanner is shorter than the pattern would be. It is NOT automatically in
-/// agreement with the web's regex, and assuming it was hid two divergences:
-/// web's guard admits `\s` (so CR passed there and threw here), and web's
-/// tokeniser silently skips any character it fails to match (so `M5.,3` parsed
-/// as `M5,3` there and threw here). Web now rejects every unconsumed character
-/// that is not a separator, and the separator sets are the same five on both
-/// sides. The `testAgreesWithTheWebOnTheWholeGrammar` corpus below is what keeps
-/// that true.
+/// JS's `\d` (no `u` flag, as the web's `TOKEN` regex is written) matches only
+/// ASCII 0-9 — Swift's `Character.isNumber`/`.isHexDigit` are Unicode-aware and
+/// would also accept the fullwidth digit block (U+FF10-FF19), which is exactly
+/// the class of divergence this port must not introduce. Every digit test in
+/// this file goes through this, never through `Character.isNumber`.
+private func isAsciiDigit(_ c: Character) -> Bool { c >= "0" && c <= "9" }
+
+/// Scans one number token starting at `chars[i]`, mirroring the web's
+/// `-?(?:\d+(?:\.\d+)?|\.\d+)(?:[eE]-?\d+)?` exactly — including where the
+/// pattern's own optional groups refuse to extend a match. A decimal point
+/// with no digit after it, or an `e`/`E` with no digit (after an optional
+/// single `-`) after it, is left unconsumed rather than absorbed. That is what
+/// makes "1.2.3" scan as two numbers ("1.2" then ".3", matching the web's
+/// regex re-matching at the second dot) while "5.,3" and "5..3" both fail (the
+/// lone "." belongs to neither number and is not a separator either). Returns
+/// `nil` when no number starts at `i`, in which case nothing is consumed —
+/// mirroring the regex reporting no match at that position, including
+/// discarding a lone leading `-` that turned out not to lead a mantissa.
+private func scanNumber(_ chars: [Character], _ start: Int) -> (value: Double, end: Int)? {
+    var i = start
+    var s = ""
+    if i < chars.count, chars[i] == "-" { s.append("-"); i += 1 }
+
+    var matchedMantissa = false
+    if i < chars.count, isAsciiDigit(chars[i]) {
+        let digitsStart = i
+        while i < chars.count, isAsciiDigit(chars[i]) { i += 1 }
+        s += String(chars[digitsStart..<i])
+        matchedMantissa = true
+        if i < chars.count, chars[i] == ".", i + 1 < chars.count, isAsciiDigit(chars[i + 1]) {
+            s.append(".")
+            i += 1
+            let fracStart = i
+            while i < chars.count, isAsciiDigit(chars[i]) { i += 1 }
+            s += String(chars[fracStart..<i])
+        }
+    } else if i < chars.count, chars[i] == ".", i + 1 < chars.count, isAsciiDigit(chars[i + 1]) {
+        s.append(".")
+        i += 1
+        let fracStart = i
+        while i < chars.count, isAsciiDigit(chars[i]) { i += 1 }
+        s += String(chars[fracStart..<i])
+        matchedMantissa = true
+    }
+    guard matchedMantissa else { return nil }
+
+    if i < chars.count, chars[i] == "e" || chars[i] == "E" {
+        var j = i + 1
+        var exp = ""
+        if j < chars.count, chars[j] == "-" { exp.append("-"); j += 1 }
+        if j < chars.count, isAsciiDigit(chars[j]) {
+            let expStart = j
+            while j < chars.count, isAsciiDigit(chars[j]) { j += 1 }
+            exp += String(chars[expStart..<j])
+            s.append(chars[i])
+            s += exp
+            i = j
+        }
+    }
+
+    guard let value = Double(s) else { return nil }
+    return (value, i)
+}
+
+/// A deliberately tiny scanner, not a regex engine — but `scanNumber` above
+/// still has to reproduce the web's number regex's own backtracking-free
+/// semantics exactly, because that regex is re-applied at every position
+/// (`matchAll`, not an anchored per-token match), so it is what decides where
+/// one number ends and the next begins with no separator required between
+/// them.
 public func parsePath(_ d: String) throws -> ParsedPath {
+    let chars = Array(d)
     var kind = ""
     var points: [Double] = []
     var need = 0
     var pending: Character?
-    var number = ""
+    var i = 0
 
-    func flushNumber() throws {
-        guard !number.isEmpty else { return }
-        guard pending != nil, need > 0 else { throw PathError.stray(d) }
-        // `Double` accepts "5." and "5.e2"; web's number grammar requires a
-        // digit after the decimal point. A number the two platforms disagree
-        // about is a path they disagree about, and `.shape` channel values are
-        // path strings that cross between them.
-        if let dot = number.firstIndex(of: "."),
-           dot == number.index(before: number.endIndex)
-             || !("0"..."9").contains(number[number.index(after: dot)]) {
-            throw PathError.unsupported(d)
-        }
-        guard let value = Double(number) else { throw PathError.unsupported(d) }
-        points.append(value)
-        number = ""
-        need -= 1
-        if need == 0 { pending = nil }
+    func isSeparator(_ c: Character) -> Bool {
+        // Space, tab, CR, LF and comma — SVG's `wsp` set plus the comma the
+        // emitter writes. CR is easy to forget: web's guard tests `\s`, which
+        // admits it.
+        c == " " || c == "," || c == "\n" || c == "\t" || c == "\r"
     }
 
-    for ch in d {
-        if ch.isNumber || ch == "." || ch == "-" || ch == "e" || ch == "E" {
-            // A `-` or `e` only continues a number; anything else starts one.
-            if ch == "-", !number.isEmpty, !(number.hasSuffix("e") || number.hasSuffix("E")) {
-                try flushNumber()
-            }
-            if (ch == "e" || ch == "E"), number.isEmpty {
-                throw PathError.unsupported(d)
-            }
-            number.append(ch)
+    while i < chars.count {
+        let ch = chars[i]
+        if let n = arity[ch] {
+            guard need == 0 else { throw PathError.truncated(d) }
+            pending = ch
+            need = n
+            kind.append(ch)
+            if n == 0 { pending = nil }
+            i += 1
             continue
         }
-        try flushNumber()
-        // Space, tab, CR, LF and comma — SVG's `wsp` set plus the comma the
-        // emitter writes. CR is easy to forget and its absence was a real
-        // divergence: web's guard tests `\s`, which admits it.
-        if ch == " " || ch == "," || ch == "\n" || ch == "\t" || ch == "\r" { continue }
-        guard let n = arity[ch] else { throw PathError.unsupported(d) }
-        guard need == 0 else { throw PathError.truncated(d) }
-        pending = ch
-        need = n
-        kind.append(ch)
-        if n == 0 { pending = nil }
+        if let (value, end) = scanNumber(chars, i) {
+            guard pending != nil, need > 0 else { throw PathError.stray(d) }
+            points.append(value)
+            need -= 1
+            if need == 0 { pending = nil }
+            i = end
+            continue
+        }
+        guard isSeparator(ch) else { throw PathError.unsupported(d) }
+        i += 1
     }
-    try flushNumber()
     guard need == 0 else { throw PathError.truncated(d) }
     return ParsedPath(kind: kind, points: points)
 }

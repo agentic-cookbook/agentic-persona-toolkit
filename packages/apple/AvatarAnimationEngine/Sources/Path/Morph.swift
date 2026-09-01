@@ -5,7 +5,7 @@
 /// loudly at the moment it is attempted rather than wobbling on screen.
 public func morphPath(_ a: ParsedPath, _ b: ParsedPath, _ t: Double) throws -> ParsedPath {
     guard a.kind == b.kind else {
-        throw PathError.badPointCount(
+        throw PathError.shapeMismatch(
             "cannot morph across shape families: \(a.kind) -> \(b.kind)")
     }
     // `== 0` and `== 1`, NOT `<= 0` and `>= 1`. These two lines exist to make

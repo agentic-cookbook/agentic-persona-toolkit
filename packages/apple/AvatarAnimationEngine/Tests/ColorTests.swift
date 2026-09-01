@@ -47,4 +47,14 @@ final class ColorTests: XCTestCase {
         // a round-trip test passes with the inverse of a wrong forward matrix.
         XCTAssertEqual(try Color.mix("#00ff41", "#ff2d2d", 0.5), "#cead37")
     }
+
+    /// Caught by code review: Swift's `Character.isHexDigit` follows Unicode's
+    /// `Hex_Digit` property, which is also true for the fullwidth digit block
+    /// (U+FF10 here), unlike the web's ASCII-only `/[^0-9a-fA-F]/` guard. A
+    /// naive port lets this string past validation and then force-unwraps a
+    /// failed `UInt8(_:radix:)` parse, trapping the process; it must throw a
+    /// catchable error instead, the way the web does for the same input.
+    func testRejectsANonAsciiHexDigitInsteadOfCrashing() {
+        XCTAssertThrowsError(try Color.parseHex("#\u{FF10}0ff41"))
+    }
 }

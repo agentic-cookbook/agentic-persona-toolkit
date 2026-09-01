@@ -24,6 +24,13 @@ final class ParseTests: XCTestCase {
             ("M-1,-2", "M", [-1, -2]),
             ("M-1-2", "M", [-1, -2]),
             ("M0,0Z", "MZ", [0, 0]),
+            // A second decimal point does not extend the first number the way
+            // a third digit would: the web's number regex can only consume one
+            // `.digits` group, so it re-matches at the second dot and starts a
+            // fresh number there. Found by code review comparing the real
+            // Swift scanner against the real TS tokenizer directly; neither
+            // this corpus nor the TS's own `parse.test.ts` had covered it.
+            ("M1.2.3", "M", [1.2, 0.3]),
         ]
         for (d, kind, points) in accepted {
             let p = try parsePath(d)
@@ -39,6 +46,15 @@ final class ParseTests: XCTestCase {
                   "M1+2,3", "M0,0 C1,1"] {
             XCTAssertThrowsError(try parsePath(d), d)
         }
+    }
+
+    /// Pinned directly against the real TypeScript tokenizer (not the brief's
+    /// transcription of it), per the code review that caught this: a second
+    /// `.` cannot extend "1.2" into a longer number, so it starts a new one.
+    func testASecondDecimalPointStartsAFreshNumber() throws {
+        let p = try parsePath("M1.2.3")
+        XCTAssertEqual(p.kind, "M")
+        XCTAssertEqual(p.points, [1.2, 0.3])
     }
 
     func testReadsAThreePointMouthPolyline() throws {
