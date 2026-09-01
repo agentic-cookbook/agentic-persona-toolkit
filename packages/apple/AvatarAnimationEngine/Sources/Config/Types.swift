@@ -265,6 +265,31 @@ public struct Shape: Codable, Equatable, Sendable {
         return numeric(name).map(VariantField.number)
     }
 
+    /// Write one variant field. The mirror of `patchable(_:)`, and deliberately
+    /// adjacent to it: the checker and the writer must agree on exactly which
+    /// fields exist, and they cannot drift while they read the same list of
+    /// cases in the same file.
+    ///
+    /// An unmatched name or a mismatched case is unreachable — Task 29's variant
+    /// block already rejected a field this shape does not declare, and rejected a
+    /// value whose kind (number vs. points) differs from the authored one — so
+    /// this silently ignores it rather than duplicating that diagnostic here,
+    /// where the message would have no config context to quote.
+    public mutating func patch(_ name: String, _ value: VariantField) {
+        switch (name, value) {
+        case ("points", .points(let v)): points = v
+        case ("cx", .number(let v)): cx = v
+        case ("cy", .number(let v)): cy = v
+        case ("r", .number(let v)): r = v
+        case ("band", .number(let v)): band = v
+        case ("from", .number(let v)): from = v
+        case ("to", .number(let v)): to = v
+        case ("rx", .number(let v)): rx = v
+        case ("ry", .number(let v)): ry = v
+        default: break
+        }
+    }
+
     private func numeric(_ name: String) -> Double? {
         switch name {
         case "cx": return cx

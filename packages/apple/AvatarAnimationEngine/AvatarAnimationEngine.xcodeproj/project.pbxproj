@@ -13,6 +13,7 @@
 		17DAAC43B8476A0F4362C739 /* SchemaParityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D615C25AAE8434A2470C52A /* SchemaParityTests.swift */; };
 		1C07EA37B232BB1265832FFA /* Tweens.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85FFE581BD1451C5DAABCAE0 /* Tweens.swift */; };
 		1EF9AD6DFBCA92A469EE72E6 /* Ease.swift in Sources */ = {isa = PBXBuildFile; fileRef = D01378C62D9E6C10C9133BF0 /* Ease.swift */; };
+		2904A18880AAA4DD8001766C /* Rig.swift in Sources */ = {isa = PBXBuildFile; fileRef = F21CB22879DCEF213D033870 /* Rig.swift */; };
 		36AC86D4A619B0026524CE84 /* sayings.json in Resources */ = {isa = PBXBuildFile; fileRef = DF955C1A974A3AF13BF312F4 /* sayings.json */; };
 		3ACB1240743075C175C5EB19 /* TweenTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9328610868FB9843688F8FF7 /* TweenTests.swift */; };
 		494937CF2908E422D223FA05 /* behavior.json in Resources */ = {isa = PBXBuildFile; fileRef = 7A5A338051B22DC15F093C2E /* behavior.json */; };
@@ -41,12 +42,14 @@
 		CF47B85102C0A9A411FB9DF5 /* Prng.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE72A9354764C53E310D732C /* Prng.swift */; };
 		CF935821BA3AA98EFA338B8B /* ConfigTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69D5F4C0E3C18508A7AFDF71 /* ConfigTests.swift */; };
 		D005B62F6403FE28756B5CC3 /* ColorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9E721DC0F29FBBCB9651D0C /* ColorTests.swift */; };
+		D1F522BCD223D049BB7140F1 /* SceneTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F26949D57BEB37423A00786 /* SceneTests.swift */; };
 		D3D7EED3B9E8155D0B6E3D89 /* Color.swift in Sources */ = {isa = PBXBuildFile; fileRef = 130F581501C25450DEFB4801 /* Color.swift */; };
 		D43BA3D33A58D2134CF2D8C8 /* Scheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67E9A369E83430D8A395905C /* Scheduler.swift */; };
 		DA4E701BC4E5B1E842AD258C /* ParsedPath.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF32CAFCA98294817EB59768 /* ParsedPath.swift */; };
 		E71E233EB204DD224EFC02AE /* Ease.swift in Sources */ = {isa = PBXBuildFile; fileRef = D01378C62D9E6C10C9133BF0 /* Ease.swift */; };
 		EDD1F8C6841C74854CB4B485 /* FixtureTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B39D3FDDB8395C9221BCB51A /* FixtureTests.swift */; };
 		EDE225C83EF92DDDAB50F671 /* rig.json in Resources */ = {isa = PBXBuildFile; fileRef = 0A33B29B00C20949F5FCAB61 /* rig.json */; };
+		FBBA501B97339128FED2C902 /* Rig.swift in Sources */ = {isa = PBXBuildFile; fileRef = F21CB22879DCEF213D033870 /* Rig.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -77,6 +80,7 @@
 		0A33B29B00C20949F5FCAB61 /* rig.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = rig.json; sourceTree = "<group>"; };
 		130F581501C25450DEFB4801 /* Color.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Color.swift; sourceTree = "<group>"; };
 		3897409E395539C018E497AD /* Morph.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Morph.swift; sourceTree = "<group>"; };
+		4F26949D57BEB37423A00786 /* SceneTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneTests.swift; sourceTree = "<group>"; };
 		5343C1EC243B7AA5DACC06A1 /* AvatarAnimationEngine-iOS.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = "AvatarAnimationEngine-iOS.framework"; sourceTree = BUILT_PRODUCTS_DIR; };
 		577EE28B13B88DAF9D274DEB /* Loader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Loader.swift; sourceTree = "<group>"; };
 		678A3579A2DA68F9BBF86AA1 /* MathTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MathTests.swift; sourceTree = "<group>"; };
@@ -101,6 +105,7 @@
 		D01378C62D9E6C10C9133BF0 /* Ease.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Ease.swift; sourceTree = "<group>"; };
 		DF955C1A974A3AF13BF312F4 /* sayings.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = sayings.json; sourceTree = "<group>"; };
 		F1C7B168E34F9807CF359056 /* Types.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Types.swift; sourceTree = "<group>"; };
+		F21CB22879DCEF213D033870 /* Rig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Rig.swift; sourceTree = "<group>"; };
 		FD8DF984557CA6F751D21E97 /* Channels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Channels.swift; sourceTree = "<group>"; };
 		FE72A9354764C53E310D732C /* Prng.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Prng.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -125,6 +130,7 @@
 				B39D3FDDB8395C9221BCB51A /* FixtureTests.swift */,
 				678A3579A2DA68F9BBF86AA1 /* MathTests.swift */,
 				6B91FC70EB83145FF6F3D762 /* PathTests.swift */,
+				4F26949D57BEB37423A00786 /* SceneTests.swift */,
 				6C3172839D819BE33290C555 /* SchedulerTests.swift */,
 				6D615C25AAE8434A2470C52A /* SchemaParityTests.swift */,
 				9328610868FB9843688F8FF7 /* TweenTests.swift */,
@@ -150,6 +156,7 @@
 				CC0DFC7A29C4525AF1C1C965 /* Math */,
 				EB2595762E6D8C7B2BC32F76 /* Path */,
 				91093879915EC1E0949003DA /* Runtime */,
+				9E58038390DBA0E76D6BEB50 /* Scene */,
 			);
 			path = Sources;
 			sourceTree = "<group>";
@@ -162,6 +169,14 @@
 				85FFE581BD1451C5DAABCAE0 /* Tweens.swift */,
 			);
 			path = Runtime;
+			sourceTree = "<group>";
+		};
+		9E58038390DBA0E76D6BEB50 /* Scene */ = {
+			isa = PBXGroup;
+			children = (
+				F21CB22879DCEF213D033870 /* Rig.swift */,
+			);
+			path = Scene;
 			sourceTree = "<group>";
 		};
 		BAF13F97021F276689C8B685 /* Fixtures */ = {
@@ -344,6 +359,7 @@
 				A85EDE95C4541D1D9213F80E /* Morph.swift in Sources */,
 				8CC408CE8511DEFE85BF27E3 /* ParsedPath.swift in Sources */,
 				CF47B85102C0A9A411FB9DF5 /* Prng.swift in Sources */,
+				FBBA501B97339128FED2C902 /* Rig.swift in Sources */,
 				9DCC63D6046DE7FB8AA4185D /* Scheduler.swift in Sources */,
 				1C07EA37B232BB1265832FFA /* Tweens.swift in Sources */,
 				7C940DBEC703E798BCC9F547 /* Types.swift in Sources */,
@@ -359,6 +375,7 @@
 				EDD1F8C6841C74854CB4B485 /* FixtureTests.swift in Sources */,
 				518D0C21F8C335EBAA8E1443 /* MathTests.swift in Sources */,
 				B2C128A2BBDB42E6A4551B28 /* PathTests.swift in Sources */,
+				D1F522BCD223D049BB7140F1 /* SceneTests.swift in Sources */,
 				11D5AC5BDC71C5AC2724AA74 /* SchedulerTests.swift in Sources */,
 				17DAAC43B8476A0F4362C739 /* SchemaParityTests.swift in Sources */,
 				3ACB1240743075C175C5EB19 /* TweenTests.swift in Sources */,
@@ -378,6 +395,7 @@
 				A1462F52EA95025AEAF24CC6 /* Morph.swift in Sources */,
 				DA4E701BC4E5B1E842AD258C /* ParsedPath.swift in Sources */,
 				03BD203520FC12145F55D4AB /* Prng.swift in Sources */,
+				2904A18880AAA4DD8001766C /* Rig.swift in Sources */,
 				D43BA3D33A58D2134CF2D8C8 /* Scheduler.swift in Sources */,
 				8838649E71B1DAE93946BA35 /* Tweens.swift in Sources */,
 				4BEE7B2C34F97980C7E45F27 /* Types.swift in Sources */,
