@@ -55,6 +55,17 @@ export interface MarkdownDocumentEditorProps extends MarkdownEditorProps {
   header?: ReactNode
   /** Layout to open in on a wide viewport. Narrow always opens tabbed. */
   defaultLayout?: MarkdownEditorLayout
+  /** Pane to open the tabbed layout on. Defaults to the editor. */
+  defaultTab?: MarkdownEditorTab
+  /**
+   * What the layout control is OF, for its two toggle groups' accessible names — see
+   * `SplitViewControlProps.subject`. Defaults to "Editor", which is right for the one
+   * editor on a page and wrong the moment there are two: a host rendering a note beside a
+   * discussion gave a screen-reader user two groups both called "Editor layout", with
+   * nothing in the rotor to tell them apart. The control has always taken this; only this
+   * component hard-coded it.
+   */
+  subject?: string
   /** Rendered inside the editor pane's positioning context — a typeahead listbox, a drag
    *  target, anything that must sit against the textarea rather than the page. Absent from
    *  the preview pane by construction: it belongs to editing. */
@@ -89,13 +100,15 @@ export interface MarkdownDocumentEditorProps extends MarkdownEditorProps {
 export function MarkdownDocumentEditor({
   header,
   defaultLayout = 'tabbed',
+  defaultTab,
+  subject = 'Editor',
   overlay,
   previewClassName,
   fill = true,
   themeId,
   ...editor
 }: MarkdownDocumentEditorProps): React.JSX.Element {
-  const view = useSplitView({ defaultLayout })
+  const view = useSplitView({ defaultLayout, defaultPane: defaultTab })
 
   const source = useDebounced(editor.value, PREVIEW_DEBOUNCE_MS)
 
@@ -115,7 +128,7 @@ export function MarkdownDocumentEditor({
     >
       {header}
 
-      <SplitViewControl view={view} subject="Editor" />
+      <SplitViewControl view={view} subject={subject} />
 
       {/* The body's FLOOR. `fill` hands this row the pane's leftover height, and leftover height
           can be nothing at all — so a floor is what keeps a filling editor from filling with

@@ -8,8 +8,13 @@
 import { describe, expect, it } from "vitest"
 import { act, render, screen } from "@testing-library/react"
 import { useEditableList } from "../blocks/use-editable-list"
+// `EditableListController` is declared by the hook, not by the types module beside it — the
+// types module holds the shapes a CALLER writes (columns, facets, filters, sort), and the
+// controller is what the hook hands back. Importing it from the wrong one typechecked
+// nowhere and ran anyway, because vitest strips types without resolving them.
+import type { EditableListController } from "../blocks/use-editable-list"
 import { EditableList } from "../blocks/editable-list"
-import type { EditableListColumn, EditableListController } from "../blocks/editable-list-types"
+import type { EditableListColumn } from "../blocks/editable-list-types"
 
 interface Row {
   id: string
@@ -31,6 +36,10 @@ function Harness({ onList }: { onList: (list: EditableListController<Row>) => vo
     <EditableList<Row>
       list={list}
       ariaLabel="People"
+      // Required, and unused by anything asserted here: the widths are persisted per key so a
+      // table remembers its layout, which is exactly why the prop has no default — two lists
+      // sharing one key would silently share one layout.
+      columnWidthsKey="editable-list-details-test"
       describeRow={(r) => r.name}
       details={{
         label: "Profile",
@@ -90,7 +99,9 @@ describe("EditableList details", () => {
   it("draws no pane at all without the prop", () => {
     function Bare() {
       const list = useEditableList<Row>({ rows, getRowId: (r) => r.id, columns })
-      return <EditableList<Row> list={list} ariaLabel="People" />
+      return (
+        <EditableList<Row> list={list} ariaLabel="People" columnWidthsKey="editable-list-bare-test" />
+      )
     }
     render(<Bare />)
     expect(screen.queryByText("Pick one.")).toBeNull()

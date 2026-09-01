@@ -366,7 +366,12 @@ export function EditableList<T>({
                 details.render(detailRow)
               ) : (
                 <span className="text-apt-text-muted">
-                  {list.selectedIds.size > 1
+                  {/* `selectedRows`, not `selectedIds`, for the same reason `detailRow` above uses
+                      it: ids are never pruned when rows leave `allRows`, so after a bulk delete the
+                      set still holds two ids for rows that no longer exist — and this branch then
+                      told the operator to "select a single row" when nothing at all was selected.
+                      Both halves of the pane now answer from the same, resolved, list. */}
+                  {list.selectedRows.length > 1
                     ? (details.manyLabel ?? "Select a single row to see its details.")
                     : (details.emptyLabel ?? "Select a row to see its details.")}
                 </span>
