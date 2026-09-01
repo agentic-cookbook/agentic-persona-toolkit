@@ -137,6 +137,52 @@ describe("applyPose", () => {
     expect(result.resetAt).toEqual({ at: 0.9, channel: "body.rotation", value: -90 });
   });
 
+  it("runs a carried channel at the spin's pace, not the pose's", () => {
+    const spin = config.poses.poses.silly!.spin!;
+    expect(spin.carries).toEqual(["body.scale"]);
+    const target = config.poses.poses.silly!.channels["body.scale"] as number;
+    // `body.scale` is a group; the rig's own channels are the two axes.
+    expect(config.expand("body.scale")).toEqual(["body.scaleX", "body.scaleY"]);
+    const c = ctx();
+    expect(c.channels.get("body.scaleX")).toBe(1);
+    applyPose(c, "silly", 0);
+
+    // At the pose's own duration the pose's channels have landed...
+    c.tweens.tick(config.poses.poses.silly!.duration);
+    expect(c.channels.get("eyeLeft.x")).toBeCloseTo(-6, 9);
+    // ...but the scale rides the 0.9s whirl, so it is barely a third of the way.
+    // Written out rather than read back off `resolveEase`, so the expected value
+    // pins the spin's ease by name: powerN.inOut is 2^N * t^(N+1) below the
+    // midpoint, so power3.inOut at p = 0.4 / 0.9 is 8 * p^4 = 0.312...
+    const p = config.poses.poses.silly!.duration / spin.duration;
+    expect(p).toBeLessThan(0.5);
+    expect(c.channels.get("body.scaleX")).toBeCloseTo(1 + (target - 1) * 8 * p ** 4, 6);
+    expect(c.channels.get("body.scaleY") as number).toBeLessThan(target);
+
+    c.tweens.tick(spin.duration);
+    expect(c.channels.get("body.scaleX")).toBeCloseTo(target, 9);
+    expect(c.channels.get("body.scaleY")).toBeCloseTo(target, 9);
+  });
+
+  it("refuses a carried channel the pose does not drive, or the spin's own", () => {
+    const clone = () => structuredClone({ character, rig, poses, timelines, behavior, sayings });
+    const spinOf = (b: ReturnType<typeof clone>): { channel: string; carries?: string[] } =>
+      (b.poses as unknown as { poses: Record<string, { spin: { channel: string; carries?: string[] } }> })
+        .poses.silly!.spin;
+
+    const undriven = clone();
+    spinOf(undriven).carries = ["face.rotation"];
+    expect(() => loadConfig(undriven)).toThrow(/does not drive/);
+
+    const itself = clone();
+    spinOf(itself).carries = [spinOf(itself).channel];
+    expect(() => loadConfig(itself)).toThrow(/already times it/);
+
+    const nonsense = clone();
+    spinOf(nonsense).carries = ["body.notAChannel"];
+    expect(() => loadConfig(nonsense)).toThrow();
+  });
+
   it("lets a later pose interrupt an earlier one mid-flight", () => {
     const c = ctx();
     applyPose(c, "excited", 0);

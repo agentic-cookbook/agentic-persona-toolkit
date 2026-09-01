@@ -326,6 +326,22 @@ export function loadConfig(input: RawFiles): CharacterConfig {
         fail(`${where} spin targets group "${pose.spin.channel}"; spin needs a single concrete channel`);
       }
       requireEase(pose.spin.ease, `${where} spin`);
+      // A carried channel has to be one the pose actually states a target for:
+      // `carries` re-times a target, it does not invent one. Checking against
+      // the EXPANDED set lets a pose drive a group and carry one member of it.
+      const driven = new Set<string>();
+      for (const ch of Object.keys(pose.channels)) for (const c of expand(ch)) driven.add(c);
+      for (const carried of pose.spin.carries ?? []) {
+        requireChannel(carried, `${where} spin carries`);
+        if (carried === pose.spin.channel) {
+          fail(`${where} spin carries its own channel "${carried}"; the spin already times it`);
+        }
+        for (const c of expand(carried)) {
+          if (!driven.has(c)) {
+            fail(`${where} spin carries "${c}", which the pose does not drive`);
+          }
+        }
+      }
     }
   }
   for (const name of poses.order) {

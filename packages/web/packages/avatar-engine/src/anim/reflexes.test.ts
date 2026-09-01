@@ -113,6 +113,91 @@ describe("reflexes", () => {
     expect(swing(c, "antennaLeft.bend", 6, 11)).toBeGreaterThan(1);
   });
 
+  it("stands a symmetric loop on its phase's extreme before its first stroke", () => {
+    const left = B.loops.find((l) => l.channel === "antennaLeft.bend")!;
+    const right = B.loops.find((l) => l.channel === "antennaRight.bend")!;
+    const amp = amplitude(config, { mood: ACTIVE }, left.amplitude);
+    const c = make();
+    c.reflexes.start(0);
+    // Not one frame has been ticked yet. The original bends both antennae the
+    // instant the pose lands and only then runs the sway across, so `phase`
+    // names the side the loop is standing on — not the side it is heading for.
+    expect(left.phase).toBe("negativeFirst");
+    expect(right.phase).toBe("positiveFirst");
+    expect(c.channels.get("antennaLeft.bend")).toBeCloseTo(-amp, 9);
+    expect(c.channels.get("antennaRight.bend")).toBeCloseTo(amp, 9);
+    // …and the opening stroke crosses to the far extreme, rather than arriving
+    // at the near one a whole half cycle late.
+    const dur = amplitude(config, { mood: ACTIVE }, left.duration);
+    const end = (left.delay ?? 0) + dur;
+    run(c, 0, end);
+    // Landed on exactly: `run` steps a frame at a time and stops just short.
+    c.scheduler.tick(end); c.tweens.tick(end);
+    expect(c.channels.get("antennaLeft.bend")).toBeCloseTo(amp, 9);
+  });
+
+  it("starts the giggle wiggle at full tilt, the way the pose lands it", () => {
+    const wiggle = B.loops.find((l) => l.channel === "face.rotation")!;
+    const amp = amplitude(config, { mood: LIVELY }, wiggle.amplitude);
+    expect(amp).toBeGreaterThan(0); // otherwise this measures nothing
+    const c = make();
+    c.h.mood = LIVELY;
+    c.reflexes.start(0);
+    // `face.rotation` turns the whole glyph about the face's pivot, so easing
+    // out of zero here is not a subtle phase error: on the pose's first frame
+    // every node under the face sits some degrees away from where the original
+    // draws it, and stays there for as long as the mood does.
+    expect(c.channels.get("face.rotation")).toBeCloseTo(-amp, 9);
+  });
+
+  it("reopens a loop on its configured phase, not on the side it stopped at", () => {
+    const left = B.loops.find((l) => l.channel === "antennaLeft.bend")!;
+    const amp = amplitude(config, { mood: ACTIVE }, left.amplitude);
+    const poll = B.ladder.pollMs / 1000;
+    const c = make();
+    c.reflexes.start(0);
+    // Shut the eyes DURING the opening stroke, so the sign the chain leaves
+    // behind is the opposite of the one the config names. Reopening is a pose
+    // landing, and a pose landing always re-states the same starting side — a
+    // chain that resumed where the last one stopped would come back bent the
+    // wrong way, at full amplitude, for half a cycle.
+    run(c, 0, poll);
+    c.h.mood = B.eyesShutMood;
+    run(c, poll, 3);
+    expect(Math.abs(c.channels.get("antennaLeft.bend") as number)).toBeLessThan(1e-6);
+    c.h.mood = ACTIVE;
+    let first = 0;
+    for (let t = 3; t <= 5 && first === 0; t += 1 / 60) {
+      c.scheduler.tick(t); c.tweens.tick(t);
+      const v = c.channels.get("antennaLeft.bend") as number;
+      if (Math.abs(v) > 1e-6) first = v;
+    }
+    expect(first).toBeCloseTo(-amp, 9);
+  });
+
+  it("charges a loop's start delay once, so its period is its own duration", () => {
+    const left = B.loops.find((l) => l.channel === "antennaLeft.bend")!;
+    const dur = amplitude(config, { mood: ACTIVE }, left.duration);
+    const delay = left.delay ?? 0;
+    expect(delay).toBeGreaterThan(0); // otherwise this measures nothing
+    const c = make();
+    c.reflexes.start(0);
+    const readAt = (t: number): number => {
+      c.scheduler.tick(t); c.tweens.tick(t);
+      return c.channels.get("antennaLeft.bend") as number;
+    };
+    // A yoyo's period is two strokes. Sample well inside one stroke, then the
+    // same point two strokes later: the readings match only while the delay
+    // stays the one-off it is on the original. Charging it again per repeat
+    // stretches the period to `2 * (dur + delay)`, and the second sample lands
+    // a third of a stroke away — and permanently out of step with the original.
+    const probe = delay + dur + dur / 2;
+    run(c, 0, probe);
+    const first = readAt(probe);
+    run(c, probe, probe + 2 * dur);
+    expect(readAt(probe + 2 * dur)).toBeCloseTo(first, 3);
+  });
+
   it("blinks — shut and back open — and not at all in a suppressed mood", () => {
     const chan = config.expand(B.blink.channel)[0]!;
     const c = make();

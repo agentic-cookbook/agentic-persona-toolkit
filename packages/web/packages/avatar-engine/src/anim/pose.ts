@@ -55,14 +55,34 @@ export function applyPose(ctx: PoseContext, mood: string, now: number): PoseResu
   // and a slow `sad` are the character, so there is no global to fall back to.
   const { duration, ease } = pose;
 
+  /** Channels the spin re-times, and the timing each inherits.
+   *
+   *  A node has ONE transform matrix, so a scale stated alongside a whirl is not
+   *  a second animation running beside it — it is the same animation, and it
+   *  moves at the whirl's pace. Without this, a spinning pose reaches its scale
+   *  in the pose's own duration while the spin is still a third of the way
+   *  round, and the body is visibly too big for most of the transition.
+   *
+   *  Naming the channels in data rather than inferring them keeps the rule
+   *  anatomy-agnostic: nothing here has to know that a scale and a rotation
+   *  happen to share a matrix in SVG. */
+  const carried = new Map<string, { duration: number; ease: string }>();
+  if (pose.spin?.carries) {
+    const timing = { duration: pose.spin.duration, ease: pose.spin.ease };
+    for (const name of pose.spin.carries) {
+      for (const concrete of config.expand(name)) carried.set(concrete, timing);
+    }
+  }
+
   for (const [channel, target] of Object.entries(pose.channels)) {
     for (const concrete of config.expand(channel)) {
+      const rides = carried.get(concrete);
       tweens.add({
         channel: concrete,
         to: target as ChannelValue,
-        duration,
+        duration: rides?.duration ?? duration,
         delay: channelDelay(config, concrete),
-        ease,
+        ease: rides?.ease ?? ease,
       }, now);
     }
   }

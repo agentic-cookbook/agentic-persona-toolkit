@@ -59,9 +59,9 @@ export function createReflexes(deps: ReflexDeps): Reflexes {
    *  orphaned event fires, the poll has already armed a fresh chain — the
    *  orphan then arms a SECOND one, and the loop oscillates on two chains at
    *  once, forever, each re-arming the other's channel at a fractional offset.
-   *  Reachable whenever a loop's period exceeds `pollMs`: the sways are 0.97s
-   *  with their delay against a 400ms poll, and 0.97 and 0.4 share no useful
-   *  factor, so the two cadences drift into that window on their own.
+   *  Reachable whenever a loop's period exceeds `pollMs`: the calm sways are
+   *  0.85s and 1.05s against a 400ms poll, and neither shares a useful factor
+   *  with 0.4, so the two cadences drift into that window on their own.
    *
    *  The generation is what lets a pending event ask whether the chain that
    *  scheduled it is still the current one. Every arm mints one; every stop
@@ -121,15 +121,48 @@ export function createReflexes(deps: ReflexDeps): Reflexes {
       stopLoop(loop, when);
       return; // the poll re-arms it; nothing idles in a chain it cannot use
     }
+    /** Whether this arm OPENS a chain rather than continuing one.
+     *
+     *  The original states an ambient loop as ONE tween, created the instant the
+     *  pose lands and left to repeat itself. So everything about that loop which
+     *  happens once happens here and nowhere else: the phase it begins at, the
+     *  jump onto that phase, and the loop's start delay. A re-arm is one repeat
+     *  of that same tween — no delay, no jump, and it picks up the phase the
+     *  previous half cycle left. */
+    const opening = running.get(loop.id) !== true;
     running.set(loop.id, true);
-    const sign = signs.get(loop.id) ?? (loop.phase === "negativeFirst" ? -1 : 1);
+    // A REOPENED chain begins at the phase the config names, never at whichever
+    // extreme the last one happened to stop on. Reopening is a pose landing, and
+    // the original's pose apply always re-states the same starting side.
+    const sign = (opening ? undefined : signs.get(loop.id))
+      ?? (loop.phase === "negativeFirst" ? -1 : 1);
     const amp = amplitude(config, s, loop.amplitude);
     const dur = amplitude(config, s, loop.duration);
+    /** A symmetric yoyo swings BETWEEN two extremes, so it has to be standing on
+     *  one of them before the swing starts. The original puts it there with an
+     *  instantaneous set and only then runs the tween across to the far side, so
+     *  `phase` names the side it stands on and the stroke this arm plays runs to
+     *  the other one. Easing out of rest instead leaves the port half a cycle
+     *  behind for as long as the pose lasts, and on the pose's very first frame
+     *  it sits at zero where the original sits at full amplitude — around five
+     *  degrees of whole-face rotation on `silly`, and the antennae start bent
+     *  the wrong way in every mood.
+     *
+     *  `zeroTo` has no such jump and must not be given one: its rest value IS
+     *  one of its two ends, so the original starts it exactly where the channel
+     *  already is — `faceBob` runs to `-bob` with no set of any kind first. */
+    const swings = loop.mode === "symmetric" && loop.yoyo === true;
     const to = loop.mode === "symmetric"
-      ? sign * amp
+      ? (swings ? -sign : sign) * amp
       : (sign > 0 ? amp : loop.restValue);
-    const delay = loop.delay ?? 0;
+    // The delay positions the loop's START. It is not a gap between repeats —
+    // charging it every half cycle stretches the antenna sway's period by its
+    // own 0.12s and puts the two implementations permanently out of step.
+    const delay = opening ? (loop.delay ?? 0) : 0;
     for (const ch of config.expand(loop.channel)) {
+      if (swings && opening) {
+        tweens.add({ channel: ch, to: sign * amp, duration: 0 }, when);
+      }
       tweens.add({
         channel: ch, to, duration: dur, delay, ease: loop.ease,
         // A non-yoyo loop replays the same stroke each cycle, so it starts from
@@ -491,9 +524,12 @@ export function createReflexes(deps: ReflexDeps): Reflexes {
       // original reaches the same state by re-running `useGaze`, whose
       // `eyesShut` branch zeroes all three before it returns.
       const shutDef = b.gaze.disabledWhen;
-      if (shutDef !== undefined
+      // `start` always sets `lastMood` before the first poll can run, so the
+      // null here is a type, not a state — but naming it is cheaper than a cast.
+      const was = lastMood;
+      if (shutDef !== undefined && was !== null
         && predicate(config, { mood: m }, shutDef)
-        && !predicate(config, { mood: lastMood }, shutDef)) {
+        && !predicate(config, { mood: was }, shutDef)) {
         lookAt(when, 0, 0);
         tiltTo(when, 0);
         leanTo(when, 0, 0);

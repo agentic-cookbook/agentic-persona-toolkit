@@ -220,7 +220,8 @@
           "required": ["channel", "turns", "duration", "ease"],
           "properties": {
             "channel": { "type": "string" }, "turns": { "type": "number" },
-            "duration": { "type": "number" }, "ease": { "type": "string" }
+            "duration": { "type": "number" }, "ease": { "type": "string" },
+            "carries": { "type": "array", "items": { "type": "string" } }
           }
         }
       }

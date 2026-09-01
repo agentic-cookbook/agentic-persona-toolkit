@@ -101,7 +101,12 @@ export interface PoseDef {
   channels: Record<string, number | string>;
   /** Values `behavior.json`'s `params` selectors read (e.g. `wiggle`, `bob`). */
   loops?: Record<string, number>;
-  spin?: { channel: string; turns: number; duration: number; ease: string };
+  /** `carries` names sibling channels that inherit the spin's duration and
+   *  ease instead of the pose's own — see `applyPose` for why. */
+  spin?: {
+    channel: string; turns: number; duration: number; ease: string;
+    carries?: string[];
+  };
 }
 
 export interface PosesFile {
