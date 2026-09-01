@@ -1,0 +1,70 @@
+name: AvatarAnimationEngine
+options:
+  bundleIdPrefix: dev.agenticdevelopertoolkit.AvatarAnimationEngine
+  createIntermediateGroups: true
+  deploymentTarget:
+    macOS: "26.0"
+    iOS: "26.0"
+
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    SWIFT_STRICT_CONCURRENCY: complete
+    DEFINES_MODULE: YES
+    SKIP_INSTALL: YES
+    GENERATE_INFOPLIST_FILE: YES
+    CURRENT_PROJECT_VERSION: "1"
+    MARKETING_VERSION: "0.1.0"
+
+targets:
+  AvatarAnimationEngine-macOS:
+    type: framework
+    platform: macOS
+    sources:
+      - path: Sources
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: dev.agenticdevelopertoolkit.AvatarAnimationEngine.lib.macos
+        PRODUCT_NAME: AvatarAnimationEngine
+
+  AvatarAnimationEngine-iOS:
+    type: framework
+    platform: iOS
+    sources:
+      - path: Sources
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: dev.agenticdevelopertoolkit.AvatarAnimationEngine.lib.ios
+        PRODUCT_NAME: AvatarAnimationEngine
+        TARGETED_DEVICE_FAMILY: "1,2"
+
+  AvatarAnimationEngineTests-macOS:
+    type: bundle.unit-test
+    platform: macOS
+    sources:
+      - path: Tests
+    dependencies:
+      - target: AvatarAnimationEngine-macOS
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: dev.agenticdevelopertoolkit.AvatarAnimationEngine.tests.macos
+        GENERATE_INFOPLIST_FILE: YES
+
+schemes:
+  AvatarAnimationEngine-macOS:
+    build:
+      targets:
+        AvatarAnimationEngine-macOS: all
+        AvatarAnimationEngineTests-macOS: [test]
+    test:
+      config: Debug
+      targets:
+        - AvatarAnimationEngineTests-macOS
+    run:
+      config: Debug
+  AvatarAnimationEngine-iOS:
+    build:
+      targets:
+        AvatarAnimationEngine-iOS: all
+    run:
+      config: Debug

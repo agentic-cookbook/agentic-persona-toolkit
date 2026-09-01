@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "order": ["calm", "eager", "out", "flipping"],
+  "poses": {
+    "calm": {
+      "duration": 0.4,
+      "ease": "power3.out",
+      "channels": {
+        "body.ink": "ink",
+        "body.scale": 1,
+        "limb.bend": 0,
+        "line.shape": "M40,70L50,74L60,70"
+      },
+      "loops": { "wiggle": 0, "sway": 4 }
+    },
+    "eager": {
+      "duration": 0.3,
+      "ease": "back.out(1.7)",
+      "channels": {
+        "body.ink": "warm",
+        "body.scale": 1.05,
+        "limb.bend": 6,
+        "line.shape": "M40,68L50,78L60,68",
+        "spark.rotation": 200,
+        "spark.y": -4
+      },
+      "loops": { "wiggle": 3, "sway": 9 },
+      "spin": { "channel": "spark.rotation", "turns": 1, "duration": 0.6,
+                "ease": "power2.out", "carries": ["spark.y"] }
+    },
+    "out": {
+      "duration": 0.5,
+      "ease": "power2.inOut",
+      "channels": {
+        "body.ink": "ink",
+        "eyes.scaleY": 0.05,
+        "line.shape": "M40,72L50,72L60,72"
+      },
+      "loops": { "wiggle": 0, "sway": 1 }
+    },
+    "flipping": {
+      "duration": 0.5,
+      "ease": "power2.inOut",
+      "channels": {},
+      "loops": { "wiggle": 0, "sway": 1 }
+    }
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "id": "dot",
+  "canvas": { "w": 100, "h": 100 },
+  "strokeStyle": { "width": 4, "linecap": "round", "linejoin": "round" },
+  "palette": { "ink": "#112233", "warm": "#ff8800", "black": "#000000" },
+  "inks": {
+    "body": { "kind": "stroke", "color": "@body", "width": 4 },
+    "ring": { "kind": "stroke", "color": "@body", "width": 4 },
+    "hole": { "kind": "fill", "color": "black" }
+  },
+  "crops": { "full": ["core", "limb"], "coreOnly": ["core"] },
+  "variants": {
+    "bold": {
+      "inks": { "body": { "width": 7 }, "ring": { "width": 7 } },
+      "shapes": { "eye": { "band": 7 }, "pupil": { "r": 8 } }
+    }
+  },
+  "files": {
+    "rig": "rig.json",
+    "poses": "poses.json",
+    "timelines": "timelines.json",
+    "behavior": "behavior.json",
+    "sayings": "sayings.json"
+  }
+}

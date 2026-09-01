@@ -1,0 +1,102 @@
+{
+  "schemaVersion": 1,
+  "channelDelays": { "eye": 0, "pupil": 0, "limb": 0.04, "line": 0.02, "line.shape": 0.08 },
+  "params": {
+    "lively":     { "gt": ["wiggle", 0] },
+    "swayAmp":    { "select": "lively", "then": 9, "else": 4 },
+    "swayPeriod": { "select": "lively", "then": 1.6, "else": 3.2 }
+  },
+  "loops": [
+    { "id": "sway", "channel": "body.x", "mode": "symmetric",
+      "amplitude": { "param": "swayAmp" }, "duration": { "param": "swayPeriod" },
+      "ease": "sine.inOut", "yoyo": true,
+      "restValue": 0, "restDuration": 0.4, "restEase": "power2.out",
+      "disabledWhen": "eyesShut" },
+    { "id": "faceWiggle", "channel": "line.rotation", "mode": "symmetric",
+      "amplitude": { "param": "wiggle", "scale": 0.5 }, "duration": 1.1,
+      "ease": "sine.inOut", "yoyo": true, "phase": "negativeFirst", "delay": 0.1,
+      "restValue": 0, "enabledWhen": "lively" },
+    { "id": "pupilBob", "channel": "pupil.rotation", "mode": "zeroTo",
+      "amplitude": { "param": "wiggle", "scale": -1 }, "duration": 0.5,
+      "ease": "sine.inOut", "yoyo": true,
+      "restValue": 0, "restDuration": 0.45, "restEase": "power3.out" }
+  ],
+  "blink": { "channel": "eyes.scaleY", "shut": 0.06,
+             "durationMs": 90, "minMs": 2200, "maxMs": 6200,
+             "tweenDuration": 0.09, "ease": "power2.inOut",
+             "suppressedIn": ["out"] },
+  "gaze": {
+    "gazeMax": 3, "tiltMax": 2, "leanMax": 4,
+    "look": { "channels": ["pupil.x", "pupil.y"], "duration": 0.35, "ease": "power2.out" },
+    "tilt": { "channel": "body.rotation", "duration": 0.5, "ease": "power2.out" },
+    "lean": { "channels": ["body.y"], "duration": 0.6, "ease": "power2.out" },
+    "wanderAfterMs": 1500, "wanderMinMs": 1500, "wanderMaxMs": 4000,
+    "centreChanceCurious": 0.2, "centreChanceIdle": 0.5,
+    "reachCurious": [0.6, 1], "reachIdle": [0.2, 0.6],
+    "disabledWhen": "eyesShut"
+  },
+  "idleFidget": {
+    "activeWhen": "lively",
+    "breath": { "channel": "body.scaleY", "from": 1, "to": 1.01,
+                "duration": 4.4, "ease": "sine.inOut", "yoyo": true },
+    "sway": { "channel": "limb.rotation", "amplitude": 4 },
+    "brow": { "nodes": ["eye"], "rotationAmplitude": 2, "yAmplitude": 1 },
+    "durationRange": [0.5, 1.1],
+    "rearm": { "gapMs": [4000, 9000], "jitterMs": 500 },
+    "ease": "power1.inOut",
+    "settle": { "duration": 0.4, "ease": "power2.out" }
+  },
+  "ladder": { "boredAfterMs": 20000, "asleepAfterMs": 90000,
+              "alertAfterTypingMs": 30000, "pollMs": 200,
+              "moods": { "active": "eager", "bored": "calm", "asleep": "out" } },
+  "poke": [
+    { "from": "out", "expression": "eager", "ms": 900 },
+    { "from": "*",   "expression": "calm",  "ms": 900 }
+  ],
+  "waking": { "from": "out", "to": "calm", "play": "flipping", "ms": 600 },
+  "choreography": { "flipping": "flip" },
+  "moodEffects": {
+    "eager": {
+      "id": "sparkle",
+      "target": "spark",
+      "firstDelayMs": [200, 600],
+      "rearmMs": [1200, 2600],
+      "branch": { "probability": 0.6, "then": "twitch", "else": "drift" },
+      "twitch": [
+        { "channels": { "spark.y": { "rnd": 2 } }, "duration": 0.18, "ease": "power1.out" }
+      ],
+      "drift": [
+        { "channels": { "spark.x": { "rnd": 3 } },
+          "durationRange": [0.4, 0.9], "ease": "sine.inOut" }
+      ],
+      "settle": { "duration": 0.3, "ease": "power2.out" }
+    },
+    "calm": {
+      "id": "calmDrift",
+      "target": "body",
+      "once": [
+        { "channels": { "limb.y": 2 }, "duration": 0.3, "ease": "power2.out" }
+      ],
+      "loop": { "channel": "pupil.rotation", "mode": "zeroTo", "amplitude": 2,
+                "duration": 2.5, "ease": "sine.inOut", "yoyo": true },
+      "settle": { "duration": 0.4, "ease": "power2.out" }
+    }
+  },
+  "eyesShutMood": "out",
+  "pinpricks": { "nodes": ["spark"], "shownWhen": "eyesShut", "alpha": 1,
+                 "showDuration": 0.3, "hideDuration": 0.2, "ease": "power1.out" },
+  "speech": {
+    "mutterMs": 220,
+    "loopingIn": ["calm"],
+    "bubble": {
+      "x": 70, "y": 24,
+      "angleDeg": { "base": -20, "jitter": 8 },
+      "distance": [10, 18],
+      "spin": 6,
+      "in":  { "from": { "alpha": 0, "scale": 0.6 }, "to": { "alpha": 1, "scale": 1 },
+               "duration": 0.2, "ease": "back.out(1.7)" },
+      "out": { "duration": 0.15, "delay": 0.4, "ease": "power1.in",
+               "to": { "alpha": 0, "scale": 0.8 } }
+    }
+  }
+}

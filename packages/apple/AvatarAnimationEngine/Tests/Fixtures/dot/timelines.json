@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "timelines": {
+    "wink": {
+      "duration": 0.2,
+      "steps": [
+        { "at": 0,    "channel": "eyes.scaleY", "to": 0.1, "duration": 0.08, "ease": "power2.in" },
+        { "at": 0.08, "channel": "eyes.scaleY", "to": 1,   "duration": 0.12, "ease": "power2.out" }
+      ]
+    },
+    "flip": {
+      "duration": 0.5,
+      "steps": [
+        { "at": 0,   "channel": "line.shape", "to": "M40,72C44,66 56,66 60,72",
+          "duration": 0, "ease": "none", "family": "arcLine" },
+        { "at": 0,   "channel": "line.shape", "to": "M40,76C44,62 56,62 60,76",
+          "duration": 0.2, "ease": "sine.inOut" },
+        { "at": 0.3, "channel": "line.shape", "to": "M40,70L50,74L60,70",
+          "duration": 0, "ease": "none", "family": "line" }
+      ]
+    }
+  }
+}
