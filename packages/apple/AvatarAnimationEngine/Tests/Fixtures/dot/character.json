@@ -9,7 +9,7 @@
     "ring": { "kind": "stroke", "color": "@body", "width": 4 },
     "hole": { "kind": "fill", "color": "black" }
   },
-  "crops": { "full": ["core", "limb"], "coreOnly": ["core"] },
+  "crops": { "full": ["core", "limb"], "coreOnly": ["core"], "limbOnly": ["limb"] },
   "variants": {
     "bold": {
       "inks": { "body": { "width": 7 }, "ring": { "width": 7 } },

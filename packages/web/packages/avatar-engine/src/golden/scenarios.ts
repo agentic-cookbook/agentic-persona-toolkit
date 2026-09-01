@@ -6,6 +6,8 @@ export interface Scenario {
   fps: number;
   duration: number;
   reducedMotion?: boolean;
+  /** Scene-build-time rig patch, e.g. the optical cut. Defaults to the true rig. */
+  variant?: string;
   script: { at: number; do: (e: Engine) => void }[];
 }
 
@@ -39,4 +41,5 @@ export const SCENARIOS: readonly Scenario[] = [
   },
   { name: "reduced-motion", seed: 1, fps: 60, duration: 20, reducedMotion: true, script: [] },
   { name: "high-rate", seed: 1, fps: 240, duration: 20, script: [] },
+  { name: "optical", seed: 1, fps: 60, duration: 2, variant: "optical", script: [] },
 ];

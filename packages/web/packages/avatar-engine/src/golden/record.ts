@@ -22,6 +22,7 @@ export function recordScenario(config: CharacterConfig, scenario: Scenario): str
     config,
     seed: scenario.seed,
     env: scenario.reducedMotion ? { reducedMotion: () => true } : undefined,
+    variant: scenario.variant,
   });
 
   const frames = Math.floor(scenario.duration * scenario.fps);

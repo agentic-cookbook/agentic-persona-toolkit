@@ -170,8 +170,8 @@ final class RenderTests: XCTestCase {
     // MARK: - the public bridges
 
     func testThePublicPathDoorBuildsTheSamePathAsTheInternalBuilder() throws {
-        // `OlyloMark` (Plan B, Task 39) is the first renderer outside this
-        // package. Without this door it would need `parsePath`, `ParsedPath` and
+        // The first renderer outside this package (a host static renderer).
+        // Without this door it would need `parsePath`, `ParsedPath` and
         // `cgPath` all made public — or, far likelier, its own copy of the cubic
         // argument order the test above exists to protect.
         let d = "M0,0C10,0 20,10 20,20L30,20Z"

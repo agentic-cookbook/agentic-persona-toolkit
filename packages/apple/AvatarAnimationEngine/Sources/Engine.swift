@@ -5,12 +5,16 @@ public struct EngineOptions {
     /// Seeds the ONE PRNG stream the reflexes and the saying picker share.
     public var seed: UInt32
     public var env: AvatarEnvironment
+    /// Scene-build-time rig patch, e.g. the optical cut. `nil` builds the true rig.
+    public var variant: String?
 
     public init(config: CharacterConfig, seed: UInt32 = 1,
-                env: AvatarEnvironment = AvatarEnvironment()) {
+                env: AvatarEnvironment = AvatarEnvironment(),
+                variant: String? = nil) {
         self.config = config
         self.seed = seed
         self.env = env
+        self.variant = variant
     }
 }
 
@@ -45,7 +49,7 @@ public final class Engine {
         env = options.env
         store = Channels()
         config.seed(into: store)
-        scene = try Scene(config)
+        scene = try Scene(config, variant: options.variant)
         tweens = Tweens(channels: store, respond: config.respond)
         scheduler = Scheduler()
         prng = Prng(seed: options.seed)

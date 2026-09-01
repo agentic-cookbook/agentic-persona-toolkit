@@ -13,6 +13,8 @@ export interface EngineOptions {
   config: CharacterConfig;
   seed?: number;
   env?: Partial<Environment>;
+  /** Scene-build-time rig patch, e.g. the optical cut. Defaults to the true rig. */
+  variant?: string;
 }
 
 export interface Engine {
@@ -34,7 +36,7 @@ export function createEngine(options: EngineOptions): Engine {
 
   const channels = createChannels();
   seedChannels(config, channels);
-  const scene = buildScene(config);
+  const scene = buildScene(config, options.variant);
   const scheduler = createScheduler();
   const tweens = createTweens(channels, config.respond);
   const prng = createPrng(options.seed ?? 1);

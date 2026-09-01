@@ -303,12 +303,28 @@ final class SceneTests: XCTestCase {
     func testAFeatureIsInheritedFromTheNearestAncestorThatDeclaresOne() throws {
         let (config, list) = try rest()
         // `pupil` declares no feature. It is a child of `body`, which declares
-        // "core", so it belongs to `coreOnly` — and an implementation that reads
-        // `node.feature` directly returns the other three and nothing complains.
+        // "core", so it belongs to `coreOnly`. NOTE: this alone does not prove
+        // inheritance — "core"'s crop also keeps every unfeatured node by the
+        // structural fallback below, so `coreOnly` returns the same four ids
+        // whether or not `pupil`'s feature is actually inherited. See
+        // `testInheritanceIsWhatDropsAnUnfeaturedNodeFromACropThatExcludesItsAncestor`
+        // for the assertion that actually distinguishes the two.
         let kept = try config.crop(list, to: "coreOnly")
         XCTAssertEqual(kept.map(\.id), ["eye", "pupil", "line", "spark"])
         // Same items, same order, same paint — a filter, not a recomposition.
         XCTAssertEqual(kept, list.filter { $0.id != "limb" })
+    }
+
+    func testInheritanceIsWhatDropsAnUnfeaturedNodeFromACropThatExcludesItsAncestor() throws {
+        let (config, list) = try rest()
+        // `pupil` declares no feature and inherits "core" from `body`. `limbOnly`
+        // excludes "core", so an implementation that actually walks the chain
+        // drops `pupil` along with the rest of "core". An implementation that
+        // reads `node.feature` directly sees no feature on `pupil` at all, falls
+        // through the "no feature anywhere -> kept by every crop" rule, and keeps
+        // it — this is the one case where the two rules disagree, and the only
+        // assertion in this file that would fail if inheritance were deleted.
+        XCTAssertEqual(try config.crop(list, to: "limbOnly").map(\.id), ["limb"])
     }
 
     func testAnUnknownCropNameThrows() throws {
