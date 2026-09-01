@@ -159,18 +159,22 @@ describe("compose", () => {
   it("rebuilds a bend-driven antenna from its points and .bend", () => {
     // The antennae have NO .shape channel — two authorities over one node's
     // geometry is exactly how a bend stops bending. `bend` moves the control
-    // points; `inwardSign`/`inwardDamp` reproduce the original's asymmetry.
+    // points, and it moves them by exactly what the channel holds: the inward
+    // damp is applied where the value is WRITTEN (`CharacterConfig.respond`),
+    // never here, because the original damps a tween's endpoints and lerps the
+    // paths between them. A channel set by hand is therefore already rendered.
     const { scene, channels } = fresh();
     const rest = compose(scene, channels).find((i) => i.id === "antennaLeft")!.d;
     channels.set("antennaLeft.bend", 10);
     const out = compose(scene, channels).find((i) => i.id === "antennaLeft")!;
     expect(out.kind).toBe("MC");
     expect(out.d).not.toBe(rest);
-    // weights [0, 0.3, 0.8, 1] on x, damped by 0.72 because +10 is inward here.
+    // weights [0, 0.3, 0.8, 1] on x, undamped: the anchor does not move and the
+    // tip takes the whole offset.
     // `points` is flat [x0,y0,x1,y1,…]: index 0 is the M anchor, index 3 the tip.
     const pts = parsePath(out.d).points;
     expect(pts[0]).toBeCloseTo(183, 12);
-    expect(pts[6]).toBeCloseTo(179 + 10 * 0.72, 12);
+    expect(pts[6]).toBeCloseTo(179 + 10, 12);
   });
 });
 

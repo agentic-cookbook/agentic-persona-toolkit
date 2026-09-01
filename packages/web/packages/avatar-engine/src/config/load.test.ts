@@ -34,6 +34,20 @@ type BadTimelines = {
 };
 
 describe("loadConfig", () => {
+  it("damps only a bend's inward side, and leaves every other channel alone", () => {
+    const c = loadConfig(clone());
+    // antennaLeft bends inward on the positive side, antennaRight on the
+    // negative one, and the damp is 0.72 on whichever side that is.
+    expect(c.respond("antennaLeft.bend", 10)).toBeCloseTo(7.2, 10);
+    expect(c.respond("antennaLeft.bend", -10)).toBe(-10);
+    expect(c.respond("antennaRight.bend", -10)).toBeCloseTo(-7.2, 10);
+    expect(c.respond("antennaRight.bend", 10)).toBe(10);
+    expect(c.respond("antennaLeft.bend", 0)).toBe(0);
+    // Not a bend, not a number: identity.
+    expect(c.respond("face.rotation", 10)).toBe(10);
+    expect(c.respond("body.ink", "#ff0000")).toBe("#ff0000");
+  });
+
   it("loads olylo", () => {
     const c = loadConfig(clone());
     expect(c.character.id).toBe("olylo");

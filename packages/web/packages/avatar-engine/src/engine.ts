@@ -36,7 +36,7 @@ export function createEngine(options: EngineOptions): Engine {
   seedChannels(config, channels);
   const scene = buildScene(config);
   const scheduler = createScheduler();
-  const tweens = createTweens(channels);
+  const tweens = createTweens(channels, config.respond);
   const prng = createPrng(options.seed ?? 1);
 
   const arbiter = createArbiter({ config, channels, tweens, scheduler });

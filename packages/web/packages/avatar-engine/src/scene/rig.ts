@@ -97,14 +97,16 @@ function resolvePath(node: RigNode, channels: Channels): string {
       return cubicO(s.cx, s.cy, s.rx, s.ry);
     case "bezier": {
       if (s.bend === undefined) return bezier(s.points);
-      // `bend` offsets each point along one axis by its weight, damped when the
-      // bend goes inward — the exact shape of the original's bend(side, a).
+      // `bend` offsets each point along one axis by its weight. The channel
+      // already carries the inward damp -- `respond` (config/load) applies it
+      // where the value is written, because the original damps a tween's
+      // ENDPOINTS and lerps the paths between them. Damping again here would
+      // bend the line a second time.
       const a = num(channels, `${node.id}.bend`, 0);
-      const scaled = Math.sign(a) === s.bend.inwardSign ? a * s.bend.inwardDamp : a;
       const axis = s.bend.axis === "x" ? 0 : 1;
       const moved = s.points.map((p, i): [number, number] => {
         const out: [number, number] = [p[0], p[1]];
-        out[axis] += (s.bend!.weights[i] ?? 0) * scaled;
+        out[axis] += (s.bend!.weights[i] ?? 0) * a;
         return out;
       });
       return bezier(moved);

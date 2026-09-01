@@ -294,6 +294,12 @@ export interface CharacterConfig {
   channels: ReadonlySet<string>;
   /** group name -> the concrete channels it fans out to (a concrete channel maps to itself). */
   expand: (channel: string) => readonly string[];
+  /** The value the rig RENDERS for a value written to `channel`.
+   *
+   *  Applied once, where the value is written, so the channel holds rendered
+   *  quantity and everything downstream interpolates in the space the original
+   *  interpolates. Identity for every channel but a damped bend. */
+  respond: (channel: string, value: ChannelValue) => ChannelValue;
   /** node id -> declared shape family, for the morph guard. */
   families: ReadonlyMap<string, string>;
   /** Every concrete channel's resting value, DERIVED from the rig tree — the

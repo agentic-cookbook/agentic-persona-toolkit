@@ -220,6 +220,34 @@ export function loadConfig(input: RawFiles): CharacterConfig {
   const channels = new Set<string>([...concrete, ...expandMap.keys()]);
   const expand = (channel: string): readonly string[] => expandMap.get(channel) ?? [channel];
 
+  // --- channel responses ---------------------------------------------------
+  /** A channel whose RENDERED value is not the value written to it.
+   *
+   *  Only a bend has one, and the reason is the original's morph. `inwardDamp`
+   *  is a kink at zero: apply it while rendering and a sway crossing zero draws
+   *  a bent line through rendered space, because the channel is what moves
+   *  linearly. The original tweens the two PATHS, so its rendered deflection is
+   *  linear in eased time and only the ENDPOINTS carry the damp -- the calm
+   *  antenna sway runs -10.64 to +7.66 in a straight line, where damping at
+   *  render draws -10.64 to +10.64 and folds the top half over. Mapping the
+   *  value once, at the moment it is written, puts the channel in the same
+   *  space the original interpolates: it holds rendered deflection, endpoints
+   *  included, and every consumer downstream reads it raw.
+   *
+   *  Written as a map rather than read off the node at each use so the rule is
+   *  one lookup on both platforms and the renderer needs no rig knowledge. */
+  const responses = new Map<string, (v: number) => number>();
+  for (const [id, node] of nodes) {
+    const shape = node.shape;
+    if (shape === undefined || shape.kind !== "bezier" || shape.bend === undefined) continue;
+    const { inwardDamp, inwardSign } = shape.bend;
+    responses.set(`${id}.bend`, (v) => (Math.sign(v) === inwardSign ? v * inwardDamp : v));
+  }
+  const respond = (channel: string, value: ChannelValue): ChannelValue => {
+    const f = responses.get(channel);
+    return f !== undefined && typeof value === "number" ? f(value) : value;
+  };
+
   const requireChannel = (name: string, where: string): void => {
     if (!channels.has(name)) fail(`${where} targets unknown channel "${name}"`);
   };
@@ -689,6 +717,6 @@ export function loadConfig(input: RawFiles): CharacterConfig {
 
   return {
     character, rig, poses, timelines, behavior, sayings,
-    channels, expand, families, rest, nodes,
+    channels, expand, respond, families, rest, nodes,
   };
 }

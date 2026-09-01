@@ -20,6 +20,36 @@ describe("tweens", () => {
     expect(tw.active()).toBe(0);
   });
 
+  it("maps an endpoint through `respond` and then lerps in the mapped space", () => {
+    // The antenna sway, exactly: a symmetric swing whose inward half is damped
+    // to 0.72. The original tweens the two PATHS, so the rendered deflection
+    // runs -10.64 to +7.66 in a straight line. Damping the LIVE value instead
+    // would fold the outward half over at the zero crossing and read +0.14
+    // here, where the straight lerp reads -1.49.
+    const damp = (_c: string, v: number | string): number | string =>
+      typeof v === "number" && v > 0 ? v * 0.72 : v;
+    const ch = createChannels({ "antennaLeft.bend": 0 });
+    const tw = createTweens(ch, damp);
+    tw.add({ channel: "antennaLeft.bend", to: -10.64, duration: 0 }, 0);
+    near(ch.get("antennaLeft.bend") as number, -10.64);
+
+    tw.add({ channel: "antennaLeft.bend", to: 10.64, duration: 1, ease: "none" }, 0);
+    tw.tick(0.5);
+    near(ch.get("antennaLeft.bend") as number, (-10.64 + 10.64 * 0.72) / 2);
+    tw.tick(1);
+    near(ch.get("antennaLeft.bend") as number, 10.64 * 0.72);
+  });
+
+  it("maps an explicit `from` through `respond` too", () => {
+    const damp = (_c: string, v: number | string): number | string =>
+      typeof v === "number" && v > 0 ? v * 0.72 : v;
+    const ch = createChannels({ b: 0 });
+    const tw = createTweens(ch, damp);
+    tw.add({ channel: "b", from: 10, to: 0, duration: 1, ease: "none" }, 0);
+    tw.tick(0);
+    near(ch.get("b") as number, 7.2);
+  });
+
   it("lands on the same value regardless of frame rate", () => {
     const run = (step: number): number => {
       const ch = createChannels({ x: 0 });

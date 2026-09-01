@@ -65,7 +65,14 @@ function lerpValue(from: ChannelValue, to: ChannelValue, t: number): ChannelValu
   return t >= 1 ? to : from;
 }
 
-export function createTweens(channels: Channels): Tweens {
+/** `respond` maps a value to what the rig renders for it, once, where it is
+ *  written -- see `CharacterConfig.respond`. It belongs here because `add` is
+ *  the single funnel every animated value passes through, and applying it any
+ *  later would interpolate in a space the original never interpolates in. */
+export function createTweens(
+  channels: Channels,
+  respond: (channel: string, value: ChannelValue) => ChannelValue = (_c, v) => v,
+): Tweens {
   const live: Live[] = [];
 
   const cancel = (channel: string): void => {
@@ -104,6 +111,7 @@ export function createTweens(channels: Channels): Tweens {
     add(spec, now) {
       settle(spec.channel, now);
       cancel(spec.channel);
+      const to = respond(spec.channel, spec.to);
       const delay = spec.delay ?? 0;
       // A snapping channel (`snaps`, in ./channels) ignores whatever duration its
       // caller asked for. The rule lives HERE rather than at each of the dozen
@@ -120,7 +128,7 @@ export function createTweens(channels: Channels): Tweens {
       // safe would pop instead of animating. Landing at `add` time is what makes
       // the authored pair mean what it reads as.
       if (duration === 0 && delay === 0) {
-        channels.set(spec.channel, spec.to);
+        channels.set(spec.channel, to);
         return;
       }
       const start = now + delay;
@@ -132,8 +140,8 @@ export function createTweens(channels: Channels): Tweens {
         // delayed tween picks up whatever the channel holds at that moment. That is
         // what makes the per-channel delay ladder read as a wave rather than as a
         // set of tweens that all secretly began at the same value.
-        from: spec.from,
-        to: spec.to,
+        from: spec.from === undefined ? undefined : respond(spec.channel, spec.from),
+        to,
         easeName: spec.ease ?? "power3.out",
       });
     },
