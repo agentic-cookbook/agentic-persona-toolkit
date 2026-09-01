@@ -38,11 +38,22 @@ function findCharacterDir(): string {
   }
 }
 
+const CHARACTER_DIR = findCharacterDir();
+
 export default defineConfig({
-  test: { environment: "node", include: ["src/**/*.test.ts"] },
+  // `CHARACTER_DIR` is the same resolved path as the `@character` alias, handed
+  // to the tests as a STRING: the goldens sit beside the JSON in that directory
+  // and are read as files, not imported as modules, so an alias cannot reach
+  // them. Resolved once, here, so the upward search above stays the single
+  // source of truth for where olylo's config lives.
+  test: {
+    environment: "node",
+    include: ["src/**/*.test.ts"],
+    env: { CHARACTER_DIR },
+  },
   resolve: {
     alias: {
-      "@character": findCharacterDir(),
+      "@character": CHARACTER_DIR,
     },
   },
 });

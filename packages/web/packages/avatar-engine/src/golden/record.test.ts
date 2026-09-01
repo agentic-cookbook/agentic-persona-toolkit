@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import character from "@character/character.json";
 import rig from "@character/rig.json";
@@ -66,5 +68,37 @@ describe("recordScenario", () => {
     const probe = { setMood: (m: string | null) => { if (m) scripted.add(m); } };
     for (const step of moods.script) step.do(probe as never);
     expect([...scripted].sort()).toEqual(Object.keys(config.poses.poses).sort());
+  });
+});
+
+// The checked-in goldens are what every OTHER platform is verified against: the
+// Swift replay in `OlyloAvatar` reads these exact files. Nothing above compares
+// the recorder's output to them, and for one day nothing did anywhere -- so when
+// `ac3b5de` moved the antenna's inward damp from the renderer to the write, the
+// goldens kept the old shape, stayed green, and the Swift port faithfully
+// reproducing the NEW behaviour looked like the thing that was broken (Ruling
+// 113). A recording that nothing re-checks is not a golden, it is a fossil.
+describe("the checked-in goldens", () => {
+  // Beside the character JSON, not importable: they are read as files. See the
+  // `CHARACTER_DIR` note in vitest.config.ts.
+  const dir = join(process.env.CHARACTER_DIR!, "goldens");
+
+  it.each(SCENARIOS.map((s) => s.name))("%s.jsonl matches what src/ records today", (name) => {
+    const scenario = SCENARIOS.find((s) => s.name === name)!;
+    const fresh = recordScenario(config, scenario);
+    const onDisk = readFileSync(join(dir, `${name}.jsonl`), "utf8");
+    if (fresh === onDisk) return;
+
+    // Never `expect(fresh).toBe(onDisk)` -- these run to 43MB and vitest would
+    // try to render a character diff of the whole thing. Report the first
+    // differing line instead, which is the only part anyone can act on.
+    const a = fresh.split("\n");
+    const b = onDisk.split("\n");
+    const i = a.findIndex((line, n) => line !== b[n]);
+    expect.fail(
+      `${name}.jsonl is stale (${b.length} lines on disk, ${a.length} fresh). ` +
+        `First difference at line ${i + 1}. ` +
+        `Re-record with: python3 tools/avatar/record_golden.py ${name}`,
+    );
   });
 });
