@@ -20,6 +20,12 @@ export function predicate(config: CharacterConfig, scope: ParamScope, name: stri
   const def = config.behavior.params[name];
   if (def !== undefined && "gt" in def) return poseNumber(config, scope, def.gt[0]) > def.gt[1];
   if (name === "eyesShut") return scope.mood === config.behavior.eyesShutMood;
+  // A mood whose animation is a timeline rather than a pose. The original
+  // creates every ambient loop inside `applyPose` and returns before it for a
+  // choreographed mood, so "this mood is choreographed" is a fact about the
+  // mood in exactly the way `eyesShut` and `curious` are, and belongs here
+  // rather than as a second way of asking inside the reflexes.
+  if (name === "choreographed") return config.behavior.choreography?.[scope.mood] !== undefined;
   // The MOOD, not the ladder rung. `curious` means "awake and unoccupied" —
   // nothing to play, so the idle life may have the face. The ladder's rung is a
   // different question: a mood forced from outside leaves the rung at 0 while

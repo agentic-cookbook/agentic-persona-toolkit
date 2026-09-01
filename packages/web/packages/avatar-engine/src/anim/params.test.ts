@@ -31,12 +31,19 @@ describe("params", () => {
     expect(sel.then).toBeCloseTo(23.94, 9);
   });
 
-  it("resolves the two built-in predicates", () => {
+  it("resolves the three built-in predicates", () => {
     const shut = { mood: config.behavior.eyesShutMood };
     expect(predicate(config, shut, "eyesShut")).toBe(true);
     expect(predicate(config, calm, "eyesShut")).toBe(false);
     expect(predicate(config, calm, "curious")).toBe(true);
     expect(predicate(config, shut, "curious")).toBe(false);
+    // A choreographed mood is one the behaviour hands to a timeline rather than
+    // a pose, and the ambient loops read it to know to stand down.
+    const danced = Object.keys(config.behavior.choreography ?? {})[0]!;
+    expect(danced).toBeDefined();
+    expect(predicate(config, { mood: danced }, "choreographed")).toBe(true);
+    expect(predicate(config, calm, "choreographed")).toBe(false);
+    expect(predicate(config, shut, "choreographed")).toBe(false);
   });
 
   it("applies an amplitude's scale, and opens a gate only when both halves agree", () => {

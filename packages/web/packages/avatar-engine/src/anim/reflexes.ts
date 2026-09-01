@@ -115,8 +115,53 @@ export function createReflexes(deps: ReflexDeps): Reflexes {
     settleLoop(loop, when);
   };
 
+  /** Take a loop out of the chain WITHOUT writing its channel.
+   *
+   *  `stopLoop` settles, because it is the eyes-shutting case: the original
+   *  tweens each antenna back to bend 0 over half a second when the character
+   *  falls asleep, and `restValue`/`restDuration`/`restEase` are that tween,
+   *  copied. Entering a choreographed mood is a different case with a different
+   *  answer. There the original kills the loop tweens outright, and a killed
+   *  GSAP tween writes nothing more: the antenna stays at whatever bend the
+   *  half cycle had reached and the timeline owns the channel unchallenged.
+   *  Settling here would put a half-second sway-to-centre underneath the yawn
+   *  that the original never draws.
+   *
+   *  Cancelling the channel's tweens is what makes the freeze a freeze rather
+   *  than a pause: an in-flight sway tween left running would keep writing.
+   */
+  const freezeLoop = (loop: LoopDef): void => {
+    nextGen(loop); // orphan any pending chain event, running or not
+    if (running.get(loop.id) !== true) return;
+    running.set(loop.id, false);
+    for (const ch of config.expand(loop.channel)) tweens.cancel(ch);
+  };
+
+  /** Whether a choreographed mood suppresses this loop outright.
+   *
+   *  A CHOREOGRAPHED MOOD RUNS NO AMBIENT LOOP AT ALL. In the original every
+   *  ambient loop is created inside `applyPose`, and the pose effect returns
+   *  before `applyPose` when the mood has a timeline — so the suppression is
+   *  structural and covers every ambient loop uniformly, which is why it is
+   *  expressed here and not as a `disabledWhen` each loop opts into one at a
+   *  time. Measured on a forced 10s `yawning` take: the original never writes
+   *  `antennaLeft.bend` (tip x is 179.000 on all 601 frames) while the port
+   *  swung the full calm amplitude, 10.64 units, throughout.
+   *
+   *  It is the AMBIENT loops and only those. A mood effect's loop reaches its
+   *  channels through its own hook in the original, not through the pose, so a
+   *  timeline never suppressed it and neither does this.
+   */
+  const ambient = new Set(b.loops.map((l) => l.id));
+  const suppressed = (loop: LoopDef, s: ParamScope): boolean =>
+    ambient.has(loop.id) && predicate(config, s, "choreographed");
+
   function armLoop(loop: LoopDef, when: number): void {
     const s = scope();
+    if (suppressed(loop, s)) {
+      freezeLoop(loop);
+      return; // the poll re-arms it when the timeline's mood ends
+    }
     if (!loopLive(loop, s)) {
       stopLoop(loop, when);
       return; // the poll re-arms it; nothing idles in a chain it cannot use
@@ -502,7 +547,9 @@ export function createReflexes(deps: ReflexDeps): Reflexes {
       // by killing the loops `applyPose` had returned. The poll is 400ms, so
       // testing both directions here is what keeps the settle inside a delay the
       // original would recognise.
-      if (loopLive(loop, s)) {
+      if (suppressed(loop, s)) {
+        freezeLoop(loop);
+      } else if (loopLive(loop, s)) {
         if (running.get(loop.id) !== true) armLoop(loop, when);
       } else {
         stopLoop(loop, when);

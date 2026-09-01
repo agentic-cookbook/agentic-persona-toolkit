@@ -19,6 +19,10 @@ const B = config.behavior;
 const ACTIVE = B.ladder.moods.active!;
 const LIVELY = Object.keys(config.poses.poses)
   .find((m) => (config.poses.poses[m]!.loops?.wiggle ?? 0) > 0)!;
+/** A mood the behaviour hands to a timeline rather than a pose. Found in the
+ *  config rather than named, so dropping the choreography fails here instead of
+ *  quietly turning these into tests of nothing. */
+const DANCED = Object.keys(B.choreography ?? {})[0]!;
 /** The mood whose effect drives a channel an always-on ambient loop also owns —
  *  the collision Ruling 39 is about, found from the config rather than named, so
  *  that renaming the mood or moving the sag to another channel turns this into a
@@ -111,6 +115,32 @@ describe("reflexes", () => {
     expect(Math.abs(c.channels.get("antennaLeft.bend") as number)).toBeLessThan(1e-6);
     c.h.mood = ACTIVE;
     expect(swing(c, "antennaLeft.bend", 6, 11)).toBeGreaterThan(1);
+  });
+
+  it("runs no ambient loop at all in a choreographed mood", () => {
+    const c = make();
+    c.h.mood = DANCED;
+    c.reflexes.start(0);
+    expect(swing(c, "antennaLeft.bend", 0, 4)).toBeLessThan(1e-9);
+    expect(swing(c, "antennaRight.bend", 0, 4)).toBeLessThan(1e-9);
+  });
+
+  it("freezes an ambient loop entering a choreographed mood, rather than settling it", () => {
+    const c = make();
+    c.reflexes.start(0);
+    run(c, 0, 2);
+    c.h.mood = DANCED;
+    run(c, 2, 3); // the poll is 400ms, so the freeze has landed well inside this
+    const held = c.channels.get("antennaLeft.bend") as number;
+    // The original kills the loop tween, and a killed tween writes nothing more:
+    // the antenna keeps the bend the half cycle had reached. Settling it to
+    // `restValue` instead would draw a sway-to-centre under the timeline that
+    // the original never draws, so a held value at rest would be the bug.
+    expect(Math.abs(held)).toBeGreaterThan(1);
+    run(c, 3, 8);
+    expect(c.channels.get("antennaLeft.bend")).toBe(held);
+    c.h.mood = ACTIVE;
+    expect(swing(c, "antennaLeft.bend", 8, 13)).toBeGreaterThan(1);
   });
 
   it("stands a symmetric loop on its phase's extreme before its first stroke", () => {
