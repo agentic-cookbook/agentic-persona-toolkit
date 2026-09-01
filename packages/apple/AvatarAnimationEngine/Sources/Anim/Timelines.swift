@@ -58,21 +58,6 @@ public struct TimelineHandle {
     }
 }
 
-/// Expand a declarative timeline into scheduled tweens.
-///
-/// Each step is scheduled as a one-shot at `startedAt + step.at`, which then adds
-/// the tween. Scheduling the tween at its own moment (rather than adding every
-/// tween up front with a long delay) is what lets a step read the channel's value
-/// as it actually is when the step fires — the yawn's return-to-rest steps depend
-/// on that — and it is also what makes cancellation clean: an unfired one-shot is
-/// simply removed.
-///
-/// Timelines deliberately do NOT apply the pose delay ladder. A timeline author
-/// has already placed every step in time; adding 40-80ms of stagger on top would
-/// smear the yawn's phases — and it would do worse than that, because a delayed
-/// `duration: 0` snap stops qualifying for rule 4, so the morph that supersedes
-/// it is handed a family it cannot cross and `lerpValue` snaps it: the shape
-/// pops instead of animating, with nothing thrown to say so.
 /// Re-express an open polyline as an all-cubic path of `segments` segments,
 /// drawing the identical ink. The ONLY representation change the engine
 /// performs: a straight segment IS the cubic whose controls sit at the 1/3
@@ -115,6 +100,21 @@ func promotePolyline(_ p: ParsedPath, segments: Int) throws -> ParsedPath {
     return ParsedPath(kind: "M" + String(repeating: "C", count: segments), points: points)
 }
 
+/// Expand a declarative timeline into scheduled tweens.
+///
+/// Each step is scheduled as a one-shot at `startedAt + step.at`, which then adds
+/// the tween. Scheduling the tween at its own moment (rather than adding every
+/// tween up front with a long delay) is what lets a step read the channel's value
+/// as it actually is when the step fires — the yawn's return-to-rest steps depend
+/// on that — and it is also what makes cancellation clean: an unfired one-shot is
+/// simply removed.
+///
+/// Timelines deliberately do NOT apply the pose delay ladder. A timeline author
+/// has already placed every step in time; adding 40-80ms of stagger on top would
+/// smear the yawn's phases — and it would do worse than that, because a delayed
+/// `duration: 0` snap stops qualifying for rule 4, so the morph that supersedes
+/// it is handed a family it cannot cross and `lerpValue` snaps it: the shape
+/// pops instead of animating, with nothing thrown to say so.
 public func playTimeline(_ ctx: AnimContext, _ name: String, now: Double,
                          onDone: (() -> Void)? = nil) throws -> TimelineHandle {
     guard let timeline = ctx.config.timelines.timelines[name] else {
