@@ -76,3 +76,21 @@ public final class Channels {
         values.keys.sorted()
     }
 }
+
+extension ChannelValue: Codable {
+    public init(from decoder: Decoder) throws {
+        let c = try decoder.singleValueContainer()
+        if let v = try? c.decode(Double.self) { self = .number(v); return }
+        if let v = try? c.decode(String.self) { self = .text(v); return }
+        throw DecodingError.dataCorruptedError(
+            in: c, debugDescription: "a channel value must be a number or a string")
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var c = encoder.singleValueContainer()
+        switch self {
+        case .number(let v): try c.encode(v)
+        case .text(let v): try c.encode(v)
+        }
+    }
+}
