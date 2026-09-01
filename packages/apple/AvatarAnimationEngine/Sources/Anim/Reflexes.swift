@@ -9,19 +9,16 @@ public struct ReflexDeps {
     public var ctx: AnimContext
     public var prng: Prng
     public var mood: () -> String
-    public var idleRung: () -> Int
     public var reducedMotion: () -> Bool
     public var mutter: (Double) -> Void
 
     public init(ctx: AnimContext, prng: Prng,
                 mood: @escaping () -> String,
-                idleRung: @escaping () -> Int,
                 reducedMotion: @escaping () -> Bool,
                 mutter: @escaping (Double) -> Void) {
         self.ctx = ctx
         self.prng = prng
         self.mood = mood
-        self.idleRung = idleRung
         self.reducedMotion = reducedMotion
         self.mutter = mutter
     }
@@ -33,7 +30,6 @@ public final class Reflexes {
     /// with `randomSaying`, not a private copy of it.
     private let prng: Prng
     private let moodOf: () -> String
-    private let idleRungOf: () -> Int
     private let reducedMotion: () -> Bool
     private let mutter: (Double) -> Void
 
@@ -86,7 +82,6 @@ public final class Reflexes {
         ctx = deps.ctx
         prng = deps.prng
         moodOf = deps.mood
-        idleRungOf = deps.idleRung
         reducedMotion = deps.reducedMotion
         mutter = deps.mutter
         b = deps.ctx.config.behavior
@@ -96,7 +91,7 @@ public final class Reflexes {
     // MARK: - the small helpers everything else is written in
 
     private var scope: ParamScope {
-        ParamScope(mood: moodOf(), idleRung: idleRungOf())
+        ParamScope(mood: moodOf())
     }
 
     private func rest(_ channel: String) -> Double {
@@ -639,8 +634,8 @@ public final class Reflexes {
             // than a force-unwrap.
             let was = lastMood
             if let shutDef, let was,
-               predicate(ctx.config, ParamScope(mood: m, idleRung: 0), shutDef),
-               !predicate(ctx.config, ParamScope(mood: was, idleRung: 0), shutDef) {
+               predicate(ctx.config, ParamScope(mood: m), shutDef),
+               !predicate(ctx.config, ParamScope(mood: was), shutDef) {
                 lookAt(when, 0, 0)
                 tiltTo(when, 0)
                 leanTo(when, 0, 0)

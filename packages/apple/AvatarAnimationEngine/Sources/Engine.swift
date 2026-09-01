@@ -66,7 +66,6 @@ public final class Engine {
             ctx: ctx,
             prng: prng,
             mood: { a.state.mood },
-            idleRung: { a.state.idleRung },
             reducedMotion: options.env.reducedMotion,
             mutter: { now in a.say(pick(nil), now: now) }))
     }
@@ -92,8 +91,8 @@ public final class Engine {
             origin = now
             // ORDER: the arbiter registers first, so its ladder poll holds a
             // lower scheduler id than anything the reflexes arm and therefore
-            // runs first on every tick. `reflexes.start` reads `mood()` and
-            // `idleRung()`; the arbiter's `start` is what makes those true.
+            // runs first on every tick. `reflexes.start` reads `mood()`; the
+            // arbiter's `start` is what makes that true.
             arbiter.start(0)
             reflexes.start(0)
         }

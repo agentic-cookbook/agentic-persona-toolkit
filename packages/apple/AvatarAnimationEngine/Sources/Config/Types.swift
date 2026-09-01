@@ -162,7 +162,7 @@ public struct CharacterFile: Codable, Equatable, Sendable {
         public var sayings: String
     }
     /// `"$schema"` — the editor's pointer at `schema.json`. Nothing in the
-    /// engine reads it, and `dot` does not carry one, but olylo's
+    /// engine reads it, and `dot` does not carry one, but a production
     /// `character.json` does and Task 36's round-trip fails on any key the
     /// Swift types drop. `$` is not a legal Swift identifier character, which
     /// is why this one property costs the whole `CodingKeys` block below.
@@ -311,7 +311,7 @@ public struct RigNode: Codable, Equatable, Sendable {
     /// A pure transform layer, no geometry. Never read by the loader — TS's
     /// `load.ts` never inspects `node.layer` either — but modelled because
     /// `types.ts` and `schema.json` both declare it as a real, closed-schema
-    /// property, and a real config (olylo's) can carry one. Dropping it would
+    /// property, and a production config can carry one. Dropping it would
     /// pass `dot`'s fixtures clean (nothing here uses it) while silently
     /// discarding the field for any config that does — exactly the failure
     /// mode `SchemaParityTests` exists to catch, so it must be modelled even
@@ -330,11 +330,13 @@ public struct RigFile: Codable, Equatable, Sendable {
     // REQUIRED, not Optional, because web's `schema.json` lists `groups` in
     // `RigFile.required` and the two loaders must accept and reject the same set.
     // A rig with no groups writes `"groups": {}`; the explicit empty collection is
-    // what keeps the schema total, and both olylo and the `dot` fixture carry it.
+    // what keeps the schema total, and both a production character and the
+    // `dot` fixture carry it.
     //
     // There is no `overlays` key. A rig is ONE tree: a node that must escape a
     // transform is placed higher up the tree instead, which is where paint order
-    // already comes from. Olylo's pinpricks are `body`'s last children.
+    // already comes from. A production character's pinpricks are `body`'s
+    // last children.
     public var groups: [String: [String]]
 }
 
@@ -477,8 +479,8 @@ public struct LoopDef: Codable, Equatable, Sendable {
     public var channel: String
     public var mode: String                // "symmetric" | "zeroTo"
     public var amplitude: AmplitudeRef
-    /// An `AmplitudeRef`, not a `Double`, and the type is load-bearing: olylo's
-    /// sway period IS a param (`{"param":"swayPeriodLeft"}`) — 0.85 s calm,
+    /// An `AmplitudeRef`, not a `Double`, and the type is load-bearing: a
+    /// production character's sway period IS a param (`{"param":"swayPeriodLeft"}`) — 0.85 s calm,
     /// 0.3 s lively — so the cycle length changes with the mood exactly as its
     /// swing does. This is also why a loop is a self-rescheduling one-shot
     /// chain rather than `scheduler.every`: an `every` fixes its interval when
@@ -648,7 +650,7 @@ public enum EffectValue: Codable, Equatable, Sendable {
 public struct EffectStep: Codable, Equatable, Sendable {
     public var channels: [String: EffectValue]
     /// Exactly one of these two is present. A fixed length, or a range the
-    /// engine draws from at the scheduled event — olylo's sleeping `drift`
+    /// engine draws from at the scheduled event — a production sleeping `drift`
     /// wanders for 2.6–4.2 s, which is what stops it looking metronomic.
     public var duration: Double?
     public var durationRange: [Double]?
@@ -668,7 +670,7 @@ public struct EffectDef: Codable, Equatable, Sendable {
     /// disjoint subsets: a branching stirrer has `firstDelayMs`/`rearmMs` and
     /// two step lists, a loop-only effect has none of them, and a once-only
     /// effect has just `once`. Making any of them mandatory rejects two of
-    /// olylo's three mood effects at load time.
+    /// the three mood effects a production character declares.
     public var firstDelayMs: [Double]?
     public var rearmMs: [Double]?
     public var branch: Branch?

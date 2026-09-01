@@ -6,7 +6,6 @@ import XCTest
 /// and closures that read the harness would close the loop into a retain cycle.
 private final class Knobs {
     var mood: String
-    var rung = 0
     var reduced = false
     var mutters: [Double] = []
     init(mood: String) { self.mood = mood }
@@ -37,7 +36,6 @@ private struct Harness {
                              tweens: tweens, scheduler: scheduler),
             prng: Prng(seed: seed),
             mood: { k.mood },
-            idleRung: { k.rung },
             reducedMotion: { k.reduced },
             mutter: { k.mutters.append($0) }))
     }
@@ -136,14 +134,12 @@ final class ReflexesTests: XCTestCase {
         h.reflexes.start(0)
         h.run(from: 0, to: 2)
         h.knobs.mood = h.behavior.eyesShutMood
-        h.knobs.rung = 2
         // The gate is read at the next cycle boundary (3.2 s), and the settle
         // takes restDuration (0.4 s) after that — so 7 s is a wide margin.
         h.run(from: 2, to: 7)
         XCTAssertEqual(h.number("body.x"), 0, accuracy: 1e-6)
 
         h.knobs.mood = h.lively
-        h.knobs.rung = 0
         XCTAssertGreaterThan(h.swing("body.x", from: 7, to: 12), 1)
     }
 
@@ -186,7 +182,7 @@ final class ReflexesTests: XCTestCase {
     func testStandsASymmetricLoopOnItsPhasesExtremeBeforeItsFirstStroke() throws {
         let h = try Harness()
         h.knobs.mood = h.lively
-        let scope = ParamScope(mood: h.lively, idleRung: 0)
+        let scope = ParamScope(mood: h.lively)
         let sway = h.behavior.loops.first { $0.id == "sway" }!
         let wiggle = h.behavior.loops.first { $0.id == "faceWiggle" }!
         // Two symmetric loops on opposite phases — a pair of antennae on a
@@ -219,7 +215,7 @@ final class ReflexesTests: XCTestCase {
     func testReopensALoopOnItsConfiguredPhaseNotOnTheSideItStoppedAt() throws {
         let h = try Harness()
         h.knobs.mood = h.lively
-        let scope = ParamScope(mood: h.lively, idleRung: 0)
+        let scope = ParamScope(mood: h.lively)
         let sway = h.behavior.loops.first { $0.id == "sway" }!
         let amp = amplitude(h.config, scope, sway.amplitude)
         let dur = amplitude(h.config, scope, sway.duration)
@@ -228,7 +224,6 @@ final class ReflexesTests: XCTestCase {
         // the side it started on.
         h.run(from: 0, to: dur * 0.5)
         h.knobs.mood = h.behavior.eyesShutMood
-        h.knobs.rung = 2
         let settled = dur * 2 + (sway.restDuration ?? 0) + 1
         h.run(from: dur * 0.5, to: settled)
         XCTAssertEqual(h.number(sway.channel), sway.restValue, accuracy: 1e-6)
@@ -238,7 +233,6 @@ final class ReflexesTests: XCTestCase {
         // instead would put a paired antennae rig's two loops in step for the
         // rest of the run.
         h.knobs.mood = h.lively
-        h.knobs.rung = 0
         var first = 0.0
         var i = 0
         let deadline = settled + h.behavior.ladder.pollMs / 1000 + dur + 1
@@ -268,7 +262,7 @@ final class ReflexesTests: XCTestCase {
     func testChargesALoopsStartDelayOnceSoItsPeriodStaysItsOwnDuration() throws {
         let h = try Harness()
         h.knobs.mood = h.lively
-        let scope = ParamScope(mood: h.lively, idleRung: 0)
+        let scope = ParamScope(mood: h.lively)
         let wiggle = h.behavior.loops.first { $0.id == "faceWiggle" }!
         let delay = wiggle.delay ?? 0
         XCTAssertGreaterThan(delay, 0, "faceWiggle is the fixture's delayed loop")
@@ -536,7 +530,7 @@ final class ReflexesTests: XCTestCase {
         // The effect's own loop is a `LoopDef` in everything but its id, and it
         // swings to the amplitude the param language resolves for this mood.
         let loop = def.loop!
-        let amp = amplitude(h.config, ParamScope(mood: h.calm, idleRung: 0), loop.amplitude)
+        let amp = amplitude(h.config, ParamScope(mood: h.calm), loop.amplitude)
         let peak = h.swing(loop.channel, from: 1, to: 6)
         XCTAssertGreaterThan(peak, amp * 0.25)
         XCTAssertLessThanOrEqual(peak, amp + 1e-6)
@@ -565,10 +559,10 @@ final class ReflexesTests: XCTestCase {
         h.knobs.mood = h.calm
         h.reflexes.start(0)
         let loop = h.behavior.moodEffects[h.calm]!.loop!
-        let amp = amplitude(h.config, ParamScope(mood: h.calm, idleRung: 0), loop.amplitude)
+        let amp = amplitude(h.config, ParamScope(mood: h.calm), loop.amplitude)
         // `start` arms the effect directly, so no poll is needed to begin; the
         // window is one out-and-back of the drift.
-        let dur = amplitude(h.config, ParamScope(mood: h.calm, idleRung: 0), loop.duration)
+        let dur = amplitude(h.config, ParamScope(mood: h.calm), loop.duration)
         let peak = h.swing(loop.channel, from: 0, to: dur * 2 + 1)
         XCTAssertGreaterThan(peak, amp * 0.9)
         XCTAssertLessThanOrEqual(peak, amp + 1e-6)
@@ -580,8 +574,8 @@ final class ReflexesTests: XCTestCase {
         // amplitude just went to zero is noticed by `pollTick` and by nothing else.
         let h = try Harness()
         let loop = h.behavior.moodEffects[h.calm]!.loop!
-        let amp = amplitude(h.config, ParamScope(mood: h.calm, idleRung: 0), loop.amplitude)
-        let dur = amplitude(h.config, ParamScope(mood: h.calm, idleRung: 0), loop.duration)
+        let amp = amplitude(h.config, ParamScope(mood: h.calm), loop.amplitude)
+        let dur = amplitude(h.config, ParamScope(mood: h.calm), loop.duration)
         h.knobs.mood = h.lively
         h.reflexes.start(0)
         XCTAssertGreaterThan(h.swing(loop.channel, from: 0, to: 2), 0.5)
@@ -597,8 +591,8 @@ final class ReflexesTests: XCTestCase {
     func testSuppressesAMoodEffectUnderReducedMotionAndRestoresItWhenItClears() throws {
         let h = try Harness()
         let loop = h.behavior.moodEffects[h.calm]!.loop!
-        let amp = amplitude(h.config, ParamScope(mood: h.calm, idleRung: 0), loop.amplitude)
-        let dur = amplitude(h.config, ParamScope(mood: h.calm, idleRung: 0), loop.duration)
+        let amp = amplitude(h.config, ParamScope(mood: h.calm), loop.amplitude)
+        let dur = amplitude(h.config, ParamScope(mood: h.calm), loop.duration)
         h.knobs.mood = h.calm
         h.knobs.reduced = true
         h.reflexes.start(0)
@@ -630,11 +624,11 @@ final class ReflexesTests: XCTestCase {
         let poll = b.ladder.pollMs / 1000
         let active = b.ladder.moods["active"]!
         func cycle(_ l: LoopDef, _ m: String) -> Double {
-            amplitude(h.config, ParamScope(mood: m, idleRung: 0), l.duration)
+            amplitude(h.config, ParamScope(mood: m), l.duration)
                 + (l.delay ?? 0)
         }
         func live(_ l: LoopDef, _ m: String) -> Bool {
-            let s = ParamScope(mood: m, idleRung: 0)
+            let s = ParamScope(mood: m)
             return amplitude(h.config, s, l.amplitude) != 0
                 && gateOpen(h.config, s, enabledWhen: l.enabledWhen,
                             disabledWhen: l.disabledWhen)

@@ -65,6 +65,16 @@ public extension AvatarEnvironment {
     /// `tick` is `CADisplayLink.targetTimestamp`, and it is the engine's only
     /// one (Ruling 48), so there is no second time source to keep on the same
     /// time base as it.
+    ///
+    /// - Important: the returned closure must be CALLED on the main actor. It
+    ///   reads AppKit/UIKit accessibility state through
+    ///   `MainActor.assumeIsolated`, which traps off the main actor — and the
+    ///   trap fires where the engine samples the setting, inside `tick`, not
+    ///   here. `Engine` is deliberately not actor-isolated, so nothing in the
+    ///   type system enforces this: a host that drives `tick` from a
+    ///   background queue must pass its own `AvatarEnvironment` instead of
+    ///   this one. `AvatarLayerView` drives it from a `CADisplayLink`, which
+    ///   is already on the main actor.
     static func live() -> AvatarEnvironment {
         // `reducedMotion` is a plain, non-isolated `() -> Bool` (Task 34): the
         // engine may sample it from any context. `Platform.reduceMotion()` is

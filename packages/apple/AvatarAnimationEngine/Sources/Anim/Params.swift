@@ -1,15 +1,18 @@
 import Foundation
 
-/// Everything a param can be a function of. Deliberately two fields: a param
-/// that could read a channel could read a channel a loop writes, and the loop
-/// would then be driving its own amplitude.
+/// Everything a param can be a function of, which is the mood and
+/// deliberately nothing else. A param that could read a channel could read a
+/// channel a loop writes, and the loop would then be driving its own
+/// amplitude. The ladder's idle rung is excluded for its own reason, stated
+/// at `curious` in `predicate` below: a mood forced from outside leaves the
+/// rung at 0 while the face is very much occupied, so a rung-based reading
+/// hands the idle fidget a mood's brows to overwrite. Keeping the rung out of
+/// scope is what makes that mistake unwritable rather than merely undone.
 public struct ParamScope: Equatable, Sendable {
     public var mood: String
-    public var idleRung: Int
 
-    public init(mood: String, idleRung: Int) {
+    public init(mood: String) {
         self.mood = mood
-        self.idleRung = idleRung
     }
 }
 

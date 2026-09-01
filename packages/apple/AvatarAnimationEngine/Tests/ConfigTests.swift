@@ -204,10 +204,10 @@ final class ConfigTests: XCTestCase {
         // over a wrong picture.
         //
         // The guard is written inks-FIRST, and the `dot` fixture cannot show
-        // why: no name here is both an ink and a palette entry. olylo's config
+        // why: no name here is both an ink and a palette entry. A production config
         // is the collision case -- `eyeBg` and `iris` are each both -- so a
         // palette-first guard would refuse to load the real character. Task 43's
-        // golden replay is what catches that, because it loads olylo itself.
+        // golden replay is what catches that, because it loads a real one.
         expectLoadFailure("palette colour \"warm\"") {
             try fixture("rig", set: "root/children/0/ink", to: "warm")
         }
@@ -255,8 +255,9 @@ final class ConfigTests: XCTestCase {
     func testRejectsATimelineWhoseStepsOutrunItsDeclaredDuration() {
         // `duration` is what the host waits on before firing `onDone`. Declaring
         // it short fires `onDone` mid-tween — every individual frame still
-        // correct, so no golden catches it. This is the check that found olylo's
-        // `yawn` declaring 2.05 s against a 2.1 s `body.scale` settle.
+        // correct, so no golden catches it. This is the check that found a real
+        // character's `yawn` declaring 2.05 s against a 2.1 s
+        // `body.scale` settle.
         expectLoadFailure("steps run to") {
             try fixture("timelines", set: "timelines/flip/duration", to: 0.1)
         }

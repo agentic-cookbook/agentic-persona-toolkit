@@ -15,7 +15,7 @@ final class ParamsTests: XCTestCase {
     /// named, so the test says "a lively mood" rather than "eager".
     private var lively: ParamScope {
         let mood = config.poses.order.first { (config.poses.poses[$0]?.loops?["wiggle"] ?? 0) > 0 }!
-        return ParamScope(mood: mood, idleRung: 0)
+        return ParamScope(mood: mood)
     }
 
     /// The first mood that is neither lively nor the eyes-shut mood.
@@ -24,7 +24,7 @@ final class ParamsTests: XCTestCase {
             (config.poses.poses[$0]?.loops?["wiggle"] ?? 0) == 0
                 && $0 != config.behavior.eyesShutMood
         }!
-        return ParamScope(mood: mood, idleRung: 0)
+        return ParamScope(mood: mood)
     }
 
     private func select(_ name: String) throws -> (then: Double, otherwise: Double) {
@@ -58,15 +58,17 @@ final class ParamsTests: XCTestCase {
     }
 
     func testResolvesTheThreeBuiltInPredicates() {
-        let shut = ParamScope(mood: config.behavior.eyesShutMood, idleRung: 2)
+        let shut = ParamScope(mood: config.behavior.eyesShutMood)
         XCTAssertTrue(predicate(config, shut, "eyesShut"))
         XCTAssertFalse(predicate(config, calm, "eyesShut"))
 
-        // `curious` reads the MOOD, not the idle rung. `calm` here carries
-        // `idleRung: 0` — the value an app-forced mood also leaves behind —
-        // without being the ladder's `active` mood, "eager"; the old
-        // `idleRung == 0` reading would have called this curious, wrongly
-        // handing the idle fidget a mood's brows to overwrite.
+        // `curious` reads the MOOD, and the scope deliberately cannot see the
+        // ladder's rung at all. `calm` is not the ladder's `active` mood,
+        // "eager"; a rung-based reading would have called it curious anyway,
+        // because a mood forced from outside leaves the rung at 0 while the
+        // face is very much occupied — wrongly handing the idle fidget a
+        // mood's brows to overwrite. Ruling 105 took the rung out of
+        // `ParamScope` so that reading cannot be written.
         XCTAssertEqual(lively.mood, config.behavior.ladder.moods["active"])
         XCTAssertTrue(predicate(config, lively, "curious"))
         XCTAssertFalse(predicate(config, calm, "curious"))
@@ -75,7 +77,7 @@ final class ParamsTests: XCTestCase {
         // `choreographed` is a fact about the mood, read off
         // `behavior.choreography` directly — true only for a mood the
         // config maps to a timeline.
-        let flipping = ParamScope(mood: "flipping", idleRung: 0)
+        let flipping = ParamScope(mood: "flipping")
         XCTAssertTrue(predicate(config, flipping, "choreographed"))
         XCTAssertFalse(predicate(config, calm, "choreographed"))
     }
