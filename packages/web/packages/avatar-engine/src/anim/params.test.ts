@@ -10,10 +10,10 @@ import { amplitude, gateOpen, numberParam, poseNumber, predicate } from "./param
 
 const config = loadConfig({ character, rig, poses, timelines, behavior, sayings });
 const P = config.behavior.params;
-const calm = { mood: config.behavior.ladder.moods.active!, idleRung: 0 };
+const calm = { mood: config.behavior.ladder.moods.active! };
 const livelyMood = Object.keys(config.poses.poses)
   .find((m) => (config.poses.poses[m]!.loops?.wiggle ?? 0) > 0)!;
-const lively = { mood: livelyMood, idleRung: 0 };
+const lively = { mood: livelyMood };
 
 describe("params", () => {
   it("reads a gt predicate off the current pose's loops block", () => {
@@ -32,7 +32,7 @@ describe("params", () => {
   });
 
   it("resolves the two built-in predicates", () => {
-    const shut = { mood: config.behavior.eyesShutMood, idleRung: 2 };
+    const shut = { mood: config.behavior.eyesShutMood };
     expect(predicate(config, shut, "eyesShut")).toBe(true);
     expect(predicate(config, calm, "eyesShut")).toBe(false);
     expect(predicate(config, calm, "curious")).toBe(true);
@@ -46,6 +46,13 @@ describe("params", () => {
     expect(gateOpen(config, calm, {})).toBe(true);
     expect(gateOpen(config, calm, { enabledWhen: "lively" })).toBe(false);
     expect(gateOpen(config, lively, { enabledWhen: "lively" })).toBe(true);
-    expect(gateOpen(config, lively, { enabledWhen: "lively", disabledWhen: "curious" })).toBe(false);
+    // `disabledWhen` is consulted even after `enabledWhen` has passed. The two
+    // halves name the SAME predicate on purpose: `curious` is now "the mood is
+    // the ladder's active one", and that mood has `wiggle: 0`, so no mood in the
+    // shipped config satisfies `lively` and `curious` at once. Naming two
+    // predicates that cannot co-hold would let the gate close for the wrong
+    // half and still pass.
+    expect(gateOpen(config, lively, { enabledWhen: "lively", disabledWhen: "lively" })).toBe(false);
+    expect(gateOpen(config, lively, { enabledWhen: "lively", disabledWhen: "curious" })).toBe(true);
   });
 });

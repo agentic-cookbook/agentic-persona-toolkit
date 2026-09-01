@@ -55,10 +55,9 @@ export function createEngine(options: EngineOptions): Engine {
   const reflexes = createReflexes({
     config, channels, tweens, scheduler, prng,
     mood: () => arbiter.state().mood,
-    idleRung: () => arbiter.state().idleRung,
-    // Reduced motion is its own switch, not a rung trick. Pinning the rung to 0
-    // would read as *curious*, which is precisely when the idle fidget is most
-    // active — the opposite of what the preference asks for.
+    // Reduced motion is its own switch, not a mood trick. Reporting the ladder's
+    // active mood would read as *curious*, which is precisely when the idle
+    // fidget is most active — the opposite of what the preference asks for.
     reducedMotion: () => env.reducedMotion(),
     // The reflexes own the clock and the PRNG; the arbiter owns what a bubble is.
     mutter: (now) => arbiter.say(pickSaying(), now),

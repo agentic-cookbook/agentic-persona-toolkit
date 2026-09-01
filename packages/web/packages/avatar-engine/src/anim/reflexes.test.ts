@@ -31,19 +31,27 @@ const SAG = B.moodEffects[COLLIDING]!.loop!;
 // Through `amplitude` rather than a cast: both fields are `AmplitudeRef`, so a
 // `as number` would compile happily against a config that had since moved the
 // sag's amplitude behind a param and then measure `NaN`.
-const SAG_SCOPE = { mood: COLLIDING, idleRung: 0 };
+const SAG_SCOPE = { mood: COLLIDING };
 const SAG_AMP = amplitude(config, SAG_SCOPE, SAG.amplitude);
 const SAG_PERIOD = amplitude(config, SAG_SCOPE, SAG.duration);
 
+/** The channel the idle fidget BORROWS, and a mood that takes it back. Found
+ *  from the config so that moving the fidget off the brows, or dropping the
+ *  brows out of every pose, fails here rather than silently testing nothing. */
+const BROW = `${B.idleFidget.brow.nodes[0]!}.rotation`;
+const BROW_MOOD = Object.keys(config.poses.poses).find((m) =>
+  m !== ACTIVE && m !== B.eyesShutMood
+  && (config.poses.poses[m]!.channels[BROW] ?? config.rest.get(BROW)) !== config.rest.get(BROW))!;
+const BROW_POSED = config.poses.poses[BROW_MOOD]!.channels[BROW] as number;
+
 interface Harness {
   mood: string;
-  rung: number;
   reduced: boolean;
   mutters: number[];
 }
 
 const make = (seed = 7) => {
-  const h: Harness = { mood: ACTIVE, rung: 0, reduced: false, mutters: [] };
+  const h: Harness = { mood: ACTIVE, reduced: false, mutters: [] };
   const channels = createChannels();
   seedChannels(config, channels);
   const scheduler = createScheduler();
@@ -52,7 +60,6 @@ const make = (seed = 7) => {
     config, channels, tweens, scheduler,
     prng: createPrng(seed),
     mood: () => h.mood,
-    idleRung: () => h.rung,
     reducedMotion: () => h.reduced,
     mutter: (now) => h.mutters.push(now),
   });
@@ -100,11 +107,9 @@ describe("reflexes", () => {
     c.reflexes.start(0);
     run(c, 0, 2);
     c.h.mood = B.eyesShutMood;
-    c.h.rung = 2;
     run(c, 2, 6);
     expect(Math.abs(c.channels.get("antennaLeft.bend") as number)).toBeLessThan(1e-6);
     c.h.mood = ACTIVE;
-    c.h.rung = 0;
     expect(swing(c, "antennaLeft.bend", 6, 11)).toBeGreaterThan(1);
   });
 
@@ -172,6 +177,49 @@ describe("reflexes", () => {
     expect(swing(c, "antennaLeft.bend", 5, 10)).toBeGreaterThan(1);
   });
 
+  it("hands a borrowed brow to the mood's pose and never takes it back", () => {
+    // The regression this pins. The fidget's gate used to read the idle ladder's
+    // RUNG, and a mood forced from outside leaves that rung at 0 — so the idle
+    // fidget went on jittering brows a mood had just set, and the settle it had
+    // already scheduled dragged them back to the idle value half a second later.
+    // The measured cost was the whole face: brow rotation pinned near 0 instead
+    // of the pose's, and a swaying idle layer displacing every child node under
+    // it. The gate reads the MOOD now, and the settle skips a pose-owned channel
+    // once the fidget is no longer active.
+    const c = make();
+    c.reflexes.start(0);
+    // The mood must land while a fidget is IN FLIGHT — that is the only moment
+    // whose settle is already on the scheduler with the old idle value in its
+    // closure. Waiting for a fixed instant would land in a gap between fidgets
+    // on a different seed and quietly stop testing the race.
+    let at = 0;
+    for (let t = 0; t <= 8; t += 1 / 60) {
+      c.scheduler.tick(t); c.tweens.tick(t);
+      if (t > 1 && Math.abs(c.channels.get(BROW) as number) > 0.5) { at = t; break; }
+    }
+    expect(at).toBeGreaterThan(0);
+    // The mood arrives, and its pose takes the brow — written the way `applyPose`
+    // writes it, since the reflexes know nothing about poses.
+    c.h.mood = BROW_MOOD;
+    const pose = config.poses.poses[BROW_MOOD]!;
+    c.tweens.add({ channel: BROW, to: BROW_POSED, duration: pose.duration, ease: pose.ease }, at);
+    // Once that tween has landed the brow belongs to the mood, and NOTHING may
+    // move it again — not a fidget the gate should have shut off, and not a
+    // settle scheduled before the mood existed. Sampling the whole window is the
+    // assertion: an end-state check passes even on the broken engine, because a
+    // fidget that ran and settled leaves the channel back where it found it.
+    let worst = 0;
+    for (let t = at; t <= at + 6; t += 1 / 60) {
+      c.scheduler.tick(t); c.tweens.tick(t);
+      if (t < at + pose.duration) continue;
+      worst = Math.max(worst, Math.abs((c.channels.get(BROW) as number) - BROW_POSED));
+    }
+    expect(worst).toBeLessThan(1e-9);
+    // And the idle LAYER — which no pose writes, so only the fidget can put it
+    // back — must still have settled to neutral rather than been left mid-sway.
+    expect(c.channels.get("idle.rotation")).toBeCloseTo(0, 6);
+  });
+
   it("fades the pinpricks in when the eyes shut and back out when they open", () => {
     const node = B.pinpricks.nodes[0]!;
     const c = make();
@@ -190,7 +238,6 @@ describe("reflexes", () => {
   it("stirs the body while asleep and returns it to rest on waking", () => {
     const c = make();
     c.h.mood = B.eyesShutMood;
-    c.h.rung = 2;
     c.reflexes.start(0);
     let moved = 0;
     for (let t = 0; t <= 20; t += 1 / 60) {
@@ -199,7 +246,6 @@ describe("reflexes", () => {
     }
     expect(moved).toBeGreaterThan(0.2);
     c.h.mood = ACTIVE;
-    c.h.rung = 0;
     run(c, 20, 23);
     expect(c.channels.get("body.x")).toBeCloseTo(config.rest.get("body.x") as number, 5);
   });
@@ -291,9 +337,9 @@ describe("reflexes", () => {
     // the shipped config at all.
     const poll = B.ladder.pollMs / 1000;
     const cycle = (l: (typeof B.loops)[number], m: string): number =>
-      amplitude(config, { mood: m, idleRung: 0 }, l.duration) + (l.delay ?? 0);
+      amplitude(config, { mood: m }, l.duration) + (l.delay ?? 0);
     const live = (l: (typeof B.loops)[number], m: string): boolean => {
-      const s = { mood: m, idleRung: 0 };
+      const s = { mood: m };
       return amplitude(config, s, l.amplitude) !== 0 && gateOpen(config, s, l);
     };
     const gated = B.loops.find((l) =>

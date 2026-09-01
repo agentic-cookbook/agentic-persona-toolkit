@@ -5,7 +5,6 @@ import type { AmplitudeRef, CharacterConfig } from "../config/types";
  *  would then drive its own amplitude. */
 export interface ParamScope {
   mood: string;
-  idleRung: number;
 }
 
 /** A number the CURRENT pose supplies through its `loops` block. */
@@ -21,7 +20,12 @@ export function predicate(config: CharacterConfig, scope: ParamScope, name: stri
   const def = config.behavior.params[name];
   if (def !== undefined && "gt" in def) return poseNumber(config, scope, def.gt[0]) > def.gt[1];
   if (name === "eyesShut") return scope.mood === config.behavior.eyesShutMood;
-  if (name === "curious") return scope.idleRung === 0;
+  // The MOOD, not the ladder rung. `curious` means "awake and unoccupied" —
+  // nothing to play, so the idle life may have the face. The ladder's rung is a
+  // different question: a mood forced from outside leaves the rung at 0 while
+  // the face is very much occupied, and reading the rung there hands the idle
+  // fidget a mood's brows to overwrite.
+  if (name === "curious") return scope.mood === config.behavior.ladder.moods.active;
   throw new Error(`unknown predicate "${name}"`);
 }
 

@@ -12,7 +12,6 @@ export interface ReflexDeps {
   scheduler: Scheduler;
   prng: Prng;
   mood: () => string;
-  idleRung: () => number;
   reducedMotion: () => boolean;
   mutter: (now: number) => void;
 }
@@ -27,11 +26,11 @@ const clamp1 = (v: number): number => (v < -1 ? -1 : v > 1 ? 1 : v);
 
 export function createReflexes(deps: ReflexDeps): Reflexes {
   const { config, channels, tweens, scheduler, prng } = deps;
-  const { mood, idleRung, reducedMotion, mutter } = deps;
+  const { mood, reducedMotion, mutter } = deps;
   const b = config.behavior;
   const poll = b.ladder.pollMs / 1000;
 
-  const scope = (): ParamScope => ({ mood: mood(), idleRung: idleRung() });
+  const scope = (): ParamScope => ({ mood: mood() });
   const rest = (channel: string): number => (config.rest.get(channel) as number) ?? 0;
   const now0 = (channel: string): number => (channels.get(channel) as number) ?? rest(channel);
 
@@ -228,14 +227,21 @@ export function createReflexes(deps: ReflexDeps): Reflexes {
   const fidgetActive = (): boolean =>
     !reducedMotion() && predicate(config, scope(), b.idleFidget.activeWhen);
 
-  /** channel -> the ± magnitude it jitters by. */
-  const fidgetTargets = (): [string, number][] => {
+  /** channel -> the ± magnitude it jitters by, and whether a pose owns it too.
+   *
+   *  The sway lives on a layer no pose writes, so the fidget is the only thing
+   *  that can put it back. The brows are ordinary pose channels the fidget only
+   *  BORROWS while curious, and that is how the original hands them over when a
+   *  mood arrives: it settles its own layer to neutral and lets the pose reset
+   *  the brows. A settle that fired after the mood landed would drag that mood's
+   *  brows back to the idle ones half a second in. */
+  const fidgetTargets = (): [string, number, boolean][] => {
     const f = b.idleFidget;
-    const out: [string, number][] = config.expand(f.sway.channel)
-      .map((ch) => [ch, f.sway.amplitude] as [string, number]);
+    const out: [string, number, boolean][] = config.expand(f.sway.channel)
+      .map((ch) => [ch, f.sway.amplitude, false] as [string, number, boolean]);
     for (const node of f.brow.nodes) {
-      out.push([`${node}.rotation`, f.brow.rotationAmplitude]);
-      out.push([`${node}.y`, f.brow.yAmplitude]);
+      out.push([`${node}.rotation`, f.brow.rotationAmplitude, true]);
+      out.push([`${node}.y`, f.brow.yAmplitude, true]);
     }
     return out;
   };
@@ -250,10 +256,14 @@ export function createReflexes(deps: ReflexDeps): Reflexes {
     }
     fidgetRunning = true;
     const dur = prng.range(f.durationRange[0], f.durationRange[1]);
-    for (const [ch, amp] of fidgetTargets()) {
+    for (const [ch, amp, poseOwned] of fidgetTargets()) {
       const base = now0(ch);
       tweens.add({ channel: ch, to: base + prng.signed(amp), duration: dur, ease: f.ease }, when);
       at(when + dur, (t) => {
+        // The mood can change while a fidget is in flight. `base` is the idle
+        // value this jitter started from, so once the fidget is no longer
+        // active a pose-owned channel must be left where the new pose put it.
+        if (poseOwned && !fidgetActive()) return;
         tweens.add({
           channel: ch, to: base,
           duration: f.settle.duration, ease: f.settle.ease,
