@@ -61,6 +61,31 @@ describe("compose", () => {
     expect(Math.abs(d - 0)).toBeLessThan(1e-9);
   });
 
+  it("turns the whole glyph about the character's centre, not the canvas origin", () => {
+    // The idle fidget's sway and breath drive the ROOT layer, and the original
+    // states both with `svgOrigin` at the rig's pivot. A root with no pivot of
+    // its own turns the glyph about (0, 0) instead, which reads as the whole
+    // character sliding rather than breathing — 18 design units of it on the
+    // mouth, at nothing more than a 3.5 degree sway and a 1.035 swell.
+    const { scene, channels } = fresh();
+    const centre = config.rig.root.transform?.pivot;
+    expect(centre).toEqual([200, 200]);
+    const [px, py] = centre!;
+
+    const sway = config.behavior.idleFidget.sway;
+    const breath = config.behavior.idleFidget.breath;
+    expect(config.expand(sway.channel)).toEqual(["idle.rotation"]);
+    for (const ch of config.expand(sway.channel)) channels.set(ch, sway.amplitude);
+    for (const ch of config.expand(breath.channel)) channels.set(ch, breath.to);
+
+    // The centre is the fixed point of a turn taken about it, at every depth.
+    for (const id of ["mouth", "browLeft", "irisRight"]) {
+      const [a, b, c, d, e, f] = compose(scene, channels).find((i) => i.id === id)!.m;
+      expect(a * px + c * py + e).toBeCloseTo(px, 9);
+      expect(b * px + d * py + f).toBeCloseTo(py, 9);
+    }
+  });
+
   it("pins the multiply argument order — parent-then-local, not local-then-parent", () => {
     // multiply(parent, local) and multiply(local, parent) agree whenever either
     // operand is identity, which every node but the root is at rest — a single
