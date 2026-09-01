@@ -43,7 +43,7 @@ describe("recordScenario", () => {
     }
 
     // `length > 0` is not a test. It passed while every scripted command in five
-    // of these nine scenarios landed already expired and snapped to its end
+    // of these ten scenarios landed already expired and snapped to its end
     // state inside a single frame (Ruling 48) — the goldens were wrong and the
     // suite was green. What that bug destroyed is DURATION, so duration is what
     // is asserted here: the yawn is played at t=1 and takes about two and a half

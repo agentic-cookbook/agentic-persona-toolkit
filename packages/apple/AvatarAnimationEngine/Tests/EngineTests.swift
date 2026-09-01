@@ -12,8 +12,9 @@ final class EngineTests: XCTestCase {
     }
 
     private func engine(seed: UInt32 = 1,
-                        env: AvatarEnvironment = AvatarEnvironment()) throws -> Engine {
-        try Engine(EngineOptions(config: config, seed: seed, env: env))
+                        env: AvatarEnvironment = AvatarEnvironment(),
+                        variant: String? = nil) throws -> Engine {
+        try Engine(EngineOptions(config: config, seed: seed, env: env, variant: variant))
     }
 
     /// Frame times as exact rationals. `t += 1 / fps` accumulates error, and two
@@ -84,6 +85,20 @@ final class EngineTests: XCTestCase {
         let a = try engine(seed: 1), b = try engine(seed: 99)
         XCTAssertNotEqual(try trace(a, fps: 60, seconds: 4),
                           try trace(b, fps: 60, seconds: 4))
+    }
+
+    func testEngineOptionsVariantReachesTheSceneItBuilds() throws {
+        // `dot`'s "bold" variant thickens the "body" ink from 4 to 7; `limb`
+        // paints with "body". This is the engine's own, single-package proof
+        // that `EngineOptions.variant` actually reaches `Scene` — separate
+        // from `$OA`'s golden replay, which only catches this because it
+        // happens to consume this package. If `Engine.init` stopped passing
+        // `options.variant` to `Scene(config, variant:)`, `limb` would render
+        // at width 4 under "bold" too, and only this assertion would fail.
+        let plain = try item(try engine().tick(0), "limb")
+        let bold = try item(try engine(variant: "bold").tick(0), "limb")
+        XCTAssertEqual(plain.paint.width, 4)
+        XCTAssertEqual(bold.paint.width, 7)
     }
 
     // MARK: - the commands
