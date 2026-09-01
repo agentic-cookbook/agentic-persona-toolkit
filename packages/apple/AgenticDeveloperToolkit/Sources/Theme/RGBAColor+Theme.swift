@@ -83,6 +83,23 @@ extension RGBAColor {
         return self
     }
 
+    /// Blend `self` toward the grey of the same apparent lightness. `amount`
+    /// of 1 leaves a pure neutral; 0 leaves the color untouched.
+    ///
+    /// Rec. 601 luma over the *encoded* sRGB components rather than
+    /// `relativeLuminance`, which is linear-light: feeding a linearized value
+    /// back into a display-encoded channel would darken every color it
+    /// touched. Luma keeps a bright phosphor green and its grey looking about
+    /// equally bright, which is the whole point — the result has to read as
+    /// the same ink with the color drained out of it, not as a dimmer one.
+    public func desaturated(by amount: Double = 1) -> RGBAColor {
+        let fraction = Swift.min(1, Swift.max(0, amount))
+        let luma = 0.299 * red + 0.587 * green + 0.114 * blue
+        return blended(
+            withFraction: fraction,
+            of: RGBAColor(red: luma, green: luma, blue: luma, alpha: alpha))
+    }
+
     /// Opaque pure black / white constants for contrast picking.
     public static let opaqueBlack = RGBAColor(red: 0, green: 0, blue: 0, alpha: 1)
     public static let opaqueWhite = RGBAColor(red: 1, green: 1, blue: 1, alpha: 1)

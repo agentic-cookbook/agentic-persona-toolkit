@@ -309,7 +309,9 @@ public final class ThinkingIndicatorView: NSView, Themeable {
         switch machine.phase {
         case .idle:
             if let idlePhrase = configuration.idlePhrase {
-                label.attributedStringValue = settledLine(glyph: configuration.doneGlyph, text: idlePhrase + "…", palette: palette)
+                label.attributedStringValue = settledLine(
+                    glyph: configuration.doneGlyph, text: idlePhrase + "…",
+                    color: palette.nsColor(.thinkingIdleText), palette: palette)
             } else {
                 label.stringValue = ""
             }
@@ -325,7 +327,8 @@ public final class ThinkingIndicatorView: NSView, Themeable {
         case .done:
             let word = currentWord?.past ?? ""
             label.attributedStringValue = settledLine(
-                glyph: configuration.doneGlyph, text: "\(word) for \(machine.elapsedSeconds)s", palette: palette
+                glyph: configuration.doneGlyph, text: "\(word) for \(machine.elapsedSeconds)s",
+                color: palette.nsColor(.thinkingDoneText), palette: palette
             )
         }
     }
@@ -356,10 +359,16 @@ public final class ThinkingIndicatorView: NSView, Themeable {
         return result
     }
 
-    /// The settled/idle line's colour: `.thinkingDoneText`, always — deliberately
-    /// never tinted, per `ThinkingTint`'s doc comment.
-    private func settledLine(glyph: String, text: String, palette: SemanticPalette) -> NSAttributedString {
-        let color = palette.nsColor(.thinkingDoneText)
+    /// A line that is not running: one colour across the glyph and the words,
+    /// and deliberately never tinted, per `ThinkingTint`'s doc comment.
+    ///
+    /// The caller passes the colour because the two states that share this
+    /// shape disagree about it — `.done` speaks in `.thinkingDoneText` (the
+    /// theme's own ink, web's `--pc-thinking-done-color`), `.idle` in the
+    /// neutral `.thinkingIdleText`. Same typography, opposite meanings.
+    private func settledLine(
+        glyph: String, text: String, color: NSColor, palette: SemanticPalette
+    ) -> NSAttributedString {
         let font = palette.font(.caption)
         let result = NSMutableAttributedString(string: glyph, attributes: [.foregroundColor: color, .font: font])
         result.append(NSAttributedString(string: " " + text, attributes: [.foregroundColor: color, .font: font]))

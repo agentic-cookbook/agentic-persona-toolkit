@@ -36,15 +36,39 @@ public final class ChatInputField: NSTextField, Themeable {
         didSet { layer?.borderWidth = showsBorder ? 1 : 0 }
     }
 
-    /// Whether the insertion point is a solid block rather than the system's
-    /// one-pixel bar.
+    /// Whether the composer parks a solid character-cell block where the
+    /// system would draw its one-pixel bar.
     ///
-    /// Read by this field's *own* editor, which is why `PaddedTextFieldCell`
-    /// overrides `fieldEditor(for:)` at all: an `NSTextField` normally borrows
-    /// the window's shared field editor, and widening that one's caret would
-    /// hand a block cursor to every other text field in the window.
+    /// This is drawn here, as a layer of this field's own, rather than by
+    /// widening the field editor's insertion point. The insertion point was
+    /// the obvious route and it does not work: `drawInsertionPoint(in:color:
+    /// turnedOn:)` is not called for a field editor on a current macOS, so a
+    /// subclass overriding it renders nothing at all — which is exactly what
+    /// the composer showed. Web reached the same conclusion from the other
+    /// side, and its `.pc-input-caret` comment says why: an `<input>` exposes
+    /// no caret-shape styling, so the block is a positioned element the chat
+    /// moves itself. Two platforms, one answer — draw the caret, don't ask the
+    /// text control for it.
+    ///
+    /// Owning the blink is the other half of the reason. AppKit's caret blinks
+    /// on a system-wide cadence nobody can switch off per field, and web's is
+    /// `ost-caret-blink 1.06s steps(1)` — hard on/off, no fade, a CRT and not
+    /// a macOS text field. `caretBlinks` can only exist because this timer is
+    /// ours.
     public var usesBlockCaret: Bool = false {
-        didSet { (currentEditor() as? BlockCaretTextView)?.drawsBlockCaret = usesBlockCaret }
+        didSet {
+            guard usesBlockCaret != oldValue else { return }
+            updateCaretPresence()
+        }
+    }
+
+    /// Whether the block caret blinks or parks solid. Surfaced to users as the
+    /// window's "Blink caret" switch; web has no such switch, and always blinks.
+    public var caretBlinks: Bool = true {
+        didSet {
+            guard caretBlinks != oldValue else { return }
+            updateCaretPresence()
+        }
     }
 
     /// Whether the field currently has the keyboard focus, which selects
@@ -65,6 +89,16 @@ public final class ChatInputField: NSTextField, Themeable {
 
     private var observer: ThemePaletteObserver?
 
+    /// The block caret. A layer rather than something drawn in `draw(_:)` so a
+    /// blink costs an `isHidden` flip instead of a redraw of the whole field.
+    let caretLayer = CALayer()
+    private var caretTimer: Timer?
+    private var selectionObserver: (any NSObjectProtocol)?
+
+    /// Web's `ost-caret-blink` is `1.06s steps(1)` with `50% { opacity: 0 }` —
+    /// half the period lit, half dark, and no interpolation between them.
+    static let caretBlinkHalfPeriod: TimeInterval = 0.53
+
     public override class var cellClass: AnyClass? {
         get { PaddedTextFieldCell.self }
         set { super.cellClass = newValue }
@@ -84,11 +118,17 @@ public final class ChatInputField: NSTextField, Themeable {
         cell?.wraps = false
         cell?.usesSingleLineMode = true
         lineBreakMode = .byTruncatingHead
+        caretLayer.isHidden = true
         observer = ThemePaletteObserver { [weak self] palette in self?.applyTheme(palette) }
     }
 
     @available(*, unavailable)
     public required init?(coder: NSCoder) { fatalError("init(coder:) is not supported") }
+
+    deinit {
+        caretTimer?.invalidate()
+        if let selectionObserver { NotificationCenter.default.removeObserver(selectionObserver) }
+    }
 
     /// The cell's padding is drawn, not laid out, so auto layout has no idea
     /// it is there — a field asking for exactly its glyph height renders with
@@ -111,7 +151,9 @@ public final class ChatInputField: NSTextField, Themeable {
         // invisible until focus moves away and back.
         if let editor = currentEditor() as? NSTextView {
             editor.textColor = palette.nsColor(.userText)
-            editor.insertionPointColor = palette.nsColor(.chatInputFocus)
+            // Our own block plus the system's bar would be two carets in the
+            // same place, so the system's is painted out.
+            editor.insertionPointColor = usesBlockCaret ? .clear : palette.nsColor(.chatInputFocus)
             editor.font = palette.font(.body)
         }
         if let placeholder = placeholderString {
@@ -120,6 +162,128 @@ public final class ChatInputField: NSTextField, Themeable {
                 .font: palette.font(.body)
             ])
         }
+        applyCaretTheme(palette)
+        positionCaret()
+    }
+
+    // MARK: The block caret
+
+    /// The caret's own ink is the input's text colour — web's `.pc-input-caret`
+    /// fills with `--ost-green`, the same token `.pc-input` colours its text
+    /// with — under the phosphor bloom that rule's `box-shadow: 0 0 6px` puts
+    /// around it. The bloom is what keeps a hard-edged rectangle reading as
+    /// light coming off a tube rather than as a UI element.
+    private func applyCaretTheme(_ palette: SemanticPalette) {
+        let ink = palette.nsColor(.userText)
+        caretLayer.backgroundColor = ink.cgColor
+        caretLayer.shadowColor = ink.cgColor
+        caretLayer.shadowOpacity = 0.85
+        caretLayer.shadowRadius = 3
+        caretLayer.shadowOffset = .zero
+    }
+
+    /// Attaches or detaches the caret and its timer to match `usesBlockCaret`
+    /// and `caretBlinks`. Idempotent, so both `didSet`s can just call it.
+    private func updateCaretPresence() {
+        caretTimer?.invalidate()
+        caretTimer = nil
+        guard usesBlockCaret else {
+            caretLayer.removeFromSuperlayer()
+            caretLayer.isHidden = true
+            return
+        }
+        if caretLayer.superlayer == nil { layer?.addSublayer(caretLayer) }
+        setCaretLit(true)
+        applyCaretTheme(ThemePaletteObserver.currentPalette)
+        positionCaret()
+        guard caretBlinks else { return }
+        let timer = Timer(timeInterval: Self.caretBlinkHalfPeriod, repeats: true) { [weak self] _ in
+            MainActor.assumeIsolated {
+                guard let self else { return }
+                self.setCaretLit(self.caretLayer.isHidden)
+            }
+        }
+        // `.common`, not `.default`: a caret that stops blinking the moment a
+        // menu opens or a slider is dragged is a caret that looks broken.
+        RunLoop.main.add(timer, forMode: .common)
+        caretTimer = timer
+    }
+
+    /// `steps(1)`, not a fade: implicit layer actions would cross-dissolve
+    /// every flip and turn the hard CRT blink into a soft pulse.
+    private func setCaretLit(_ lit: Bool) {
+        CATransaction.begin()
+        CATransaction.setDisableActions(true)
+        caretLayer.isHidden = !lit
+        CATransaction.commit()
+    }
+
+    /// Parks the block over the character the insertion point stands on — or,
+    /// with the field unfocused, at the end of whatever is typed, which for an
+    /// empty composer is the prompt itself. A terminal's cursor is always
+    /// somewhere; it does not vanish when the window stops being key.
+    func positionCaret() {
+        guard usesBlockCaret, caretLayer.superlayer != nil, let font = self.font else { return }
+        let editor = currentEditor() as? NSTextView
+        let text = (editor?.string ?? stringValue) as NSString
+        let caretIndex = editor.map { Swift.min($0.selectedRange().location, text.length) } ?? text.length
+        let attributes: [NSAttributedString.Key: Any] = [.font: font]
+        let advance = text.substring(to: caretIndex).size(withAttributes: attributes).width
+        // The same rect the cell lays its text out in — see
+        // `PaddedTextFieldCell.titleRect(forBounds:)`.
+        let title = bounds.insetBy(dx: PaddedTextFieldCell.inset.width, dy: PaddedTextFieldCell.inset.height)
+        let lineHeight = ceil(font.ascender - font.descender)
+        // One character wide, measured from the live font rather than fixed:
+        // the terminal themes scale their type, and a caret that did not scale
+        // with it would sit under half a glyph.
+        let cellWidth = Swift.max(("0" as NSString).size(withAttributes: attributes).width, 1)
+        CATransaction.begin()
+        CATransaction.setDisableActions(true)
+        caretLayer.frame = NSRect(
+            x: title.minX + advance,
+            y: title.midY - lineHeight / 2,
+            width: cellWidth,
+            height: lineHeight)
+        CATransaction.commit()
+    }
+
+    public override func layout() {
+        super.layout()
+        positionCaret()
+    }
+
+    public override func textDidChange(_ notification: Notification) {
+        super.textDidChange(notification)
+        // Typing relights the blink, so the block is never dark at the moment
+        // the user is looking for it.
+        if usesBlockCaret { setCaretLit(true) }
+        positionCaret()
+    }
+
+    public override func textDidBeginEditing(_ notification: Notification) {
+        super.textDidBeginEditing(notification)
+        applyTheme(ThemePaletteObserver.currentPalette)
+        // Arrow keys and clicks move the insertion point without changing the
+        // text, so `textDidChange` alone would leave the block a keystroke
+        // behind.
+        if let editor = currentEditor() as? NSTextView {
+            selectionObserver = NotificationCenter.default.addObserver(
+                forName: NSTextView.didChangeSelectionNotification, object: editor, queue: .main
+            ) { [weak self] _ in
+                MainActor.assumeIsolated {
+                    self?.setCaretLit(true)
+                    self?.positionCaret()
+                }
+            }
+        }
+        positionCaret()
+    }
+
+    public override func textDidEndEditing(_ notification: Notification) {
+        super.textDidEndEditing(notification)
+        if let selectionObserver { NotificationCenter.default.removeObserver(selectionObserver) }
+        selectionObserver = nil
+        positionCaret()
     }
 }
 
@@ -129,8 +293,24 @@ public final class ChatInputField: NSTextField, Themeable {
 private final class PaddedTextFieldCell: NSTextFieldCell {
     static let inset = NSSize(width: 8, height: 5)
 
+    /// The inset is clamped to half the rect it is given, because this is not
+    /// only called with the field's real bounds.
+    ///
+    /// AppKit asks a cell for its baseline by calling this with a probe rect —
+    /// measured here as 4×16, narrower than the 8-point horizontal inset. On
+    /// that rect a plain `insetBy` produces a *negative* width, and
+    /// `NSTextFieldCell.titleRect` answers a degenerate rect with an infinite
+    /// origin. That infinity becomes the field's `firstBaselineOffsetFromTop`,
+    /// and any `NSStackView` aligning on `.firstBaseline` hands it straight to
+    /// the layout engine, which rejects it — `Invalid parameter not satisfying:
+    /// isfinite(c)`, and the process is gone. Clamped, the same probe yields a
+    /// finite 18, which is exactly the unpadded field's 13 plus this cell's
+    /// 5-point vertical inset: the padding shows up in the baseline, which is
+    /// what an aligned prompt needs it to do.
     override func titleRect(forBounds rect: NSRect) -> NSRect {
-        super.titleRect(forBounds: rect.insetBy(dx: Self.inset.width, dy: Self.inset.height))
+        let dx = Swift.min(Self.inset.width, Swift.max(0, rect.width / 2))
+        let dy = Swift.min(Self.inset.height, Swift.max(0, rect.height / 2))
+        return super.titleRect(forBounds: rect.insetBy(dx: dx, dy: dy))
     }
 
     override func drawInterior(withFrame cellFrame: NSRect, in controlView: NSView) {
@@ -153,74 +333,5 @@ private final class PaddedTextFieldCell: NSTextFieldCell {
         super.select(
             withFrame: titleRect(forBounds: rect), in: controlView, editor: textObj,
             delegate: delegate, start: start, length: length)
-    }
-
-    /// This cell's own field editor, so the caret shape is a property of *this*
-    /// composer.
-    ///
-    /// By default every editable control in a window shares one field editor
-    /// the window vends, so a text view subclass installed there would give a
-    /// block cursor to the search field and the settings panel too. `NSCell`
-    /// exists precisely for this: return a view here and AppKit uses it for
-    /// this cell alone.
-    private var blockCaretEditor: BlockCaretTextView?
-
-    override func fieldEditor(for controlView: NSView) -> NSTextView? {
-        let editor = blockCaretEditor ?? {
-            let created = BlockCaretTextView()
-            created.isFieldEditor = true
-            blockCaretEditor = created
-            return created
-        }()
-        editor.drawsBlockCaret = (controlView as? ChatInputField)?.usesBlockCaret ?? false
-        return editor
-    }
-}
-
-/// A field editor whose insertion point is a solid character-wide block rather
-/// than the system's one-pixel bar.
-///
-/// Web draws this itself — it hides the native caret and animates a
-/// `.pc-input-caret` div with `ost-caret-blink` — because a browser cannot
-/// restyle a text input's cursor. AppKit can: `drawInsertionPoint` is handed
-/// the rect to fill, and the blink is already the framework's job, so the only
-/// thing to say here is how wide.
-final class BlockCaretTextView: NSTextView {
-
-    /// Off by default, so a field that says nothing keeps the system caret.
-    var drawsBlockCaret = false {
-        didSet {
-            guard drawsBlockCaret != oldValue else { return }
-            needsDisplay = true
-        }
-    }
-
-    /// One character wide, measured from the editor's own font rather than
-    /// fixed: the terminal themes scale their type (VT323 at a 1.07 size
-    /// scale), and a caret that did not scale with the text would sit under
-    /// half a glyph.
-    private var caretWidth: CGFloat {
-        let font = self.font ?? NSFont.monospacedSystemFont(ofSize: NSFont.systemFontSize, weight: .regular)
-        return max(("0" as NSString).size(withAttributes: [.font: font]).width, 1)
-    }
-
-    override func drawInsertionPoint(in rect: NSRect, color: NSColor, turnedOn flag: Bool) {
-        guard drawsBlockCaret else {
-            super.drawInsertionPoint(in: rect, color: color, turnedOn: flag)
-            return
-        }
-        var block = rect
-        block.size.width = caretWidth
-        super.drawInsertionPoint(in: block, color: color, turnedOn: flag)
-    }
-
-    /// The blink erases by invalidating the caret's rect, and AppKit computes
-    /// that rect from the one-pixel bar it thinks it drew. Without widening it
-    /// to match, the block's tail is never repainted and a trail of it is left
-    /// behind as the caret moves.
-    override func setNeedsDisplay(_ invalidRect: NSRect, avoidAdditionalLayout flag: Bool) {
-        var rect = invalidRect
-        rect.size.width += caretWidth
-        super.setNeedsDisplay(rect, avoidAdditionalLayout: flag)
     }
 }

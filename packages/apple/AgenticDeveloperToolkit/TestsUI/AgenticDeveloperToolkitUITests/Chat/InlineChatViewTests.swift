@@ -162,6 +162,28 @@ struct InlineChatViewTests {
         #expect(view.inputField.cornerRadius == 0)
     }
 
+    /// `blinksCaret` is the reader's switch, not the theme's, so it has to
+    /// survive the thing that carries the theme's opinion. A host writes it
+    /// once at launch from a saved default and then whenever someone flips it;
+    /// if applying chrome reset it, restoring a window would quietly turn
+    /// blinking back on.
+    @Test("blinksCaret reaches the composer and is not undone by chrome")
+    func blinksCaretReachesTheField() {
+        _ = makeManager(activeThemeID: BuiltInThemes.solarizedDark.id)
+        let (view, _, _) = makeView()
+        #expect(view.blinksCaret)
+        #expect(view.inputField.caretBlinks)
+
+        view.blinksCaret = false
+        #expect(!view.inputField.caretBlinks)
+
+        view.chrome = .terminal
+        #expect(!view.inputField.caretBlinks)
+
+        view.blinksCaret = true
+        #expect(view.inputField.caretBlinks)
+    }
+
     /// The prompt is the composer's own ink — web colours it with the input's
     /// text colour — so it has to follow the theme like everything else.
     @Test("the prompt repaints with the active theme")

@@ -39,6 +39,29 @@ public final class ThemeManager {
     /// tracks the theme but paints no chrome of its own.
     public var appearanceDriver: (any ThemeAppearanceDriver)?
 
+    /// The reader's own multiplier over every theme's typography — what a
+    /// host's "Text Size" control writes to. `1` leaves each theme's type
+    /// exactly as its designer scaled it; see `SemanticPalette.scaled(by:)`
+    /// for why the two scales stay separate.
+    ///
+    /// It lives here, on the manager, rather than on the view a host happens
+    /// to be resizing, because `ThemePaletteObserver` is how every themed view
+    /// in the app gets its palette — a bubble, a status line and a composer
+    /// each ask for their own, and nothing hands a palette down a view tree.
+    /// Scaling at the source is therefore the only place one number reaches
+    /// all of them; scaling at a view would resize that view's own labels and
+    /// leave its children at the theme's size.
+    ///
+    /// Not persisted: what a scale means is the host's business (per window,
+    /// per account, per document), so the host owns the storage and writes the
+    /// restored value here at launch.
+    public var textScale: Double = 1 {
+        didSet {
+            guard textScale != oldValue else { return }
+            rebuildPalette()
+        }
+    }
+
     private let storage: any ThemeStorage
 
     private static let logger = Logger(subsystem: "com.mikefullerton.AgenticDeveloperToolkitUI", category: "ThemeManager")
@@ -81,9 +104,16 @@ public final class ThemeManager {
         // proceeds.
         guard theme != currentTheme else { return }
         currentTheme = theme
-        currentPalette = SemanticPalette(theme: theme)
-        applyApplicationAppearance()
         Self.logger.info("Active theme: \(theme.name, privacy: .public)")
+        rebuildPalette()
+    }
+
+    /// Re-resolves the palette from the active theme and the reader's
+    /// `textScale`, then tells the app to repaint. The one path out of both a
+    /// theme change and a scale change, so neither can forget the other.
+    private func rebuildPalette() {
+        currentPalette = SemanticPalette(theme: currentTheme).scaled(by: textScale)
+        applyApplicationAppearance()
         NotificationCenter.default.post(name: Self.didChangeNotification, object: self)
     }
 }

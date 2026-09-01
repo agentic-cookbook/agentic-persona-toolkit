@@ -64,6 +64,18 @@ public final class InlineChatView: NSView, ChatStateObserver, Themeable, NSTextF
     /// existing call site is unchanged.
     public var chrome: InlineChatChrome = InlineChatChrome() { didSet { applyChrome() } }
 
+    /// Whether the composer's block caret blinks or parks solid.
+    ///
+    /// Separate from `chrome` because it is not the theme's opinion but the
+    /// reader's: `chrome.usesBlockCaret` says a terminal theme wants a block
+    /// at all, and this says whether that block should keep moving in the
+    /// corner of someone's eye. A host surfaces it as a switch (Olylo's window
+    /// gear does); with no host saying otherwise it blinks, which is what web
+    /// does unconditionally.
+    public var blinksCaret: Bool = true {
+        didSet { inputField.caretBlinks = blinksCaret }
+    }
+
     let transcriptScroll = ThemedScrollView()
     private let transcriptStack = NSStackView()
     /// Internal, like `transcriptScroll` above: the composer's look is now
@@ -190,10 +202,32 @@ public final class InlineChatView: NSView, ChatStateObserver, Themeable, NSTextF
         // gap applies between the flex children, and the `❯` is a `::before`
         // on the row — it sits against the text it introduces, the way a shell
         // prompt does. The field's own 8pt cell inset is the whole gap.
-        let inputRow = NSStackView(views: [promptLabel, inputField, sendButton])
+        // Baselines, not centres. The prompt and the composer show the same
+        // string at the same size and still do not line up under `.centerY`,
+        // because they are not in the same typeface: VT323 has no `❯` (nor
+        // `↵`, `✱` or `⊙` — 568 glyphs, none of them these), so the prompt
+        // falls back to a face whose ascent and descent are its own, and
+        // centring two differently-proportioned boxes puts their glyphs at two
+        // different heights. A baseline is the one line both faces agree on,
+        // and it is what web aligns on too — the `❯` is a `::before` in the
+        // input row's line box, not a floated box of its own.
+        //
+        // The send button stays out of it, in an outer `.centerY` row: it
+        // carries an image, not a line of text, so it has no baseline that
+        // means anything. Aligning a glyph-in-a-circle on the text baseline
+        // would hang most of it below the line. The two things made of text
+        // baseline-align to each other in the inner stack, and the button
+        // centres against that pair the way it always did.
+        let promptedField = NSStackView(views: [promptLabel, inputField])
+        promptedField.orientation = .horizontal
+        promptedField.alignment = .firstBaseline
+        promptedField.spacing = 0
+        promptedField.translatesAutoresizingMaskIntoConstraints = false
+
+        let inputRow = NSStackView(views: [promptedField, sendButton])
         inputRow.orientation = .horizontal
+        inputRow.alignment = .centerY
         inputRow.spacing = 10
-        inputRow.setCustomSpacing(0, after: promptLabel)
         inputRow.edgeInsets = NSEdgeInsets(top: 14, left: 16, bottom: 14, right: 16)
         inputRow.translatesAutoresizingMaskIntoConstraints = false
 

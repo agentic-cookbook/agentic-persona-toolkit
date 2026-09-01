@@ -100,6 +100,17 @@ public enum ThemeRole: String, CaseIterable, Sendable {
     /// `--pc-time-color` a dim 40%-alpha green, and a monochrome terminal
     /// palette has no grey in it at all.
     case thinkingDoneText
+    /// The status line while nothing is happening — ADT's own idle muttering
+    /// ("\u{2299} waiting to zeeble\u{2026}"), which web has no token for because web
+    /// renders no `.pc-typing` at all when there is nothing to say.
+    ///
+    /// Deliberately not `thinkingDoneText`: those two lines look identical and
+    /// mean opposite things. "\u{2731} thought for 8s" is the machine reporting on
+    /// work it just did and belongs in the theme's own ink; the idle phrase is
+    /// the machine with nothing to report, and reads as noise in that same ink
+    /// — a phosphor-green line that never goes away looks like a turn that
+    /// never ends. So this one derives to a neutral grey: off, not speaking.
+    case thinkingIdleText
 }
 
 /// Resolves every `ThemeRole` to a concrete `RGBAColor` for a given `ColorTheme`.
@@ -250,6 +261,16 @@ public struct SemanticPalette: Equatable, Sendable {
             // role in this table already answers "dim, secondary text" this
             // way. A theme that wants web's exact colour declares it.
             return foreground.dimmed(towards: background, by: 0.55, minContrast: 2.0)
+        case .thinkingIdleText:
+            // Grey by construction, not by transcription: the palette's own
+            // ink with the colour drained out, then dimmed a quarter of the
+            // way to the backdrop. That lands near the web library's literal
+            // `#8a8a8a` on a dark theme without inheriting its failure on a
+            // light one, and it is the one role in this table that must NOT
+            // stay in the theme's hue -- a monochrome terminal has no grey in
+            // its palette to derive from, which is exactly why the idle line
+            // has to be given one.
+            return foreground.desaturated().dimmed(towards: background, by: 0.25, minContrast: 3.0)
         }
     }
 
@@ -305,4 +326,29 @@ extension SemanticPalette {
     public var sendButtonHover: RGBAColor { color(.sendButtonHover) }
     public var timestampText: RGBAColor { color(.timestampText) }
     public var thinkingDoneText: RGBAColor { color(.thinkingDoneText) }
+    public var thinkingIdleText: RGBAColor { color(.thinkingIdleText) }
+}
+
+extension SemanticPalette {
+    /// This palette with every font size multiplied by `factor`, *on top of*
+    /// the theme's own `sizeScale`.
+    ///
+    /// The two scales answer to different people, so they must not be one
+    /// number. A theme's `sizeScale` is the designer's: `old-school-terminal`
+    /// sets 1.0667 because VT323 draws small for its point size, and that is a
+    /// property of the typeface the theme picked, not a preference. `factor`
+    /// is the reader's — the "Text Size" control — and has to survive a change
+    /// of theme, which it does precisely because it is applied here rather
+    /// than written into the theme.
+    ///
+    /// Clamped, because it arrives from a slider a host wires up: a scale of
+    /// zero would lay the whole UI out at no height, taking every constraint
+    /// built on an intrinsic size with it.
+    public func scaled(by factor: Double) -> SemanticPalette {
+        let clamped = Swift.max(0.5, Swift.min(4, factor))
+        guard clamped != 1 else { return self }
+        var scaledTheme = theme
+        scaledTheme.typography.sizeScale *= clamped
+        return SemanticPalette(theme: scaledTheme)
+    }
 }

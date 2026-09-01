@@ -122,6 +122,66 @@ struct ThinkingIndicatorViewTests {
         #expect(before != after)
     }
 
+    // MARK: The resting line
+
+    private func makeIdleIndicator() -> ThinkingIndicatorView {
+        let indicator = ThinkingIndicatorView()
+        var configuration = ThinkingIndicatorConfiguration()
+        configuration.words = [ChatStatusWordPair(present: "zeeping", past: "zeeped")]
+        configuration.idlePhrase = "waiting to zeeble"
+        indicator.configure(configuration)
+        return indicator
+    }
+
+    private func renderedColor(_ indicator: ThinkingIndicatorView) -> NSColor? {
+        let attributed = indicator.label.attributedStringValue
+        guard attributed.length > 0 else { return nil }
+        return attributed.attribute(.foregroundColor, at: 0, effectiveRange: nil) as? NSColor
+    }
+
+    @Test("before anything has run, the line shows the idle phrase in the idle ink")
+    func idleLineUsesTheIdleInk() throws {
+        let manager = makeManager(activeThemeID: BuiltInThemes.solarizedDark.id)
+        let indicator = makeIdleIndicator()
+
+        #expect(indicator.currentPhase == .idle)
+        #expect(indicator.label.stringValue.contains("waiting to zeeble"))
+        let color = try #require(renderedColor(indicator))
+        #expect(color == manager.currentPalette.nsColor(.thinkingIdleText))
+        withExtendedLifetime(manager) {}
+    }
+
+    /// The two settled lines are the same shape — a glyph, then a phrase — and
+    /// mean opposite things: one reports work that happened, the other reports
+    /// that none has. Only the colour tells them apart, so a derivation that
+    /// collapsed the two roles would make the status line lie silently.
+    @Test("the resting line and the settled line are not the same colour")
+    func idleInkDiffersFromDoneInk() throws {
+        let manager = makeManager(activeThemeID: BuiltInThemes.solarizedDark.id)
+        let indicator = makeIdleIndicator()
+        let idle = try #require(renderedColor(indicator))
+
+        indicator.update(status: ChatStatus(kind: .think))
+        indicator.update(status: nil)
+        #expect(indicator.currentPhase == .done)
+        let done = try #require(renderedColor(indicator))
+
+        #expect(idle != done)
+        #expect(done == manager.currentPalette.nsColor(.thinkingDoneText))
+        withExtendedLifetime(manager) {}
+    }
+
+    @Test("with no idle phrase configured, the resting line is simply empty")
+    func noIdlePhraseLeavesTheLineBlank() {
+        let manager = makeManager(activeThemeID: BuiltInThemes.solarizedDark.id)
+        let indicator = ThinkingIndicatorView()
+        var configuration = ThinkingIndicatorConfiguration()
+        configuration.words = [ChatStatusWordPair(present: "zeeping", past: "zeeped")]
+        indicator.configure(configuration)
+        #expect(indicator.label.stringValue.isEmpty)
+        withExtendedLifetime(manager) {}
+    }
+
     @Test("colorful's hue draws never land in the excluded green band")
     func colorfulHueSkipsGreen() {
         for _ in 0..<500 {
