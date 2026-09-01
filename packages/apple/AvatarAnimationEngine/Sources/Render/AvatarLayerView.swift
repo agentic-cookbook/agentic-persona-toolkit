@@ -192,7 +192,15 @@ public final class AvatarLayerView: PlatformView {
 
     /// `ParsedPath` -> `CGPath`. `kind` is Task 27's `M`/`L`/`C`/`Z` alphabet and
     /// `points` is flat, x,y interleaved.
-    static func cgPath(_ p: ParsedPath) -> CGPath {
+    ///
+    /// `nonisolated`: this touches no view state and no AppKit/UIKit type, so
+    /// there is no reason for it to inherit the class's main-actor isolation.
+    /// Task 39's `CGPath.avatarItem` (`PlatformShims.swift`) is the first
+    /// caller outside the main-actor-isolated render path — a static renderer
+    /// with no view of its own — and would otherwise have to become
+    /// main-actor-isolated itself just to reach a function that never touches
+    /// the actor it would be isolated to.
+    nonisolated static func cgPath(_ p: ParsedPath) -> CGPath {
         let out = CGMutablePath()
         var i = 0
         func next() -> CGPoint {

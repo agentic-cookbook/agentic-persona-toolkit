@@ -270,6 +270,46 @@ extension CharacterConfig {
     }
 }
 
+public extension CharacterConfig {
+    /// The display list, keeping only what the named crop asks for.
+    ///
+    /// A crop names FEATURES (`character.crops`), and a feature is declared on a
+    /// node — but not necessarily on the node that carries the shape. A
+    /// character may reasonably declare `"eyes"` on an eye GROUP and leave the
+    /// ring, the interior and the iris underneath it bare, because the feature
+    /// is a property of the eye rather than of each disc it is built from. So a
+    /// feature is INHERITED from the nearest ancestor that declares one.
+    ///
+    /// An item whose chain declares none at all is kept by every crop: a node
+    /// nobody assigned to a feature is structural, and a crop that silently
+    /// subtracted things its author never named would be impossible to reason
+    /// about.
+    ///
+    /// This is a filter over a composed list, not a second compositor — same
+    /// items, same order, same paint, fewer of them. It has no opinion about
+    /// visibility either: `compose` emits an `alpha <= 0` item deliberately, and
+    /// dropping one here would change what the golden logs record.
+    func crop(_ list: DisplayList, to name: String) throws -> DisplayList {
+        guard let wanted = character.crops[name] else {
+            throw SceneError("unknown crop \"\(name)\"")
+        }
+        let features = Set(wanted)
+        var featureOf: [String: String] = [:]
+
+        func walk(_ node: RigNode, _ inherited: String?) {
+            let feature = node.feature ?? inherited
+            if let feature { featureOf[node.id] = feature }
+            for child in node.children ?? [] { walk(child, feature) }
+        }
+        walk(rig.root, nil)
+
+        return list.filter { item in
+            guard let feature = featureOf[item.id] else { return true }
+            return features.contains(feature)
+        }
+    }
+}
+
 private func num(_ channels: Channels, _ name: String, _ fallback: Double) -> Double {
     channels.get(name)?.number ?? fallback
 }

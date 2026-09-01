@@ -166,4 +166,37 @@ final class RenderTests: XCTestCase {
         // leaving it implied.
         XCTAssertTrue(Platform.viewSpaceIsBottomLeft)
     }
+
+    // MARK: - the public bridges
+
+    func testThePublicPathDoorBuildsTheSamePathAsTheInternalBuilder() throws {
+        // `OlyloMark` (Plan B, Task 39) is the first renderer outside this
+        // package. Without this door it would need `parsePath`, `ParsedPath` and
+        // `cgPath` all made public — or, far likelier, its own copy of the cubic
+        // argument order the test above exists to protect.
+        let d = "M0,0C10,0 20,10 20,20L30,20Z"
+        XCTAssertEqual(try CGPath.avatarItem(d),
+                       AvatarLayerView.cgPath(try parsePath(d)))
+        XCTAssertThrowsError(try CGPath.avatarItem("Q0,0 1,1"))
+    }
+
+    func testTheStrokeStyleVocabularyMapsOntoCoreGraphicsCapsAndJoins() throws {
+        func style(_ cap: String, _ join: String) throws -> StrokeStyle {
+            try JSONDecoder().decode(StrokeStyle.self, from: Data(
+                #"{"width":4,"linecap":"\#(cap)","linejoin":"\#(join)"}"#.utf8))
+        }
+        XCTAssertEqual(try style("round", "round").cgLineCap, .round)
+        XCTAssertEqual(try style("round", "round").cgLineJoin, .round)
+        XCTAssertEqual(try style("butt", "miter").cgLineCap, .butt)
+        XCTAssertEqual(try style("butt", "miter").cgLineJoin, .miter)
+        XCTAssertEqual(try style("square", "bevel").cgLineCap, .square)
+        XCTAssertEqual(try style("square", "bevel").cgLineJoin, .bevel)
+        // Core Graphics' own defaults for a vocabulary neither side knows. The
+        // loader is where a bad value is caught; a renderer that threw would
+        // report it in the least useful place.
+        XCTAssertEqual(try style("wobbly", "wobbly").cgLineCap, .butt)
+        XCTAssertEqual(try style("wobbly", "wobbly").cgLineJoin, .miter)
+        // And the fixture's own, through the loader rather than a literal.
+        XCTAssertEqual(config.character.strokeStyle.cgLineCap, .round)
+    }
 }

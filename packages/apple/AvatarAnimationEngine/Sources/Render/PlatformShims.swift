@@ -100,7 +100,7 @@ public extension CGAffineTransform {
     }
 }
 
-extension CGColor {
+public extension CGColor {
     /// `#rrggbb` -> sRGB. Alpha is deliberately NOT baked in: `paint.alpha`
     /// animates, and folding it in here would rebuild a `CGColor` on every
     /// frame of every fade. It belongs on the layer's `opacity`.
@@ -108,5 +108,46 @@ extension CGColor {
         guard let rgb = try? Color.parseHex(hex) else { return nil }
         return CGColor(srgbRed: CGFloat(rgb.r), green: CGFloat(rgb.g),
                        blue: CGFloat(rgb.b), alpha: 1)
+    }
+}
+
+public extension CGPath {
+    /// A display item's `d`, as a `CGPath`.
+    ///
+    /// The one door a renderer outside this package needs. The alternative is
+    /// making `parsePath`, `ParsedPath` and `cgPath` public — three types
+    /// exposed to hide one string — or letting each host write its own path
+    /// builder, which means each host reproducing the cubic argument order
+    /// `cgPath` carries a comment about: a version that compiles, runs, and
+    /// draws every curve wrong.
+    static func avatarItem(_ d: String) throws -> CGPath {
+        AvatarLayerView.cgPath(try parsePath(d))
+    }
+}
+
+public extension StrokeStyle {
+    /// `character.strokeStyle`'s cap and join vocabulary is Core Animation's
+    /// verbatim, and Core Graphics spells the same three values as an enum with
+    /// no string door. `AvatarLayerView` needs the Core Animation spelling and a
+    /// static renderer needs this one, so the mapping lives here beside the
+    /// other bridges rather than in whichever host happens to want it first.
+    ///
+    /// An unrecognised value falls back to Core Graphics' own default rather
+    /// than throwing: the loader is where a bad vocabulary is caught, and a
+    /// renderer that refused to draw would report it in the least useful place.
+    var cgLineCap: CGLineCap {
+        switch linecap {
+        case "round": return .round
+        case "square": return .square
+        default: return .butt
+        }
+    }
+
+    var cgLineJoin: CGLineJoin {
+        switch linejoin {
+        case "round": return .round
+        case "bevel": return .bevel
+        default: return .miter
+        }
     }
 }

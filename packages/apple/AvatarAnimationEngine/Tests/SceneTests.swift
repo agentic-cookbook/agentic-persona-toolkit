@@ -277,4 +277,44 @@ final class SceneTests: XCTestCase {
             XCTAssertTrue("\(error)".contains("does not resolve to a colour"), "\(error)")
         }
     }
+
+    // MARK: - crops
+
+    /// The rest-pose display list plus the config that produced it. `fresh()`
+    /// hands back the scene and the channels; the crop is a method on the
+    /// config, so this one needs the third thing.
+    private func rest() throws -> (CharacterConfig, DisplayList) {
+        let config = try loadFixtureConfig()
+        let channels = Channels()
+        config.seed(into: channels)
+        return (config, try Scene(config).compose(channels))
+    }
+
+    func testACropWhoseFeaturesCoverEveryNodeIsTheIdentity() throws {
+        let (config, list) = try rest()
+        // `dot`'s `full` is ["core", "limb"], and between them they name every
+        // feature in the rig — so this asserts the filter subtracts nothing when
+        // nothing should be subtracted, which is the failure mode a count alone
+        // would miss.
+        XCTAssertEqual(try config.crop(list, to: "full"), list)
+        XCTAssertEqual(list.count, 5)
+    }
+
+    func testAFeatureIsInheritedFromTheNearestAncestorThatDeclaresOne() throws {
+        let (config, list) = try rest()
+        // `pupil` declares no feature. It is a child of `body`, which declares
+        // "core", so it belongs to `coreOnly` — and an implementation that reads
+        // `node.feature` directly returns the other three and nothing complains.
+        let kept = try config.crop(list, to: "coreOnly")
+        XCTAssertEqual(kept.map(\.id), ["eye", "pupil", "line", "spark"])
+        // Same items, same order, same paint — a filter, not a recomposition.
+        XCTAssertEqual(kept, list.filter { $0.id != "limb" })
+    }
+
+    func testAnUnknownCropNameThrows() throws {
+        let (config, list) = try rest()
+        XCTAssertThrowsError(try config.crop(list, to: "nope")) { error in
+            XCTAssertEqual(error as? SceneError, SceneError("unknown crop \"nope\""))
+        }
+    }
 }
