@@ -104,10 +104,11 @@ struct PortedThemeTests {
 
     /// Every ported theme carries web's font stack, reduced to the two things
     /// `FontStyle` can hold: the first named family and whether the stack is
-    /// monospaced. An uninstalled family is not a defect — `VT323` is a web
-    /// font and almost certainly absent — because `nsFont(scaledSize:)` falls
-    /// through to the system face, which is what the browser does with the
-    /// same stack's `ui-monospace` fallback.
+    /// monospaced. A family the system does not know is still not a build
+    /// failure — `nsFont(scaledSize:)` falls through to the system face, which
+    /// is what the browser does with the same stack's `ui-monospace` fallback
+    /// — but the faces the themes actually depend on travel with the framework
+    /// and are registered by `ToolkitFonts`, so `VT323` resolves.
     @Test("ported themes carry web's typography")
     func typographyIsPorted() {
         for theme in BuiltInThemes.webPorted {
@@ -129,6 +130,70 @@ struct PortedThemeTests {
         #expect(!professional.typography.style(.body).monospaced)
         #expect(professional.typography.style(.code).family == "JetBrains Mono")
         #expect(professional.typography.style(.code).monospaced)
+    }
+
+    /// A theme's face and its readable size are one decision, and web says so:
+    /// `old-school-terminal`'s CSS carries the comment "VT323 renders small per
+    /// px — bump up a notch vs the JetBrains Mono themes" next to
+    /// `body { font-size: 16px }`, and the two CRT themes go to 19px. Porting
+    /// the family without the size ports half of what the theme said, and
+    /// leaves VT323 — which really is small per point — looking cramped
+    /// against every other theme in the picker.
+    ///
+    /// Carried as a *ratio* against the catalogue's modal 15px, not as
+    /// transcribed point sizes: AppKit's metrics are not CSS pixels
+    /// (`ThemeTypography.defaultStyle` puts body at 13pt), so absolute
+    /// transcription would make every ported theme a fifth larger than every
+    /// Swift-native one. What ports cleanly is what each theme said relative
+    /// to its siblings.
+    @Test("ported themes carry web's body size as a type scale")
+    func bodyFontSizeIsPortedAsAScale() {
+        func scale(_ name: String) -> Double {
+            BuiltInThemes.webPorted.first { $0.name == name }!.typography.sizeScale
+        }
+        // 16px / 15px — the "bump up a notch" the CSS comment asks for.
+        #expect(abs(scale("Old School Terminal") - 16.0 / 15.0) < 0.001)
+        // 19px / 15px, from --crt-type-size and --hc-type-size.
+        #expect(abs(scale("CRT Monitor") - 19.0 / 15.0) < 0.001)
+        #expect(abs(scale("Handheld Communicator") - 19.0 / 15.0) < 0.001)
+        // 14px / 15px: a theme quieter than the baseline scales *down*.
+        #expect(abs(scale("Terminal") - 14.0 / 15.0) < 0.001)
+        // A theme whose CSS states no body size is left at the identity
+        // rather than guessed at.
+        #expect(scale("Charcoal") == 1.0)
+
+        // The scale reaches the resolved size, which is the only reason it is
+        // worth carrying.
+        let terminal = BuiltInThemes.webPorted.first { $0.name == "Old School Terminal" }!
+        #expect(terminal.typography.size(.body) > terminal.typography.style(.body).size)
+    }
+
+    /// `--pc-thinking-done-color` — the settled status line, "✱ thought for
+    /// 8s". Three themes declare it and the rest derive it, which is why it is
+    /// an optional role rather than a required one.
+    ///
+    /// The terminal family is the reason it exists as a role at all: the
+    /// library default is a flat `#8a8a8a`, a colour a phosphor screen does
+    /// not have, so a grey status line there reads as a rendering fault rather
+    /// than as the machine's own note. Note that this is *not* the same
+    /// question as `.timestampText`: these themes keep their clock dim (40%
+    /// alpha green) while writing the status line in full phosphor.
+    @Test("terminal themes declare the settled status colour, and it is not the clock's")
+    func thinkingDoneColourIsDeclaredByTerminalThemes() {
+        let phosphor = RGBAColor(hexString: "#00ff41ff")!
+        for name in ["Old School Terminal", "CRT Monitor", "Handheld Communicator"] {
+            let theme = BuiltInThemes.webPorted.first { $0.name == name }!
+            let palette = SemanticPalette(theme: theme)
+            #expect(palette.declares(.thinkingDoneText), "\(name) does not declare it")
+            #expect(palette.color(.thinkingDoneText) == phosphor, "\(name) is not phosphor green")
+            #expect(palette.color(.timestampText) != phosphor, "\(name) dims its clock, not its status")
+        }
+        // Everyone else derives, and derivation must still produce something
+        // legible rather than web's literal mid-grey on a light palette.
+        let whimsical = BuiltInThemes.webPorted.first { $0.name == "Whimsical" }!
+        let palette = SemanticPalette(theme: whimsical)
+        #expect(!palette.declares(.thinkingDoneText))
+        #expect(palette.color(.thinkingDoneText).alpha > 0)
     }
 
     @Test("ported themes are in the catalog")

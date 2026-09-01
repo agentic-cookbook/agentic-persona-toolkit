@@ -26,6 +26,9 @@ extension FontStyle {
     /// system font otherwise), monospaced roles use the system monospaced
     /// face, and everything else uses the system face at `weight`.
     public func uiFont(scaledSize: CGFloat) -> UIFont {
+        // Mirrors the macOS bridge: register the bundled faces before asking
+        // whether the theme's family exists.
+        ToolkitFonts.registerBundledFonts()
         if let family, let base = UIFont(name: family, size: scaledSize) {
             // Best-effort weight for arbitrary families, mirroring the
             // NSFontManager bold-trait fallback on macOS: apply a bold trait

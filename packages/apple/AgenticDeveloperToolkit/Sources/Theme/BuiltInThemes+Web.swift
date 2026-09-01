@@ -168,6 +168,7 @@ extension BuiltInThemes {
     /// reads that as a flat transcript line — no padding, no corner radius.
     /// Typography is web's own stack: `IBM Plex Mono`, falling back to the
     /// system face at the same metrics when the family is not installed.
+    /// Type is scaled 0.9333x: web sets `body { font-size: 14px }` against a catalogue baseline of 15px.
     static let terminal = ColorTheme(
         id: "B1B6F0E2-0000-4000-8000-000000000103",
         name: "Terminal",
@@ -209,7 +210,7 @@ extension BuiltInThemes {
             ThemeRole.userName.rawValue: RGBAColor(hexString: "#ffcc00ff")!,
             ThemeRole.userText.rawValue: RGBAColor(hexString: "#d0d0d0ff")!
         ],
-        typography: ThemeTypography(styles: [
+        typography: ThemeTypography(sizeScale: 0.9333, styles: [
             TextRole.title.rawValue: FontStyle(family: "IBM Plex Mono", size: 22, weight: .semibold, monospaced: true),
             TextRole.heading.rawValue: FontStyle(family: "IBM Plex Mono", size: 15, weight: .semibold, monospaced: true),
             TextRole.body.rawValue: FontStyle(family: "IBM Plex Mono", size: 13, weight: .regular, monospaced: true),
@@ -226,6 +227,7 @@ extension BuiltInThemes {
     /// reads that as a flat transcript line — no padding, no corner radius.
     /// Typography is web's own stack: `IBM Plex Mono`, falling back to the
     /// system face at the same metrics when the family is not installed.
+    /// Type is scaled 0.9333x: web sets `body { font-size: 14px }` against a catalogue baseline of 15px.
     static let terminalSplit = ColorTheme(
         id: "B1B6F0E2-0000-4000-8000-000000000104",
         name: "Terminal Split",
@@ -267,7 +269,7 @@ extension BuiltInThemes {
             ThemeRole.userName.rawValue: RGBAColor(hexString: "#ffcc00ff")!,
             ThemeRole.userText.rawValue: RGBAColor(hexString: "#d0d0d0ff")!
         ],
-        typography: ThemeTypography(styles: [
+        typography: ThemeTypography(sizeScale: 0.9333, styles: [
             TextRole.title.rawValue: FontStyle(family: "IBM Plex Mono", size: 22, weight: .semibold, monospaced: true),
             TextRole.heading.rawValue: FontStyle(family: "IBM Plex Mono", size: 15, weight: .semibold, monospaced: true),
             TextRole.body.rawValue: FontStyle(family: "IBM Plex Mono", size: 13, weight: .regular, monospaced: true),
@@ -284,6 +286,7 @@ extension BuiltInThemes {
     /// reads that as a flat transcript line — no padding, no corner radius.
     /// Typography is web's own stack: `JetBrains Mono`, falling back to the
     /// system face at the same metrics when the family is not installed.
+    /// Type is scaled 0.9333x: web sets `body { font-size: 14px }` against a catalogue baseline of 15px.
     static let greenMatrix = ColorTheme(
         id: "B1B6F0E2-0000-4000-8000-000000000105",
         name: "Green Matrix",
@@ -325,7 +328,7 @@ extension BuiltInThemes {
             ThemeRole.userName.rawValue: RGBAColor(hexString: "#aaffaaff")!,
             ThemeRole.userText.rawValue: RGBAColor(hexString: "#aaffaaff")!
         ],
-        typography: ThemeTypography(styles: [
+        typography: ThemeTypography(sizeScale: 0.9333, styles: [
             TextRole.title.rawValue: FontStyle(family: "JetBrains Mono", size: 22, weight: .semibold, monospaced: true),
             TextRole.heading.rawValue: FontStyle(family: "JetBrains Mono", size: 15, weight: .semibold, monospaced: true),
             TextRole.body.rawValue: FontStyle(family: "JetBrains Mono", size: 13, weight: .regular, monospaced: true),
@@ -342,6 +345,7 @@ extension BuiltInThemes {
     /// reads that as a flat transcript line — no padding, no corner radius.
     /// Typography is web's own stack: `JetBrains Mono`, falling back to the
     /// system face at the same metrics when the family is not installed.
+    /// Type is scaled 0.9333x: web sets `body { font-size: 14px }` against a catalogue baseline of 15px.
     static let greenMatrixGlass = ColorTheme(
         id: "B1B6F0E2-0000-4000-8000-000000000106",
         name: "Green Matrix (Glass)",
@@ -383,7 +387,7 @@ extension BuiltInThemes {
             ThemeRole.userName.rawValue: RGBAColor(hexString: "#aaffaaff")!,
             ThemeRole.userText.rawValue: RGBAColor(hexString: "#aaffaaff")!
         ],
-        typography: ThemeTypography(styles: [
+        typography: ThemeTypography(sizeScale: 0.9333, styles: [
             TextRole.title.rawValue: FontStyle(family: "JetBrains Mono", size: 22, weight: .semibold, monospaced: true),
             TextRole.heading.rawValue: FontStyle(family: "JetBrains Mono", size: 15, weight: .semibold, monospaced: true),
             TextRole.body.rawValue: FontStyle(family: "JetBrains Mono", size: 13, weight: .regular, monospaced: true),
@@ -400,6 +404,7 @@ extension BuiltInThemes {
     /// reads that as a flat transcript line — no padding, no corner radius.
     /// Typography is web's own stack: `VT323`, falling back to the
     /// system face at the same metrics when the family is not installed.
+    /// Type is scaled 1.0667x: web sets `body { font-size: 16px }` against a catalogue baseline of 15px.
     static let oldSchoolTerminal = ColorTheme(
         id: "B1B6F0E2-0000-4000-8000-000000000107",
         name: "Old School Terminal",
@@ -436,12 +441,13 @@ extension BuiltInThemes {
             ThemeRole.personaBubble.rawValue: RGBAColor(hexString: "#00000000")!,
             ThemeRole.personaName.rawValue: RGBAColor(hexString: "#00ff41ff")!,
             ThemeRole.personaText.rawValue: RGBAColor(hexString: "#00ff41ff")!,
+            ThemeRole.thinkingDoneText.rawValue: RGBAColor(hexString: "#00ff41ff")!,
             ThemeRole.timestampText.rawValue: RGBAColor(hexString: "#00ff4166")!,
             ThemeRole.userBubble.rawValue: RGBAColor(hexString: "#00000000")!,
             ThemeRole.userName.rawValue: RGBAColor(hexString: "#aaffaaff")!,
             ThemeRole.userText.rawValue: RGBAColor(hexString: "#aaffaaff")!
         ],
-        typography: ThemeTypography(styles: [
+        typography: ThemeTypography(sizeScale: 1.0667, styles: [
             TextRole.title.rawValue: FontStyle(family: "VT323", size: 22, weight: .semibold, monospaced: true),
             TextRole.heading.rawValue: FontStyle(family: "VT323", size: 15, weight: .semibold, monospaced: true),
             TextRole.body.rawValue: FontStyle(family: "VT323", size: 13, weight: .regular, monospaced: true),
@@ -461,6 +467,7 @@ extension BuiltInThemes {
     /// reads that as a flat transcript line — no padding, no corner radius.
     /// Typography is web's own stack: `VT323`, falling back to the
     /// system face at the same metrics when the family is not installed.
+    /// Type is scaled 1.2667x: web sets `body { font-size: 19px }` against a catalogue baseline of 15px.
     static let crtMonitor = ColorTheme(
         id: "B1B6F0E2-0000-4000-8000-000000000108",
         name: "CRT Monitor",
@@ -497,12 +504,13 @@ extension BuiltInThemes {
             ThemeRole.personaBubble.rawValue: RGBAColor(hexString: "#00000000")!,
             ThemeRole.personaName.rawValue: RGBAColor(hexString: "#00ff41ff")!,
             ThemeRole.personaText.rawValue: RGBAColor(hexString: "#00ff41ff")!,
+            ThemeRole.thinkingDoneText.rawValue: RGBAColor(hexString: "#00ff41ff")!,
             ThemeRole.timestampText.rawValue: RGBAColor(hexString: "#00ff4166")!,
             ThemeRole.userBubble.rawValue: RGBAColor(hexString: "#00000000")!,
             ThemeRole.userName.rawValue: RGBAColor(hexString: "#aaffaaff")!,
             ThemeRole.userText.rawValue: RGBAColor(hexString: "#aaffaaff")!
         ],
-        typography: ThemeTypography(styles: [
+        typography: ThemeTypography(sizeScale: 1.2667, styles: [
             TextRole.title.rawValue: FontStyle(family: "VT323", size: 22, weight: .semibold, monospaced: true),
             TextRole.heading.rawValue: FontStyle(family: "VT323", size: 15, weight: .semibold, monospaced: true),
             TextRole.body.rawValue: FontStyle(family: "VT323", size: 13, weight: .regular, monospaced: true),
@@ -522,6 +530,7 @@ extension BuiltInThemes {
     /// reads that as a flat transcript line — no padding, no corner radius.
     /// Typography is web's own stack: `VT323`, falling back to the
     /// system face at the same metrics when the family is not installed.
+    /// Type is scaled 1.2667x: web sets `body { font-size: 19px }` against a catalogue baseline of 15px.
     static let handheldCommunicator = ColorTheme(
         id: "B1B6F0E2-0000-4000-8000-000000000109",
         name: "Handheld Communicator",
@@ -558,12 +567,13 @@ extension BuiltInThemes {
             ThemeRole.personaBubble.rawValue: RGBAColor(hexString: "#00000000")!,
             ThemeRole.personaName.rawValue: RGBAColor(hexString: "#00ff41ff")!,
             ThemeRole.personaText.rawValue: RGBAColor(hexString: "#00ff41ff")!,
+            ThemeRole.thinkingDoneText.rawValue: RGBAColor(hexString: "#00ff41ff")!,
             ThemeRole.timestampText.rawValue: RGBAColor(hexString: "#00ff4166")!,
             ThemeRole.userBubble.rawValue: RGBAColor(hexString: "#00000000")!,
             ThemeRole.userName.rawValue: RGBAColor(hexString: "#aaffaaff")!,
             ThemeRole.userText.rawValue: RGBAColor(hexString: "#aaffaaff")!
         ],
-        typography: ThemeTypography(styles: [
+        typography: ThemeTypography(sizeScale: 1.2667, styles: [
             TextRole.title.rawValue: FontStyle(family: "VT323", size: 22, weight: .semibold, monospaced: true),
             TextRole.heading.rawValue: FontStyle(family: "VT323", size: 15, weight: .semibold, monospaced: true),
             TextRole.body.rawValue: FontStyle(family: "VT323", size: 13, weight: .regular, monospaced: true),
@@ -804,6 +814,7 @@ extension BuiltInThemes {
     /// "Techy" — ported from the web theme catalogue (`techy.css`).
     /// Typography is web's own stack: `Inter`, code in `JetBrains Mono`, falling back to the
     /// system face at the same metrics when the family is not installed.
+    /// Type is scaled 0.9333x: web sets `body { font-size: 14px }` against a catalogue baseline of 15px.
     static let techy = ColorTheme(
         id: "B1B6F0E2-0000-4000-8000-000000000114",
         name: "Techy",
@@ -849,7 +860,7 @@ extension BuiltInThemes {
             ThemeRole.userName.rawValue: RGBAColor(hexString: "#00d4ffff")!,
             ThemeRole.userText.rawValue: RGBAColor(hexString: "#c9d1d9ff")!
         ],
-        typography: ThemeTypography(styles: [
+        typography: ThemeTypography(sizeScale: 0.9333, styles: [
             TextRole.title.rawValue: FontStyle(family: "Inter", size: 22, weight: .semibold, monospaced: false),
             TextRole.heading.rawValue: FontStyle(family: "Inter", size: 15, weight: .semibold, monospaced: false),
             TextRole.body.rawValue: FontStyle(family: "Inter", size: 13, weight: .regular, monospaced: false),
@@ -869,6 +880,7 @@ extension BuiltInThemes {
     ///   - `--pc-send-bg` -> `.sendButton` = `#c8506aff`
     /// Typography is web's own stack: `Nunito`, code in `JetBrains Mono`, falling back to the
     /// system face at the same metrics when the family is not installed.
+    /// Type is scaled 1.0667x: web sets `body { font-size: 16px }` against a catalogue baseline of 15px.
     static let whimsical = ColorTheme(
         id: "B1B6F0E2-0000-4000-8000-000000000115",
         name: "Whimsical",
@@ -912,7 +924,7 @@ extension BuiltInThemes {
             ThemeRole.userName.rawValue: RGBAColor(hexString: "#c8b0e0ff")!,
             ThemeRole.userText.rawValue: RGBAColor(hexString: "#ffffffff")!
         ],
-        typography: ThemeTypography(styles: [
+        typography: ThemeTypography(sizeScale: 1.0667, styles: [
             TextRole.title.rawValue: FontStyle(family: "Nunito", size: 22, weight: .semibold, monospaced: false),
             TextRole.heading.rawValue: FontStyle(family: "Nunito", size: 15, weight: .semibold, monospaced: false),
             TextRole.body.rawValue: FontStyle(family: "Nunito", size: 13, weight: .regular, monospaced: false),
@@ -984,6 +996,7 @@ extension BuiltInThemes {
     /// "Dev Team" — ported from the web theme catalogue (`dev-team.css`).
     /// Typography is web's own stack: `Manrope`, code in `DM Mono`, falling back to the
     /// system face at the same metrics when the family is not installed.
+    /// Type is scaled 0.9333x: web sets `body { font-size: 14px }` against a catalogue baseline of 15px.
     static let devTeam = ColorTheme(
         id: "B1B6F0E2-0000-4000-8000-000000000117",
         name: "Dev Team",
@@ -1029,7 +1042,7 @@ extension BuiltInThemes {
             ThemeRole.userName.rawValue: RGBAColor(hexString: "#5cb270ff")!,
             ThemeRole.userText.rawValue: RGBAColor(hexString: "#e8e6e3ff")!
         ],
-        typography: ThemeTypography(styles: [
+        typography: ThemeTypography(sizeScale: 0.9333, styles: [
             TextRole.title.rawValue: FontStyle(family: "Manrope", size: 22, weight: .semibold, monospaced: false),
             TextRole.heading.rawValue: FontStyle(family: "Manrope", size: 15, weight: .semibold, monospaced: false),
             TextRole.body.rawValue: FontStyle(family: "Manrope", size: 13, weight: .regular, monospaced: false),
@@ -1042,6 +1055,7 @@ extension BuiltInThemes {
     /// "Mike Fullerton" — ported from the web theme catalogue (`mikefullerton.css`).
     /// Typography is web's own stack: `DM Mono`, falling back to the
     /// system face at the same metrics when the family is not installed.
+    /// Type is scaled 0.9x: web sets `body { font-size: 13.5px }` against a catalogue baseline of 15px.
     static let mikeFullerton = ColorTheme(
         id: "B1B6F0E2-0000-4000-8000-000000000118",
         name: "Mike Fullerton",
@@ -1087,7 +1101,7 @@ extension BuiltInThemes {
             ThemeRole.userName.rawValue: RGBAColor(hexString: "#5a8fd4ff")!,
             ThemeRole.userText.rawValue: RGBAColor(hexString: "#e8e6e3ff")!
         ],
-        typography: ThemeTypography(styles: [
+        typography: ThemeTypography(sizeScale: 0.9, styles: [
             TextRole.title.rawValue: FontStyle(family: "DM Mono", size: 22, weight: .semibold, monospaced: true),
             TextRole.heading.rawValue: FontStyle(family: "DM Mono", size: 15, weight: .semibold, monospaced: true),
             TextRole.body.rawValue: FontStyle(family: "DM Mono", size: 13, weight: .regular, monospaced: true),
@@ -1100,6 +1114,7 @@ extension BuiltInThemes {
     /// "My Projects" — ported from the web theme catalogue (`myprojects.css`).
     /// Typography is web's own stack: `Manrope`, code in `DM Mono`, falling back to the
     /// system face at the same metrics when the family is not installed.
+    /// Type is scaled 0.9333x: web sets `body { font-size: 14px }` against a catalogue baseline of 15px.
     static let myProjects = ColorTheme(
         id: "B1B6F0E2-0000-4000-8000-000000000119",
         name: "My Projects",
@@ -1146,7 +1161,7 @@ extension BuiltInThemes {
             ThemeRole.userName.rawValue: RGBAColor(hexString: "#d4a754ff")!,
             ThemeRole.userText.rawValue: RGBAColor(hexString: "#e8e6e3ff")!
         ],
-        typography: ThemeTypography(styles: [
+        typography: ThemeTypography(sizeScale: 0.9333, styles: [
             TextRole.title.rawValue: FontStyle(family: "Manrope", size: 22, weight: .semibold, monospaced: false),
             TextRole.heading.rawValue: FontStyle(family: "Manrope", size: 15, weight: .semibold, monospaced: false),
             TextRole.body.rawValue: FontStyle(family: "Manrope", size: 13, weight: .regular, monospaced: false),
@@ -1159,6 +1174,7 @@ extension BuiltInThemes {
     /// "Projects Overview" — ported from the web theme catalogue (`myprojectsoverview.css`).
     /// Typography is web's own stack: `Manrope`, code in `DM Mono`, falling back to the
     /// system face at the same metrics when the family is not installed.
+    /// Type is scaled 0.8667x: web sets `body { font-size: 13px }` against a catalogue baseline of 15px.
     static let projectsOverview = ColorTheme(
         id: "B1B6F0E2-0000-4000-8000-000000000120",
         name: "Projects Overview",
@@ -1204,7 +1220,7 @@ extension BuiltInThemes {
             ThemeRole.userName.rawValue: RGBAColor(hexString: "#5a8fd4ff")!,
             ThemeRole.userText.rawValue: RGBAColor(hexString: "#e8e6e3ff")!
         ],
-        typography: ThemeTypography(styles: [
+        typography: ThemeTypography(sizeScale: 0.8667, styles: [
             TextRole.title.rawValue: FontStyle(family: "Manrope", size: 22, weight: .semibold, monospaced: false),
             TextRole.heading.rawValue: FontStyle(family: "Manrope", size: 15, weight: .semibold, monospaced: false),
             TextRole.body.rawValue: FontStyle(family: "Manrope", size: 13, weight: .regular, monospaced: false),

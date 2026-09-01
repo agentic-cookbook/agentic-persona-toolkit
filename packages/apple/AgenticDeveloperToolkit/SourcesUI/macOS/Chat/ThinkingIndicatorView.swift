@@ -107,7 +107,6 @@ public final class ThinkingIndicatorView: NSView, Themeable {
 
     private func setup() {
         wantsLayer = true
-        layer?.cornerRadius = 12
         translatesAutoresizingMaskIntoConstraints = false
 
         let stack = NSStackView(views: dots)
@@ -143,8 +142,15 @@ public final class ThinkingIndicatorView: NSView, Themeable {
         themeObserver = ThemePaletteObserver { [weak self] palette in self?.applyTheme(palette) }
     }
 
+    /// Draws no fill of its own. Web's `.pc-typing` declares no `background`
+    /// and no `border-radius` — it is a line of text in the gutter, not a
+    /// pill. Repainting `chatSurface` here stacked a second copy of the
+    /// surface on top of the one `InlineChatView` already draws, which on a
+    /// theme whose surface is translucent (`old-school-terminal` is
+    /// `rgba(5, 8, 5, 0.8)`) showed up as a lighter rounded band floating
+    /// above the composer.
     public func applyTheme(_ palette: SemanticPalette) {
-        layer?.backgroundColor = palette.nsColor(.chatSurface).cgColor
+        layer?.backgroundColor = NSColor.clear.cgColor
         for dot in dots {
             dot.layer?.backgroundColor = palette.nsColor(.secondaryText).cgColor
         }
@@ -350,10 +356,10 @@ public final class ThinkingIndicatorView: NSView, Themeable {
         return result
     }
 
-    /// The settled/idle line's colour: `.timestampText`, always — deliberately
+    /// The settled/idle line's colour: `.thinkingDoneText`, always — deliberately
     /// never tinted, per `ThinkingTint`'s doc comment.
     private func settledLine(glyph: String, text: String, palette: SemanticPalette) -> NSAttributedString {
-        let color = palette.nsColor(.timestampText)
+        let color = palette.nsColor(.thinkingDoneText)
         let font = palette.font(.caption)
         let result = NSMutableAttributedString(string: glyph, attributes: [.foregroundColor: color, .font: font])
         result.append(NSAttributedString(string: " " + text, attributes: [.foregroundColor: color, .font: font]))

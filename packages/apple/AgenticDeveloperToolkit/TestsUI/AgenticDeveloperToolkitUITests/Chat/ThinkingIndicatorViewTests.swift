@@ -22,18 +22,31 @@ struct ThinkingIndicatorViewTests {
         #expect(indicator.frame.width == 48)
     }
 
-    @Test("repaints its layer background when the active theme changes")
-    func repaintsOnThemeChange() {
+    /// The indicator's own ink follows the theme — but its *fill* does not,
+    /// because it has none. Web's `.pc-typing` declares no `background`, so
+    /// the surface belongs to the chat view alone; painting `chatSurface`
+    /// here too stacked a second copy of it, which a translucent theme shows
+    /// as a lighter rounded band hovering over the composer. So the assertion
+    /// is deliberately two-sided: the dots repaint, the fill stays clear.
+    @Test("repaints its ink when the active theme changes, and never its fill")
+    func repaintsOnThemeChange() throws {
         let manager = makeManager(activeThemeID: BuiltInThemes.solarizedDark.id)
         let indicator = ThinkingIndicatorView()
+        indicator.frame = NSRect(x: 0, y: 0, width: 48, height: 28)
+        indicator.layoutSubtreeIfNeeded()
 
-        let before = indicator.layer?.backgroundColor
+        func dotColor() throws -> CGColor? {
+            let stack = try #require(indicator.subviews.compactMap { $0 as? NSStackView }.first)
+            return stack.arrangedSubviews.first?.layer?.backgroundColor
+        }
+
+        let before = try dotColor()
         manager.selectTheme(id: BuiltInThemes.dracula.id)
         pumpRunLoop()
-        let after = indicator.layer?.backgroundColor
 
         #expect(before != nil)
-        #expect(before != after)
+        #expect(before != (try dotColor()))
+        #expect(indicator.layer?.backgroundColor == NSColor.clear.cgColor)
     }
 
     // MARK: Words-empty fallback (ci-thinking-dots-fallback)
@@ -89,7 +102,7 @@ struct ThinkingIndicatorViewTests {
         configuration.words = [ChatStatusWordPair(present: "zeeping", past: "zeeped")]
         indicator.configure(configuration)
         indicator.update(status: ChatStatus(kind: .think))
-        indicator.update(status: nil) // settles to .done — colours come from .timestampText
+        indicator.update(status: nil) // settles to .done — colours come from .thinkingDoneText
 
         func renderedColor() -> NSColor? {
             let attributed = indicator.label.attributedStringValue

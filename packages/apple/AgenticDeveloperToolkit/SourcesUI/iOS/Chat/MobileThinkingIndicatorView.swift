@@ -83,7 +83,6 @@ public final class MobileThinkingIndicatorView: UIView, Themeable {
     }
 
     private func setup() {
-        layer.cornerRadius = 12
         translatesAutoresizingMaskIntoConstraints = false
 
         let stack = UIStackView(arrangedSubviews: dots)
@@ -119,8 +118,12 @@ public final class MobileThinkingIndicatorView: UIView, Themeable {
         themeObserver = ThemePaletteObserver { [weak self] palette in self?.applyTheme(palette) }
     }
 
+    /// Draws no fill of its own — see the macOS `ThinkingIndicatorView` for
+    /// why: web's `.pc-typing` declares neither a `background` nor a
+    /// `border-radius`, and repainting the surface here stacks a second copy
+    /// of it over the one the chat view already draws.
     public func applyTheme(_ palette: SemanticPalette) {
-        backgroundColor = palette.uiColor(.chatSurface)
+        backgroundColor = .clear
         for dot in dots {
             dot.backgroundColor = palette.uiColor(.secondaryText)
         }
@@ -302,9 +305,10 @@ public final class MobileThinkingIndicatorView: UIView, Themeable {
         return result
     }
 
-    /// The settled line's colour: `.timestampText`, always.
+    /// The settled line's colour: `.thinkingDoneText`, always — web's
+    /// `--pc-thinking-done-color`.
     private func settledLine(glyph: String, text: String, palette: SemanticPalette) -> NSAttributedString {
-        let color = palette.uiColor(.timestampText)
+        let color = palette.uiColor(.thinkingDoneText)
         let font = palette.font(.caption)
         let result = NSMutableAttributedString(string: glyph, attributes: [.foregroundColor: color, .font: font])
         result.append(NSAttributedString(string: " " + text, attributes: [.foregroundColor: color, .font: font]))

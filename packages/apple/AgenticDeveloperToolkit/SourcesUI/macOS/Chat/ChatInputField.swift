@@ -29,6 +29,24 @@ public final class ChatInputField: NSTextField, Themeable {
         didSet { layer?.cornerRadius = cornerRadius }
     }
 
+    /// Whether the field paints its one-pixel rule at all. Off for terminal
+    /// themes, whose `.pc-input` says `border: none` — see
+    /// `InlineChatChrome.showsInputBorder`.
+    public var showsBorder: Bool = true {
+        didSet { layer?.borderWidth = showsBorder ? 1 : 0 }
+    }
+
+    /// Whether the insertion point is a solid block rather than the system's
+    /// one-pixel bar.
+    ///
+    /// Read by this field's *own* editor, which is why `PaddedTextFieldCell`
+    /// overrides `fieldEditor(for:)` at all: an `NSTextField` normally borrows
+    /// the window's shared field editor, and widening that one's caret would
+    /// hand a block cursor to every other text field in the window.
+    public var usesBlockCaret: Bool = false {
+        didSet { (currentEditor() as? BlockCaretTextView)?.drawsBlockCaret = usesBlockCaret }
+    }
+
     /// Whether the field currently has the keyboard focus, which selects
     /// between `.chatInputBorder` and `.chatInputFocus`.
     ///
@@ -62,7 +80,7 @@ public final class ChatInputField: NSTextField, Themeable {
         focusRingType = .none
         wantsLayer = true
         layer?.cornerRadius = cornerRadius
-        layer?.borderWidth = 1
+        layer?.borderWidth = showsBorder ? 1 : 0
         cell?.wraps = false
         cell?.usesSingleLineMode = true
         lineBreakMode = .byTruncatingHead
@@ -135,5 +153,74 @@ private final class PaddedTextFieldCell: NSTextFieldCell {
         super.select(
             withFrame: titleRect(forBounds: rect), in: controlView, editor: textObj,
             delegate: delegate, start: start, length: length)
+    }
+
+    /// This cell's own field editor, so the caret shape is a property of *this*
+    /// composer.
+    ///
+    /// By default every editable control in a window shares one field editor
+    /// the window vends, so a text view subclass installed there would give a
+    /// block cursor to the search field and the settings panel too. `NSCell`
+    /// exists precisely for this: return a view here and AppKit uses it for
+    /// this cell alone.
+    private var blockCaretEditor: BlockCaretTextView?
+
+    override func fieldEditor(for controlView: NSView) -> NSTextView? {
+        let editor = blockCaretEditor ?? {
+            let created = BlockCaretTextView()
+            created.isFieldEditor = true
+            blockCaretEditor = created
+            return created
+        }()
+        editor.drawsBlockCaret = (controlView as? ChatInputField)?.usesBlockCaret ?? false
+        return editor
+    }
+}
+
+/// A field editor whose insertion point is a solid character-wide block rather
+/// than the system's one-pixel bar.
+///
+/// Web draws this itself — it hides the native caret and animates a
+/// `.pc-input-caret` div with `ost-caret-blink` — because a browser cannot
+/// restyle a text input's cursor. AppKit can: `drawInsertionPoint` is handed
+/// the rect to fill, and the blink is already the framework's job, so the only
+/// thing to say here is how wide.
+final class BlockCaretTextView: NSTextView {
+
+    /// Off by default, so a field that says nothing keeps the system caret.
+    var drawsBlockCaret = false {
+        didSet {
+            guard drawsBlockCaret != oldValue else { return }
+            needsDisplay = true
+        }
+    }
+
+    /// One character wide, measured from the editor's own font rather than
+    /// fixed: the terminal themes scale their type (VT323 at a 1.07 size
+    /// scale), and a caret that did not scale with the text would sit under
+    /// half a glyph.
+    private var caretWidth: CGFloat {
+        let font = self.font ?? NSFont.monospacedSystemFont(ofSize: NSFont.systemFontSize, weight: .regular)
+        return max(("0" as NSString).size(withAttributes: [.font: font]).width, 1)
+    }
+
+    override func drawInsertionPoint(in rect: NSRect, color: NSColor, turnedOn flag: Bool) {
+        guard drawsBlockCaret else {
+            super.drawInsertionPoint(in: rect, color: color, turnedOn: flag)
+            return
+        }
+        var block = rect
+        block.size.width = caretWidth
+        super.drawInsertionPoint(in: block, color: color, turnedOn: flag)
+    }
+
+    /// The blink erases by invalidating the caret's rect, and AppKit computes
+    /// that rect from the one-pixel bar it thinks it drew. Without widening it
+    /// to match, the block's tail is never repainted and a trail of it is left
+    /// behind as the caret moves.
+    override func setNeedsDisplay(_ invalidRect: NSRect, avoidAdditionalLayout flag: Bool) {
+        var rect = invalidRect
+        rect.size.width += caretWidth
+        super.setNeedsDisplay(rect, avoidAdditionalLayout: flag)
     }
 }

@@ -48,6 +48,8 @@ targets:
       - path: SourcesUI/Shared
         optional: true
       - path: SourcesUI/macOS
+      - path: SourcesUI/Resources
+        buildPhase: resources
     dependencies:
       - target: AgenticDeveloperToolkit-macOS
     settings:
@@ -75,6 +77,8 @@ targets:
         optional: true
       - path: SourcesUI/iOS
         optional: true
+      - path: SourcesUI/Resources
+        buildPhase: resources
     dependencies:
       - target: AgenticDeveloperToolkit-iOS
     settings:

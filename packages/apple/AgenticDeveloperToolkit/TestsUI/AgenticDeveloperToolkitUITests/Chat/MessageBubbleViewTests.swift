@@ -155,6 +155,62 @@ struct MessageBubbleViewTests {
         #expect(attributes[.foregroundColor] as? NSColor == palette.nsColor(.personaName))
     }
 
+    // MARK: Timestamp
+
+    /// Web renders `.pc-time` as a `display: block` element under the message
+    /// text — the bubble's last child — not as a suffix on the sentence. The
+    /// old rendering appended `"  08:05"` into the same run as the text, which
+    /// reads as something the persona said.
+    @Test("the timestamp is the last thing rendered, on a line of its own")
+    func timestampIsOnItsOwnFinalLine() {
+        _ = makeManager(activeThemeID: BuiltInThemes.solarizedDark.id)
+        let message = FixtureMessage(
+            id: "1", localID: "1", senderID: "persona-1", text: "hello", timestamp: Date())
+        let bubble = MessageBubbleView(message: message, maxWidth: 300, isLocalUser: false)
+
+        let lines = bubble.renderedText.string.components(separatedBy: "\n")
+        #expect(lines.count == 2)
+        #expect(lines[0] == "hello")
+        // Two digits, a separator, two digits — the locale decides the rest.
+        #expect(lines[1].range(of: #"^\d{2}\D\d{2}"#, options: .regularExpression) != nil)
+    }
+
+    /// `text-align: right` on a user bubble's `.pc-time`, `left` on a
+    /// persona's — the clock hugs the side the message is on.
+    @Test("the timestamp line is aligned to the sender's side")
+    func timestampAlignsToSender() {
+        _ = makeManager(activeThemeID: BuiltInThemes.solarizedDark.id)
+        let message = FixtureMessage(
+            id: "1", localID: "1", senderID: "x", text: "hello", timestamp: Date())
+
+        func alignment(isLocalUser: Bool) -> NSTextAlignment? {
+            let rendered = MessageBubbleView(
+                message: message, maxWidth: 300, isLocalUser: isLocalUser).renderedText
+            let location = (rendered.string as NSString).range(of: "\n").location + 1
+            let style = rendered.attribute(.paragraphStyle, at: location, effectiveRange: nil)
+            return (style as? NSParagraphStyle)?.alignment
+        }
+
+        #expect(alignment(isLocalUser: true) == .right)
+        #expect(alignment(isLocalUser: false) == .left)
+    }
+
+    /// The failure caption is part of the message's story and the clock is a
+    /// note about it, so the clock stays last even when both are present.
+    @Test("a failed message still ends with its timestamp")
+    func failedMessageStillEndsWithTimestamp() {
+        _ = makeManager(activeThemeID: BuiltInThemes.solarizedDark.id)
+        let message = FixtureMessage(
+            id: nil, localID: "1", senderID: "user-1", text: "hi", timestamp: Date(),
+            deliveryStatus: .failed(reason: "boom"))
+        let bubble = MessageBubbleView(message: message, maxWidth: 300, isLocalUser: true)
+
+        let lines = bubble.renderedText.string.components(separatedBy: "\n")
+        #expect(lines.count == 3)
+        #expect(lines[1] == "boom")
+        #expect(lines[2].contains(":") || lines[2].contains("."))
+    }
+
     @Test("a settled message carries no caret")
     func settledMessageHasNoCaret() {
         _ = makeManager(activeThemeID: BuiltInThemes.solarizedDark.id)

@@ -134,6 +134,84 @@ struct InlineChatViewTests {
             id: "1", localID: "1", senderID: "persona-1", text: "hi", timestamp: Date())))
     }
 
+    // MARK: Chrome
+
+    /// The composer is where a theme's terminal-ness is most visible and where
+    /// the port had been least faithful: web's `.pc-input` sets
+    /// `border: none`, draws a `❯` as the input row's `::before`, and replaces
+    /// the native caret with a blinking phosphor block. None of that is a
+    /// colour, so all of it lives on `chrome`.
+    @Test("terminal chrome unboxes the composer and gives it a prompt")
+    func terminalChromeShapesTheComposer() {
+        _ = makeManager(activeThemeID: BuiltInThemes.solarizedDark.id)
+        let (view, _, _) = makeView()
+
+        // The default is the boxed, rounded, prompt-less composer every
+        // non-terminal theme wants — asserted so the terminal case below is
+        // read as a change and not as the only behaviour.
+        #expect(view.inputField.showsBorder)
+        #expect(!view.inputField.usesBlockCaret)
+        #expect(view.promptLabel.isHidden)
+
+        view.chrome = .terminal
+        #expect(!view.inputField.showsBorder)
+        #expect(view.inputField.layer?.borderWidth == 0)
+        #expect(view.inputField.usesBlockCaret)
+        #expect(!view.promptLabel.isHidden)
+        #expect(view.promptLabel.stringValue == "\u{276F}")
+        #expect(view.inputField.cornerRadius == 0)
+    }
+
+    /// The prompt is the composer's own ink — web colours it with the input's
+    /// text colour — so it has to follow the theme like everything else.
+    @Test("the prompt repaints with the active theme")
+    func promptRepaintsOnThemeChange() {
+        let manager = makeManager(activeThemeID: BuiltInThemes.solarizedDark.id)
+        let (view, _, _) = makeView()
+        view.chrome = .terminal
+
+        let before = view.promptLabel.textColor
+        manager.selectTheme(id: BuiltInThemes.dracula.id)
+        pumpRunLoop()
+
+        #expect(before != nil)
+        #expect(before != view.promptLabel.textColor)
+    }
+
+    // MARK: The surface
+
+    /// Web paints `--pc-surface` on `.persona-chat` and nowhere else:
+    /// `.pc-transcript`, `.pc-typing` and `.pc-input-area` declare no
+    /// `background` at all. The port had each of them repaint it, which costs
+    /// nothing while the surface is opaque and is plainly visible the moment
+    /// it is not — `old-school-terminal` sets `rgba(5, 8, 5, 0.8)`, and three
+    /// stacked copies of an 80% fill drew the transcript nearly solid while
+    /// the status row and the composer stayed see-through.
+    ///
+    /// It is also what makes a translucent theme translucent *as a window*:
+    /// the host clears the window's own fill, so whatever alpha survives this
+    /// one layer is what the desktop shows through.
+    @Test("only the chat view itself paints the surface")
+    func theSurfaceIsPaintedExactlyOnce() throws {
+        let terminal = try #require(BuiltInThemes.all.first { $0.name == "Old School Terminal" })
+        let manager = makeManager(activeThemeID: terminal.id)
+        let palette = manager.currentPalette
+        let (view, _, _) = makeView()
+
+        // The theme really is translucent — the rest of the test is only
+        // interesting because of this.
+        #expect(palette.color(.chatSurface).alpha < 1)
+        #expect(view.layer?.backgroundColor == palette.nsColor(.chatSurface).cgColor)
+
+        let scroll = try #require(view.subviews.compactMap { $0 as? NSScrollView }.first)
+        #expect(!scroll.drawsBackground)
+        #expect(!scroll.contentView.drawsBackground)
+        #expect(view.thinkingIndicator.layer?.backgroundColor == NSColor.clear.cgColor)
+        let statusRow = try #require(view.thinkingIndicator.superview)
+        #expect(statusRow.layer?.backgroundColor == NSColor.clear.cgColor)
+        withExtendedLifetime(manager) {}
+    }
+
     @Test("repaints its layer background when the active theme changes")
     func repaintsOnThemeChange() {
         let manager = makeManager(activeThemeID: BuiltInThemes.solarizedDark.id)

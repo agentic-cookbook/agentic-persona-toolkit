@@ -91,6 +91,15 @@ public enum ThemeRole: String, CaseIterable, Sendable {
     case sendButtonHover
     /// Inline message timestamps.
     case timestampText
+    /// The status line once a turn has settled ("✱ thought for 8s") — web's
+    /// `--pc-thinking-done-color`, whose CSS default is a flat `#8a8a8a`.
+    ///
+    /// Its own role rather than a reuse of `timestampText` because the two
+    /// disagree on the themes that care: `crt-monitor` and
+    /// `handheld-communicator` set this to their phosphor green while leaving
+    /// `--pc-time-color` a dim 40%-alpha green, and a monochrome terminal
+    /// palette has no grey in it at all.
+    case thinkingDoneText
 }
 
 /// Resolves every `ThemeRole` to a concrete `RGBAColor` for a given `ColorTheme`.
@@ -234,6 +243,13 @@ public struct SemanticPalette: Equatable, Sendable {
             return derive(.accent, theme: theme).blended(withFraction: 0.18, of: foreground)
         case .timestampText:
             return foreground.dimmed(towards: background, by: 0.55, minContrast: 2.0)
+        case .thinkingDoneText:
+            // Web's default is the literal `#8a8a8a`. Derived from the palette
+            // instead of transcribed: a fixed mid-grey is legible on the dark
+            // themes web ships and washes out on a light one, and every other
+            // role in this table already answers "dim, secondary text" this
+            // way. A theme that wants web's exact colour declares it.
+            return foreground.dimmed(towards: background, by: 0.55, minContrast: 2.0)
         }
     }
 
@@ -288,4 +304,5 @@ extension SemanticPalette {
     public var sendButtonText: RGBAColor { color(.sendButtonText) }
     public var sendButtonHover: RGBAColor { color(.sendButtonHover) }
     public var timestampText: RGBAColor { color(.timestampText) }
+    public var thinkingDoneText: RGBAColor { color(.thinkingDoneText) }
 }

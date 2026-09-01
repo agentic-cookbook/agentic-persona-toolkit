@@ -62,11 +62,36 @@ public final class MessageBubbleView: NSView, Themeable {
     /// screenshotting, and a host has `message` for everything else.
     var renderedText: NSAttributedString { textView.attributedString() }
 
+    /// Hour and minute in the user's own locale, zero-padded.
+    ///
+    /// Web's `formatTime` asks for exactly this —
+    /// `toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })`: the
+    /// locale decides the hour cycle and the ordering, the caller insists only
+    /// on two digits. The hard-coded `"HH:mm"` this replaces forced a 24-hour
+    /// clock on every reader, which is a decision neither the theme nor the
+    /// website ever made.
+    ///
+    /// So: take the locale's own `j`-pattern (`j` = "hour, however this locale
+    /// writes one") and widen a single-digit hour field to two, leaving the
+    /// separator, the ordering and any AM/PM marker as the locale wrote them.
     private static let timeFormatter: DateFormatter = {
         let formatter = DateFormatter()
-        formatter.dateFormat = "HH:mm"
+        let pattern = DateFormatter.dateFormat(
+            fromTemplate: "jmm", options: 0, locale: Locale.current) ?? "HH:mm"
+        formatter.dateFormat = pattern
+            .replacingOccurrences(of: "(?<!h)h(?!h)", with: "hh", options: .regularExpression)
+            .replacingOccurrences(of: "(?<!H)H(?!H)", with: "HH", options: .regularExpression)
         return formatter
     }()
+
+    /// The timestamp line's own paragraph style: web's `.pc-time` is a block
+    /// element under the message text, aligned to the sender's side
+    /// (`text-align: left` on a persona bubble, `right` on the user's).
+    private static func timeParagraphStyle(isLocalUser: Bool) -> NSParagraphStyle {
+        let style = NSMutableParagraphStyle()
+        style.alignment = isLocalUser ? .right : .left
+        return style
+    }
 
     public init(
         message: any Message,
@@ -160,12 +185,6 @@ public final class MessageBubbleView: NSView, Themeable {
                 attributes: [.font: palette.font(.body), .foregroundColor: palette.nsColor(.personaName)]
             ))
         }
-        if let timestamp = message.timestamp {
-            attrString.append(NSAttributedString(
-                string: "  " + Self.timeFormatter.string(from: timestamp),
-                attributes: [.font: palette.font(.caption), .foregroundColor: palette.nsColor(.timestampText)]
-            ))
-        }
         // The reason is spelled out rather than left encoded in the border
         // color: the border says something went wrong, the caption says what,
         // and the message text stays readable either way.
@@ -191,6 +210,22 @@ public final class MessageBubbleView: NSView, Themeable {
         } else {
             layer?.borderWidth = 0
             layer?.borderColor = nil
+        }
+
+        // Last, and on a line of its own: web puts `.pc-time` beneath the
+        // message as the bubble's final child, not trailing the sentence. It
+        // went in mid-string here — two spaces and a clock jammed onto the end
+        // of whatever the persona said — which reads as part of the message
+        // rather than as a note about it.
+        if let timestamp = message.timestamp {
+            attrString.append(NSAttributedString(
+                string: "\n" + Self.timeFormatter.string(from: timestamp),
+                attributes: [
+                    .font: palette.font(.caption),
+                    .foregroundColor: palette.nsColor(.timestampText),
+                    .paragraphStyle: Self.timeParagraphStyle(isLocalUser: isLocalUser)
+                ]
+            ))
         }
 
         let (textWidth, textHeight) = Self.measure(attrString, maxWidth: textMaxWidth)

@@ -27,6 +27,9 @@ extension FontStyle {
     /// back to the system font otherwise), monospaced roles use the system
     /// monospaced face, and everything else uses the system face at `weight`.
     public func nsFont(scaledSize: CGFloat) -> NSFont {
+        // Before the lookup, never after: a theme's family is only "installed"
+        // for VT323 and friends because the toolkit registers its own copy.
+        ToolkitFonts.registerBundledFonts()
         if let family, let base = NSFont(name: family, size: scaledSize) {
             // Best-effort weight for arbitrary families: apply a bold trait for
             // semibold-and-heavier (AppKit can't dial arbitrary weights on a

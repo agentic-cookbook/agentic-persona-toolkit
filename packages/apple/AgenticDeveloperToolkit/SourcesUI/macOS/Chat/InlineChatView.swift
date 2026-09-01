@@ -66,7 +66,13 @@ public final class InlineChatView: NSView, ChatStateObserver, Themeable, NSTextF
 
     let transcriptScroll = ThemedScrollView()
     private let transcriptStack = NSStackView()
-    private let inputField = ChatInputField()
+    /// Internal, like `transcriptScroll` above: the composer's look is now
+    /// `chrome`'s to decide, and a test that cannot see the field cannot tell
+    /// whether the chrome reached it.
+    let inputField = ChatInputField()
+    /// Web's `❯` before the composer — the input row's `::before`, not part of
+    /// the field, so it never enters what the user is typing.
+    let promptLabel = NSTextField(labelWithString: "")
     private let sendButton = NSButton()
     private let divider = ThemedSeparatorView()
     private let statusRow = NSView()
@@ -159,7 +165,7 @@ public final class InlineChatView: NSView, ChatStateObserver, Themeable, NSTextF
 
         transcriptScroll.documentView = transcriptStack
         transcriptScroll.hasVerticalScroller = true
-        transcriptScroll.drawsBackground = true
+        transcriptScroll.drawsBackground = false
         transcriptScroll.translatesAutoresizingMaskIntoConstraints = false
         transcriptScroll.contentView.postsBoundsChangedNotifications = true
         NotificationCenter.default.addObserver(
@@ -176,9 +182,18 @@ public final class InlineChatView: NSView, ChatStateObserver, Themeable, NSTextF
         sendButton.action = #selector(sendTapped)
         sendButton.translatesAutoresizingMaskIntoConstraints = false
 
-        let inputRow = NSStackView(views: [inputField, sendButton])
+        promptLabel.translatesAutoresizingMaskIntoConstraints = false
+        promptLabel.setContentHuggingPriority(.required, for: .horizontal)
+        promptLabel.setContentCompressionResistancePriority(.required, for: .horizontal)
+
+        // Spacing 0 between the prompt and the field: web's `.pc-input-area`
+        // gap applies between the flex children, and the `❯` is a `::before`
+        // on the row — it sits against the text it introduces, the way a shell
+        // prompt does. The field's own 8pt cell inset is the whole gap.
+        let inputRow = NSStackView(views: [promptLabel, inputField, sendButton])
         inputRow.orientation = .horizontal
         inputRow.spacing = 10
+        inputRow.setCustomSpacing(0, after: promptLabel)
         inputRow.edgeInsets = NSEdgeInsets(top: 14, left: 16, bottom: 14, right: 16)
         inputRow.translatesAutoresizingMaskIntoConstraints = false
 
@@ -234,17 +249,35 @@ public final class InlineChatView: NSView, ChatStateObserver, Themeable, NSTextF
         ])
     }
 
+    /// The chat surface is drawn exactly once, here, and nothing inside the
+    /// chat repaints it.
+    ///
+    /// That is web's structure, not a simplification of it: `.persona-chat`
+    /// carries `--pc-surface` and `.pc-transcript`, `.pc-typing` and
+    /// `.pc-input-area` declare no `background` at all. The port had each of
+    /// those paint the surface again for itself, which is invisible while the
+    /// surface is opaque and obvious the moment it is not — `old-school-terminal`
+    /// sets `rgba(5, 8, 5, 0.8)`, and stacking three copies of an 80% fill
+    /// gave the transcript a near-solid black while the status row and
+    /// composer stayed visibly lighter. One surface at the theme's own alpha
+    /// is also what lets a translucent theme blend with the windows behind it:
+    /// the host clears the window's own fill, and this layer is then the only
+    /// thing between the chat and the desktop.
     public func applyTheme(_ palette: SemanticPalette) {
         wantsLayer = true
         layer?.backgroundColor = palette.nsColor(.chatSurface).cgColor
-        // The scroll view defaults to `.windowBackground`, which is the right
-        // answer for a list in a window and the wrong one here: the transcript
-        // *is* the chat surface, and against a theme whose `chatSurface`
-        // differs from its window fill it read as a panel sitting on the chat
-        // rather than as the chat itself.
-        transcriptScroll.backgroundColor = palette.nsColor(.chatSurface)
+        // Not `.windowBackground` (the AppKit default, which would hide the
+        // surface behind an opaque system fill) and not `chatSurface` either
+        // — the transcript *is* the surface, so it draws nothing and lets the
+        // one above show through.
+        transcriptScroll.drawsBackground = false
+        transcriptScroll.contentView.drawsBackground = false
         statusRow.wantsLayer = true
-        statusRow.layer?.backgroundColor = palette.nsColor(.chatSurface).cgColor
+        statusRow.layer?.backgroundColor = NSColor.clear.cgColor
+        // The prompt is the composer's own ink, not the send affordance's:
+        // web colours `.pc-input-area::before` with the input's text colour.
+        promptLabel.textColor = palette.nsColor(.userText)
+        promptLabel.font = palette.font(.body)
         sendButton.contentTintColor = palette.nsColor(.sendButton)
         if let glyph = chrome.sendGlyph {
             sendButton.attributedTitle = NSAttributedString(string: glyph, attributes: [
@@ -259,7 +292,11 @@ public final class InlineChatView: NSView, ChatStateObserver, Themeable, NSTextF
     private func applyChrome() {
         divider.isHidden = !chrome.showsDivider
         inputField.cornerRadius = chrome.inputCornerRadius
+        inputField.showsBorder = chrome.showsInputBorder
+        inputField.usesBlockCaret = chrome.usesBlockCaret
         inputField.placeholderString = chrome.inputPlaceholder
+        promptLabel.isHidden = chrome.promptGlyph == nil
+        promptLabel.stringValue = chrome.promptGlyph ?? ""
         if let glyph = chrome.sendGlyph {
             sendButton.image = nil
             sendButton.title = glyph

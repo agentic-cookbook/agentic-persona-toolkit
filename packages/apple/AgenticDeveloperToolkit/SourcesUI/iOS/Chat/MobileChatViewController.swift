@@ -167,9 +167,14 @@ public final class MobileChatViewController: UIViewController, ChatStateObserver
         ])
     }
 
+    /// The chat surface is drawn exactly once, on the controller's own
+    /// view, and nothing inside the chat repaints it — web carries
+    /// `--pc-surface` on `.persona-chat` alone, and a theme whose surface is
+    /// translucent (`old-school-terminal` is `rgba(5, 8, 5, 0.8)`) makes
+    /// every extra copy visible as a lighter band.
     public func applyTheme(_ palette: SemanticPalette) {
         view.backgroundColor = palette.uiColor(.chatSurface)
-        statusRow.backgroundColor = palette.uiColor(.chatSurface)
+        statusRow.backgroundColor = .clear
         divider.backgroundColor = palette.uiColor(.border)
     }
 
