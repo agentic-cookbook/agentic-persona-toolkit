@@ -94,7 +94,11 @@ describe("the checked-in goldens", () => {
     // differing line instead, which is the only part anyone can act on.
     const a = fresh.split("\n");
     const b = onDisk.split("\n");
-    const i = a.findIndex((line, n) => line !== b[n]);
+    // Scan to the LONGER of the two: `findIndex` over `a` alone returns -1 when
+    // the fresh output is a strict prefix of the file (a scenario that got
+    // shorter), and would report the difference as "line 0".
+    let i = 0;
+    while (i < Math.max(a.length, b.length) && a[i] === b[i]) i += 1;
     expect.fail(
       `${name}.jsonl is stale (${b.length} lines on disk, ${a.length} fresh). ` +
         `First difference at line ${i + 1}. ` +
