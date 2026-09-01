@@ -51,9 +51,6 @@ export function buildScene(config: CharacterConfig, variant?: string): Scene {
     for (const child of node.children ?? []) walk(child, [...parents, node.id]);
   };
   walk(config.rig.root, []);
-  // The overlays are a second root, painted last and outside the primary
-  // root's transform chain — an overlay item must not inherit the root's scale.
-  for (const overlay of config.rig.overlays) walk(overlay, []);
 
   const base = config.character.inks;
   const inks = patch?.inks === undefined
@@ -178,7 +175,14 @@ export function compose(scene: Scene, channels: Channels): DisplayList {
       rotation: num(channels, `${node.id}.rotation`, 0),
       scaleX: num(channels, `${node.id}.scaleX`, 1),
       scaleY: num(channels, `${node.id}.scaleY`, 1),
-      pivot: node.transform?.pivot,
+      // Channels, not `node.transform.pivot`: the rig only seeds the rest value.
+      // The original moves a transform origin as freely as it moves a rotation —
+      // the sad droop turns the face about its bbox bottom, the settle turns it
+      // about 60% height — so the origin has to be animatable too.
+      pivot: [
+        num(channels, `${node.id}.pivotX`, 0),
+        num(channels, `${node.id}.pivotY`, 0),
+      ],
     });
     const m = multiply(parentMat, local);
     world.set(node.id, m);
@@ -248,9 +252,6 @@ export function cropList(
     for (const child of node.children ?? []) walk(child, feature);
   };
   walk(config.rig.root, undefined);
-  // An overlay is outside the root's transform chain, so it is its own root
-  // here too — it inherits nothing.
-  for (const overlay of config.rig.overlays) walk(overlay, undefined);
 
   return list.filter((item) => {
     const feature = featureOf.get(item.id);

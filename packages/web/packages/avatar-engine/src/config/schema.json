@@ -198,11 +198,10 @@
     "RigFile": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["schemaVersion", "root", "overlays", "groups"],
+      "required": ["schemaVersion", "root", "groups"],
       "properties": {
         "schemaVersion": { "const": 1 },
         "root": { "$ref": "#/$defs/RigNode" },
-        "overlays": { "type": "array", "items": { "$ref": "#/$defs/RigNode" } },
         "groups": { "type": "object", "additionalProperties": { "type": "array", "items": { "type": "string" } } }
       }
     },

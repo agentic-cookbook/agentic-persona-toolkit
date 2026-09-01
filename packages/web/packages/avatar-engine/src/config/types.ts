@@ -84,10 +84,6 @@ export interface RigNode {
 export interface RigFile {
   schemaVersion: number;
   root: RigNode;
-  /** Painted after `root`, outside its transform chain — for anything that must
-   *  not inherit the body's scale or the face's bob. Same node shape, same
-   *  channels; they are a second root, not a special case. */
-  overlays: RigNode[];
   /** group name -> its "<nodeId>.<prop>" members. */
   groups: Record<string, string[]>;
 }
@@ -309,8 +305,15 @@ export interface CharacterConfig {
   nodes: ReadonlyMap<string, RigNode>;
 }
 
-/** The animatable property set is fixed and closed. */
+/** The animatable property set is fixed and closed.
+ *
+ *  `pivotX`/`pivotY` are here because the original moves a transform origin the
+ *  same way it moves anything else: the sad droop rotates the face about its
+ *  bbox bottom and the settle puts the origin back at 60% height. A pivot that
+ *  could only be authored in the rig could not express that, and the whole-glyph
+ *  offset it produced was the largest geometric difference left in the port. */
 export const ANIMATABLE = [
   "x", "y", "rotation", "scale", "scaleX", "scaleY",
+  "pivotX", "pivotY",
   "bend", "ink", "alpha", "shape", "family",
 ] as const;

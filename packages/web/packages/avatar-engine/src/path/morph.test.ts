@@ -18,6 +18,17 @@ describe("morphPath", () => {
     expect(emitPath(morphPath(a, b, 1))).toBe(emitPath(b));
   });
 
+  it("extrapolates past the target when the ease overshoots", () => {
+    // `back.out(3)` crosses 1 a quarter of the way through and peaks near 1.11,
+    // so the mouth has to be allowed past its own target and back.
+    const a = parsePath("M187,233 L200,246 L213,233");
+    const b = parsePath("M195,230 L200,235 L205,230");
+    const over = morphPath(a, b, 1.1);
+    expect(over.points[3]).toBeCloseTo(233.9, 10); // 246 + (235 - 246) * 1.1
+    const under = morphPath(a, b, -0.1);
+    expect(under.points[3]).toBeCloseTo(247.1, 10); // 246 + (235 - 246) * -0.1
+  });
+
   it("refuses to morph across shape families", () => {
     const poly = parsePath("M187,233 L200,246 L213,233");
     const o = parsePath(

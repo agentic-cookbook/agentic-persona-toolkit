@@ -2,7 +2,7 @@ import { resolveEase } from "../math/ease";
 import { mixColor } from "../math/color";
 import { emitPath, parsePath } from "../path/parse";
 import { morphPath } from "../path/morph";
-import type { ChannelValue, Channels } from "./channels";
+import { snaps, type ChannelValue, type Channels } from "./channels";
 
 export interface TweenSpec {
   channel: string;
@@ -105,6 +105,11 @@ export function createTweens(channels: Channels): Tweens {
       settle(spec.channel, now);
       cancel(spec.channel);
       const delay = spec.delay ?? 0;
+      // A snapping channel (`snaps`, in ./channels) ignores whatever duration its
+      // caller asked for. The rule lives HERE rather than at each of the dozen
+      // call sites that build a tween, because a pivot that tweened at even one
+      // of them would be a silent whole-subtree drift, not a visible error.
+      const duration = snaps(spec.channel) ? 0 : spec.duration;
       // Rule 4. A snap lands HERE, not at the next tick, and it writes `spec.to`
       // verbatim rather than routing through `lerpValue`. Two reasons, and the
       // second is the one that bites: a family snap's two paths are by
@@ -114,7 +119,7 @@ export function createTweens(channels: Channels): Tweens {
       // rule 1. The authored crossing would vanish and the shape it was making
       // safe would pop instead of animating. Landing at `add` time is what makes
       // the authored pair mean what it reads as.
-      if (spec.duration === 0 && delay === 0) {
+      if (duration === 0 && delay === 0) {
         channels.set(spec.channel, spec.to);
         return;
       }
@@ -122,7 +127,7 @@ export function createTweens(channels: Channels): Tweens {
       live.push({
         channel: spec.channel,
         start,
-        end: start + spec.duration,
+        end: start + duration,
         // `from` is resolved when the tween STARTS, not when it is scheduled, so a
         // delayed tween picks up whatever the channel holds at that moment. That is
         // what makes the per-channel delay ladder read as a wave rather than as a

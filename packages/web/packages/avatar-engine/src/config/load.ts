@@ -95,6 +95,13 @@ export function loadConfig(input: RawFiles): CharacterConfig {
     for (const [prop, fallback] of Object.entries(NUM_REST)) {
       rest.set(`${node.id}.${prop}`, (t as Record<string, number | undefined>)[prop] ?? fallback);
     }
+    // The authored `pivot` is only this node's REST origin; `compose` reads the
+    // channels, so a pose or a mood effect can move the origin the way the
+    // original moves `transformOrigin`. A node with no authored pivot rests at
+    // (0, 0), which is what `fromTransform` already means by an absent pivot.
+    const [pivotX, pivotY] = t.pivot ?? [0, 0];
+    rest.set(`${node.id}.pivotX`, pivotX);
+    rest.set(`${node.id}.pivotY`, pivotY);
     if (node.alpha !== undefined) rest.set(`${node.id}.alpha`, node.alpha);
 
     // A LAYER may carry an ink too: that is how `body` holds the mood colour every
@@ -157,7 +164,6 @@ export function loadConfig(input: RawFiles): CharacterConfig {
     for (const child of node.children ?? []) walk(child);
   };
   walk(rig.root);
-  for (const overlay of rig.overlays) walk(overlay);
 
   for (const [name, ink] of Object.entries(character.inks)) {
     if (ink.color.startsWith("@")) {

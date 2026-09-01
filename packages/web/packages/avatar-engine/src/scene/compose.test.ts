@@ -33,7 +33,7 @@ describe("compose", () => {
       "eyeRightBg", "eyeRightRing", "irisRight",
       "pinprickLeft", "pinprickRight",
     ]);
-    // Depth-first through `root`, then `overlays` — so each eye's background
+    // Depth-first through `root` in declaration order — so each eye's background
     // comes before its ring, and both come before the iris. This list is the
     // one `scrape.ts` (Task 22) emits in, and it is the paint order, so a
     // reordering here is a visual change and the differ treats it as a hard
@@ -249,9 +249,9 @@ describe("crops", () => {
     const list = compose(scene, channels);
     const kept = cropList(config, list, "browsAndEyes");
     // `eyeLeft` and `eyeRight` carry "eyes"; the six discs and rings underneath
-    // them carry nothing. The pinpricks are overlays and declare "eyes"
-    // themselves, so they survive by name rather than by the structural
-    // fallback — which is exactly why `rig.json` names it on them (Task 2).
+    // them carry nothing. The pinpricks hang off `body`, which declares no
+    // feature, so they survive by naming "eyes" themselves rather than by the
+    // structural fallback — which is why `rig.json` names it on them (Task 2).
     expect(kept.map((i) => i.id)).toEqual([
       "browLeft", "browRight",
       "eyeLeftBg", "eyeLeftRing", "irisLeft",
