@@ -441,7 +441,6 @@ extension BuiltInThemes {
             ThemeRole.personaBubble.rawValue: RGBAColor(hexString: "#00000000")!,
             ThemeRole.personaName.rawValue: RGBAColor(hexString: "#00ff41ff")!,
             ThemeRole.personaText.rawValue: RGBAColor(hexString: "#00ff41ff")!,
-            ThemeRole.thinkingDoneText.rawValue: RGBAColor(hexString: "#00ff41ff")!,
             ThemeRole.timestampText.rawValue: RGBAColor(hexString: "#00ff4166")!,
             ThemeRole.userBubble.rawValue: RGBAColor(hexString: "#00000000")!,
             ThemeRole.userName.rawValue: RGBAColor(hexString: "#aaffaaff")!,

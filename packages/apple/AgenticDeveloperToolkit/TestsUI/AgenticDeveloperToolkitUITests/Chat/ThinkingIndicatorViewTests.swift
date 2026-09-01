@@ -122,6 +122,69 @@ struct ThinkingIndicatorViewTests {
         #expect(before != after)
     }
 
+    // MARK: The glyph's box
+
+    /// Web puts the glyph in `flex: 0 0 1.6ch; text-align: center` precisely so
+    /// "a wider frame fattens symmetrically from the center instead of shoving
+    /// the word sideways". This is that, in AppKit: the words start in the same
+    /// place no matter which glyph is up.
+    @Test("the glyph's box does not move when the glyph does")
+    func glyphBoxHoldsItsWidth() {
+        _ = makeManager(activeThemeID: BuiltInThemes.solarizedDark.id)
+        let indicator = ThinkingIndicatorView()
+        var configuration = ThinkingIndicatorConfiguration()
+        configuration.words = [ChatStatusWordPair(present: "zeeping", past: "zeeped")]
+        // Two frames of deliberately different widths, plus a done glyph of a
+        // third. Concatenated into one run these would each shift the words.
+        configuration.frames = ["i", "MMMM"]
+        configuration.doneGlyph = "WW"
+        indicator.configure(configuration)
+        indicator.frame = NSRect(x: 0, y: 0, width: 320, height: 28)
+
+        func wordsOrigin() -> CGFloat {
+            indicator.layoutSubtreeIfNeeded()
+            return indicator.label.frame.minX
+        }
+
+        indicator.update(status: ChatStatus(kind: .think))
+        let thinking = wordsOrigin()
+        #expect(indicator.glyphLabel.stringValue.isEmpty == false)
+
+        indicator.update(status: nil) // settles, swapping in the done glyph
+        #expect(wordsOrigin() == thinking)
+        #expect(indicator.glyphLabel.stringValue == "WW")
+
+        // And the box is wide enough for the widest of them, so nothing is
+        // truncated into the ellipsis AppKit would otherwise draw.
+        let font = ThemePaletteObserver.currentPalette.font(.caption)
+        let widest = ("MMMM" as NSString).size(withAttributes: [.font: font]).width
+        #expect(indicator.glyphLabel.frame.width >= widest)
+    }
+
+    @Test("the glyph and the words are separately inked, so a tint can name one")
+    func tintReachesOnlyTheGlyph() throws {
+        _ = makeManager(activeThemeID: BuiltInThemes.solarizedDark.id)
+        let indicator = ThinkingIndicatorView()
+        var configuration = ThinkingIndicatorConfiguration()
+        configuration.words = [ChatStatusWordPair(present: "zeeping", past: "zeeped")]
+        configuration.tint = ThinkingTint(
+            color: RGBAColor(hexString: "#ff00ffff")!, applies: .icons)
+        indicator.configure(configuration)
+        indicator.update(status: ChatStatus(kind: .think))
+
+        func ink(_ field: NSTextField) -> NSColor? {
+            let attributed = field.attributedStringValue
+            guard attributed.length > 0 else { return nil }
+            return attributed.attribute(.foregroundColor, at: 0, effectiveRange: nil) as? NSColor
+        }
+        let glyphInk = try #require(ink(indicator.glyphLabel))
+        let wordInk = try #require(ink(indicator.label))
+        // Splitting the line into two labels must not have flattened the two
+        // spans onto one colour.
+        #expect(glyphInk != wordInk)
+        #expect(glyphInk == NSColor(RGBAColor(hexString: "#ff00ffff")!))
+    }
+
     // MARK: The resting line
 
     private func makeIdleIndicator() -> ThinkingIndicatorView {

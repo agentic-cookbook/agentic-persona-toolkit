@@ -70,7 +70,24 @@ public final class ThinkingIndicatorView: NSView, Themeable {
 
     // MARK: Phase-driven line
 
+    /// The words. Split from the glyph rather than one attributed string,
+    /// because web's `.pc-thinking-glyph` is a box of its own — see
+    /// `glyphLabel`.
     let label = NSTextField(labelWithString: "")
+
+    /// The glyph, in a box whose width does not follow the glyph.
+    ///
+    /// Web declares `flex: 0 0 1.6ch; min-width: 0; text-align: center` on
+    /// `.pc-thinking-glyph` so "a wider frame fattens symmetrically from the
+    /// center instead of shoving the word sideways". Concatenating the glyph
+    /// and the words into one run — which is what this view used to do — has
+    /// no such box, so every braille frame that measured a hair wider than the
+    /// last, and every hand-off between `frames` and `doneGlyph`, slid the
+    /// sentence back and forth.
+    let glyphLabel = NSTextField(labelWithString: "")
+
+    private var statusLine: NSStackView!
+    private var glyphWidth: NSLayoutConstraint!
 
     private(set) var configuration = ThinkingIndicatorConfiguration()
     private var machine = ThinkingPhase.Machine()
@@ -119,14 +136,37 @@ public final class ThinkingIndicatorView: NSView, Themeable {
         label.translatesAutoresizingMaskIntoConstraints = false
         label.isHidden = true
         label.lineBreakMode = .byTruncatingTail
-        addSubview(label)
+
+        glyphLabel.translatesAutoresizingMaskIntoConstraints = false
+        glyphLabel.isHidden = true
+        glyphLabel.alignment = .center
+        // The box is the point: nothing about the glyph currently in it may
+        // change its width, so it neither hugs nor resists.
+        glyphLabel.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        glyphLabel.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+
+        // Baselines, and a gap — web's `.pc-thinking` is
+        // `display: inline-flex; align-items: baseline; gap: 0.45em`. The
+        // glyphs fall out of a terminal face the way `\u{276F}` does in the
+        // composer (VT323 has no braille, no `\u{2731}`, no `\u{2299}`), so the
+        // two runs are in different faces and their baseline is the one line
+        // they agree on.
+        let line = NSStackView(views: [glyphLabel, label])
+        line.orientation = .horizontal
+        line.alignment = .firstBaseline
+        line.spacing = 0
+        line.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(line)
+        statusLine = line
+        glyphWidth = glyphLabel.widthAnchor.constraint(equalToConstant: 0)
 
         NSLayoutConstraint.activate([
             stack.centerXAnchor.constraint(equalTo: centerXAnchor),
             stack.centerYAnchor.constraint(equalTo: centerYAnchor),
-            label.centerYAnchor.constraint(equalTo: centerYAnchor),
-            label.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 4),
-            label.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: -4),
+            glyphWidth,
+            line.centerYAnchor.constraint(equalTo: centerYAnchor),
+            line.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 4),
+            line.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: -4),
             widthAnchor.constraint(greaterThanOrEqualToConstant: 48),
             heightAnchor.constraint(greaterThanOrEqualToConstant: 28)
         ])
@@ -154,6 +194,7 @@ public final class ThinkingIndicatorView: NSView, Themeable {
         for dot in dots {
             dot.layer?.backgroundColor = palette.nsColor(.secondaryText).cgColor
         }
+        resizeGlyphBox(palette: palette)
         render(palette: palette)
     }
 
@@ -215,6 +256,8 @@ public final class ThinkingIndicatorView: NSView, Themeable {
         let usesPhaseMachine = !configuration.words.isEmpty
         dotsStack.isHidden = usesPhaseMachine
         label.isHidden = !usesPhaseMachine
+        glyphLabel.isHidden = !usesPhaseMachine
+        resizeGlyphBox(palette: ThemePaletteObserver.currentPalette)
         render(palette: ThemePaletteObserver.currentPalette)
     }
 
@@ -309,34 +352,35 @@ public final class ThinkingIndicatorView: NSView, Themeable {
         switch machine.phase {
         case .idle:
             if let idlePhrase = configuration.idlePhrase {
-                label.attributedStringValue = settledLine(
-                    glyph: configuration.doneGlyph, text: idlePhrase + "…",
-                    color: palette.nsColor(.thinkingIdleText), palette: palette)
+                let ink = palette.nsColor(.thinkingIdleText)
+                paint(glyph: configuration.doneGlyph, text: idlePhrase + "\u{2026}",
+                      glyphColor: ink, wordColor: ink, palette: palette)
             } else {
-                label.stringValue = ""
+                paint(glyph: "", text: "", glyphColor: .clear, wordColor: .clear, palette: palette)
             }
         case .thinking:
             drainWordBagIfNeeded()
-            label.attributedStringValue = activeLine(
-                glyph: currentGlyph(), text: (currentWord?.present ?? "") + "…", palette: palette
-            )
+            let ink = activeInk(palette: palette)
+            paint(glyph: currentGlyph(), text: (currentWord?.present ?? "") + "\u{2026}",
+                  glyphColor: ink.glyph, wordColor: ink.word, palette: palette)
         case .utterance:
-            label.attributedStringValue = activeLine(
-                glyph: currentGlyph(), text: currentUtterance ?? "", palette: palette
-            )
+            let ink = activeInk(palette: palette)
+            paint(glyph: currentGlyph(), text: currentUtterance ?? "",
+                  glyphColor: ink.glyph, wordColor: ink.word, palette: palette)
         case .done:
+            // One colour across both spans, and deliberately never tinted, per
+            // `ThinkingTint`'s doc comment.
             let word = currentWord?.past ?? ""
-            label.attributedStringValue = settledLine(
-                glyph: configuration.doneGlyph, text: "\(word) for \(machine.elapsedSeconds)s",
-                color: palette.nsColor(.thinkingDoneText), palette: palette
-            )
+            let ink = palette.nsColor(.thinkingDoneText)
+            paint(glyph: configuration.doneGlyph, text: "\(word) for \(machine.elapsedSeconds)s",
+                  glyphColor: ink, wordColor: ink, palette: palette)
         }
     }
 
     /// The running line's colours: `.personaName` by default, overridden by
-    /// `colorful`'s flashing hue and then by an explicit `tint` — never both
+    /// `colorful`'s flashing hue and then by an explicit `tint` \u{2014} never both
     /// spans forced to the same source unless `tint.applies == .both`.
-    private func activeLine(glyph: String, text: String, palette: SemanticPalette) -> NSAttributedString {
+    private func activeInk(palette: SemanticPalette) -> (glyph: NSColor, word: NSColor) {
         let base = palette.nsColor(.personaName)
         var glyphColor = base
         var wordColor = base
@@ -353,26 +397,43 @@ public final class ThinkingIndicatorView: NSView, Themeable {
             case .both: glyphColor = tinted; wordColor = tinted
             }
         }
-        let font = palette.font(.caption)
-        let result = NSMutableAttributedString(string: glyph, attributes: [.foregroundColor: glyphColor, .font: font])
-        result.append(NSAttributedString(string: " " + text, attributes: [.foregroundColor: wordColor, .font: font]))
-        return result
+        return (glyphColor, wordColor)
     }
 
-    /// A line that is not running: one colour across the glyph and the words,
-    /// and deliberately never tinted, per `ThinkingTint`'s doc comment.
-    ///
-    /// The caller passes the colour because the two states that share this
-    /// shape disagree about it — `.done` speaks in `.thinkingDoneText` (the
-    /// theme's own ink, web's `--pc-thinking-done-color`), `.idle` in the
-    /// neutral `.thinkingIdleText`. Same typography, opposite meanings.
-    private func settledLine(
-        glyph: String, text: String, color: NSColor, palette: SemanticPalette
-    ) -> NSAttributedString {
+    /// Paints the two spans. They are two labels rather than two runs of one
+    /// attributed string so that the glyph's box can hold its width \u{2014} see
+    /// `glyphLabel`.
+    private func paint(
+        glyph: String, text: String, glyphColor: NSColor, wordColor: NSColor, palette: SemanticPalette
+    ) {
         let font = palette.font(.caption)
-        let result = NSMutableAttributedString(string: glyph, attributes: [.foregroundColor: color, .font: font])
-        result.append(NSAttributedString(string: " " + text, attributes: [.foregroundColor: color, .font: font]))
-        return result
+        glyphLabel.attributedStringValue = NSAttributedString(
+            string: glyph, attributes: [.foregroundColor: glyphColor, .font: font])
+        label.attributedStringValue = NSAttributedString(
+            string: text, attributes: [.foregroundColor: wordColor, .font: font])
+    }
+
+    /// Sizes the glyph's box, and sets the gap between it and the words.
+    ///
+    /// Web's `1.6ch` is the floor here rather than the whole answer. `ch` is
+    /// measured in the *line's* font, and on a terminal theme none of these
+    /// glyphs are in that font \u{2014} they come from whatever face the system
+    /// substitutes, which can be wider than 1.6 of the theme's digits. Web lets
+    /// that overflow spill (the box is `min-width: 0` and centred); AppKit
+    /// truncates instead, so the box is widened to hold the widest glyph the
+    /// configuration can ever show. Still fixed, still centred, still
+    /// independent of which glyph is currently up \u{2014} which is the whole point
+    /// of the box.
+    private func resizeGlyphBox(palette: SemanticPalette) {
+        let font = palette.font(.caption)
+        let attributes: [NSAttributedString.Key: Any] = [.font: font]
+        let ch = ("0" as NSString).size(withAttributes: attributes).width
+        let widest = (configuration.frames + [configuration.doneGlyph])
+            .map { ($0 as NSString).size(withAttributes: attributes).width }
+            .max() ?? 0
+        glyphWidth.constant = ceil(Swift.max(ch * 1.6, widest))
+        // Web's `gap: 0.45em` on `.pc-thinking`.
+        statusLine.spacing = (font.pointSize * 0.45).rounded()
     }
 
     private func postAccessibilityAnnouncement(_ text: String) {

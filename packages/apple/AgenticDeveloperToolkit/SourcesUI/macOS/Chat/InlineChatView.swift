@@ -85,6 +85,11 @@ public final class InlineChatView: NSView, ChatStateObserver, Themeable, NSTextF
     /// Web's `❯` before the composer — the input row's `::before`, not part of
     /// the field, so it never enters what the user is typing.
     let promptLabel = NSTextField(labelWithString: "")
+
+    /// Holds the prompt's baseline below the composer's by whatever it takes
+    /// to centre the glyph on the typed line. Re-derived on every theme change
+    /// and every text-scale change, because both fonts move.
+    private var promptBaselineDrop: NSLayoutConstraint?
     private let sendButton = NSButton()
     private let divider = ThemedSeparatorView()
     private let statusRow = NSView()
@@ -198,32 +203,43 @@ public final class InlineChatView: NSView, ChatStateObserver, Themeable, NSTextF
         promptLabel.setContentHuggingPriority(.required, for: .horizontal)
         promptLabel.setContentCompressionResistancePriority(.required, for: .horizontal)
 
-        // Spacing 0 between the prompt and the field: web's `.pc-input-area`
-        // gap applies between the flex children, and the `❯` is a `::before`
-        // on the row — it sits against the text it introduces, the way a shell
+        // No gap between the prompt and the field: web's `.pc-input-area` gap
+        // applies between the flex children, and the `\u{276F}` is a `::before` on
+        // the row \u{2014} it sits against the text it introduces, the way a shell
         // prompt does. The field's own 8pt cell inset is the whole gap.
-        // Baselines, not centres. The prompt and the composer show the same
-        // string at the same size and still do not line up under `.centerY`,
-        // because they are not in the same typeface: VT323 has no `❯` (nor
-        // `↵`, `✱` or `⊙` — 568 glyphs, none of them these), so the prompt
-        // falls back to a face whose ascent and descent are its own, and
-        // centring two differently-proportioned boxes puts their glyphs at two
-        // different heights. A baseline is the one line both faces agree on,
-        // and it is what web aligns on too — the `❯` is a `::before` in the
-        // input row's line box, not a floated box of its own.
         //
+        // A plain container rather than a stack, because the prompt's vertical
+        // placement is neither of the two things a stack can do. Centres are
+        // wrong: the two are not in the same typeface (VT323 has no `\u{276F}`, nor
+        // `\u{21B5}`, `\u{2731}` or `\u{2299}` \u{2014} 568 glyphs, none of them these), so
+        // centring two differently-proportioned boxes puts their glyphs at two
+        // different heights. Bare baselines are wrong too, for the same reason
+        // read the other way: a shared baseline left the substituted `\u{276F}`
+        // riding ~2 points above the middle of the typed line. So: a baseline
+        // constraint with a font-derived drop on it \u{2014} see
+        // `PromptGlyphAlignment` \u{2014} which is the one arrangement that puts the
+        // glyph's ink centre on the text's centre and keeps it there at every
+        // text scale.
+        let promptedField = NSView()
+        promptedField.translatesAutoresizingMaskIntoConstraints = false
+        promptedField.addSubview(promptLabel)
+        promptedField.addSubview(inputField)
+        let promptBaseline = promptLabel.firstBaselineAnchor.constraint(
+            equalTo: inputField.firstBaselineAnchor)
+        promptBaselineDrop = promptBaseline
+        NSLayoutConstraint.activate([
+            promptLabel.leadingAnchor.constraint(equalTo: promptedField.leadingAnchor),
+            inputField.leadingAnchor.constraint(equalTo: promptLabel.trailingAnchor),
+            inputField.trailingAnchor.constraint(equalTo: promptedField.trailingAnchor),
+            inputField.topAnchor.constraint(equalTo: promptedField.topAnchor),
+            inputField.bottomAnchor.constraint(equalTo: promptedField.bottomAnchor),
+            promptBaseline
+        ])
+
         // The send button stays out of it, in an outer `.centerY` row: it
         // carries an image, not a line of text, so it has no baseline that
         // means anything. Aligning a glyph-in-a-circle on the text baseline
-        // would hang most of it below the line. The two things made of text
-        // baseline-align to each other in the inner stack, and the button
-        // centres against that pair the way it always did.
-        let promptedField = NSStackView(views: [promptLabel, inputField])
-        promptedField.orientation = .horizontal
-        promptedField.alignment = .firstBaseline
-        promptedField.spacing = 0
-        promptedField.translatesAutoresizingMaskIntoConstraints = false
-
+        // would hang most of it below the line.
         let inputRow = NSStackView(views: [promptedField, sendButton])
         inputRow.orientation = .horizontal
         inputRow.alignment = .centerY
@@ -312,6 +328,7 @@ public final class InlineChatView: NSView, ChatStateObserver, Themeable, NSTextF
         // web colours `.pc-input-area::before` with the input's text colour.
         promptLabel.textColor = palette.nsColor(.userText)
         promptLabel.font = palette.font(.body)
+        alignPrompt(palette: palette)
         sendButton.contentTintColor = palette.nsColor(.sendButton)
         if let glyph = chrome.sendGlyph {
             sendButton.attributedTitle = NSAttributedString(string: glyph, attributes: [
@@ -319,6 +336,16 @@ public final class InlineChatView: NSView, ChatStateObserver, Themeable, NSTextF
                 .font: palette.font(.title)
             ])
         }
+    }
+
+    /// Drops the prompt's baseline far enough that the glyph's ink sits on the
+    /// middle of the typed line. Both fonts are read fresh: the composer's
+    /// face and its size both come from the palette, and the text-size slider
+    /// changes them under a window that is already open.
+    private func alignPrompt(palette: SemanticPalette) {
+        let font = palette.font(.body)
+        promptBaselineDrop?.constant = PromptGlyphAlignment.baselineDrop(
+            for: promptLabel.stringValue, in: font, centeredOn: font)
     }
 
     /// Applies the parts of the look that live on `chrome` rather than in the
@@ -331,6 +358,11 @@ public final class InlineChatView: NSView, ChatStateObserver, Themeable, NSTextF
         inputField.placeholderString = chrome.inputPlaceholder
         promptLabel.isHidden = chrome.promptGlyph == nil
         promptLabel.stringValue = chrome.promptGlyph ?? ""
+        // Which glyph is in the prompt decides how far its baseline drops, so
+        // the alignment is redone here as well as on a theme change. (The
+        // `applyTheme` call at the end of this method would do it too; doing
+        // it here keeps the reason next to the change that causes it.)
+        alignPrompt(palette: ThemePaletteObserver.currentPalette)
         if let glyph = chrome.sendGlyph {
             sendButton.image = nil
             sendButton.title = glyph

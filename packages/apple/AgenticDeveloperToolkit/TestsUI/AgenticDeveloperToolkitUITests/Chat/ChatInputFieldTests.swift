@@ -163,22 +163,44 @@ struct ChatInputFieldTests {
         withExtendedLifetime(manager) {}
     }
 
-    @Test("lays out inside a first-baseline stack, which is how the composer aligns its prompt")
-    func survivesABaselineAlignedStack() {
+    /// The composer aligns the prompt by constraining its baseline anchor to
+    /// this field's, then pushing it down by the glyph's own centring drop —
+    /// which only works if a padded field publishes a baseline anchor Auto
+    /// Layout can solve against. This is that arrangement, in miniature.
+    @Test("its baseline anchor can carry the prompt, offset and all")
+    func carriesAnOffsetPromptBaseline() {
         let manager = makeManager()
         let field = makeField(text: "olylo")
         field.translatesAutoresizingMaskIntoConstraints = false
         let prompt = NSTextField(labelWithString: "\u{276F}")
         prompt.translatesAutoresizingMaskIntoConstraints = false
 
-        let stack = NSStackView(views: [prompt, field])
-        stack.orientation = .horizontal
-        stack.alignment = .firstBaseline
-        stack.frame = NSRect(x: 0, y: 0, width: 320, height: 40)
-        stack.layoutSubtreeIfNeeded()
+        let container = NSView(frame: NSRect(x: 0, y: 0, width: 320, height: 40))
+        container.addSubview(prompt)
+        container.addSubview(field)
+        let drop: CGFloat = 3
+        NSLayoutConstraint.activate([
+            prompt.leadingAnchor.constraint(equalTo: container.leadingAnchor),
+            field.leadingAnchor.constraint(equalTo: prompt.trailingAnchor),
+            field.trailingAnchor.constraint(equalTo: container.trailingAnchor),
+            field.topAnchor.constraint(equalTo: container.topAnchor),
+            field.bottomAnchor.constraint(equalTo: container.bottomAnchor),
+            prompt.firstBaselineAnchor.constraint(
+                equalTo: field.firstBaselineAnchor, constant: drop)
+        ])
+        container.layoutSubtreeIfNeeded()
 
         #expect(field.frame.origin.y.isFinite)
         #expect(prompt.frame.origin.y.isFinite)
+
+        // The drop must actually reach the glyph: an unsatisfiable baseline
+        // constraint would leave the two sitting on the same line.
+        func depth(_ label: NSTextField) -> CGFloat {
+            let box = label.convert(label.bounds, to: container)
+            let top = container.isFlipped ? box.minY : container.bounds.maxY - box.maxY
+            return top + label.firstBaselineOffsetFromTop
+        }
+        #expect(abs((depth(prompt) - depth(field)) - drop) < 0.5)
         withExtendedLifetime(manager) {}
     }
 }

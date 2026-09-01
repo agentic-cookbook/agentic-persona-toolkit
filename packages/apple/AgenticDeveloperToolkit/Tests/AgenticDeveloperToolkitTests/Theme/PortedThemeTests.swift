@@ -169,27 +169,45 @@ struct PortedThemeTests {
     }
 
     /// `--pc-thinking-done-color` — the settled status line, "✱ thought for
-    /// 8s". Three themes declare it and the rest derive it, which is why it is
+    /// 8s". Two themes declare it and the rest derive it, which is why it is
     /// an optional role rather than a required one.
     ///
-    /// The terminal family is the reason it exists as a role at all: the
-    /// library default is a flat `#8a8a8a`, a colour a phosphor screen does
-    /// not have, so a grey status line there reads as a rendering fault rather
-    /// than as the machine's own note. Note that this is *not* the same
+    /// `crt-monitor` and `handheld-communicator` are the reason it exists as a
+    /// role at all: on those two screens the library default reads as a
+    /// rendering fault rather than as the machine's own note, so they say so in
+    /// their CSS and the port carries it. Note that this is *not* the same
     /// question as `.timestampText`: these themes keep their clock dim (40%
     /// alpha green) while writing the status line in full phosphor.
-    @Test("terminal themes declare the settled status colour, and it is not the clock's")
+    @Test("the two themes whose CSS declares the settled colour keep it, and it is not the clock's")
     func thinkingDoneColourIsDeclaredByTerminalThemes() {
         let phosphor = RGBAColor(hexString: "#00ff41ff")!
-        for name in ["Old School Terminal", "CRT Monitor", "Handheld Communicator"] {
+        for name in ["CRT Monitor", "Handheld Communicator"] {
             let theme = BuiltInThemes.webPorted.first { $0.name == name }!
             let palette = SemanticPalette(theme: theme)
             #expect(palette.declares(.thinkingDoneText), "\(name) does not declare it")
             #expect(palette.color(.thinkingDoneText) == phosphor, "\(name) is not phosphor green")
             #expect(palette.color(.timestampText) != phosphor, "\(name) dims its clock, not its status")
         }
-        // Everyone else derives, and derivation must still produce something
-        // legible rather than web's literal mid-grey on a light palette.
+    }
+
+    /// `old-school-terminal`'s CSS declares no `--pc-thinking-done-color`, so
+    /// the settled line takes the library default — grey. It is the theme
+    /// olylo's chat wears, and a green settled line there went on reading as a
+    /// turn still running. Sharing a phosphor palette with its two siblings is
+    /// not the same as sharing their answer to this question.
+    @Test("the theme olylo wears settles to grey, the way its CSS leaves it")
+    func oldSchoolTerminalSettlesToGrey() {
+        let theme = BuiltInThemes.webPorted.first { $0.name == "Old School Terminal" }!
+        let palette = SemanticPalette(theme: theme)
+        #expect(!palette.declares(.thinkingDoneText))
+        let done = palette.color(.thinkingDoneText)
+        #expect(max(done.red, done.green, done.blue) - min(done.red, done.green, done.blue) < 0.02)
+    }
+
+    @Test("every other ported theme derives the settled colour, legibly")
+    func thinkingDoneColourIsDerivedElsewhere() {
+        // Derivation must still produce something legible rather than web's
+        // literal mid-grey on a light palette.
         let whimsical = BuiltInThemes.webPorted.first { $0.name == "Whimsical" }!
         let palette = SemanticPalette(theme: whimsical)
         #expect(!palette.declares(.thinkingDoneText))

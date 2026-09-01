@@ -120,4 +120,49 @@ struct IdleStatusInkTests {
         custom.roleOverrides[ThemeRole.thinkingIdleText.rawValue] = red
         #expect(SemanticPalette(theme: custom).thinkingIdleText == red)
     }
+
+    /// How far apart a colour's channels are: 0 is a pure neutral, 1 a fully
+    /// saturated primary.
+    private func spread(of color: RGBAColor) -> Double {
+        max(color.red, color.green, color.blue) - min(color.red, color.green, color.blue)
+    }
+
+    /// The bug the operator saw: a turn that had run and settled went on
+    /// looking live, because dimming a phosphor-green ink without draining it
+    /// leaves a phosphor-green ink. Web's `.pc-thinking--done` default is the
+    /// literal grey `#8a8a8a`; what has to survive the derivation is the grey,
+    /// not the hex.
+    @Test("a saturated ink settles to a line with none of its colour left")
+    func doneInkDrainsASaturatedInk() {
+        let custom = theme(background: "#050805", foreground: "#33ff66")
+        let palette = SemanticPalette(theme: custom)
+        let drained = spread(of: palette.color(.thinkingDoneText))
+        #expect(drained < spread(of: custom.foreground) / 10)
+    }
+
+    @Test("the settled line carries no more colour than the paper it sits on")
+    func doneInkIsNeutral() {
+        for (background, foreground) in [("#050805", "#33ff66"), ("#1e1e2e", "#cdd6f4"),
+                                         ("#fdf6e3", "#657b83")] {
+            let custom = theme(background: background, foreground: foreground)
+            let done = SemanticPalette(theme: custom).color(.thinkingDoneText)
+            // The derivation ends by blending toward the background, so a
+            // tinted paper tints everything laid on it. What must not survive
+            // is the *ink's* own hue.
+            #expect(spread(of: done) <= Swift.max(spread(of: custom.background), 0.02),
+                    "\(foreground) settles to a tinted line")
+        }
+    }
+
+    /// `crt-monitor` and `handheld-communicator` do exactly this in their CSS:
+    /// a phosphor screen writes in one ink, and they would rather the settled
+    /// line stayed green than went grey. `old-school-terminal` does not, which
+    /// is why olylo's chat settles to grey.
+    @Test("a theme that declares the settled ink wins over the derivation")
+    func declaredDoneInkWins() {
+        var custom = theme(background: "#050805", foreground: "#33ff66")
+        let green = RGBAColor(hexString: "#00ff41ff")!
+        custom.roleOverrides[ThemeRole.thinkingDoneText.rawValue] = green
+        #expect(SemanticPalette(theme: custom).color(.thinkingDoneText) == green)
+    }
 }

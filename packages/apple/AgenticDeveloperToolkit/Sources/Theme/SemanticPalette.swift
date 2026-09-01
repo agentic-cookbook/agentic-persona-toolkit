@@ -255,12 +255,16 @@ public struct SemanticPalette: Equatable, Sendable {
         case .timestampText:
             return foreground.dimmed(towards: background, by: 0.55, minContrast: 2.0)
         case .thinkingDoneText:
-            // Web's default is the literal `#8a8a8a`. Derived from the palette
-            // instead of transcribed: a fixed mid-grey is legible on the dark
-            // themes web ships and washes out on a light one, and every other
-            // role in this table already answers "dim, secondary text" this
-            // way. A theme that wants web's exact colour declares it.
-            return foreground.dimmed(towards: background, by: 0.55, minContrast: 2.0)
+            // Web's default is the literal `#8a8a8a`, and the *grey* is the
+            // meaning: a turn that has stopped is no longer the live thing on
+            // screen. Dimming the theme's ink without draining it kept the
+            // hue, which on `old-school-terminal` settled a finished turn to a
+            // slightly darker phosphor green that went on reading as running.
+            // Derived rather than transcribed, for the reason `thinkingIdleText`
+            // gives below: a fixed mid-grey washes out on a light theme. Dimmed
+            // further than the idle line on purpose — that is web's extra
+            // `opacity: 0.75` on `.pc-thinking--done`.
+            return foreground.desaturated().dimmed(towards: background, by: 0.55, minContrast: 2.0)
         case .thinkingIdleText:
             // Grey by construction, not by transcription: the palette's own
             // ink with the colour drained out, then dimmed a quarter of the

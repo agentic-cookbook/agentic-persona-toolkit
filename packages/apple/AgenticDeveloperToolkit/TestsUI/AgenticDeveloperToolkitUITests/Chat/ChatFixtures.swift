@@ -169,3 +169,10 @@ struct FixtureCommandResult: CommandResult {
     var errorMessage: String? = nil
     var completedAt: Date = Date()
 }
+
+/// The theme the olylo chat wears, and the one that makes the composer's
+/// alignment trouble visible: `old-school-terminal` sets VT323, whose 568
+/// glyphs include none of the arrows and asterisks the chat draws. Named by
+/// id rather than by the constant, which is internal to the core module and
+/// so out of reach from a non-`@testable` import of it.
+let terminalThemeID = "old-school-terminal"

@@ -184,6 +184,79 @@ struct InlineChatViewTests {
         #expect(view.inputField.caretBlinks)
     }
 
+    // MARK: The prompt's height
+
+    /// Distance from the top of `view` down to `field`'s text baseline, so the
+    /// two composer runs can be compared in one coordinate space whichever way
+    /// up AppKit is drawing.
+    private func baselineDepth(of field: NSTextField, in view: NSView) -> CGFloat {
+        let box = field.convert(field.bounds, to: view)
+        let top = view.isFlipped ? box.minY : view.bounds.maxY - box.maxY
+        return top + field.firstBaselineOffsetFromTop
+    }
+
+    /// The operator's report, as an assertion: "the > is still not vertically
+    /// aligned with the center point of the entry text". A shared baseline is
+    /// not enough, because the composer's face has no `\u{276F}` and the
+    /// substituted one has its own metrics.
+    /// How far the prompt's ink centre sits from the middle of the typed line,
+    /// in points, positive meaning too low. Zero is aligned.
+    private func centeringError(in view: InlineChatView, font: NSFont) throws -> CGFloat {
+        let glyph = try #require(InlineChatChrome.terminal.promptGlyph)
+        let inkCenter = try #require(
+            PromptGlyphAlignment.inkCenterAboveBaseline(of: glyph, in: font))
+        let textCenter = (font.capHeight + font.descender) / 2
+        // Depth grows downward and both centres are measured *up* from their
+        // own baseline, hence the subtraction.
+        let promptCenter = baselineDepth(of: view.promptLabel, in: view) - inkCenter
+        let textMiddle = baselineDepth(of: view.inputField, in: view) - textCenter
+        return promptCenter - textMiddle
+    }
+
+    @Test("the prompt's ink sits on the middle of the typed line, not on its baseline")
+    func promptCentersOnTheInputText() throws {
+        let manager = makeManager(activeThemeID: terminalThemeID)
+        let (view, _, _) = makeView()
+        view.chrome = .terminal
+        view.layoutSubtreeIfNeeded()
+
+        // A point of slack because AppKit reports `firstBaselineOffsetFromTop`
+        // in whole points: the drop asked for is fractional, the one laid out
+        // is rounded, and the rounding is the only gap the eye cannot see.
+        #expect(try abs(centeringError(in: view, font: manager.currentPalette.font(.body))) < 1)
+
+        // And the correction is real: aligning the two baselines outright —
+        // which is what this used to do — leaves the glyph visibly high.
+        let baselineGap = baselineDepth(of: view.promptLabel, in: view)
+            - baselineDepth(of: view.inputField, in: view)
+        #expect(baselineGap > 0)
+        withExtendedLifetime(manager) {}
+    }
+
+    @Test("the prompt stays centred after the text-size slider moves")
+    func promptRecentersOnTextScale() throws {
+        let manager = makeManager(activeThemeID: terminalThemeID)
+        let (view, _, _) = makeView()
+        view.chrome = .terminal
+        view.layoutSubtreeIfNeeded()
+        let before = baselineDepth(of: view.promptLabel, in: view)
+            - baselineDepth(of: view.inputField, in: view)
+
+        manager.textScale = 1.75
+        pumpRunLoop()
+        view.layoutSubtreeIfNeeded()
+        let after = baselineDepth(of: view.promptLabel, in: view)
+            - baselineDepth(of: view.inputField, in: view)
+
+        // Fails if the drop is ever frozen into a constant: bigger type needs a
+        // bigger correction, and the glyph has to land centred at the new size
+        // too. The ratio itself is not asserted — at these sizes AppKit's
+        // whole-point baselines quantise it beyond what it would prove.
+        #expect(after > before)
+        #expect(try abs(centeringError(in: view, font: manager.currentPalette.font(.body))) < 1)
+        withExtendedLifetime(manager) {}
+    }
+
     /// The prompt is the composer's own ink — web colours it with the input's
     /// text colour — so it has to follow the theme like everything else.
     @Test("the prompt repaints with the active theme")
