@@ -108,6 +108,13 @@ final class EaseTests: XCTestCase {
     func testRejectsAnythingOutsideTheVocabulary() {
         XCTAssertThrowsError(try Ease.resolve("elastic.out"))
         XCTAssertThrowsError(try Ease.resolve("back.in(2)"))
+        // The table is closed, not a grammar: a bare family name and an
+        // unlisted overshoot are both rejected even though they look like
+        // near-misses of names that ARE in it (`power3`, `back.out(2)`).
+        // `ease.test.ts` asserts exactly these two, and they are what stops
+        // the table quietly growing back into a parser.
+        XCTAssertThrowsError(try Ease.resolve("power2"))
+        XCTAssertThrowsError(try Ease.resolve("back.out(2.2)"))
     }
 }
 
