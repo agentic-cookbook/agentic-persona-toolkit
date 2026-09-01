@@ -165,6 +165,50 @@ describe("reflexes", () => {
     expect(peak).toBeLessThanOrEqual(B.gaze.gazeMax + 1e-6);
   });
 
+  it("levels the head on a wander instead of turning it toward nothing", () => {
+    const c = make();
+    c.reflexes.start(0);
+    // The pointer aims eyes AND head once, and then never moves again. Every
+    // wander after that is the irises drifting on their own, so the head must
+    // come back level and stay level: there is nothing left to watch.
+    c.reflexes.look(1, -1, 0);
+    run(c, 0, 1);
+    expect(c.channels.get("tilt.rotation")).toBeCloseTo(-B.gaze.tiltMax, 4);
+
+    // From two seconds on, the first wander (wanderAfterMs) and its 0.4s level
+    // have both landed. A wander that aimed the head instead would swing this
+    // by up to tiltMax * the reach it drew — several degrees of rotation on the
+    // whole rig, held until the next wander.
+    let tilt = 0;
+    let lean = 0;
+    let iris = 0;
+    for (let t = 2; t <= 20; t += 1 / 60) {
+      c.scheduler.tick(t); c.tweens.tick(t);
+      tilt = Math.max(tilt, Math.abs(c.channels.get("tilt.rotation") as number));
+      lean = Math.max(lean, Math.abs(c.channels.get("lean.x") as number));
+      iris = Math.max(iris, Math.abs(c.channels.get("irisLeft.x") as number));
+    }
+    expect(tilt).toBeLessThan(1e-9);
+    expect(lean).toBeLessThan(1e-9);
+    // …and the wanders really did run, so the two assertions above are not
+    // measuring a gaze that never moved at all.
+    expect(iris).toBeGreaterThan(B.gaze.gazeMax * B.gaze.reachIdle[0]!);
+  });
+
+  it("centres the eyes and levels the head the moment a mood shuts them", () => {
+    const c = make();
+    c.reflexes.start(0);
+    c.reflexes.look(1, -1, 0);
+    run(c, 0, 0.6);
+    expect(Math.abs(c.channels.get("tilt.rotation") as number)).toBeGreaterThan(1);
+    c.h.mood = B.eyesShutMood;
+    // Past the poll that notices the mood, plus the tilt's own settle.
+    run(c, 0.6, 0.6 + B.ladder.pollMs / 1000 + B.gaze.tilt.duration + 0.2);
+    expect(c.channels.get("tilt.rotation")).toBeCloseTo(0, 6);
+    expect(c.channels.get("lean.x")).toBeCloseTo(0, 6);
+    expect(c.channels.get("irisLeft.x")).toBeCloseTo(0, 6);
+  });
+
   it("suppresses the ambient loops and the fidget under reduced motion", () => {
     const c = make();
     c.h.mood = LIVELY;

@@ -174,40 +174,75 @@ export function createReflexes(deps: ReflexDeps): Reflexes {
   let target: readonly [number, number] = [0, 0];
   let pointerAt = -Infinity;
 
-  const applyGaze = (when: number): void => {
+  /** Asleep is dead still: no tracking, no tilt, no lean, and no saccade. The
+   *  original expresses this by returning from `useGaze` before it registers
+   *  either the pointer listener or the wander timer. */
+  const gazeShut = (): boolean =>
+    b.gaze.disabledWhen !== undefined && predicate(config, scope(), b.gaze.disabledWhen);
+
+  /** Where the irises point. Dispatched on the channel's suffix, never on its
+   *  index: the four `look` channels are two eyes x two axes, and an index would
+   *  silently swap them the day a third eye or a different order appears. */
+  const lookAt = (when: number, tx: number, ty: number): void => {
     const g = b.gaze;
-    if (g.disabledWhen !== undefined && predicate(config, scope(), g.disabledWhen)) return;
-    const [tx, ty] = target;
-    // Dispatched on the channel's suffix, never on its index: the four `look`
-    // channels are two eyes × two axes, and an index would silently swap them
-    // the day a third eye or a different order appears in the rig.
     for (const ch of g.look.channels) {
       tweens.add({
         channel: ch, to: (ch.endsWith(".y") ? ty : tx) * g.gazeMax,
         duration: g.look.duration, ease: g.look.ease,
       }, when);
     }
+  };
+
+  /** The head's own layer, in degrees — already signed by the caller. */
+  const tiltTo = (when: number, deg: number): void => {
+    const g = b.gaze;
+    tweens.add({
+      channel: g.tilt.channel, to: deg,
+      duration: g.tilt.duration, ease: g.tilt.ease,
+    }, when);
+  };
+
+  /** The whole glyph's drift, in normalised units the caller has clamped. */
+  const leanTo = (when: number, nx: number, ny: number): void => {
+    const g = b.gaze;
+    for (const ch of g.lean.channels) {
+      tweens.add({
+        channel: ch, to: (ch.endsWith(".y") ? ny : nx) * g.leanMax,
+        duration: g.lean.duration, ease: g.lean.ease,
+      }, when);
+    }
+  };
+
+  /** Eyes, head and glyph all aimed at the current target — what a POINTER
+   *  (or a deliberate gaze) does. A wander is deliberately not this. */
+  const applyGaze = (when: number): void => {
+    if (gazeShut()) return;
+    const [tx, ty] = target;
+    lookAt(when, tx, ty);
     // NEGATED, and the sign is the whole point: the head leans INTO whatever it
     // is watching, not away from it. The original spells it `-x * tiltMax` at
     // both of its call sites (`gaze.ts`), and `tiltMax` stays positive here so
     // the config keeps reading as a magnitude rather than smuggling a direction
     // into a field named "max". Flip this and the character mirrors — which is
     // exactly the class of difference this port exists to not have.
-    tweens.add({
-      channel: g.tilt.channel, to: -tx * g.tiltMax,
-      duration: g.tilt.duration, ease: g.tilt.ease,
-    }, when);
-    for (const ch of g.lean.channels) {
-      tweens.add({
-        channel: ch, to: (ch.endsWith(".y") ? ty : tx) * g.leanMax,
-        duration: g.lean.duration, ease: g.lean.ease,
-      }, when);
-    }
+    tiltTo(when, -tx * b.gaze.tiltMax);
+    leanTo(when, tx, ty);
   };
 
   function wander(when: number): void {
     const g = b.gaze;
-    if (when - pointerAt >= g.wanderAfterMs / 1000) {
+    if (!gazeShut() && when - pointerAt >= g.wanderAfterMs / 1000) {
+      // The head LEVELS and the glyph re-centres before the eyes pick their own
+      // target. A wander is the irises drifting so the face never stares blankly
+      // — it is not the head turning to watch something, because by definition
+      // there is nothing to watch: the pointer has been still for wanderAfterMs.
+      // The original opens its wander tick with `tilt(0); lean(0, 0)` for this
+      // reason. Aiming the head at a wander target instead rotates the ENTIRE
+      // rig by up to tiltMax degrees, on nothing, for as long as the mood lasts
+      // — every node in the recorded frame shifted by one common angle, with no
+      // matching motion anywhere in the original.
+      tiltTo(when, 0);
+      leanTo(when, 0, 0);
       const curious = predicate(config, scope(), "curious");
       if (prng.chance(curious ? g.centreChanceCurious : g.centreChanceIdle)) {
         target = [0, 0];
@@ -217,7 +252,7 @@ export function createReflexes(deps: ReflexDeps): Reflexes {
         const r = prng.range(reach[0], reach[1]);
         target = [Math.cos(angle) * r, Math.sin(angle) * r];
       }
-      applyGaze(when);
+      lookAt(when, target[0], target[1]);
     }
     at(when + prng.range(g.wanderMinMs, g.wanderMaxMs) / 1000, wander);
   }
@@ -449,6 +484,20 @@ export function createReflexes(deps: ReflexDeps): Reflexes {
     // path that already exists, and restarting it from the top when the setting
     // clears replays the once-steps too, which a per-shape flag would not.
     if (m !== lastMood || reduced !== lastReduced) {
+      // The instant a mood shuts the eyes, the gaze goes dead still: irises
+      // centred, head level, glyph re-centred. Nothing else would do it — a
+      // pose draws nodes, and tilt and lean are layers no pose owns — so a head
+      // the pointer had turned would stay turned for the whole sleep. The
+      // original reaches the same state by re-running `useGaze`, whose
+      // `eyesShut` branch zeroes all three before it returns.
+      const shutDef = b.gaze.disabledWhen;
+      if (shutDef !== undefined
+        && predicate(config, { mood: m }, shutDef)
+        && !predicate(config, { mood: lastMood }, shutDef)) {
+        lookAt(when, 0, 0);
+        tiltTo(when, 0);
+        leanTo(when, 0, 0);
+      }
       stopEffect(when);
       lastMood = m;
       lastReduced = reduced;
