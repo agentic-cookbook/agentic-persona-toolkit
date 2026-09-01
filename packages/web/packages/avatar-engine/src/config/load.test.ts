@@ -19,11 +19,17 @@ type BadPoses = { poses: Record<string, { channels: Record<string, unknown> }> }
 type BadBehavior = {
   loops: { id: string; amplitude: unknown; disabledWhen?: string }[];
   ladder: { moods: Record<string, string> };
+  choreography: Record<string, string>;
+  waking: { from: string; to: string; play: string; ms: number };
 };
 type BadTimelines = {
   timelines: Record<string, {
     duration: number;
-    steps: { channel: string; to: string; at: number; duration: number; family?: string }[];
+    // `to` and `promote` are mutually exclusive in the real schema, so both are
+    // optional here — a test that selects a step by which one it carries needs
+    // to be able to ask.
+    steps: { channel: string; to?: string; at: number; duration: number;
+             family?: string; promote?: number }[];
   }>;
 };
 
@@ -166,8 +172,11 @@ describe("loadConfig", () => {
 
   it("rejects a tweened family change in a timeline", () => {
     const bad = clone();
+    // The yawn carries two family steps: the promote at 0 and the closing snap
+    // at 1.85. A promote is refused for being a promote over time, by its own
+    // message, so it would pass this test without exercising the rule under it.
     const snap = (bad.timelines as BadTimelines).timelines.yawn!.steps
-      .find((s) => s.family !== undefined)!;
+      .find((s) => s.family !== undefined && s.promote === undefined)!;
     snap.duration = 0.3;  // a *tweened* family change is exactly the bug
     expect(() => loadConfig(bad)).toThrow(/family/);
   });
@@ -211,8 +220,10 @@ describe("loadConfig", () => {
 
   it("rejects a path outside the supported subset", () => {
     const bad = clone();
+    // A step that already drives a value: the first `mouth.shape` step is the
+    // promote, which computes its own target and refuses one written by hand.
     (bad.timelines as BadTimelines).timelines.yawn!.steps
-      .find((s) => s.channel === "mouth.shape")!.to = "M0,0 A45,45 0 0 1 10,10";
+      .find((s) => s.channel === "mouth.shape" && s.to !== undefined)!.to = "M0,0 A45,45 0 0 1 10,10";
     expect(() => loadConfig(bad)).toThrow(/unsupported/);
   });
 
@@ -289,5 +300,29 @@ describe("loadConfig", () => {
     const bad = clone();
     delete (bad.behavior as BadBehavior).ladder.moods.active;
     expect(() => loadConfig(bad)).toThrow(/"active" rung/);
+  });
+
+  it("rejects choreography keyed on a mood no pose defines", () => {
+    // A choreographed mood never has its pose applied, which is exactly why the
+    // pose still has to exist: the name is reachable from the ladder, the poke
+    // rules and `waking`, and every one of those is checked against the poses.
+    const bad = clone();
+    (bad.behavior as BadBehavior).choreography.stretching = "yawn";
+    expect(() => loadConfig(bad)).toThrow(/unknown mood "stretching"/);
+  });
+
+  it("rejects choreography pointing at a timeline that does not exist", () => {
+    const bad = clone();
+    (bad.behavior as BadBehavior).choreography.yawning = "stretch";
+    expect(() => loadConfig(bad)).toThrow(/unknown timeline "stretch"/);
+  });
+
+  it("rejects waking.play naming a timeline rather than a mood", () => {
+    // The trap this catches is the port's own first spelling: `play` used to
+    // name the yawn TIMELINE, so the wake window reported `idle` as the mood
+    // and every mood-keyed reflex missed the yawn entirely.
+    const bad = clone();
+    (bad.behavior as BadBehavior).waking.play = "yawn";
+    expect(() => loadConfig(bad)).toThrow(/waking.play names unknown mood "yawn"/);
   });
 });

@@ -347,12 +347,29 @@ export function loadConfig(input: RawFiles): CharacterConfig {
     // mid-playback — or never, if that step never played. Swift already
     // checked this at load; this ports that check.
     const kindOf = new Map<string, string>();
+    // A promote computes its target out of whatever shape the channel holds when
+    // it fires, so there is no path here to check its kind against. What CAN be
+    // checked is the pair of families it bridges — and must be, because the
+    // whole point of the step is to land in a kind the family already uses.
+    // Collected during the walk, with the family in force at that instant, and
+    // settled once `kindOf` is complete.
+    const promotions: { source: string; target: string; segments: number; channel: string }[] = [];
     for (const step of [...tl.steps].sort((a, b) => a.at - b.at)) {
       requireChannel(step.channel, where);
       requireEase(step.ease, where);
-      const first = expand(step.channel)[0]!;
-      step.to = canonicalise(first, colourise(first, step.to, where), where);
-      for (const c of expand(step.channel)) requireValue(c, step.to, where);
+      if (step.promote !== undefined) {
+        if (step.to !== undefined) fail(`${where} both promotes ${step.channel} and gives it a value`);
+        if (step.family === undefined) fail(`${where} promotes ${step.channel} without naming a family`);
+        if (step.duration !== 0) fail(`${where} promotes ${step.channel} over ${step.duration}s; a promote is a snap`);
+        if (!step.channel.endsWith(".shape")) fail(`${where} promotes ${step.channel}, which is not a shape channel`);
+      } else {
+        // The schema's `oneOf` has already ruled this out; the throw is what
+        // narrows it for the compiler (see the `ink` guard above).
+        if (step.to === undefined) throw fail(`${where} drives ${step.channel} with no value`);
+        const first = expand(step.channel)[0]!;
+        step.to = canonicalise(first, colourise(first, step.to, where), where);
+        for (const c of expand(step.channel)) requireValue(c, step.to, where);
+      }
       if (!step.channel.endsWith(".shape")) continue;
 
       for (const c of expand(step.channel)) {
@@ -376,6 +393,9 @@ export function loadConfig(input: RawFiles): CharacterConfig {
             fail(`${where} tweens ${c} from family "${current}" to "${step.family}"; ` +
                  `a family change must have duration 0`);
           }
+          if (step.promote !== undefined) {
+            promotions.push({ source: current, target: step.family, segments: step.promote, channel: c });
+          }
           current = step.family;
           familyOf.set(c, step.family);
         }
@@ -388,6 +408,21 @@ export function loadConfig(input: RawFiles): CharacterConfig {
           fail(`${where} morphs within family "${current}" but its path is "${kind}" ` +
                `where the family is "${known}"`);
         }
+      }
+    }
+
+    for (const pr of promotions) {
+      const source = kindOf.get(pr.source);
+      const target = kindOf.get(pr.target);
+      if (source === undefined || !/^ML+$/.test(source)) {
+        fail(`${where} promotes ${pr.channel} out of family "${pr.source}", whose shape is ` +
+             `"${source ?? "unknown"}"; only an open polyline can be promoted`);
+      } else if (target !== `M${"C".repeat(pr.segments)}`) {
+        fail(`${where} promotes ${pr.channel} into family "${pr.target}" as ${pr.segments} ` +
+             `cubic(s), but that family's shape is "${target ?? "unknown"}"`);
+      } else if ((source.length - 1) === 0 || pr.segments % (source.length - 1) !== 0) {
+        fail(`${where} promotes ${pr.channel}'s ${source.length - 1} line(s) into ${pr.segments} ` +
+             `segment(s); the target count must be a whole multiple of the source's`);
       }
     }
 
@@ -520,10 +555,24 @@ export function loadConfig(input: RawFiles): CharacterConfig {
     if (rule.from !== "*" && !(rule.from in poses.poses)) fail(`poke names unknown mood "${rule.from}"`);
     if (!(rule.expression in poses.poses)) fail(`poke names unknown pose "${rule.expression}"`);
   }
+  for (const [mood, timeline] of Object.entries(behavior.choreography ?? {})) {
+    // The pose is demanded even though the engine never applies it. A
+    // choreographed mood is still a mood — the ladder, the poke rules and
+    // `waking` all name moods, and every one of those names is checked against
+    // `poses.poses`. Letting choreography be the one exception would make a
+    // typo in it the only mood name that fails at run time instead of here.
+    if (!(mood in poses.poses)) fail(`choreography names unknown mood "${mood}"`);
+    if (!(timeline in timelines.timelines)) {
+      fail(`choreography for "${mood}" names unknown timeline "${timeline}"`);
+    }
+  }
   if (!(behavior.waking.from in poses.poses)) fail(`waking.from names unknown mood "${behavior.waking.from}"`);
   if (!(behavior.waking.to in poses.poses)) fail(`waking.to names unknown mood "${behavior.waking.to}"`);
-  if (!(behavior.waking.play in timelines.timelines)) {
-    fail(`waking.play names unknown timeline "${behavior.waking.play}"`);
+  // A MOOD, not a timeline — see `BehaviorFile.waking`. It does not have to be
+  // choreographed: a character whose waking transition is a plain pose is a
+  // legitimate character, and this validates the name, not the staging.
+  if (!(behavior.waking.play in poses.poses)) {
+    fail(`waking.play names unknown mood "${behavior.waking.play}"`);
   }
   if (!(behavior.eyesShutMood in poses.poses)) {
     fail(`eyesShutMood names unknown mood "${behavior.eyesShutMood}"`);

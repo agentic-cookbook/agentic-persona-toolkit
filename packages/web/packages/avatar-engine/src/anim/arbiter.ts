@@ -3,7 +3,7 @@ import type { Channels } from "../runtime/channels";
 import type { Scheduler } from "../runtime/scheduler";
 import type { Tweens } from "../runtime/tween";
 import { applyPose } from "./pose";
-import { playTimeline } from "./timeline";
+import { playTimeline, type TimelineHandle } from "./timeline";
 
 export type MoodSource = "app" | "idle" | "poke" | "waking";
 
@@ -62,6 +62,7 @@ export function createArbiter(deps: ArbiterDeps): Arbiter {
   let rung = 0;
   let applied = false;
   let pollId: number | null = null;
+  let choreo: TimelineHandle | null = null;
 
   const rungFor = (now: number): number => {
     // The typing pin holds the rung down WITHOUT touching lastInteraction, so
@@ -77,7 +78,11 @@ export function createArbiter(deps: ArbiterDeps): Arbiter {
     const r = rungFor(now);
     if (now < pokeUntil) return { mood: pokeMood, source: "poke", rung: r };
     if (appMood !== null) return { mood: appMood, source: "app", rung: r };
-    if (now < wakeUntil) return { mood: b.waking.to, source: "waking", rung: r };
+    // `waking.play`, NOT `waking.to`. The wake transition IS a mood for its
+    // whole window — that is what lets blink suppression, the pinpricks and
+    // every other mood-keyed reflex see the yawn. `waking.to` is where the
+    // ladder lands once the window lapses, and it gets there on its own.
+    if (now < wakeUntil) return { mood: b.waking.play, source: "waking", rung: r };
     return { mood: RUNGS[r]!.mood, source: "idle", rung: r };
   };
 
@@ -90,17 +95,32 @@ export function createArbiter(deps: ArbiterDeps): Arbiter {
     if (!applied || next.mood !== current) {
       applied = true;
       current = next.mood;
-      const result = applyPose({ config, channels, tweens }, current, now);
-      if (result.resetAt) {
-        const { at, channel, value } = result.resetAt;
-        // A zero-duration tween, NOT channels.set. The one-shot fires inside
-        // scheduler.tick, which runs before tweens.tick on the same frame, so a
-        // raw write would be overwritten by the spin tween's own final value.
-        // Going through `add` cancels that tween (newest wins) and writes the
-        // normalised value verbatim, both by rules the tween engine already has.
-        scheduler.once(at, (fired) => {
-          tweens.add({ channel, to: value, duration: 0 }, fired);
-        });
+      // Leaving a choreographed mood cancels whatever of its timeline has not
+      // fired yet, so a poke mid-yawn does not get the yawn's remaining steps
+      // dropped on top of the pose it just asked for. Unfired one-shots are the
+      // only state a timeline holds; the tweens it already started are cancelled
+      // the ordinary way, by the next tween on the same channel.
+      if (choreo !== null) { choreo.cancel(); choreo = null; }
+      const timeline = b.choreography?.[current];
+      if (timeline !== undefined) {
+        // A choreographed mood skips its pose entirely. The timeline is the
+        // whole performance — it opens the mouth, holds it, and walks every
+        // channel it touched back to rest — so applying the pose as well would
+        // fight it for the same channels from the first frame.
+        choreo = playTimeline({ config, channels, tweens, scheduler }, timeline, now);
+      } else {
+        const result = applyPose({ config, channels, tweens }, current, now);
+        if (result.resetAt) {
+          const { at, channel, value } = result.resetAt;
+          // A zero-duration tween, NOT channels.set. The one-shot fires inside
+          // scheduler.tick, which runs before tweens.tick on the same frame, so a
+          // raw write would be overwritten by the spin tween's own final value.
+          // Going through `add` cancels that tween (newest wins) and writes the
+          // normalised value verbatim, both by rules the tween engine already has.
+          scheduler.once(at, (fired) => {
+            tweens.add({ channel, to: value, duration: 0 }, fired);
+          });
+        }
       }
     }
     if (speech && now >= speech.until) speech = null;
@@ -132,10 +152,10 @@ export function createArbiter(deps: ArbiterDeps): Arbiter {
     },
 
     notice(now) {
-      if (current === b.waking.from) {
-        wakeUntil = now + b.waking.ms / 1000;
-        playTimeline({ config, channels, tweens, scheduler }, b.waking.play, now);
-      }
+      // Opening the window is all this does: `evaluate` below resolves to
+      // `waking.play` and choreography plays its timeline, the same way it
+      // would for a mood reached any other route.
+      if (current === b.waking.from) wakeUntil = now + b.waking.ms / 1000;
       lastInteraction = now;
       evaluate(now);
     },

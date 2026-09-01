@@ -37,43 +37,46 @@ describe("playTimeline", () => {
     expect(h.endsAt).toBeCloseTo(12.1, 12);
   });
 
-  it("snaps the mouth family at 0.35 and back at 1.85, never tweening it", () => {
+  it("promotes the mouth into `mouthO` at 0 and snaps back at 1.85, never tweening it", () => {
     const c = ctx();
     expect(c.channels.get("mouth.family")).toBe("mouth");   // the rest seed
     playTimeline(c, "yawn", 0);
-    // The yawn spends its first 0.35s FLATTENING the polyline mouth, and only
-    // then crosses into `mouthO`. That ordering is the whole point: a family
-    // crossing is a snap, so it is only invisible when the two families already
-    // agree, and the flatten is what makes them agree. Assert the mouth is
-    // still in its own family mid-flatten, or a regression that moved the snap
-    // back to `at: 0` would pass everything below unchanged.
-    step(c, 0, 0.3);
-    expect(c.channels.get("mouth.family")).toBe("mouth");
-    const flattening = c.channels.get("mouth.shape");
-    expect(flattening).not.toBe("M187,233L200,246L213,233");   // left the rest V
-    expect(flattening).not.toBe("M189,235L200,235L211,235");   // not there yet
-    // The snap is authored at `at: 0.35`, sharing its instant with the 0.5s
-    // morph that opens the O; it survives that morph's `add` only because a
-    // duration-0 tween lands at add time (Task 10, rule 4).
-    step(c, 0.3, 0.5);
+    // The crossing happens at the timeline's very first instant, and it is
+    // invisible because the promote re-expresses the shape the rig is ALREADY
+    // drawing: whatever polyline the interrupted mood left in the channel, as
+    // four cubics. Nothing about the mouth moves on this frame — which is the
+    // only reason a family snap is allowed to sit at `at: 0` at all.
+    step(c, 0, 0);
     expect(c.channels.get("mouth.family")).toBe("mouthO");
-    // The EXACT curve the 0.5s open reaches at 0.5, not merely "some closed
-    // path". `/^M.*Z$/` is true of the closing snap too, so it stays true when
-    // the steps are expanded in the wrong order and the open never happens.
-    // Derived, not copied off a run: 0.15s of 0.5 is p = 0.3, and `power2.in`
-    // is GSAP's naming for a CUBIC ease, so the morph is 0.3^3 = 0.027 of the
-    // way from the closed slit to the small O — e.g. its half-height is
-    // 1.4 + 0.027 * (11 - 1.4) = 1.6592, giving 235.027 +/- 1.6592.
     expect(c.channels.get("mouth.shape")).toBe(
-      "M200,233.3678C207.120252,233.3678,212.892,234.110624,212.892,235.027C212.892,235.943376,207.120252,236.6862,200,236.6862C192.879748,236.6862,187.108,235.943376,187.108,235.027C187.108,234.110624,192.879748,233.3678,200,233.3678Z",
+      "M187,233"
+      + "C189.166667,235.166667,191.333333,237.333333,193.5,239.5"
+      + "C195.666667,241.666667,197.833333,243.833333,200,246"
+      + "C202.166667,243.833333,204.333333,241.666667,206.5,239.5"
+      + "C208.666667,237.333333,210.833333,235.166667,213,233",
     );
-    step(c, 0.5, 1.8);
+    // The EXACT curve the 0.85s inhale reaches half way through, not merely
+    // "some cubic path" — `/^MC+$/` is true of the promote's own output too, so
+    // it stays true when the inhale never runs. Derived, not copied off a run:
+    // 0.425s of 0.85 is p = 0.5, and `power2.in` is GSAP's naming for a CUBIC
+    // ease, so the morph is 0.5^3 = 0.125 of the way between the promoted V and
+    // the small O — e.g. the apex anchor is 246 + 0.125 * (247 - 246) = 246.125.
+    step(c, 0, 0.425);
+    expect(c.channels.get("mouth.shape")).toBe(
+      "M188.625,232"
+      + "C191.142171,233.895834,193.541666,236.407254,195.4375,239.0625"
+      + "C197.333334,241.717746,198.725504,244.229166,200,246.125"
+      + "C201.274496,244.229166,202.666666,241.717746,204.5625,239.0625"
+      + "C206.458334,236.407254,208.857829,233.895834,211.375,232",
+    );
+    step(c, 0.425, 1.8);
     expect(c.channels.get("mouth.family")).toBe("mouthO");   // still open at 1.8
     step(c, 1.8, 1.9);
     expect(c.channels.get("mouth.family")).toBe("mouth");
-    // Written verbatim by the snap — and equal to the seeded rest string only
-    // because the loader canonicalised the yawn's spaced-out literal.
-    expect(c.channels.get("mouth.shape")).toBe("M189,235L200,235L211,235");
+    // Written verbatim by the snap, and spanning x 187..213 — the same width as
+    // the flat O it replaces, so the instant the family changes costs the mouth
+    // no width. A narrower parked line is visible as a twitch at 1.85.
+    expect(c.channels.get("mouth.shape")).toBe("M187,235L200,235L213,235");
   });
 
   it("never asks the morph to cross families", () => {
@@ -82,12 +85,12 @@ describe("playTimeline", () => {
     // A step that DID cross families would not throw — `lerpValue` snaps such a
     // pair (Task 10) — so "it ran without throwing" proves nothing here. What a
     // snap cannot fake is movement: it writes one value and holds it. Sampling
-    // across the 0.35s flatten and the 0.5s open that follows it, and requiring
+    // across the 0.85s inhale and the 0.4s apex that follows it, and requiring
     // every sample to differ, is therefore the assertion — it fails the moment
     // either of those morphs degenerates into a snap.
     const seen = new Set<unknown>();
     let at = 0;
-    for (const t of [0.2, 0.4, 0.6, 0.8]) {
+    for (const t of [0.2, 0.5, 0.8, 1.1]) {
       step(c, at, t);
       seen.add(c.channels.get("mouth.shape"));
       at = t;
@@ -95,17 +98,17 @@ describe("playTimeline", () => {
     expect(seen.size).toBe(4);
   });
 
-  it("ends on the asleep mouth, back in family `mouth`", () => {
+  it("ends on a flat slit, back in family `mouth`", () => {
     // NOT the rig's resting mouth. The rig rests on the `idle` V
-    // (`M187,233L200,246L213,233`); the yawn's closing snap at t=1.85 writes the
-    // `asleep` polyline, because a yawn ends with the character asleep. Reading
-    // `mouth.shape` before playing and asserting the timeline returns to it
-    // would compare the V against the flat line and fail.
+    // (`M187,233L200,246L213,233`); the yawn's closing snap at t=1.85 writes a
+    // flat line, because a yawn ends with the lips shut. Reading `mouth.shape`
+    // before playing and asserting the timeline returns to it would compare the
+    // V against the flat line and fail.
     const c = ctx();
     expect(c.channels.get("mouth.shape")).toBe("M187,233L200,246L213,233");
     playTimeline(c, "yawn", 0);
     step(c, 0, 2.1);
-    expect(c.channels.get("mouth.shape")).toBe("M189,235L200,235L211,235");
+    expect(c.channels.get("mouth.shape")).toBe("M187,235L200,235L213,235");
     expect(c.channels.get("mouth.family")).toBe("mouth");
   });
 

@@ -238,14 +238,19 @@
     "TimelineStep": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["at", "channel", "to", "duration", "ease"],
+      "required": ["at", "channel", "duration", "ease"],
+      "oneOf": [
+        { "required": ["to"], "not": { "required": ["promote"] } },
+        { "required": ["promote"], "not": { "required": ["to"] } }
+      ],
       "properties": {
         "at": { "type": "number" },
         "channel": { "type": "string" },
         "to": { "type": ["number", "string"] },
         "duration": { "type": "number" },
         "ease": { "type": "string" },
-        "family": { "type": "string" }
+        "family": { "type": "string" },
+        "promote": { "type": "integer", "minimum": 1 }
       }
     },
     "TimelineDef": {

@@ -65,18 +65,18 @@ describe("engine", () => {
   it("plays a named timeline and settles on the shape it ends on", () => {
     const e = engine();
     const rest = e.tick(0).find((i) => i.id === "mouth")!.d;
-    // The yawn does not end at rest — its closing snap writes the `asleep`
-    // mouth, while the rig rests on the `idle` V. Asserting a return to `rest`
-    // here would fail on the true config.
-    const ASLEEP = "M189,235L200,235L211,235";
-    expect(rest).not.toBe(ASLEEP);
+    // The yawn does not end at rest — its closing snap writes a flat slit,
+    // while the rig rests on the `idle` V. Asserting a return to `rest` here
+    // would fail on the true config.
+    const CLOSED = "M187,235L200,235L213,235";
+    expect(rest).not.toBe(CLOSED);
     e.play("yawn");
     let sawDifference = false;
     for (let t = 0; t <= 2.2; t += 1 / 60) {
       if (e.tick(t).find((i) => i.id === "mouth")!.d !== rest) sawDifference = true;
     }
     expect(sawDifference).toBe(true);
-    expect(e.tick(2.5).find((i) => i.id === "mouth")!.d).toBe(ASLEEP);
+    expect(e.tick(2.5).find((i) => i.id === "mouth")!.d).toBe(CLOSED);
   });
 
   it("stamps a command with the frame that just passed, not a clock of its own", () => {
@@ -85,20 +85,20 @@ describe("engine", () => {
     // to reach the closing shape. An engine that stamped commands from a second
     // clock — one the golden recorder never advanced — would compute a deadline
     // two seconds in the PAST and snap to the end state on the very next frame.
-    const ASLEEP = "M189,235L200,235L211,235";
+    const CLOSED = "M187,235L200,235L213,235";
     const e = engine();
     for (let t = 0; t <= 2; t += 1 / 60) e.tick(t);
     e.play("yawn");
-    let firstAsleep = Infinity;
+    let firstClosed = Infinity;
     for (let f = 120; f <= 300; f += 1) {
       const mouth = e.tick(f / 60).find((i) => i.id === "mouth")!.d;
-      if (mouth === ASLEEP && firstAsleep === Infinity) firstAsleep = f / 60 - 2;
+      if (mouth === CLOSED && firstClosed === Infinity) firstClosed = f / 60 - 2;
     }
     // Bounded on BOTH sides. The upper bound is what the timeline is worth; the
     // lower bound is the whole point — under the old two-clock engine this
     // measured a single frame.
-    expect(firstAsleep).toBeGreaterThan(1);
-    expect(firstAsleep).toBeLessThanOrEqual(2.6);
+    expect(firstClosed).toBeGreaterThan(1);
+    expect(firstClosed).toBeLessThanOrEqual(2.6);
   });
 
   it("normalises the host's epoch away", () => {

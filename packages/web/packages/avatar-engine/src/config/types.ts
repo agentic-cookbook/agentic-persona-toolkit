@@ -115,11 +115,17 @@ export interface PosesFile {
 export interface TimelineStep {
   at: number;                  // absolute seconds from timeline start
   channel: string;
-  to: number | string;
+  /** Absent only on a `promote` step, which computes its own target. */
+  to?: number | string;
   duration: number;            // 0 = snap
   ease: string;
   /** Present only on a duration-0 step that changes the channel's shape family. */
   family?: string;
+  /** A duration-0 family snap that re-expresses the channel's CURRENT shape as
+   *  this many cubic segments (see `path/promote`), rather than writing a
+   *  literal path. It is what lets a timeline cross out of the polyline family
+   *  without knowing which pose's mouth it is crossing out of. */
+  promote?: number;
 }
 
 export interface TimelineDef {
@@ -244,6 +250,17 @@ export interface BehaviorFile {
   idleFidget: IdleFidgetDef;
   ladder: LadderDef;
   poke: { from: string; expression: string; ms: number }[];
+  /** Mood -> the timeline that IS that mood. A choreographed mood skips its
+   *  pose entirely: entering it plays the named timeline, and leaving it
+   *  cancels whatever of that timeline has not fired yet. The pose of the same
+   *  name still has to exist — it is what the loader validates against, and
+   *  what a still frame of the mood would draw — but the engine never applies
+   *  it. Absent for a character with nothing choreographed. */
+  choreography?: Record<string, string>;
+  /** `play` names a MOOD, not a timeline: the wake window resolves to it, so
+   *  everything keyed on the current mood — blink suppression above all — sees
+   *  the yawn the way it sees any other mood. Choreography is what turns that
+   *  mood into a timeline. */
   waking: { from: string; to: string; play: string; ms: number };
   moodEffects: Record<string, EffectDef>;
   /** The mood in which the eyes count as shut, gating blink, gaze and pinpricks. */

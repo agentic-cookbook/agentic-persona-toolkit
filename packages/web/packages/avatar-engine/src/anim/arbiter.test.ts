@@ -112,14 +112,19 @@ describe("arbiter", () => {
     expect(c.arbiter.state().mood).toBe("thinking");
   });
 
-  it("wakes through waking.to and plays the yawn when noticed asleep", () => {
+  it("wakes INTO waking.play as a mood, and only then lands on waking.to", () => {
+    // The mood matters more than the animation here. Everything keyed on the
+    // current mood — blink suppression above all — reads `state().mood`, so a
+    // wake window that reported `idle` while the yawn played would blink the
+    // character mid-yawn, which the original never does.
     const c = make();
     run(c, 0, asleep + 1);
     expect(c.arbiter.state().mood).toBe(config.behavior.waking.from);
     const before = c.channels.get("mouth.shape");
     c.arbiter.notice(asleep + 1);
     expect(c.arbiter.state().source).toBe("waking");
-    expect(c.arbiter.state().mood).toBe(config.behavior.waking.to);
+    expect(c.arbiter.state().mood).toBe(config.behavior.waking.play);
+    expect(config.behavior.blink.suppressedIn).toContain(config.behavior.waking.play);
     // The yawn is a timeline, so it is the channels that prove it started.
     let moved = false;
     for (let t = asleep + 1; t <= asleep + 3; t += 1 / 60) {
@@ -127,16 +132,64 @@ describe("arbiter", () => {
       if (c.channels.get("mouth.shape") !== before) moved = true;
     }
     expect(moved).toBe(true);
+    // Past the window, the ladder has it back.
+    run(c, asleep + 1, asleep + 1 + config.behavior.waking.ms / 1000 + 0.2);
+    expect(c.arbiter.state().mood).toBe(config.behavior.waking.to);
+  });
+
+  it("plays a choreographed mood's timeline instead of its pose", () => {
+    // `yawning` is choreographed, and the yawn snaps `mouth.family` at t=0.35.
+    // A pose can never do that — the loader holds every pose of a node to the
+    // one family the rig declares — so the family channel is proof that the
+    // timeline ran and the pose did not.
+    const mood = "yawning";
+    const timeline = config.behavior.choreography![mood]!;
+    expect(timeline).toBeDefined();
+    const c = make();
+    c.arbiter.setMood(mood, 0);
+    expect(c.channels.get("mouth.family")).toBe(config.families.get("mouth"));
+    run(c, 0, 0.5);
+    expect(c.channels.get("mouth.family")).toBe("mouthO");
+    // And the pose it shares a name with is never applied: the pose parks the
+    // mouth on its own polyline, which is not where the yawn has it at 0.5s.
+    expect(c.channels.get("mouth.shape"))
+      .not.toBe(config.poses.poses[mood]!.channels["mouth.shape"]);
+  });
+
+  it("cancels a choreographed timeline when the mood changes out from under it", () => {
+    // The original kills the choreography timeline on every mood change; the
+    // port must too, or the yawn's later steps land on top of whatever pose
+    // replaced it. The closing snap at t=1.85 is the one to watch: if it were
+    // still scheduled it would re-write `mouth.family` long after the mood left.
+    const c = make();
+    c.arbiter.setMood("yawning", 0);
+    run(c, 0, 0.5);
+    expect(c.channels.get("mouth.family")).toBe("mouthO");
+    c.arbiter.setMood("thinking", 0.5);
+    // Cancelling hands the mouth back to the pose system, so the family channel
+    // goes back to the family a pose is allowed to draw — immediately, not at
+    // the timeline's own 1.85.
+    expect(c.channels.get("mouth.family")).toBe(config.families.get("mouth"));
+    const parked = c.channels.get("mouth.shape");
+    run(c, 0.5, 2.5);
+    expect(c.channels.get("mouth.family")).toBe(config.families.get("mouth"));
+    // The yawn's 1.4s morph would have moved the mouth again had it survived;
+    // by 2.5s the thinking pose has long since settled, so nothing more moves.
+    const settled = c.channels.get("mouth.shape");
+    run(c, 2.5, 3.0);
+    expect(c.channels.get("mouth.shape")).toBe(settled);
+    expect(settled).not.toBe(parked);
   });
 
   it("survives a poke that lands while the yawn holds the mouth open", () => {
     // The crash this task's Step 0 exists to prevent, asserted end-to-end rather
     // than at the tween layer. `waking` plays the 2.1s yawn, which snaps
-    // `mouth.shape` into family `mouthO` at t=0 and does not snap back until
-    // t=1.85; `laughing` — the `"*"` poke reaction — drives that same channel
-    // with an "MLL" polyline. So the pose asks for MCCCCZ -> MLL, and the yawn's
-    // own steps at 1.4 and 1.85 then ask for the reverse. Ticking the whole yawn
-    // out without throwing IS the assertion; there is nothing to catch.
+    // `mouth.shape` into family `mouthO` at t=0.35; `laughing` — the `"*"` poke
+    // reaction — drives that same channel with an "MLL" polyline, so the pose
+    // asks for MCCCCZ -> MLL while the mouth is mid-morph. The poke cancels the
+    // rest of the yawn, so its own steps at 1.4 and 1.85 no longer ask for the
+    // reverse; the pose's own cross-family tween is what is left, and ticking
+    // the window out without throwing IS the assertion.
     const c = make();
     run(c, 0, asleep + 1);
     c.arbiter.notice(asleep + 1);
