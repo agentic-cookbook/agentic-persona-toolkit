@@ -199,4 +199,69 @@ final class RenderTests: XCTestCase {
         // And the fixture's own, through the loader rather than a literal.
         XCTAssertEqual(config.character.strokeStyle.cgLineCap, .round)
     }
+
+    // MARK: - the pointer
+
+    @MainActor
+    func testPointerMovedAimsTheGazeAtTheCursorAsAUnitVector() throws {
+        // 400x400, so the design canvas and the view space agree and the arithmetic
+        // is readable. The engine clamps to [-1,1] and multiplies by gazeMax
+        // itself, so what the view owes it is a UNIT vector -- exactly what
+        // `$GSAP/src/gaze.ts:104-109` computes before its own clamp.
+        let view = AvatarLayerView(engine: try Engine(EngineOptions(config: config)),
+                                   frame: CGRect(x: 0, y: 0, width: 400, height: 400))
+
+        // Straight right of centre, in DESIGN space (y down).
+        view.pointerMoved(to: view.designPoint(x: 400, y: 200))
+        XCTAssertEqual(view.lastLook.x, 1, accuracy: 1e-9)
+        XCTAssertEqual(view.lastLook.y, 0, accuracy: 1e-9)
+
+        // Directly below centre in design space -- the engine's y is DOWN.
+        view.pointerMoved(to: view.designPoint(x: 200, y: 400))
+        XCTAssertEqual(view.lastLook.x, 0, accuracy: 1e-9)
+        XCTAssertEqual(view.lastLook.y, 1, accuracy: 1e-9)
+
+        // Dead centre: `$GSAP`'s `|| 1` guard, so this is (0,0) and not a divide by zero.
+        view.pointerMoved(to: view.designPoint(x: 200, y: 200))
+        XCTAssertEqual(view.lastLook.x, 0, accuracy: 1e-9)
+        XCTAssertEqual(view.lastLook.y, 0, accuracy: 1e-9)
+    }
+
+    @MainActor
+    func testPointerPressedPokesAndWakes() throws {
+        // Drive the engine's own clock past `ladder.asleepAfterMs` (90s in the
+        // `dot` fixture) so the arbiter's periodic poll actually resolves to
+        // the asleep mood ("out") before the poke lands -- the same clock the
+        // view drives from `CADisplayLink.targetTimestamp`.
+        let v = try view()
+        _ = try v.engine.tick(0)
+        _ = try v.engine.tick(v.engine.config.behavior.ladder.asleepAfterMs / 1000 + 1)
+        XCTAssertEqual(v.engine.state.mood, v.engine.config.behavior.ladder.moods["asleep"])
+
+        // A poke from asleep ("out") resolves to `dot`'s poke[0] ("eager"), not
+        // the wildcard poke[1] ("calm") -- which is only true if `poke()` sees
+        // the mood while it is STILL "out", i.e. `pointerPressed` calls
+        // `engine.poke()` before `engine.notice()` (notice would open the
+        // waking window and move `current` off "out" first).
+        v.pointerPressed()
+        let rule = v.engine.config.behavior.poke.first { $0.from == "out" }!
+        XCTAssertEqual(v.engine.state.mood, rule.expression)
+        XCTAssertEqual(v.engine.state.source, .poke)
+        // Awake: the idle ladder was reset, not merely overridden for the
+        // poke's own window.
+        XCTAssertEqual(v.engine.state.idleRung, 0)
+    }
+}
+
+private extension AvatarLayerView {
+    /// A point in DESIGN space (y down, origin top-left) converted to this
+    /// view's own space, using the same `Platform.viewSpaceIsBottomLeft` flip
+    /// `fit` uses -- so one test body covers both platforms. Test-only: a host
+    /// never needs this, since `pointerMoved` already receives points in its
+    /// own space.
+    func designPoint(x: CGFloat, y: CGFloat) -> CGPoint {
+        Platform.viewSpaceIsBottomLeft
+            ? CGPoint(x: x, y: bounds.height - y)
+            : CGPoint(x: x, y: y)
+    }
 }

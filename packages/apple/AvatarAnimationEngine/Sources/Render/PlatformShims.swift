@@ -5,6 +5,7 @@ import AppKit
 
 public typealias PlatformView = NSView
 public typealias PlatformColor = NSColor
+public typealias PlatformGestureRecognizer = NSGestureRecognizer
 
 /// THE `#if` (Global Constraints). Everything AppKit and UIKit disagree about is
 /// named here, as one constant and three functions with no logic in them. No
@@ -36,6 +37,28 @@ enum Platform {
                             selector: Selector) -> CADisplayLink {
         view.displayLink(target: target, selector: selector)
     }
+
+    static func makeTapRecognizer(target: AnyObject,
+                                  action: Selector) -> PlatformGestureRecognizer {
+        NSClickGestureRecognizer(target: target, action: action)
+    }
+
+    /// The recognizers that report a moving finger. macOS has a real cursor,
+    /// which `pointerLocation` samples every frame instead, so there are none.
+    static func makeDragRecognizers(target: AnyObject,
+                                    action: Selector) -> [PlatformGestureRecognizer] { [] }
+
+    /// Where the cursor is, in `view`'s own space -- `nil` when there is no
+    /// cursor to sample or the view is not in a window yet.
+    static func pointerLocation(in view: PlatformView) -> CGPoint? {
+        guard let window = view.window else { return nil }
+        return view.convert(window.convertPoint(fromScreen: NSEvent.mouseLocation), from: nil)
+    }
+
+    /// `document.hasFocus()`. The original gates the idle-ladder reset on it
+    /// ($GSAP/src/reflexes.ts:55) so a stray move over a background window will
+    /// not rouse him -- but NOT the gaze, which follows the cursor either way.
+    static func isFocused(_ view: PlatformView) -> Bool { view.window?.isKeyWindow ?? false }
 }
 
 #else
@@ -43,6 +66,7 @@ import UIKit
 
 public typealias PlatformView = UIView
 public typealias PlatformColor = UIColor
+public typealias PlatformGestureRecognizer = UIGestureRecognizer
 
 @MainActor
 enum Platform {
@@ -57,6 +81,26 @@ enum Platform {
                             selector: Selector) -> CADisplayLink {
         CADisplayLink(target: target, selector: selector)
     }
+
+    static func makeTapRecognizer(target: AnyObject,
+                                  action: Selector) -> PlatformGestureRecognizer {
+        UITapGestureRecognizer(target: target, action: action)
+    }
+
+    /// iOS has no cursor to sample, so the finger IS the pointer: a drag
+    /// reports its location the way `pointermove` does on a touch device, and
+    /// the hover recognizer covers an iPad trackpad or Pencil.
+    static func makeDragRecognizers(target: AnyObject,
+                                    action: Selector) -> [PlatformGestureRecognizer] {
+        [UIPanGestureRecognizer(target: target, action: action),
+         UIHoverGestureRecognizer(target: target, action: action)]
+    }
+
+    static func pointerLocation(in view: PlatformView) -> CGPoint? { nil }
+
+    /// A foreground iOS app is the focused one; there is no second window to
+    /// steal key from.
+    static func isFocused(_ view: PlatformView) -> Bool { true }
 }
 #endif
 

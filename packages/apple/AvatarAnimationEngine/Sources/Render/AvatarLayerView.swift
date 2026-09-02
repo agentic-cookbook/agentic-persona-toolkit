@@ -1,3 +1,4 @@
+import Foundation
 import QuartzCore
 
 /// `CADisplayLink` retains its target. If the view were its own target, a
@@ -29,6 +30,21 @@ public final class AvatarLayerView: PlatformView {
     /// Called once, after `render` has stopped the loop. See `step`.
     public var onError: ((Error) -> Void)?
 
+    /// Whether this view feeds the host's pointer and clicks into the engine.
+    /// On by default: in the original these are reflexes the avatar owns, not
+    /// host features ($GSAP/src/gaze.ts:120, $GSAP/src/reflexes.ts:67-69). A
+    /// host that wants a decorative, non-reacting olylo turns it off.
+    public var tracksPointer = true
+
+    /// The last point `pointerLocation` reported, so a still cursor is not
+    /// re-reported every frame. Re-reporting would call `notice()` 60 times a
+    /// second and pin the idle ladder to rung 0 forever.
+    private var lastPointer: CGPoint?
+
+    /// The last unit vector `pointerMoved` handed to `engine.look`. Internal:
+    /// the tests assert on it; a host has no business reading it.
+    var lastLook: (x: Double, y: Double) = (0, 0)
+
     /// One shape layer plus the last values written to it. The two strings are
     /// cache keys: `d` gates a `CGPath` rebuild and `ink` a `CGColor` rebuild,
     /// which are the only two allocating writes in the frame.
@@ -48,6 +64,11 @@ public final class AvatarLayerView: PlatformView {
         self.engine = engine
         super.init(frame: frame)
         proxy.view = self
+        addGestureRecognizer(Platform.makeTapRecognizer(target: self,
+                                                        action: #selector(handleTap)))
+        for r in Platform.makeDragRecognizers(target: self, action: #selector(handleDrag(_:))) {
+            addGestureRecognizer(r)
+        }
     }
 
     required init?(coder: NSCoder) {
@@ -82,6 +103,14 @@ public final class AvatarLayerView: PlatformView {
 
     fileprivate func step(_ link: CADisplayLink) {
         do {
+            // The original samples the cursor once per frame too -- its
+            // `pointermove` handler throttles itself to one `requestAnimationFrame`
+            // ($GSAP/src/gaze.ts:97-99) -- so polling here is the same rate, not a
+            // shortcut.
+            if tracksPointer, let p = Platform.pointerLocation(in: self), p != lastPointer {
+                lastPointer = p
+                pointerMoved(to: p)
+            }
             // `targetTimestamp`, not `timestamp`: the frame being built is the
             // one displayed at that instant, so sampling the animation there is
             // what puts the motion on screen on time. `timestamp` renders one
@@ -94,6 +123,46 @@ public final class AvatarLayerView: PlatformView {
             stop()
             onError?(error)
         }
+    }
+
+    // MARK: - the pointer
+
+    /// The pointer is at `point`, in this view's own coordinate space.
+    ///
+    /// The engine's `look` takes a UNIT vector and applies `gaze.gazeMax`
+    /// itself, so what this owes it is the normalised direction from the
+    /// view's centre -- which is what the original computes
+    /// ($GSAP/src/gaze.ts:104-109) before applying the same maximum.
+    public func pointerMoved(to point: CGPoint) {
+        guard tracksPointer, bounds.width > 0, bounds.height > 0 else { return }
+        let dx = point.x - bounds.midX
+        let raw = point.y - bounds.midY
+        // The engine's y is DOWN, like the design canvas. A bottom-left host
+        // space has y up, so the sign flips in exactly the place `fit` flips
+        // the drawing.
+        let dy = Platform.viewSpaceIsBottomLeft ? -raw : raw
+        // `$GSAP`'s `|| 1`: dead centre is a zero-length vector, and dividing
+        // by it would make him stare at NaN.
+        let len = max(hypot(dx, dy), .leastNormalMagnitude)
+        lastLook = (x: Double(dx / len), y: Double(dy / len))
+        engine.look(lastLook.x, lastLook.y)
+        // Gated, unlike the gaze: a move over a background window turns his
+        // head but does not count as activity ($GSAP/src/reflexes.ts:55).
+        if Platform.isFocused(self) { engine.notice() }
+    }
+
+    /// A click or a tap. Pokes AND wakes -- the original binds both to
+    /// `pointerdown` ($GSAP/src/reflexes.ts:69 plus the click reaction), and it
+    /// is ungated: a click on a background window is unambiguously deliberate.
+    public func pointerPressed() {
+        engine.poke()
+        engine.notice()
+    }
+
+    @objc private func handleTap() { pointerPressed() }
+
+    @objc private func handleDrag(_ r: PlatformGestureRecognizer) {
+        pointerMoved(to: r.location(in: self))
     }
 
     // MARK: - the dumb half
