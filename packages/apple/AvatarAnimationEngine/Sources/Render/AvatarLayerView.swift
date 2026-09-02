@@ -24,7 +24,7 @@ private final class DisplayLinkProxy: NSObject {
 /// One `CAShapeLayer` per display item, created on the first `render` and
 /// thereafter only written to. Holds no animation state: everything it draws
 /// comes from the display list it was handed.
-public final class AvatarLayerView: PlatformView {
+public final class AvatarLayerView: AvatarHostView {
     public let engine: Engine
 
     /// Called once, after `render` has stopped the loop. See `step`.
@@ -80,7 +80,10 @@ public final class AvatarLayerView: PlatformView {
     // nonisolated `deinit` could not touch `link` at all under complete
     // concurrency checking. `isolated deinit` runs synchronously on the main
     // actor instead, which is exactly where `link` was created and used.
-    isolated deinit { link?.invalidate() }
+    isolated deinit {
+        link?.invalidate()
+        if let occlusionObserver { NotificationCenter.default.removeObserver(occlusionObserver) }
+    }
 
     /// The layer tree, in display-list order. Internal: the tests assert on it;
     /// a host has no business reaching in.
@@ -88,17 +91,57 @@ public final class AvatarLayerView: PlatformView {
 
     // MARK: - the loop
 
+    /// True between `start()` and `stop()`: the host wants the character
+    /// running. Whether it actually ticks is `isTicking`, which also needs
+    /// the view to be on screen.
+    public private(set) var isStarted = false
+    var isTicking: Bool { link != nil }
+    private var occlusionObserver: NSObjectProtocol?
+
+    /// The colour painted under the mark. `nil` leaves the host layer clear.
+    public var plateColor: CGColor? {
+        didSet { host.backgroundColor = plateColor }
+    }
+
     public func start() {
-        guard link == nil else { return }
-        let l = Platform.displayLink(on: self, target: proxy,
-                                     selector: #selector(DisplayLinkProxy.step(_:)))
-        l.add(to: .main, forMode: .common)
-        link = l
+        isStarted = true
+        reconcileTicking()
     }
 
     public func stop() {
-        link?.invalidate()
-        link = nil
+        isStarted = false
+        reconcileTicking()
+    }
+
+    public override func hostVisibilityChanged() {
+        observeOcclusion()
+        reconcileTicking()
+    }
+
+    private func reconcileTicking() {
+        let shouldTick = isStarted && Platform.isOnScreen(self)
+        if shouldTick, link == nil {
+            let l = Platform.displayLink(on: self, target: proxy,
+                                         selector: #selector(DisplayLinkProxy.step(_:)))
+            l.add(to: .main, forMode: .common)
+            link = l
+        } else if !shouldTick, let l = link {
+            l.invalidate()
+            link = nil
+        }
+    }
+
+    private func observeOcclusion() {
+        if let occlusionObserver {
+            NotificationCenter.default.removeObserver(occlusionObserver)
+            self.occlusionObserver = nil
+        }
+        guard let name = Platform.occlusionNotificationName, let window else { return }
+        occlusionObserver = NotificationCenter.default.addObserver(
+            forName: name, object: window, queue: .main
+        ) { [weak self] _ in
+            MainActor.assumeIsolated { self?.reconcileTicking() }
+        }
     }
 
     fileprivate func step(_ link: CADisplayLink) {

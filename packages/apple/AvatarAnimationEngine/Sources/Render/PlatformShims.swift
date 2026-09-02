@@ -7,6 +7,26 @@ public typealias PlatformView = NSView
 public typealias PlatformColor = NSColor
 public typealias PlatformGestureRecognizer = NSGestureRecognizer
 
+/// The platform-specific half of "the view knows when it can be seen": each
+/// SDK spells the window and hidden callbacks differently, so the overrides
+/// live here and funnel into the one hook `AvatarLayerView` implements.
+@MainActor
+open class AvatarHostView: NSView {
+    open func hostVisibilityChanged() {}
+    open override func viewDidMoveToWindow() {
+        super.viewDidMoveToWindow()
+        hostVisibilityChanged()
+    }
+    open override func viewDidHide() {
+        super.viewDidHide()
+        hostVisibilityChanged()
+    }
+    open override func viewDidUnhide() {
+        super.viewDidUnhide()
+        hostVisibilityChanged()
+    }
+}
+
 /// THE `#if` (Global Constraints). Everything AppKit and UIKit disagree about is
 /// named here, as one constant and three functions with no logic in them. No
 /// other file in this package imports either framework.
@@ -69,6 +89,12 @@ enum Platform {
     /// ($GSAP/src/reflexes.ts:55) so a stray move over a background window will
     /// not rouse him -- but NOT the gaze, which follows the cursor either way.
     static func isFocused(_ view: PlatformView) -> Bool { view.window?.isKeyWindow ?? false }
+
+    static let occlusionNotificationName: Notification.Name? = NSWindow.didChangeOcclusionStateNotification
+    static func isOnScreen(_ view: PlatformView) -> Bool {
+        guard let window = view.window else { return false }
+        return !view.isHiddenOrHasHiddenAncestor && window.occlusionState.contains(.visible)
+    }
 }
 
 #else
@@ -77,6 +103,18 @@ import UIKit
 public typealias PlatformView = UIView
 public typealias PlatformColor = UIColor
 public typealias PlatformGestureRecognizer = UIGestureRecognizer
+
+@MainActor
+open class AvatarHostView: UIView {
+    open func hostVisibilityChanged() {}
+    open override func didMoveToWindow() {
+        super.didMoveToWindow()
+        hostVisibilityChanged()
+    }
+    open override var isHidden: Bool {
+        didSet { if isHidden != oldValue { hostVisibilityChanged() } }
+    }
+}
 
 @MainActor
 enum Platform {
@@ -111,6 +149,17 @@ enum Platform {
     /// A foreground iOS app is the focused one; there is no second window to
     /// steal key from.
     static func isFocused(_ view: PlatformView) -> Bool { true }
+
+    static let occlusionNotificationName: Notification.Name? = nil
+    static func isOnScreen(_ view: PlatformView) -> Bool {
+        guard view.window != nil else { return false }
+        var v: UIView? = view
+        while let cur = v {
+            if cur.isHidden { return false }
+            v = cur.superview
+        }
+        return true
+    }
 }
 #endif
 

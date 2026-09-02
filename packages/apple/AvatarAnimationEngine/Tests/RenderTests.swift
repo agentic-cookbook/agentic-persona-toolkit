@@ -1,5 +1,6 @@
 import XCTest
 import QuartzCore
+import AppKit
 @testable import AvatarAnimationEngine
 
 // `AvatarLayerView` inherits `PlatformView`'s main-actor isolation, and the
@@ -25,6 +26,14 @@ final class RenderTests: XCTestCase {
     private func view(_ w: CGFloat = 200, _ h: CGFloat = 200) throws -> AvatarLayerView {
         AvatarLayerView(engine: try Engine(EngineOptions(config: config)),
                         frame: CGRect(x: 0, y: 0, width: w, height: h))
+    }
+
+    /// An `Engine` built from `dot`, the same fixture `view(_:_:)` uses — the
+    /// lifecycle tests below construct their own `AvatarLayerView` directly
+    /// (some deliberately at the zero frame, before ever touching a window),
+    /// so they need the engine alone rather than a pre-sized view.
+    private func makeEngine() throws -> Engine {
+        try Engine(EngineOptions(config: config))
     }
 
     private func layer(_ v: AvatarLayerView, _ id: String) throws -> CAShapeLayer {
@@ -305,6 +314,77 @@ final class RenderTests: XCTestCase {
         view.pointerSampled(nil)
         XCTAssertEqual(view.lastLook.x, 0, accuracy: 1e-9)
         XCTAssertEqual(view.lastLook.y, 0, accuracy: 1e-9)
+    }
+
+    // MARK: - lifecycle: the view ticks only while it can be seen
+
+    func testStartWithoutAWindowArmsButDoesNotTick() throws {
+        let view = AvatarLayerView(engine: try makeEngine())
+        view.start()
+        XCTAssertTrue(view.isStarted)
+        XCTAssertFalse(view.isTicking, "no window, nobody can see it, no display link")
+    }
+
+    func testAttachingAStartedViewToAVisibleWindowStartsTheLinkAndDetachingStopsIt() throws {
+        let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 200, height: 200),
+                              styleMask: [.titled], backing: .buffered, defer: false)
+        window.orderFrontRegardless()
+        try XCTSkipUnless(window.occlusionState.contains(.visible),
+                          "this host has no display session; the window is never visible")
+        let view = AvatarLayerView(engine: try makeEngine())
+        view.start()
+        window.contentView?.addSubview(view)
+        XCTAssertTrue(view.isTicking)
+        view.removeFromSuperview()
+        XCTAssertFalse(view.isTicking)
+        window.contentView?.addSubview(view)
+        XCTAssertTrue(view.isTicking, "re-attaching resumes without another start()")
+        window.orderOut(nil)
+    }
+
+    func testHidingAStartedViewStopsTheLinkAndUnhidingResumesIt() throws {
+        let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 200, height: 200),
+                              styleMask: [.titled], backing: .buffered, defer: false)
+        window.orderFrontRegardless()
+        try XCTSkipUnless(window.occlusionState.contains(.visible),
+                          "this host has no display session; the window is never visible")
+        let view = AvatarLayerView(engine: try makeEngine())
+        window.contentView?.addSubview(view)
+        view.start()
+        XCTAssertTrue(view.isTicking)
+        view.isHidden = true
+        XCTAssertFalse(view.isTicking)
+        view.isHidden = false
+        XCTAssertTrue(view.isTicking)
+        window.orderOut(nil)
+    }
+
+    func testStopDisarmsEvenWhileVisible() throws {
+        let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 200, height: 200),
+                              styleMask: [.titled], backing: .buffered, defer: false)
+        window.orderFrontRegardless()
+        try XCTSkipUnless(window.occlusionState.contains(.visible),
+                          "this host has no display session; the window is never visible")
+        let view = AvatarLayerView(engine: try makeEngine())
+        window.contentView?.addSubview(view)
+        view.start()
+        view.stop()
+        XCTAssertFalse(view.isStarted)
+        XCTAssertFalse(view.isTicking)
+        view.removeFromSuperview()
+        window.contentView?.addSubview(view)
+        XCTAssertFalse(view.isTicking, "a stopped view stays stopped through window changes")
+        window.orderOut(nil)
+    }
+
+    func testThePlateColourIsPaintedOnTheHostLayer() throws {
+        let view = AvatarLayerView(engine: try makeEngine())
+        XCTAssertNil(view.plateColor)
+        let ink = CGColor(srgbRed: 6 / 255, green: 20 / 255, blue: 13 / 255, alpha: 1)
+        view.plateColor = ink
+        XCTAssertEqual(view.layer?.backgroundColor, ink)
+        view.plateColor = nil
+        XCTAssertNil(view.layer?.backgroundColor)
     }
 }
 
