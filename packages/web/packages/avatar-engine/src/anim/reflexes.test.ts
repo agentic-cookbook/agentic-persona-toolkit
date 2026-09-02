@@ -260,6 +260,27 @@ describe("reflexes", () => {
     expect(dip).toBeCloseTo(1, 6);
   });
 
+  it("gives each eye its own blink chain, so the lids are never in lockstep", () => {
+    const c = make();
+    c.reflexes.start(0);
+    // Drive a minute of engine time and record, per channel, the frames on
+    // which that lid was shut. `blink.minMs` is 2800 and `maxMs` 7000, so a
+    // minute is between 8 and 21 blinks per eye -- plenty to separate two
+    // chains from one.
+    const shutAt: Record<string, number[]> = { "eyeLeft.scaleY": [], "eyeRight.scaleY": [] };
+    for (let f = 0; f < 60 * 60; f++) {
+      const t = f / 60;
+      c.scheduler.tick(t); c.tweens.tick(t);
+      for (const ch of Object.keys(shutAt)) {
+        if ((c.channels.get(ch) as number) < 0.5) shutAt[ch]!.push(f);
+      }
+    }
+    expect(shutAt["eyeLeft.scaleY"]!.length).toBeGreaterThan(0);
+    expect(shutAt["eyeRight.scaleY"]!.length).toBeGreaterThan(0);
+    // The whole point: the two lids do not shut on the same frames.
+    expect(shutAt["eyeLeft.scaleY"]).not.toEqual(shutAt["eyeRight.scaleY"]);
+  });
+
   it("follows a look, and wanders within gazeMax once the pointer goes quiet", () => {
     const c = make();
     c.reflexes.start(0);

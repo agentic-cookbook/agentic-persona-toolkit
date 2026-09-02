@@ -286,27 +286,40 @@ public final class Reflexes {
 
     // MARK: - blink
 
+    /// Arms every lid. The original runs a separate `useBlink` hook per eye
+    /// (`$GSAP/src/engine.ts:106-107`), so the lids are never in step;
+    /// expanding inside `blink` instead -- as this did -- shuts them on the
+    /// same frame with the same tween, which reads as a graphic rather than a
+    /// face. `expand` returns `[channel]` for a name it does not know, so a
+    /// one-eyed character gets exactly one chain from the same code.
     private func armBlink(_ when: Double) {
-        at(when + prng.range(b.blink.minMs, b.blink.maxMs) / 1000) { me, t in me.blink(t) }
+        for channel in ctx.config.expand(b.blink.channel) { armLid(when, channel) }
     }
 
-    private func blink(_ when: Double) {
+    /// One lid's self-perpetuating chain. The gap is drawn off the engine's one
+    /// shared `Prng` in `expand`'s declared order, which is what keeps the
+    /// recorded goldens reproducible.
+    private func armLid(_ when: Double, _ channel: String) {
+        at(when + prng.range(b.blink.minMs, b.blink.maxMs) / 1000) { me, t in
+            me.blink(t, channel)
+        }
+    }
+
+    private func blink(_ when: Double, _ channel: String) {
         if !b.blink.suppressedIn.contains(moodOf()) {
-            for channel in ctx.config.expand(b.blink.channel) {
-                // Captured before the close, so the eye reopens to whatever the
-                // pose asked for rather than to the rig's rest.
-                let open = live(channel)
-                ctx.tweens.add(TweenSpec(channel: channel, to: .number(b.blink.shut),
-                                         duration: b.blink.tweenDuration,
-                                         ease: b.blink.ease), now: when)
-                at(when + b.blink.durationMs / 1000) { me, t in
-                    me.ctx.tweens.add(TweenSpec(channel: channel, to: .number(open),
-                                                duration: me.b.blink.tweenDuration,
-                                                ease: me.b.blink.ease), now: t)
-                }
+            // Captured before the close, so the eye reopens to whatever the
+            // pose asked for rather than to the rig's rest.
+            let open = live(channel)
+            ctx.tweens.add(TweenSpec(channel: channel, to: .number(b.blink.shut),
+                                     duration: b.blink.tweenDuration,
+                                     ease: b.blink.ease), now: when)
+            at(when + b.blink.durationMs / 1000) { me, t in
+                me.ctx.tweens.add(TweenSpec(channel: channel, to: .number(open),
+                                            duration: me.b.blink.tweenDuration,
+                                            ease: me.b.blink.ease), now: t)
             }
         }
-        armBlink(when)
+        armLid(when, channel)
     }
 
     // MARK: - gaze

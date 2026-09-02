@@ -45,10 +45,22 @@ describe("engine", () => {
   });
 
   it("differs between seeds", () => {
+    // Sampled once per second across the run, not just at the final instant:
+    // with two independent blink chains (Task 44) each engine can land on an
+    // idle, tween-free frame -- no blink, no gaze wander -- at any ONE given
+    // tick purely by chance, coinciding across seeds despite the seed
+    // otherwise mattering throughout the run. Concatenating several samples
+    // keeps that single-instant coincidence from failing a test about
+    // determinism, while still failing if the seed genuinely stopped
+    // affecting anything.
     const at = (seed: number): string => {
       const e = createEngine({ config, seed });
-      for (let t = 0; t <= 20; t += 1 / 60) e.tick(t);
-      return JSON.stringify(e.tick(20));
+      const samples: string[] = [];
+      for (let f = 0; f <= 20 * 60; f++) {
+        const list = e.tick(f / 60);
+        if (f % 60 === 0) samples.push(JSON.stringify(list));
+      }
+      return samples.join("|");
     };
     expect(at(1)).not.toBe(at(2));
   });

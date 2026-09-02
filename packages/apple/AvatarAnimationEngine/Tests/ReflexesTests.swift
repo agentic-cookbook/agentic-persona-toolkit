@@ -336,6 +336,33 @@ final class ReflexesTests: XCTestCase {
         XCTAssertEqual(dip, 1, accuracy: 1e-6, "a suppressed mood blinked anyway")
     }
 
+    func testGivesEachEyeItsOwnBlinkChainSoTheLidsAreNeverInLockstep() throws {
+        let h = try Harness()
+        let b = h.behavior.blink
+        // The fixture's `blink.channel` is a group of two -- `eye.scaleY` and
+        // `pupil.scaleY` on the "dot" fixture -- so `expand`'s two entries
+        // stand in for the two lids, in its declared order, per Task 44's
+        // contract: do not sort, shuffle, or re-derive that order.
+        let channels = h.config.expand(b.channel)
+        h.reflexes.start(0)
+        // Drive a minute of engine time and record, per channel, the frames on
+        // which that channel was shut. A minute at this fixture's [2200,6200]ms
+        // gap is between 10 and 27 blinks per chain -- plenty to separate two
+        // chains from one.
+        var shutAt = channels.map { _ in [Int]() }
+        for f in 0 ..< 60 * 60 {
+            let t = Double(f) / 60
+            h.scheduler.tick(t)
+            h.tweens.tick(t)
+            for i in channels.indices {
+                if h.number(channels[i]) < 0.5 { shutAt[i].append(f) }
+            }
+        }
+        for dips in shutAt { XCTAssertGreaterThan(dips.count, 0) }
+        // The whole point: the two chains do not shut on the same frames.
+        XCTAssertNotEqual(shutAt[0], shutAt[1])
+    }
+
     // MARK: - gaze
 
     func testFollowsALookAndThenWandersWithinGazeMax() throws {

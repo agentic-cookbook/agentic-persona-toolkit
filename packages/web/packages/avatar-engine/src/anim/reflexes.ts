@@ -222,29 +222,40 @@ export function createReflexes(deps: ReflexDeps): Reflexes {
 
   /* ── blink ───────────────────────────────────────────────────────── */
 
+  /** Arms every lid. The original runs a separate `useBlink` hook per eye
+   *  ($GSAP/src/engine.ts:106-107), so the lids are never in step; expanding
+   *  inside `blink` instead -- as this did -- shuts them on the same frame with
+   *  the same tween, which reads as a graphic rather than a face. `expand`
+   *  returns `[channel]` for a name it does not know, so a one-eyed
+   *  character gets exactly one chain from the same code. */
   function armBlink(when: number): void {
-    at(when + prng.range(b.blink.minMs, b.blink.maxMs) / 1000, blink);
+    for (const ch of config.expand(b.blink.channel)) armLid(when, ch);
   }
 
-  function blink(when: number): void {
+  /** One lid's self-perpetuating chain. The gap is drawn off the engine's one
+   *  shared prng in `expand`'s declared order, which is what keeps the recorded
+   *  goldens reproducible. */
+  function armLid(when: number, ch: string): void {
+    at(when + prng.range(b.blink.minMs, b.blink.maxMs) / 1000, (t) => blink(t, ch));
+  }
+
+  function blink(when: number, ch: string): void {
     if (!b.blink.suppressedIn.includes(mood())) {
-      for (const ch of config.expand(b.blink.channel)) {
-        // Captured before the close, so the eye reopens to whatever the pose
-        // asked for rather than to the rig's rest.
-        const open = now0(ch);
+      // Captured before the close, so the eye reopens to whatever the pose
+      // asked for rather than to the rig's rest.
+      const open = now0(ch);
+      tweens.add({
+        channel: ch, to: b.blink.shut,
+        duration: b.blink.tweenDuration, ease: b.blink.ease,
+      }, when);
+      at(when + b.blink.durationMs / 1000, (t) => {
         tweens.add({
-          channel: ch, to: b.blink.shut,
+          channel: ch, to: open,
           duration: b.blink.tweenDuration, ease: b.blink.ease,
-        }, when);
-        at(when + b.blink.durationMs / 1000, (t) => {
-          tweens.add({
-            channel: ch, to: open,
-            duration: b.blink.tweenDuration, ease: b.blink.ease,
-          }, t);
-        });
-      }
+        }, t);
+      });
     }
-    armBlink(when);
+    armLid(when, ch);
   }
 
   /* ── gaze ────────────────────────────────────────────────────────── */
