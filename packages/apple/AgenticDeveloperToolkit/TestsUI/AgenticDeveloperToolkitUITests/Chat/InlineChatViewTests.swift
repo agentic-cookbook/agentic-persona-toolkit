@@ -259,6 +259,29 @@ struct InlineChatViewTests {
 
     /// The prompt is the composer's own ink — web colours it with the input's
     /// text colour — so it has to follow the theme like everything else.
+    /// Two points prove the drop is not a constant; the slider has a range,
+    /// and the glyph has to land centred everywhere in it. This walks the
+    /// whole of `WindowAppearanceDefaults.textScaleRange`.
+    @Test("the prompt is centred at every size the slider can reach")
+    func promptCentersAcrossTheWholeRange() throws {
+        let manager = makeManager(activeThemeID: terminalThemeID)
+        let (view, _, _) = makeView()
+        view.chrome = .terminal
+        view.layoutSubtreeIfNeeded()
+
+        let range = WindowAppearanceDefaults.textScaleRange
+        var scale = range.lowerBound
+        while scale <= range.upperBound + 0.0001 {
+            manager.textScale = scale
+            pumpRunLoop()
+            view.layoutSubtreeIfNeeded()
+            let error = try centeringError(in: view, font: manager.currentPalette.font(.body))
+            #expect(abs(error) < 1, "off by \(error) at scale \(scale)")
+            scale += 0.05
+        }
+        withExtendedLifetime(manager) {}
+    }
+
     @Test("the prompt repaints with the active theme")
     func promptRepaintsOnThemeChange() {
         let manager = makeManager(activeThemeID: BuiltInThemes.solarizedDark.id)
@@ -304,6 +327,44 @@ struct InlineChatViewTests {
         #expect(view.thinkingIndicator.layer?.backgroundColor == NSColor.clear.cgColor)
         let statusRow = try #require(view.thinkingIndicator.superview)
         #expect(statusRow.layer?.backgroundColor == NSColor.clear.cgColor)
+        withExtendedLifetime(manager) {}
+    }
+
+    /// The operator's item: "the transparency should not affect the text or
+    /// gear button or controls only the container's background". The surface
+    /// is the only thing that thins; everything drawn on top of it keeps the
+    /// alpha the theme gave it, at every setting the slider can reach.
+    @Test("transparency thins the surface and nothing else")
+    func transparencyTouchesOnlyTheSurface() throws {
+        let terminal = try #require(BuiltInThemes.all.first { $0.name == "Old School Terminal" })
+        let manager = makeManager(activeThemeID: terminal.id)
+        let (view, _, _) = makeView()
+        view.chrome = .terminal
+        view.layoutSubtreeIfNeeded()
+
+        func surfaceAlpha() throws -> CGFloat {
+            try #require(view.layer?.backgroundColor?.alpha)
+        }
+        func inkAlphas() throws -> [CGFloat] {
+            [try #require(view.inputField.textColor),
+             try #require(view.promptLabel.textColor)]
+                .map { $0.usingColorSpace(.sRGB)?.alphaComponent ?? -1 }
+        }
+
+        let opaqueInk = try inkAlphas()
+        #expect(opaqueInk.allSatisfy { $0 > 0 })
+
+        var previousSurface = try surfaceAlpha()
+        for percent in stride(from: 10.0, through: 100.0, by: 10.0) {
+            view.surfaceTransparency = percent
+            let surface = try surfaceAlpha()
+            #expect(surface < previousSurface, "surface did not thin at \(percent)%")
+            #expect(try inkAlphas() == opaqueInk, "the text moved at \(percent)%")
+            previousSurface = surface
+        }
+        // The far end really is gone, not merely dim: this is what makes 100
+        // a usable setting rather than the end of a fade.
+        #expect(previousSurface < 0.001)
         withExtendedLifetime(manager) {}
     }
 

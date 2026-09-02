@@ -18,10 +18,82 @@ import AgenticDeveloperToolkit
 /// prompts, no widgets. Task 8 seams are called out inline below, at the
 /// point each attaches.
 @MainActor
-public final class InlineChatView: NSView, ChatStateObserver, Themeable, NSTextFieldDelegate {
+public final class InlineChatView: NSView, ChatStateObserver, Themeable, NSTextFieldDelegate,
+                                   ThemeScopeProviding {
 
     public let viewModel: any ChatViewModel
     public let localParticipantID: String
+
+    /// This chat's own type size, separate from every other chat's.
+    ///
+    /// Declared here rather than on the window because it is the *chat* that
+    /// the size belongs to: everything inside resolves its palette by walking
+    /// up to this view, so one slider reaches the transcript, the status line
+    /// and the composer, and reaches nothing outside. Left at `1` it is
+    /// indistinguishable from having no scope — see `ThemeScope`.
+    public let themeScope = ThemeScope()
+
+    /// How much of the surface to take away, `0`–`100`.
+    ///
+    /// Only the surface: the fill this view paints under everything else. The
+    /// text, the prompt, the send glyph and the window's gear stay fully
+    /// opaque at every setting, which is the difference between a chat you can
+    /// see through and a chat that has been faded out. (The window's own
+    /// `alphaValue` would do the second — it composites the whole window,
+    /// chrome and all.)
+    public var surfaceTransparency: Double = 0 {
+        didSet {
+            guard surfaceTransparency != oldValue else { return }
+            applyTheme(resolvedThemeScope.palette)
+        }
+    }
+
+    /// Something to draw behind the conversation — a field of falling glyphs,
+    /// a gradient, a starfield.
+    ///
+    /// It goes above the surface fill and below everything else, pinned to all
+    /// four edges and click-through, so a host supplies a view and nothing
+    /// else. `nil`, the default, is a plain chat. A backdrop that also
+    /// conforms to `AnimatedBackdrop` is started and stopped with
+    /// `showsBackdrop`, so a hidden one costs no frames.
+    public var backdrop: NSView? {
+        didSet {
+            oldValue?.removeFromSuperview()
+            (oldValue as? any AnimatedBackdrop)?.stopAnimating()
+            guard let backdrop else { return }
+            backdrop.translatesAutoresizingMaskIntoConstraints = false
+            addSubview(backdrop, positioned: .below, relativeTo: subviews.first)
+            NSLayoutConstraint.activate([
+                backdrop.leadingAnchor.constraint(equalTo: leadingAnchor),
+                backdrop.trailingAnchor.constraint(equalTo: trailingAnchor),
+                backdrop.topAnchor.constraint(equalTo: topAnchor),
+                backdrop.bottomAnchor.constraint(equalTo: bottomAnchor)
+            ])
+            applyBackdropVisibility()
+        }
+    }
+
+    /// Whether the backdrop is drawn. A host surfaces it as a switch (the
+    /// window gear does); with no backdrop set it means nothing.
+    public var showsBackdrop: Bool = true {
+        didSet {
+            guard showsBackdrop != oldValue else { return }
+            applyBackdropVisibility()
+        }
+    }
+
+    private func applyBackdropVisibility() {
+        guard let backdrop else { return }
+        backdrop.isHidden = !showsBackdrop
+        guard let animated = backdrop as? any AnimatedBackdrop else { return }
+        if showsBackdrop { animated.startAnimating() } else { animated.stopAnimating() }
+    }
+
+    /// Fires on ⌘+, ⌘− and ⌘0 with `+1`, `-1` and `0`. A host wires it to
+    /// whatever owns the saved text size — `ChatWindowAppearanceController`
+    /// does — because the view knows the gesture and not where the number
+    /// lives.
+    public var onTextScaleNudge: ((Int) -> Void)?
 
     /// How the box resizes between its active (engaged) and inactive
     /// states. Defaulted so every existing call site is unchanged: with no
@@ -145,7 +217,7 @@ public final class InlineChatView: NSView, ChatStateObserver, Themeable, NSTextF
         super.init(frame: .zero)
         setupViews()
         viewModel.addObserver(self)
-        themeObserver = ThemePaletteObserver { [weak self] palette in self?.applyTheme(palette) }
+        themeObserver = ThemePaletteObserver(host: self) { [weak self] palette in self?.applyTheme(palette) }
         applyChrome()
         rebuildTranscript()
         refreshStatus()
@@ -315,7 +387,14 @@ public final class InlineChatView: NSView, ChatStateObserver, Themeable, NSTextF
     /// thing between the chat and the desktop.
     public func applyTheme(_ palette: SemanticPalette) {
         wantsLayer = true
-        layer?.backgroundColor = palette.nsColor(.chatSurface).cgColor
+        // The theme's own alpha, thinned by the window's transparency setting.
+        // Multiplied rather than replaced: `old-school-terminal` already asks
+        // for `rgba(5, 8, 5, 0.8)`, and a setting that overwrote that would
+        // make 0% transparency *more* opaque than the theme designed.
+        let surface = palette.nsColor(.chatSurface)
+        layer?.backgroundColor = surface
+            .withAlphaComponent(surface.alphaComponent * CGFloat(1 - surfaceTransparency / 100))
+            .cgColor
         // Not `.windowBackground` (the AppKit default, which would hide the
         // surface behind an opaque system fill) and not `chatSurface` either
         // — the transcript *is* the surface, so it draws nothing and lets the
@@ -362,7 +441,7 @@ public final class InlineChatView: NSView, ChatStateObserver, Themeable, NSTextF
         // the alignment is redone here as well as on a theme change. (The
         // `applyTheme` call at the end of this method would do it too; doing
         // it here keeps the reason next to the change that causes it.)
-        alignPrompt(palette: ThemePaletteObserver.currentPalette)
+        alignPrompt(palette: resolvedThemeScope.palette)
         if let glyph = chrome.sendGlyph {
             sendButton.image = nil
             sendButton.title = glyph
@@ -371,7 +450,38 @@ public final class InlineChatView: NSView, ChatStateObserver, Themeable, NSTextF
             sendButton.image = NSImage(
                 systemSymbolName: "arrow.up.circle.fill", accessibilityDescription: "Send")
         }
-        applyTheme(ThemePaletteObserver.currentPalette)
+        applyTheme(resolvedThemeScope.palette)
+    }
+
+    /// ⌘+ / ⌘− / ⌘0 on the chat's own type size.
+    ///
+    /// Here rather than in a menu item because a chat window may have no menu
+    /// of its own — Olylo's is a status-bar app — and because a menu item would
+    /// aim at whichever window was key, where this is dispatched down *this*
+    /// window's view tree and so can only ever resize this chat.
+    ///
+    /// Only while the composer accepts typing: a chat that cannot be typed
+    /// into is a transcript someone is watching, and the shortcuts belong to
+    /// whatever else is on screen.
+    public override func performKeyEquivalent(with event: NSEvent) -> Bool {
+        guard inputField.isEnabled,
+              event.modifierFlags.intersection(.deviceIndependentFlagsMask) == .command,
+              let nudge = Self.textScaleNudge(for: event.charactersIgnoringModifiers)
+        else { return super.performKeyEquivalent(with: event) }
+        onTextScaleNudge?(nudge)
+        return true
+    }
+
+    /// `=` as well as `+` because ⌘+ is typed without the shift on every
+    /// keyboard layout that puts them on one key, and AppKit reports what was
+    /// actually typed.
+    private static func textScaleNudge(for characters: String?) -> Int? {
+        switch characters {
+        case "+", "=": return 1
+        case "-": return -1
+        case "0": return 0
+        default: return nil
+        }
     }
 
     public override func layout() {

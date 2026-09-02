@@ -13,6 +13,14 @@ import AppKit
 /// The popover's body is built once, on first open, so a host's control
 /// closures can bind to live values without a window paying for them at
 /// launch.
+///
+/// While it is open the popover **freezes the host window's content refit** —
+/// see `ContentRefittingWindowController`. A window that resizes from its
+/// content would otherwise walk out from under the pointer as a text-size
+/// slider is dragged, because the slider is changing the thing the size is
+/// measured from. Hosts that want to react to open and close themselves can
+/// hook `onWillShow` / `onDidClose`; the freeze needs no per-window
+/// bookkeeping.
 @MainActor
 public final class WindowConfigPopover: NSObject {
 
@@ -21,20 +29,39 @@ public final class WindowConfigPopover: NSObject {
     /// the same button in its own content instead.
     public let gearButton = NSButton()
 
+    /// Fires as the popover opens, before it is on screen and after the host
+    /// window's refit has been frozen.
+    public var onWillShow: (() -> Void)?
+
+    /// Fires after the popover closes — the toggle-close and the click-away
+    /// close alike — once the host window's refit has resumed.
+    public var onDidClose: (() -> Void)?
+
     public var isShown: Bool { popover.isShown }
 
     private let title: String
     private let makeControls: @MainActor () -> [NSView]
-    private let popover = NSPopover()
+    private let preferredEdge: NSRectEdge
+    /// Internal, not private, for the same reason `ContentViewController` is:
+    /// a test has to be able to look at what is actually on screen after a
+    /// rebuild, and the alternative is a second accessor that exists only for
+    /// tests and can drift from the thing it reports on.
+    let popover = NSPopover()
     private var contentBuilt = false
 
+    /// - Parameter preferredEdge: which side of the gear the panel drops from.
+    ///   The default suits a gear in a title bar, whose coordinates are
+    ///   flipped; a host that puts the button in ordinary unflipped content
+    ///   passes `.minY` to get the same *visual* result.
     public init(
         title: String,
         tooltip: String = "Window appearance",
+        preferredEdge: NSRectEdge = .maxY,
         makeControls: @escaping @MainActor () -> [NSView]
     ) {
         self.title = title
         self.makeControls = makeControls
+        self.preferredEdge = preferredEdge
         super.init()
 
         gearButton.translatesAutoresizingMaskIntoConstraints = false
@@ -48,6 +75,7 @@ public final class WindowConfigPopover: NSObject {
         gearButton.contentTintColor = .secondaryLabelColor
 
         popover.behavior = .transient
+        popover.delegate = self
     }
 
     /// A right-hand title bar accessory holding the gear, plus whatever
@@ -84,6 +112,20 @@ public final class WindowConfigPopover: NSObject {
 
     @objc private func gearTapped() { toggle() }
 
+    /// Throws away the built panel so the next open reads live values again.
+    ///
+    /// The controls are built once and kept, which is right while the panel is
+    /// the only thing changing these settings — and wrong the moment something
+    /// else does. A keyboard shortcut that moves the text size leaves an open
+    /// slider showing the number it had before. Rebuilt immediately if the
+    /// panel is on screen, and lazily if it is not.
+    public func rebuildControls() {
+        contentBuilt = false
+        guard popover.isShown else { return }
+        popover.contentViewController = ContentViewController(title: title, controls: makeControls())
+        contentBuilt = true
+    }
+
     public func toggle() {
         if popover.isShown {
             popover.close()
@@ -93,13 +135,20 @@ public final class WindowConfigPopover: NSObject {
             popover.contentViewController = ContentViewController(title: title, controls: makeControls())
             contentBuilt = true
         }
-        // `.maxY`, which is *down* from a title-bar accessory: AppKit reads the
-        // edge in the positioning view's own coordinates, and the accessory's
-        // are flipped, so `.minY` floated the panel off the top of the window
-        // with its arrow pointing back down at the gear. A gear at the top of a
-        // window drops its options over the window, the way every other
-        // titlebar control does.
-        popover.show(relativeTo: gearButton.bounds, of: gearButton, preferredEdge: .maxY)
+        // The default edge is `.maxY`, which is *down* from a title-bar
+        // accessory: AppKit reads the edge in the positioning view's own
+        // coordinates, and the accessory's are flipped, so `.minY` floated the
+        // panel off the top of the window with its arrow pointing back down at
+        // the gear. A gear at the top of a window drops its options over the
+        // window, the way every other titlebar control does.
+        popover.show(relativeTo: gearButton.bounds, of: gearButton, preferredEdge: preferredEdge)
+    }
+
+    /// The host window's controller, if it is one that refits from its content.
+    /// Looked up on demand rather than held, because the button is placed by
+    /// the host and only joins a window later.
+    private var hostController: (any ContentRefittingWindowController)? {
+        gearButton.window?.windowController as? any ContentRefittingWindowController
     }
 
     /// The popover body: a caption over the controls at one fixed width, so
@@ -151,6 +200,19 @@ public final class WindowConfigPopover: NSObject {
             NSLayoutConstraint.activate(constraints)
             view = root
         }
+    }
+}
+
+extension WindowConfigPopover: NSPopoverDelegate {
+
+    public func popoverWillShow(_ notification: Notification) {
+        hostController?.suppressContentRefit()
+        onWillShow?()
+    }
+
+    public func popoverDidClose(_ notification: Notification) {
+        hostController?.resumeContentRefit()
+        onDidClose?()
     }
 }
 

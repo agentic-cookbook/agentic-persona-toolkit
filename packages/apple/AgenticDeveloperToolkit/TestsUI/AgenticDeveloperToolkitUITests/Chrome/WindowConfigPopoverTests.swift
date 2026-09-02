@@ -159,4 +159,84 @@ struct WindowConfigPopoverTests {
         #expect(reported == [false])
         #expect(control.isOn == false)
     }
+
+    // MARK: Opening and closing
+
+    // Presenting for real needs a window on screen, so these drive the
+    // delegate methods directly. That is the seam windows actually depend on:
+    // the same two calls freeze and thaw a host's content refit.
+
+    @Test("opening and closing report themselves to the host, in that order")
+    func openCloseHooksFire() {
+        let popover = WindowConfigPopover(title: "Test Window") { [NSSlider()] }
+        var events: [String] = []
+        popover.onWillShow = { events.append("show") }
+        popover.onDidClose = { events.append("close") }
+
+        popover.popoverWillShow(Notification(name: NSPopover.willShowNotification))
+        popover.popoverDidClose(Notification(name: NSPopover.didCloseNotification))
+
+        #expect(events == ["show", "close"])
+    }
+
+    @Test("a gear with no host window opens and closes without one")
+    func hooksAreOptional() {
+        let popover = WindowConfigPopover(title: "Test Window") { [NSSlider()] }
+        // No hooks, and a button in no window — both the callbacks and the
+        // refit lookup must be safe no-ops, or a popover in a plain panel
+        // would crash on open.
+        popover.popoverWillShow(Notification(name: NSPopover.willShowNotification))
+        popover.popoverDidClose(Notification(name: NSPopover.didCloseNotification))
+    }
+
+    // MARK: Rebuilding
+
+    /// A control can be moved by something other than itself — ⌘+ moves the
+    /// text-size slider — and the panel is built from a closure over live
+    /// state, so the fix is to build it again rather than to reach in and set
+    /// a value on a control the popover owns.
+    @Test("rebuilding an open panel picks up the new state")
+    func rebuildRereadsTheState() throws {
+        var scale = 1.0
+        let popover = WindowConfigPopover(title: "Olylo Window") {
+            [WindowConfigSlider(
+                title: "Text Size", value: scale, range: 0.85...1.75,
+                caption: { "\(Int(($0 * 100).rounded()))%" },
+                onChange: { _ in })]
+        }
+        let window = NSWindow(
+            contentRect: NSRect(x: 0, y: 0, width: 300, height: 300),
+            styleMask: [.titled], backing: .buffered, defer: false)
+        popover.gearButton.frame = NSRect(x: 0, y: 0, width: 40, height: 40)
+        window.contentView?.addSubview(popover.gearButton)
+        window.makeKeyAndOrderFront(nil)
+        popover.toggle()
+        try #require(popover.isShown)
+
+        let firstPanel = try #require(popover.popover.contentViewController)
+        let before = try #require(slider(in: firstPanel.view))
+        #expect(before.doubleValue == 1.0)
+
+        scale = 1.5
+        popover.rebuildControls()
+        let secondPanel = try #require(popover.popover.contentViewController)
+        let after = try #require(slider(in: secondPanel.view))
+        #expect(after.doubleValue == 1.5)
+
+        popover.toggle()
+        window.orderOut(nil)
+    }
+
+    /// Rebuilding a *closed* panel would build controls nobody is looking at,
+    /// and would do it every time a key was pressed.
+    @Test("rebuilding a closed panel does nothing")
+    func rebuildOfAClosedPanelIsFree() {
+        var builds = 0
+        let popover = WindowConfigPopover(title: "Olylo Window") {
+            builds += 1
+            return []
+        }
+        popover.rebuildControls()
+        #expect(builds == 0)
+    }
 }

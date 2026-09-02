@@ -179,7 +179,7 @@ public final class ThinkingIndicatorView: NSView, Themeable {
             dot.alphaValue = 0.3
         }
 
-        themeObserver = ThemePaletteObserver { [weak self] palette in self?.applyTheme(palette) }
+        themeObserver = ThemePaletteObserver(host: self) { [weak self] palette in self?.applyTheme(palette) }
     }
 
     /// Draws no fill of its own. Web's `.pc-typing` declares no `background`
@@ -257,8 +257,8 @@ public final class ThinkingIndicatorView: NSView, Themeable {
         dotsStack.isHidden = usesPhaseMachine
         label.isHidden = !usesPhaseMachine
         glyphLabel.isHidden = !usesPhaseMachine
-        resizeGlyphBox(palette: ThemePaletteObserver.currentPalette)
-        render(palette: ThemePaletteObserver.currentPalette)
+        resizeGlyphBox(palette: resolvedThemeScope.palette)
+        render(palette: resolvedThemeScope.palette)
     }
 
     /// Drives the indicator from a live status. With no vocabulary configured
@@ -281,7 +281,7 @@ public final class ThinkingIndicatorView: NSView, Themeable {
         if let announcement = machine.takePendingAnnouncement() {
             postAccessibilityAnnouncement(announcement)
         }
-        render(palette: ThemePaletteObserver.currentPalette)
+        render(palette: resolvedThemeScope.palette)
         machine.isSpinning ? startPhaseTimerIfNeeded() : stopPhaseTimer()
     }
 
@@ -296,7 +296,7 @@ public final class ThinkingIndicatorView: NSView, Themeable {
         if let announcement = machine.takePendingAnnouncement() {
             postAccessibilityAnnouncement(announcement)
         }
-        render(palette: ThemePaletteObserver.currentPalette)
+        render(palette: resolvedThemeScope.palette)
         startPhaseTimerIfNeeded()
     }
 
@@ -306,7 +306,7 @@ public final class ThinkingIndicatorView: NSView, Themeable {
         let now = Date().timeIntervalSinceReferenceDate
         machine.clearUtterance(at: now)
         currentUtterance = nil
-        render(palette: ThemePaletteObserver.currentPalette)
+        render(palette: resolvedThemeScope.palette)
         if !machine.isSpinning { stopPhaseTimer() }
     }
 
@@ -330,7 +330,7 @@ public final class ThinkingIndicatorView: NSView, Themeable {
         // doc comment) — this drains defensively so a future change to that
         // contract cannot silently start re-announcing every glyph frame.
         _ = machine.takePendingAnnouncement()
-        render(palette: ThemePaletteObserver.currentPalette)
+        render(palette: resolvedThemeScope.palette)
         if !machine.isSpinning { stopPhaseTimer() }
     }
 

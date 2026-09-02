@@ -34,7 +34,10 @@ struct WindowAppearanceDefaultsTests {
         // `UserDefaults` answers 0 for an absent double, and a text scale of 0
         // lays a window out at no height at all — hence the explicit fallback.
         #expect(defaults.textScale == 1)
-        #expect(defaults.transparency == 1)
+        // Zero *percent* transparency — the theme's own alpha, untouched.
+        // Read as an alpha this used to be 1, which is the same window and
+        // the opposite number; the slider now counts the way a reader does.
+        #expect(defaults.transparency == 0)
         #expect(defaults.isFloating == false)
         // On, the way web's caret blinks unconditionally.
         #expect(defaults.blinksCaret)
@@ -44,12 +47,12 @@ struct WindowAppearanceDefaultsTests {
     func valuesRoundTrip() {
         let defaults = makeDefaults()
         defaults.textScale = 1.25
-        defaults.transparency = 0.6
+        defaults.transparency = 60
         defaults.isFloating = true
         defaults.blinksCaret = false
 
         #expect(defaults.textScale == 1.25)
-        #expect(defaults.transparency == 0.6)
+        #expect(defaults.transparency == 60)
         #expect(defaults.isFloating)
         #expect(defaults.blinksCaret == false)
     }
@@ -58,7 +61,7 @@ struct WindowAppearanceDefaultsTests {
     func storedValuesAreClamped() {
         let suite = UserDefaults(suiteName: "adt.tests.\(UUID().uuidString)")!
         suite.set(9.0, forKey: "test.window.textScale")
-        suite.set(-3.0, forKey: "test.window.transparency")
+        suite.set(-3.0, forKey: "test.window.transparencyPercent")
         let defaults = WindowAppearanceDefaults(namespace: "test.window", defaults: suite)
 
         #expect(defaults.textScale == WindowAppearanceDefaults.textScaleRange.upperBound)
@@ -84,7 +87,7 @@ struct WindowAppearanceDefaultsTests {
         let manager = makeManager()
         let defaults = makeDefaults()
         defaults.textScale = 1.5
-        defaults.transparency = 0.5
+        defaults.transparency = 50
         defaults.isFloating = true
         defaults.blinksCaret = false
 
@@ -96,8 +99,14 @@ struct WindowAppearanceDefaultsTests {
             window: window, chatView: chat, defaults: defaults, title: "Test Window")
         controller.restore()
 
-        #expect(manager.textScale == 1.5)
-        #expect(window.alphaValue == 0.5)
+        // The scale lands on this chat's own scope, not on the app-wide
+        // manager: one window's slider must not resize another window's text.
+        #expect(chat.themeScope.textScale == 1.5)
+        #expect(manager.textScale == 1)
+        // And transparency lands on the chat's surface, not the window's
+        // `alphaValue`, which would fade the text and the gear with it.
+        #expect(chat.surfaceTransparency == 50)
+        #expect(window.alphaValue == 1)
         #expect(window.level == .floating)
         #expect(chat.inputField.caretBlinks == false)
         withExtendedLifetime(manager) {}
@@ -119,6 +128,122 @@ struct WindowAppearanceDefaultsTests {
         let accessory = window.titlebarAccessoryViewControllers.first
         #expect(accessory != nil)
         #expect(accessory?.layoutAttribute == .right)
+        withExtendedLifetime(manager) {}
+    }
+
+    /// Windows saved before the slider counted percentages hold an *alpha*
+    /// under the old key. Read as a percentage it would be backwards — 0.2
+    /// meaning nearly opaque — so the old key is converted rather than
+    /// reinterpreted, once, on the way out.
+    @Test("a window saved under the old alpha reads as the same window")
+    func legacyAlphaMigrates() {
+        let suite = UserDefaults(suiteName: "adt.tests.\(UUID().uuidString)")!
+        suite.set(0.4, forKey: "test.window.transparency")
+        let defaults = WindowAppearanceDefaults(namespace: "test.window", defaults: suite)
+
+        #expect(defaults.transparency == 60)
+    }
+
+    @Test("writing a percentage wins over the old alpha")
+    func writtenPercentWinsOverLegacy() {
+        let suite = UserDefaults(suiteName: "adt.tests.\(UUID().uuidString)")!
+        suite.set(0.4, forKey: "test.window.transparency")
+        let defaults = WindowAppearanceDefaults(namespace: "test.window", defaults: suite)
+        defaults.transparency = 10
+
+        #expect(defaults.transparency == 10)
+    }
+
+    /// The switch a host surfaces as "Rain". On by default, because a window
+    /// that was given a backdrop was given it to be seen.
+    @Test("the backdrop switch defaults to on and is remembered off")
+    func backdropDefaultsOn() {
+        let defaults = makeDefaults()
+        #expect(defaults.showsBackdrop)
+
+        defaults.showsBackdrop = false
+        #expect(defaults.showsBackdrop == false)
+    }
+
+    @Test("a backdrop turned off before the window opens stays off")
+    func restoreReplaysTheBackdropSwitch() {
+        let manager = makeManager()
+        let defaults = makeDefaults()
+        defaults.showsBackdrop = false
+
+        let window = NSWindow(
+            contentRect: NSRect(x: 0, y: 0, width: 300, height: 300),
+            styleMask: [.titled], backing: .buffered, defer: true)
+        let chat = makeChat()
+        chat.backdrop = NSView()
+        let controller = ChatWindowAppearanceController(
+            window: window, chatView: chat, defaults: defaults, title: "Test Window")
+        controller.restore()
+
+        #expect(chat.showsBackdrop == false)
+        #expect(chat.backdrop?.isHidden == true)
+        withExtendedLifetime(manager) {}
+    }
+
+    // MARK: ⌘+ / ⌘- / ⌘0
+
+    private func makeController(
+        _ defaults: WindowAppearanceDefaults, _ chat: InlineChatView
+    ) -> ChatWindowAppearanceController {
+        let window = NSWindow(
+            contentRect: NSRect(x: 0, y: 0, width: 300, height: 300),
+            styleMask: [.titled], backing: .buffered, defer: true)
+        return ChatWindowAppearanceController(
+            window: window, chatView: chat, defaults: defaults, title: "Test Window")
+    }
+
+    @Test("a nudge moves the saved scale by a tenth and lands on the chat")
+    func nudgeStepsByATenth() {
+        let manager = makeManager()
+        let defaults = makeDefaults()
+        let chat = makeChat()
+        let controller = makeController(defaults, chat)
+        controller.restore()
+
+        controller.nudgeTextScale(by: 1)
+        #expect(abs(defaults.textScale - 1.1) < 0.0001)
+        #expect(abs(chat.themeScope.textScale - 1.1) < 0.0001)
+
+        controller.nudgeTextScale(by: -1)
+        #expect(abs(defaults.textScale - 1) < 0.0001)
+        withExtendedLifetime(manager) {}
+    }
+
+    /// Zero is the reset, not a step of nothing — ⌘0 is what a reader reaches
+    /// for after nudging too far.
+    @Test("a nudge of zero returns to the theme's own size")
+    func nudgeOfZeroResets() {
+        let manager = makeManager()
+        let defaults = makeDefaults()
+        defaults.textScale = 1.6
+        let chat = makeChat()
+        let controller = makeController(defaults, chat)
+        controller.restore()
+
+        controller.nudgeTextScale(by: 0)
+        #expect(defaults.textScale == 1)
+        #expect(chat.themeScope.textScale == 1)
+        withExtendedLifetime(manager) {}
+    }
+
+    @Test("nudging past the end stops at the end")
+    func nudgeClampsAtTheRange() {
+        let manager = makeManager()
+        let defaults = makeDefaults()
+        let chat = makeChat()
+        let controller = makeController(defaults, chat)
+        controller.restore()
+
+        for _ in 0..<50 { controller.nudgeTextScale(by: 1) }
+        #expect(defaults.textScale == WindowAppearanceDefaults.textScaleRange.upperBound)
+
+        for _ in 0..<50 { controller.nudgeTextScale(by: -1) }
+        #expect(defaults.textScale == WindowAppearanceDefaults.textScaleRange.lowerBound)
         withExtendedLifetime(manager) {}
     }
 }

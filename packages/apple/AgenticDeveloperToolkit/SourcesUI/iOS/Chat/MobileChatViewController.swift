@@ -79,7 +79,7 @@ public final class MobileChatViewController: UIViewController, ChatStateObserver
         super.viewDidLoad()
         setupViews()
         viewModel.addObserver(self)
-        themeObserver = ThemePaletteObserver { [weak self] palette in self?.applyTheme(palette) }
+        themeObserver = ThemePaletteObserver(host: view) { [weak self] palette in self?.applyTheme(palette) }
         rebuildTranscript()
     }
 

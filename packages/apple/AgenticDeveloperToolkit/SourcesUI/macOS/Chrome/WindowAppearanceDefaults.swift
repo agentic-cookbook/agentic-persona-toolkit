@@ -17,10 +17,20 @@ public struct WindowAppearanceDefaults: Sendable {
     /// Deliberately the ranges Stenographer uses: a reader who has both apps
     /// open should find the same slider means the same thing in each.
     public static let textScaleRange: ClosedRange<Double> = 0.85...1.75
-    public static let transparencyRange: ClosedRange<Double> = 0.3...1.0
+
+    /// Transparency as a percentage, read the way the word does: `0` is
+    /// nothing taken away, `100` is everything. It used to be an *alpha* in
+    /// `0.3...1.0`, where the slider ran backwards — dragging right made the
+    /// window more solid under a label reading "70% transparent".
+    public static let transparencyRange: ClosedRange<Double> = 0...100
 
     private let namespace: String
-    private let defaults: UserDefaults
+
+    /// `UserDefaults` is thread-safe but not yet marked `Sendable`, and this
+    /// struct crosses isolation boundaries as a plain value describing *which*
+    /// keys a window owns. Unchecked here rather than dropping `Sendable`,
+    /// which would push the problem onto every host.
+    private nonisolated(unsafe) let defaults: UserDefaults
 
     public init(namespace: String, defaults: UserDefaults = .standard) {
         self.namespace = namespace
@@ -36,12 +46,33 @@ public struct WindowAppearanceDefaults: Sendable {
         nonmutating set { defaults.set(newValue, forKey: key("textScale")) }
     }
 
-    /// Window opacity. `1` is the theme's own alpha and nothing further —
-    /// `old-school-terminal` is already `rgba(5, 8, 5, 0.8)`, so this thins
-    /// what the theme chose rather than introducing translucency.
+    /// How much of the window's surface to take away, `0`–`100`. `0` is the
+    /// theme's own alpha and nothing further — `old-school-terminal` is
+    /// already `rgba(5, 8, 5, 0.8)`, so this thins what the theme chose rather
+    /// than introducing translucency.
+    ///
+    /// Written under a new key because the old one held the opposite quantity
+    /// on a different scale, and a reader who had already set a window to 70%
+    /// transparent should not find it at 0.3% after an update. The old key is
+    /// read once, converted, and never written again.
     public var transparency: Double {
-        get { value(for: key("transparency"), default: 1, in: Self.transparencyRange) }
-        nonmutating set { defaults.set(newValue, forKey: key("transparency")) }
+        get {
+            if defaults.object(forKey: key("transparencyPercent")) != nil {
+                return value(for: key("transparencyPercent"), default: 0, in: Self.transparencyRange)
+            }
+            guard defaults.object(forKey: key("transparency")) != nil else { return 0 }
+            let legacyAlpha = Swift.max(0, Swift.min(1, defaults.double(forKey: key("transparency"))))
+            return (1 - legacyAlpha) * 100
+        }
+        nonmutating set { defaults.set(newValue, forKey: key("transparencyPercent")) }
+    }
+
+    /// Whether the window draws its animated backdrop. On by default: a host
+    /// that hands a window a backdrop meant it to be seen, and this is the
+    /// switch for the reader who finds it distracting.
+    public var showsBackdrop: Bool {
+        get { !defaults.bool(forKey: key("backdrop.off")) }
+        nonmutating set { defaults.set(!newValue, forKey: key("backdrop.off")) }
     }
 
     /// Whether the window floats above other apps' windows.

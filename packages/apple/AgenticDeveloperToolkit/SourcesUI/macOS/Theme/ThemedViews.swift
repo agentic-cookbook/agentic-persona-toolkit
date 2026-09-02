@@ -12,7 +12,7 @@ public final class ThemedBackgroundView: NSView, Themeable {
         self.role = role
         super.init(frame: .zero)
         self.wantsLayer = true
-        self.observer = ThemePaletteObserver { [weak self] palette in self?.applyTheme(palette) }
+        self.observer = ThemePaletteObserver(host: self) { [weak self] palette in self?.applyTheme(palette) }
     }
 
     @available(*, unavailable)
@@ -27,8 +27,8 @@ public final class ThemedBackgroundView: NSView, Themeable {
 /// tracks a `TextRole` (so both color *and* size/weight follow the theme).
 @MainActor
 public final class ThemedLabel: NSTextField, Themeable {
-    public var role: ThemeRole { didSet { applyTheme(ThemePaletteObserver.currentPalette) } }
-    public var textRole: TextRole { didSet { applyTheme(ThemePaletteObserver.currentPalette) } }
+    public var role: ThemeRole { didSet { applyTheme(resolvedThemeScope.palette) } }
+    public var textRole: TextRole { didSet { applyTheme(resolvedThemeScope.palette) } }
     private var observer: ThemePaletteObserver?
 
     public init(string: String = "", role: ThemeRole = .primaryText, textRole: TextRole = .body) {
@@ -49,7 +49,7 @@ public final class ThemedLabel: NSTextField, Themeable {
         self.cell?.usesSingleLineMode = true
         self.lineBreakMode = .byClipping
         self.stringValue = string
-        self.observer = ThemePaletteObserver { [weak self] palette in self?.applyTheme(palette) }
+        self.observer = ThemePaletteObserver(host: self) { [weak self] palette in self?.applyTheme(palette) }
     }
 
     @available(*, unavailable)
@@ -74,7 +74,7 @@ public final class ThemedTextField: NSTextField, Themeable {
         self.isBezeled = true
         self.bezelStyle = .roundedBezel
         self.drawsBackground = true
-        self.observer = ThemePaletteObserver { [weak self] palette in self?.applyTheme(palette) }
+        self.observer = ThemePaletteObserver(host: self) { [weak self] palette in self?.applyTheme(palette) }
     }
 
     @available(*, unavailable)
@@ -110,7 +110,7 @@ public final class ThemedButton: NSButton, Themeable {
         self.wantsLayer = true
         self.layer?.cornerRadius = 6
         self.focusRingType = .none
-        self.observer = ThemePaletteObserver { [weak self] palette in self?.applyTheme(palette) }
+        self.observer = ThemePaletteObserver(host: self) { [weak self] palette in self?.applyTheme(palette) }
     }
 
     @available(*, unavailable)
@@ -201,7 +201,7 @@ public final class ThemedSecondaryButton: NSButton, Themeable {
         self.title = title
         self.target = target
         self.action = action
-        self.observer = ThemePaletteObserver { [weak self] palette in self?.applyTheme(palette) }
+        self.observer = ThemePaletteObserver(host: self) { [weak self] palette in self?.applyTheme(palette) }
     }
 
     @available(*, unavailable)
@@ -212,11 +212,11 @@ public final class ThemedSecondaryButton: NSButton, Themeable {
     /// and leave the old word on screen — the bug every caller had to know
     /// about, now the class's own business.
     public override var title: String {
-        didSet { applyTheme(ThemePaletteObserver.currentPalette) }
+        didSet { applyTheme(resolvedThemeScope.palette) }
     }
 
     public override var isHighlighted: Bool {
-        didSet { paintFill(ThemePaletteObserver.currentPalette) }
+        didSet { paintFill(resolvedThemeScope.palette) }
     }
 
     public override var intrinsicContentSize: NSSize {
@@ -254,7 +254,7 @@ public final class ThemedBox: NSView, Themeable {
         self.wantsLayer = true
         self.layer?.cornerRadius = cornerRadius
         self.layer?.borderWidth = stroke == nil ? 0 : 1
-        self.observer = ThemePaletteObserver { [weak self] palette in self?.applyTheme(palette) }
+        self.observer = ThemePaletteObserver(host: self) { [weak self] palette in self?.applyTheme(palette) }
     }
 
     @available(*, unavailable)
@@ -286,7 +286,7 @@ public final class ThemedSeparatorView: NSView, Themeable {
         // to zero along with it (`InlineChatView`'s composer, once).
         self.translatesAutoresizingMaskIntoConstraints = false
         self.heightAnchor.constraint(equalToConstant: 1).isActive = true
-        self.observer = ThemePaletteObserver { [weak self] palette in self?.applyTheme(palette) }
+        self.observer = ThemePaletteObserver(host: self) { [weak self] palette in self?.applyTheme(palette) }
     }
 
     @available(*, unavailable)
@@ -305,7 +305,7 @@ public final class ThemedScrollView: NSScrollView, Themeable {
     public override init(frame frameRect: NSRect) {
         super.init(frame: frameRect)
         self.drawsBackground = true
-        self.observer = ThemePaletteObserver { [weak self] palette in self?.applyTheme(palette) }
+        self.observer = ThemePaletteObserver(host: self) { [weak self] palette in self?.applyTheme(palette) }
     }
 
     @available(*, unavailable)
@@ -334,7 +334,7 @@ public final class ThemedTableView: NSTableView, Themeable {
         self.role = role
         super.init(frame: .zero)
         self.usesAlternatingRowBackgroundColors = false
-        self.observer = ThemePaletteObserver { [weak self] palette in self?.applyTheme(palette) }
+        self.observer = ThemePaletteObserver(host: self) { [weak self] palette in self?.applyTheme(palette) }
     }
 
     @available(*, unavailable)
@@ -356,7 +356,7 @@ public final class ThemedTableRowView: NSTableRowView, Themeable {
 
     public override init(frame frameRect: NSRect) {
         super.init(frame: frameRect)
-        self.observer = ThemePaletteObserver { [weak self] palette in self?.applyTheme(palette) }
+        self.observer = ThemePaletteObserver(host: self) { [weak self] palette in self?.applyTheme(palette) }
     }
 
     @available(*, unavailable)

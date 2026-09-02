@@ -57,7 +57,7 @@ public final class ToolCallPillView: NSView, Themeable {
             label.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -hPad)
         ])
 
-        themeObserver = ThemePaletteObserver { [weak self] palette in self?.applyTheme(palette) }
+        themeObserver = ThemePaletteObserver(host: self) { [weak self] palette in self?.applyTheme(palette) }
     }
 
     @available(*, unavailable)

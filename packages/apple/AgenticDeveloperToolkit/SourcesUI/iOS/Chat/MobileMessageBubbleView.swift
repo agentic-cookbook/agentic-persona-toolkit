@@ -93,7 +93,7 @@ public final class MobileMessageBubbleView: UIView, Themeable {
             bubbleWidthConstraint
         ])
 
-        themeObserver = ThemePaletteObserver { [weak self] palette in self?.applyTheme(palette) }
+        themeObserver = ThemePaletteObserver(host: self) { [weak self] palette in self?.applyTheme(palette) }
     }
 
     @available(*, unavailable)

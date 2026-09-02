@@ -83,7 +83,7 @@ public final class ChatInputField: NSTextField, Themeable {
     public var isFocused: Bool = false {
         didSet {
             guard isFocused != oldValue else { return }
-            applyTheme(ThemePaletteObserver.currentPalette)
+            applyTheme(resolvedThemeScope.palette)
         }
     }
 
@@ -119,7 +119,7 @@ public final class ChatInputField: NSTextField, Themeable {
         cell?.usesSingleLineMode = true
         lineBreakMode = .byTruncatingHead
         caretLayer.isHidden = true
-        observer = ThemePaletteObserver { [weak self] palette in self?.applyTheme(palette) }
+        observer = ThemePaletteObserver(host: self) { [weak self] palette in self?.applyTheme(palette) }
     }
 
     @available(*, unavailable)
@@ -194,7 +194,7 @@ public final class ChatInputField: NSTextField, Themeable {
         }
         if caretLayer.superlayer == nil { layer?.addSublayer(caretLayer) }
         setCaretLit(true)
-        applyCaretTheme(ThemePaletteObserver.currentPalette)
+        applyCaretTheme(resolvedThemeScope.palette)
         positionCaret()
         guard caretBlinks else { return }
         let timer = Timer(timeInterval: Self.caretBlinkHalfPeriod, repeats: true) { [weak self] _ in
@@ -262,7 +262,7 @@ public final class ChatInputField: NSTextField, Themeable {
 
     public override func textDidBeginEditing(_ notification: Notification) {
         super.textDidBeginEditing(notification)
-        applyTheme(ThemePaletteObserver.currentPalette)
+        applyTheme(resolvedThemeScope.palette)
         // Arrow keys and clicks move the insertion point without changing the
         // text, so `textDidChange` alone would leave the block a keystroke
         // behind.

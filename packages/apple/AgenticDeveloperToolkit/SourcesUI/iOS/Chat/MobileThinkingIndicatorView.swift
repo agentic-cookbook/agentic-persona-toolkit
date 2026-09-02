@@ -115,7 +115,7 @@ public final class MobileThinkingIndicatorView: UIView, Themeable {
             dot.alpha = 0.3
         }
 
-        themeObserver = ThemePaletteObserver { [weak self] palette in self?.applyTheme(palette) }
+        themeObserver = ThemePaletteObserver(host: self) { [weak self] palette in self?.applyTheme(palette) }
     }
 
     /// Draws no fill of its own — see the macOS `ThinkingIndicatorView` for
@@ -186,7 +186,7 @@ public final class MobileThinkingIndicatorView: UIView, Themeable {
         let usesPhaseMachine = !configuration.words.isEmpty
         dotsStack.isHidden = usesPhaseMachine
         label.isHidden = !usesPhaseMachine
-        render(palette: ThemePaletteObserver.currentPalette)
+        render(palette: resolvedThemeScope.palette)
     }
 
     /// Drives the indicator from a live status. With no vocabulary configured
@@ -208,7 +208,7 @@ public final class MobileThinkingIndicatorView: UIView, Themeable {
         if let announcement = machine.takePendingAnnouncement() {
             postAccessibilityAnnouncement(announcement)
         }
-        render(palette: ThemePaletteObserver.currentPalette)
+        render(palette: resolvedThemeScope.palette)
         machine.isSpinning ? startPhaseTimerIfNeeded() : stopPhaseTimer()
     }
 
@@ -222,7 +222,7 @@ public final class MobileThinkingIndicatorView: UIView, Themeable {
         if let announcement = machine.takePendingAnnouncement() {
             postAccessibilityAnnouncement(announcement)
         }
-        render(palette: ThemePaletteObserver.currentPalette)
+        render(palette: resolvedThemeScope.palette)
         startPhaseTimerIfNeeded()
     }
 
@@ -232,7 +232,7 @@ public final class MobileThinkingIndicatorView: UIView, Themeable {
         let now = Date().timeIntervalSinceReferenceDate
         machine.clearUtterance(at: now)
         currentUtterance = nil
-        render(palette: ThemePaletteObserver.currentPalette)
+        render(palette: resolvedThemeScope.palette)
         if !machine.isSpinning { stopPhaseTimer() }
     }
 
@@ -256,7 +256,7 @@ public final class MobileThinkingIndicatorView: UIView, Themeable {
         // doc comment) — this drains defensively so a future change to that
         // contract cannot silently start re-announcing every glyph frame.
         _ = machine.takePendingAnnouncement()
-        render(palette: ThemePaletteObserver.currentPalette)
+        render(palette: resolvedThemeScope.palette)
         if !machine.isSpinning { stopPhaseTimer() }
     }
 

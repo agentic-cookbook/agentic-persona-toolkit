@@ -24,6 +24,12 @@ public final class ChatWindowAppearanceController {
     private var popover: WindowConfigPopover?
 
     private let title: String
+
+    /// What the backdrop switch is called. The toolkit has no name for what a
+    /// host chose to draw back there — "Rain" for Olylo, something else for
+    /// the next tool — so the host supplies the word.
+    private let backdropToggleTitle: String
+
     private weak var window: NSWindow?
     private weak var chatView: InlineChatView?
 
@@ -31,12 +37,14 @@ public final class ChatWindowAppearanceController {
         window: NSWindow,
         chatView: InlineChatView,
         defaults: WindowAppearanceDefaults,
-        title: String
+        title: String,
+        backdropToggleTitle: String = "Background animation"
     ) {
         self.window = window
         self.chatView = chatView
         self.defaults = defaults
         self.title = title
+        self.backdropToggleTitle = backdropToggleTitle
     }
 
     /// Puts the gear in the window's right title-bar accessory and replays
@@ -55,7 +63,23 @@ public final class ChatWindowAppearanceController {
         }
         window.addTitlebarAccessoryViewController(popover.makeTitlebarAccessory(leading: leading))
         self.popover = popover
+        chatView?.onTextScaleNudge = { [weak self] step in self?.nudgeTextScale(by: step) }
         restore()
+    }
+
+    /// ⌘+ / ⌘− / ⌘0, arriving from the chat view. One step is 10% of the
+    /// theme's own size — coarse enough to be worth a keystroke, fine enough
+    /// that overshooting costs one more. `0` is "back to the theme's size",
+    /// which is the shortcut's meaning everywhere else it exists.
+    public func nudgeTextScale(by step: Int) {
+        let range = WindowAppearanceDefaults.textScaleRange
+        let target = step == 0 ? 1 : defaults.textScale + Double(step) * 0.1
+        let clamped = Swift.max(range.lowerBound, Swift.min(range.upperBound, target))
+        guard clamped != defaults.textScale else { return }
+        defaults.textScale = clamped
+        applyTextScale(clamped)
+        // The panel, if it happens to be open, is showing the old number.
+        popover?.rebuildControls()
     }
 
     /// Replays the saved settings onto the window and the chat, so the four
@@ -65,6 +89,7 @@ public final class ChatWindowAppearanceController {
         applyTransparency(defaults.transparency)
         applyFloating(defaults.isFloating)
         chatView?.blinksCaret = defaults.blinksCaret
+        chatView?.showsBackdrop = defaults.showsBackdrop
     }
 
     /// Built on first open rather than at construction, so the controls read
@@ -84,10 +109,10 @@ public final class ChatWindowAppearanceController {
                 title: "Transparency",
                 value: defaults.transparency,
                 range: WindowAppearanceDefaults.transparencyRange,
-                caption: { "\(Int(((1 - $0) * 100).rounded()))% transparent" },
-                onChange: { [weak self] alpha in
-                    self?.defaults.transparency = alpha
-                    self?.applyTransparency(alpha)
+                caption: { "\(Int($0.rounded()))%" },
+                onChange: { [weak self] transparency in
+                    self?.defaults.transparency = transparency
+                    self?.applyTransparency(transparency)
                 }),
             WindowConfigToggle(
                 title: "Float above other windows",
@@ -102,19 +127,35 @@ public final class ChatWindowAppearanceController {
                 onChange: { [weak self] blinks in
                     self?.defaults.blinksCaret = blinks
                     self?.chatView?.blinksCaret = blinks
+                }),
+            WindowConfigToggle(
+                title: backdropToggleTitle,
+                isOn: defaults.showsBackdrop,
+                onChange: { [weak self] shows in
+                    self?.defaults.showsBackdrop = shows
+                    self?.chatView?.showsBackdrop = shows
                 })
         ]
     }
 
-    /// Through the theme manager rather than the chat view: every themed view
-    /// resolves its own palette from there, so this is the one place a single
-    /// number reaches the transcript, the status line and the composer alike.
+    /// Through the chat's own `ThemeScope`, not `ThemeManager.textScale`.
+    ///
+    /// The manager's scale is the app's — one number for every window it has
+    /// open — so driving it from a per-window slider resized every other
+    /// window at the same time. The scope reaches exactly the views inside
+    /// this chat: the transcript, the status line and the composer, and
+    /// nothing else. Saved under this window's namespace, so two chats
+    /// remember two sizes.
     private func applyTextScale(_ scale: Double) {
-        ThemeManager.shared?.textScale = scale
+        chatView?.themeScope.textScale = scale
     }
 
-    private func applyTransparency(_ alpha: Double) {
-        window?.alphaValue = CGFloat(alpha)
+    /// On the chat's surface, not the window's `alphaValue`. Fading the window
+    /// faded the text, the prompt and the gear along with the background,
+    /// which is not what "transparency" means here — see
+    /// `InlineChatView.surfaceTransparency`.
+    private func applyTransparency(_ transparency: Double) {
+        chatView?.surfaceTransparency = transparency
     }
 
     private func applyFloating(_ floating: Bool) {
