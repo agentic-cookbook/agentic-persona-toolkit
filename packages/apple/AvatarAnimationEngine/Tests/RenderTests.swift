@@ -36,6 +36,30 @@ final class RenderTests: XCTestCase {
         try Engine(EngineOptions(config: config))
     }
 
+    /// Orders `window` in and pumps AppKit until the WindowServer reports it
+    /// visible. `NSWindow.occlusionState` is only refreshed when `NSApplication`
+    /// dispatches the WindowServer's occlusion event, and `xctest` never calls
+    /// `NSApplication.run()` -- so without draining NSApp's own queue the state
+    /// stays at its initial value forever and `.visible` is never set, on every
+    /// host, display session or not. `RunLoop.run(until:)` is not enough: it
+    /// spins the CFRunLoop but never dequeues an NSEvent.
+    @discardableResult
+    private func showAndWaitForVisible(_ window: NSWindow,
+                                       timeout: TimeInterval = 2) -> Bool {
+        let app = NSApplication.shared
+        window.orderFrontRegardless()
+        let deadline = Date().addingTimeInterval(timeout)
+        while Date() < deadline {
+            if window.occlusionState.contains(.visible) { return true }
+            while let e = app.nextEvent(matching: .any,
+                                        until: Date().addingTimeInterval(0.01),
+                                        inMode: .default, dequeue: true) {
+                app.sendEvent(e)
+            }
+        }
+        return window.occlusionState.contains(.visible)
+    }
+
     private func layer(_ v: AvatarLayerView, _ id: String) throws -> CAShapeLayer {
         try XCTUnwrap(v.shapeLayers.first { $0.name == id }, "no layer named \(id)")
     }
@@ -328,8 +352,7 @@ final class RenderTests: XCTestCase {
     func testAttachingAStartedViewToAVisibleWindowStartsTheLinkAndDetachingStopsIt() throws {
         let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 200, height: 200),
                               styleMask: [.titled], backing: .buffered, defer: false)
-        window.orderFrontRegardless()
-        try XCTSkipUnless(window.occlusionState.contains(.visible),
+        try XCTSkipUnless(showAndWaitForVisible(window),
                           "this host has no display session; the window is never visible")
         let view = AvatarLayerView(engine: try makeEngine())
         view.start()
@@ -345,8 +368,7 @@ final class RenderTests: XCTestCase {
     func testHidingAStartedViewStopsTheLinkAndUnhidingResumesIt() throws {
         let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 200, height: 200),
                               styleMask: [.titled], backing: .buffered, defer: false)
-        window.orderFrontRegardless()
-        try XCTSkipUnless(window.occlusionState.contains(.visible),
+        try XCTSkipUnless(showAndWaitForVisible(window),
                           "this host has no display session; the window is never visible")
         let view = AvatarLayerView(engine: try makeEngine())
         window.contentView?.addSubview(view)
@@ -362,8 +384,7 @@ final class RenderTests: XCTestCase {
     func testStopDisarmsEvenWhileVisible() throws {
         let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 200, height: 200),
                               styleMask: [.titled], backing: .buffered, defer: false)
-        window.orderFrontRegardless()
-        try XCTSkipUnless(window.occlusionState.contains(.visible),
+        try XCTSkipUnless(showAndWaitForVisible(window),
                           "this host has no display session; the window is never visible")
         let view = AvatarLayerView(engine: try makeEngine())
         window.contentView?.addSubview(view)
