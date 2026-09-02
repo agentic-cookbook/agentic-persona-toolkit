@@ -49,10 +49,20 @@ enum Platform {
                                     action: Selector) -> [PlatformGestureRecognizer] { [] }
 
     /// Where the cursor is, in `view`'s own space -- `nil` when there is no
-    /// cursor to sample or the view is not in a window yet.
+    /// cursor to sample, the view is not in a window yet, or the cursor has
+    /// left the window entirely.
+    ///
+    /// `NSEvent.mouseLocation` is a SCREEN coordinate -- it keeps reporting a
+    /// position even while the cursor sits over another app or a second
+    /// display -- so the window-frame test below is what stands in for the
+    /// original's `document.mouseleave` ($GSAP/src/gaze.ts:120): tested in
+    /// screen space, before the conversion, because the view's own space has
+    /// no "outside the window" left to test once one is applied.
     static func pointerLocation(in view: PlatformView) -> CGPoint? {
         guard let window = view.window else { return nil }
-        return view.convert(window.convertPoint(fromScreen: NSEvent.mouseLocation), from: nil)
+        let screenPoint = NSEvent.mouseLocation
+        guard window.frame.contains(screenPoint) else { return nil }
+        return view.convert(window.convertPoint(fromScreen: screenPoint), from: nil)
     }
 
     /// `document.hasFocus()`. The original gates the idle-ladder reset on it

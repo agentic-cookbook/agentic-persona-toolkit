@@ -107,10 +107,7 @@ public final class AvatarLayerView: PlatformView {
             // `pointermove` handler throttles itself to one `requestAnimationFrame`
             // ($GSAP/src/gaze.ts:97-99) -- so polling here is the same rate, not a
             // shortcut.
-            if tracksPointer, let p = Platform.pointerLocation(in: self), p != lastPointer {
-                lastPointer = p
-                pointerMoved(to: p)
-            }
+            if tracksPointer { pointerSampled(Platform.pointerLocation(in: self)) }
             // `targetTimestamp`, not `timestamp`: the frame being built is the
             // one displayed at that instant, so sampling the animation there is
             // what puts the motion on screen on time. `timestamp` renders one
@@ -126,6 +123,33 @@ public final class AvatarLayerView: PlatformView {
     }
 
     // MARK: - the pointer
+
+    /// One frame's pointer sample -- `Platform.pointerLocation(in:)`'s result,
+    /// already in this view's own space. `nil` on the non-nil -> nil edge
+    /// relaxes the gaze to centre ONCE, mirroring the original's
+    /// `document.addEventListener("mouseleave", () => look(0, 0))`
+    /// ($GSAP/src/gaze.ts:120) -- `pointerLocation` has no view-space "outside
+    /// the window" left to test once its own conversion is applied, so it
+    /// reports the leave as `nil` instead, and this is where that edge is
+    /// caught. `lastPointer` already exists to skip re-reporting a still
+    /// cursor; the same field doubles as the one-shot latch here, since
+    /// setting it back to `nil` is exactly what stops a second `nil` sample
+    /// (the cursor still away next frame) from calling `look(0, 0)` again.
+    ///
+    /// Extracted from `step(_:)` so the edge can be exercised without a live
+    /// `CADisplayLink`.
+    func pointerSampled(_ point: CGPoint?) {
+        guard let p = point else {
+            guard lastPointer != nil else { return }
+            lastPointer = nil
+            lastLook = (x: 0, y: 0)
+            engine.look(0, 0)
+            return
+        }
+        guard p != lastPointer else { return }
+        lastPointer = p
+        pointerMoved(to: p)
+    }
 
     /// The pointer is at `point`, in this view's own coordinate space.
     ///
@@ -153,8 +177,12 @@ public final class AvatarLayerView: PlatformView {
 
     /// A click or a tap. Pokes AND wakes -- the original binds both to
     /// `pointerdown` ($GSAP/src/reflexes.ts:69 plus the click reaction), and it
-    /// is ungated: a click on a background window is unambiguously deliberate.
+    /// is not gated on focus the way `pointerMoved`'s `notice()` is: a click
+    /// on a background window is unambiguously deliberate. It IS gated on
+    /// `tracksPointer`, like every other pointer reflex -- a host that turns
+    /// tracking off wants a decorative, non-reacting olylo, clicks included.
     public func pointerPressed() {
+        guard tracksPointer else { return }
         engine.poke()
         engine.notice()
     }

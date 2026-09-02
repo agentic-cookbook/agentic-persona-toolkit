@@ -251,6 +251,61 @@ final class RenderTests: XCTestCase {
         // poke's own window.
         XCTAssertEqual(v.engine.state.idleRung, 0)
     }
+
+    @MainActor
+    func testPointerPressedDoesNothingWhenTracksPointerIsOff() throws {
+        // `tracksPointer`'s own doc comment promises a decorative,
+        // non-reacting olylo when it is off -- "the host's pointer AND
+        // clicks". `pointerMoved` already guards on it; this is the same
+        // promise for `pointerPressed`.
+        let v = try view()
+        v.tracksPointer = false
+        _ = try v.engine.tick(0)
+        _ = try v.engine.tick(v.engine.config.behavior.ladder.asleepAfterMs / 1000 + 1)
+        let before = v.engine.state
+
+        v.pointerPressed()
+
+        XCTAssertEqual(v.engine.state.mood, before.mood)
+        XCTAssertEqual(v.engine.state.source, before.source)
+        XCTAssertEqual(v.engine.state.idleRung, before.idleRung)
+    }
+
+    @MainActor
+    func testPointerSampledRelaxesTheGazeOnceOnTheNonNilToNilEdge() throws {
+        // `$GSAP/src/gaze.ts:120`: `document.addEventListener("mouseleave",
+        // () => look(0, 0))`. `pointerLocation` reports the macOS analogue --
+        // the cursor leaving the WINDOW, not merely the view's bounds -- as
+        // `nil`; `pointerSampled` is where that edge is caught, since it is
+        // extracted from `step(_:)` for exactly this test.
+        let view = AvatarLayerView(engine: try Engine(EngineOptions(config: config)),
+                                   frame: CGRect(x: 0, y: 0, width: 400, height: 400))
+
+        view.pointerSampled(view.designPoint(x: 400, y: 200))
+        XCTAssertEqual(view.lastLook.x, 1, accuracy: 1e-9)
+        XCTAssertEqual(view.lastLook.y, 0, accuracy: 1e-9)
+
+        // The cursor leaves: the gaze relaxes to centre.
+        view.pointerSampled(nil)
+        XCTAssertEqual(view.lastLook.x, 0, accuracy: 1e-9)
+        XCTAssertEqual(view.lastLook.y, 0, accuracy: 1e-9)
+
+        // Fires ONCE, not every frame the cursor stays away: plant a sentinel
+        // no real gaze value could produce, sample `nil` again, and confirm
+        // it is untouched.
+        view.lastLook = (x: 0.42, y: 0.42)
+        view.pointerSampled(nil)
+        XCTAssertEqual(view.lastLook.x, 0.42, accuracy: 1e-9)
+        XCTAssertEqual(view.lastLook.y, 0.42, accuracy: 1e-9)
+
+        // Re-entry re-arms: a fresh non-nil sample looks again, and a
+        // following leave relaxes again.
+        view.pointerSampled(view.designPoint(x: 200, y: 400))
+        XCTAssertEqual(view.lastLook.y, 1, accuracy: 1e-9)
+        view.pointerSampled(nil)
+        XCTAssertEqual(view.lastLook.x, 0, accuracy: 1e-9)
+        XCTAssertEqual(view.lastLook.y, 0, accuracy: 1e-9)
+    }
 }
 
 private extension AvatarLayerView {
