@@ -78,13 +78,6 @@ struct ThemeScopeTests {
 
     // MARK: Notification
 
-    /// The observer delivers on the main run loop rather than inside the
-    /// `didSet` that started it, so a synchronous assertion would run before
-    /// the palette ever arrives.
-    private func pump() {
-        RunLoop.main.run(until: Date().addingTimeInterval(0.05))
-    }
-
     /// A themed view re-reads its palette when *its* scope changes and ignores
     /// every other scope's — otherwise the isolation above would be undone by
     /// the very mechanism that delivers it.
@@ -103,13 +96,60 @@ struct ThemeScopeTests {
         let initial = sizes.count
 
         other.themeScope.textScale = 1.5
-        pump()
         #expect(sizes.count == initial, "a sibling window's slider is not this view's business")
 
         chat.themeScope.textScale = 1.5
-        pump()
         #expect(sizes.count == initial + 1)
         #expect(sizes.last! > sizes.first!)
+        withExtendedLifetime((manager, observer)) {}
+    }
+
+    /// A themed view's first apply happens inside its own initialiser — before
+    /// it has a superview to walk — so it resolves to the app scope and nothing
+    /// corrects it until the next change. For a transcript rebuilt on every
+    /// message that is the whole feature failing: each new bubble arrives at
+    /// 100% beside a composer at 150%. `refresh()` is how whoever inserted the
+    /// views says the tree is complete now.
+    @Test("refreshing re-announces a scope that never changed, so views built since catch up")
+    func refreshReachesViewsBuiltAfterTheChange() {
+        let manager = makeManager()
+        let chat = makeChat()
+        chat.themeScope.textScale = 1.5
+
+        // Built loose and inserted afterwards, exactly as a bubble is: the
+        // observer's first resolution can only find the app scope.
+        let late = NSView()
+        var sizes: [Double] = []
+        let observer = ThemePaletteObserver(host: late) { palette in
+            sizes.append(palette.theme.typography.sizeScale)
+        }
+        chat.addSubview(late)
+        let unscaled = sizes.last!
+
+        chat.themeScope.refresh()
+        #expect(sizes.count == 2)
+        #expect(sizes.last! > unscaled)
+        withExtendedLifetime((manager, observer)) {}
+    }
+
+    /// The refresh is one scope's, like a change is: a chat that rebuilds its
+    /// transcript must not repaint the window beside it.
+    @Test("refreshing one scope leaves another alone")
+    func refreshIsScopedToo() {
+        let manager = makeManager()
+        let chat = makeChat()
+        let other = makeChat()
+        let inner = NSView()
+        chat.addSubview(inner)
+
+        var sizes: [Double] = []
+        let observer = ThemePaletteObserver(host: inner) { palette in
+            sizes.append(palette.theme.typography.sizeScale)
+        }
+        let initial = sizes.count
+
+        other.themeScope.refresh()
+        #expect(sizes.count == initial)
         withExtendedLifetime((manager, observer)) {}
     }
 }

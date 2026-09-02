@@ -464,11 +464,24 @@ public final class InlineChatView: NSView, ChatStateObserver, Themeable, NSTextF
     /// into is a transcript someone is watching, and the shortcuts belong to
     /// whatever else is on screen.
     public override func performKeyEquivalent(with event: NSEvent) -> Bool {
-        guard inputField.isEnabled,
-              event.modifierFlags.intersection(.deviceIndependentFlagsMask) == .command,
+        let flags = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
+        // `contains`, not `==`: an equality test rejects every event carrying
+        // any *other* flag, and three of them ride along routinely. ⇧ is on the
+        // `+` key itself, so `case "+"` was unreachable; Caps Lock and the
+        // numeric keypad set their own bits and would silently kill all three
+        // shortcuts. What must be absent is only what would make this a
+        // different chord — ⌃ and ⌥.
+        //
+        // And a nudge nobody is listening for is not this view's key to take:
+        // returning true without a handler swallows the host application's own
+        // ⌘0 / ⌘− menu items for as long as a chat is in the responder chain.
+        guard let onTextScaleNudge,
+              inputField.isEnabled,
+              flags.contains(.command),
+              flags.isDisjoint(with: [.control, .option]),
               let nudge = Self.textScaleNudge(for: event.charactersIgnoringModifiers)
         else { return super.performKeyEquivalent(with: event) }
-        onTextScaleNudge?(nudge)
+        onTextScaleNudge(nudge)
         return true
     }
 
@@ -545,6 +558,13 @@ public final class InlineChatView: NSView, ChatStateObserver, Themeable, NSTextF
         for activity in viewModel.commandActivity {
             transcriptStack.addArrangedSubview(ToolCallPillView(activity: activity))
         }
+
+        // Everything above was built before it was inserted, so every one of
+        // those views resolved its scope to `.app` and painted at 100%. Now
+        // that they are in the tree, tell the scope to say its piece again —
+        // otherwise a transcript rebuilt at 150% comes back at 100% while the
+        // composer beside it stays where the reader put it.
+        themeScope.refresh()
 
         if isAtBottom {
             DispatchQueue.main.async { [weak self] in self?.scrollToBottom() }

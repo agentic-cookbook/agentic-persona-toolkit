@@ -11,14 +11,14 @@ import AgenticDeveloperToolkit
 // `AgenticDeveloperToolkitTests` and `AgenticDeveloperToolkitUITests`) —
 // `@testable import` doesn't cross the framework boundary.
 
-/// `ThemePaletteObserver` delivers theme changes via
-/// `.receive(on: RunLoop.main)`, which — even on the main thread — defers the
-/// `sink` to the next run-loop turn rather than firing synchronously inside
-/// `NotificationCenter.post`. A test that calls `ThemeManager.selectTheme`
-/// and immediately re-reads a themed view's color would therefore observe
-/// the *old* color, not because the wiring is broken but because nothing
-/// has pumped the run loop yet. This gives the pending Combine work a turn
-/// to run before the test asserts.
+/// Gives real timers a turn to fire — the caret's blink, an indicator's frame
+/// clock — for tests that assert on what one of them did.
+///
+/// Not for theme changes: `ThemePaletteObserver` applies inside the `post`,
+/// so a themed view's colour is already correct on the line after
+/// `selectTheme`. Spinning a nested run loop to wait for it would be worse
+/// than pointless — it re-enters the main actor, and whatever else the suite
+/// is running gets to swap `ThemeManager.shared` out mid-test.
 @MainActor
 func pumpRunLoop(for interval: TimeInterval = 0.05) {
     RunLoop.main.run(until: Date().addingTimeInterval(interval))

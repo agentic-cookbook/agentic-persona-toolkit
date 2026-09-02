@@ -120,6 +120,26 @@ struct ChatInputFieldTests {
         withExtendedLifetime(manager) {}
     }
 
+    /// Past the field's width AppKit scrolls the field editor instead of
+    /// shrinking the type, and the caret is a sublayer of the *field* — so an
+    /// unadjusted advance walks it off the right edge, where the field's own
+    /// clipping erases it. A terminal chat with a long line would simply lose
+    /// its cursor.
+    @Test("the caret stays inside the field when the text runs past its width")
+    func caretStaysInsideAnOverflowingField() {
+        let manager = makeManager()
+        let field = makeField()
+        field.usesBlockCaret = true
+
+        field.stringValue = String(repeating: "olylo ", count: 60)
+        field.positionCaret()
+
+        #expect(field.caretLayer.frame.maxX <= field.bounds.maxX)
+        #expect(field.caretLayer.frame.minX >= field.bounds.minX)
+        #expect(field.caretLayer.frame.width > 0)
+        withExtendedLifetime(manager) {}
+    }
+
     @Test("the caret is painted, not transparent")
     func caretHasInk() {
         let manager = makeManager()

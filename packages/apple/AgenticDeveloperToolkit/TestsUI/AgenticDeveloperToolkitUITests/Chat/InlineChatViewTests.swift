@@ -243,7 +243,6 @@ struct InlineChatViewTests {
             - baselineDepth(of: view.inputField, in: view)
 
         manager.textScale = 1.75
-        pumpRunLoop()
         view.layoutSubtreeIfNeeded()
         let after = baselineDepth(of: view.promptLabel, in: view)
             - baselineDepth(of: view.inputField, in: view)
@@ -273,7 +272,6 @@ struct InlineChatViewTests {
         var scale = range.lowerBound
         while scale <= range.upperBound + 0.0001 {
             manager.textScale = scale
-            pumpRunLoop()
             view.layoutSubtreeIfNeeded()
             let error = try centeringError(in: view, font: manager.currentPalette.font(.body))
             #expect(abs(error) < 1, "off by \(error) at scale \(scale)")
@@ -290,7 +288,6 @@ struct InlineChatViewTests {
 
         let before = view.promptLabel.textColor
         manager.selectTheme(id: BuiltInThemes.dracula.id)
-        pumpRunLoop()
 
         #expect(before != nil)
         #expect(before != view.promptLabel.textColor)
@@ -375,10 +372,76 @@ struct InlineChatViewTests {
 
         let before = view.layer?.backgroundColor
         manager.selectTheme(id: BuiltInThemes.dracula.id)
-        pumpRunLoop()
         let after = view.layer?.backgroundColor
 
         #expect(before != nil)
         #expect(before != after)
+    }
+
+    // MARK: The text-size shortcuts
+
+    private func keyEvent(_ characters: String, _ flags: NSEvent.ModifierFlags) -> NSEvent {
+        NSEvent.keyEvent(
+            with: .keyDown, location: .zero, modifierFlags: flags, timestamp: 0,
+            windowNumber: 0, context: nil, characters: characters,
+            charactersIgnoringModifiers: characters, isARepeat: false, keyCode: 0)!
+    }
+
+    @Test("plain command with +, - or 0 nudges the text size")
+    func commandNudgesTextSize() {
+        _ = makeManager(activeThemeID: BuiltInThemes.solarizedDark.id)
+        let (view, _, _) = makeView()
+        var steps: [Int] = []
+        view.onTextScaleNudge = { steps.append($0) }
+
+        #expect(view.performKeyEquivalent(with: keyEvent("+", .command)))
+        #expect(view.performKeyEquivalent(with: keyEvent("-", .command)))
+        #expect(view.performKeyEquivalent(with: keyEvent("0", .command)))
+        #expect(steps == [1, -1, 0])
+    }
+
+    /// ⌥⌘- and ⌃⌘0 are somebody else's shortcuts — zoom, a host's own menu —
+    /// and swallowing them because the command key happened to be down would
+    /// take them away from whoever owns them.
+    @Test("command with another modifier is left to whoever owns it")
+    func extraModifiersAreNotSwallowed() {
+        _ = makeManager(activeThemeID: BuiltInThemes.solarizedDark.id)
+        let (view, _, _) = makeView()
+        var steps: [Int] = []
+        view.onTextScaleNudge = { steps.append($0) }
+
+        #expect(view.performKeyEquivalent(with: keyEvent("-", [.command, .option])) == false)
+        #expect(view.performKeyEquivalent(with: keyEvent("0", [.command, .control])) == false)
+        #expect(steps.isEmpty)
+    }
+
+    @Test("a chat with no host listening passes the shortcut on")
+    func noHandlerMeansNoClaim() {
+        _ = makeManager(activeThemeID: BuiltInThemes.solarizedDark.id)
+        let (view, _, _) = makeView()
+        #expect(view.performKeyEquivalent(with: keyEvent("+", .command)) == false)
+    }
+
+    // MARK: Rebuilding the transcript
+
+    /// Every bubble is built loose and then inserted, so its own first apply
+    /// can only resolve to the app scope. The rebuild is what knows the tree is
+    /// complete, so the rebuild is what re-announces the scope — otherwise a
+    /// chat at 150% renders each new message at 100%.
+    @Test("rebuilding the transcript re-announces the scope for the bubbles it just added")
+    func rebuildRefreshesTheScope() {
+        _ = makeManager(activeThemeID: BuiltInThemes.solarizedDark.id)
+        let (view, viewModel, _) = makeView()
+        view.themeScope.textScale = 1.5
+
+        var announcements = 0
+        let token = NotificationCenter.default.addObserver(
+            forName: ThemeScope.didChangeNotification, object: view.themeScope, queue: nil
+        ) { _ in announcements += 1 }
+        defer { NotificationCenter.default.removeObserver(token) }
+
+        viewModel.handle(.messageReceived(FixtureMessage(
+            id: "1", localID: "1", senderID: "persona-1", text: "hi there", timestamp: Date())))
+        #expect(announcements >= 1)
     }
 }

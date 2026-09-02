@@ -11,18 +11,6 @@ import AgenticDeveloperToolkit
 // `AgenticDeveloperToolkitTests` and `AgenticDeveloperToolkitUITests`) —
 // `@testable import` doesn't cross the framework boundary.
 
-/// `ThemePaletteObserver` delivers theme changes via
-/// `.receive(on: RunLoop.main)`, which — even on the main thread — defers the
-/// `sink` to the next run-loop turn rather than firing synchronously inside
-/// `NotificationCenter.post`. A test that calls `ThemeManager.selectTheme`
-/// and immediately re-reads a themed view's color would therefore observe
-/// the *old* color, not because the wiring is broken but because nothing
-/// has pumped the run loop yet. This gives the pending Combine work a turn
-/// to run before the test asserts.
-@MainActor
-func pumpRunLoop(for interval: TimeInterval = 0.05) {
-    RunLoop.main.run(until: Date().addingTimeInterval(interval))
-}
 
 /// A `Backend` whose `inboundEvents` stream is driven by hand via `emit(_:)`,
 /// and which records everything sent through it.

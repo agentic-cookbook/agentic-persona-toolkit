@@ -136,7 +136,6 @@ open class ChatWindowController: NSWindowController, ContentRefittingWindowContr
         // chosen alpha would land on solid grey.
         window.isOpaque = false
         window.backgroundColor = .clear
-        window.center()
 
         appearance = ChatWindowAppearanceController(
             window: window,
@@ -146,6 +145,21 @@ open class ChatWindowController: NSWindowController, ContentRefittingWindowContr
             backdropToggleTitle: configuration.backdropToggleTitle)
 
         super.init(window: window)
+
+        // Where the reader last left it. Set *after* `super.init(window:)` and
+        // through the controller rather than the window, because adopting a
+        // window is what clears its `frameAutosaveName`: a name set before this
+        // line is thrown away, and the window opens centred every launch.
+        // `windowFrameAutosaveName` is the controller's own spelling of the
+        // same setting, and it is what makes AppKit write the frame on every
+        // move and resize. `setFrameUsingName` reads it back, and its `false` —
+        // nothing saved yet — is the only case where centring is right.
+        // Namespaced with the settings, so two chat windows remember their
+        // frames as separately as they remember their text size.
+        let frameName = "\(configuration.defaultsNamespace).chatWindowFrame"
+        windowFrameAutosaveName = frameName
+        if !window.setFrameUsingName(frameName) { window.center() }
+
         appearance.install()
 
         // Typing is never off in a chat window. The composer is always
@@ -162,7 +176,18 @@ open class ChatWindowController: NSWindowController, ContentRefittingWindowContr
 
     deinit { NotificationCenter.default.removeObserver(self) }
 
-    @objc private func windowBecameKey() { focusInput() }
+    /// Only when nothing else already has the caret.
+    ///
+    /// The window swallowing the first keystroke is the problem being solved,
+    /// and that only happens when the first responder is still the window
+    /// itself. Taking focus unconditionally solves it by creating a worse one:
+    /// select a passage of the transcript, click away to another app, click
+    /// back — and the selection is gone before ⌘C can reach it, every time the
+    /// window regains key.
+    @objc private func windowBecameKey() {
+        guard let window, window.firstResponder === window else { return }
+        focusInput()
+    }
 
     @available(*, unavailable)
     public required init?(coder: NSCoder) {
@@ -186,24 +211,68 @@ open class ChatWindowController: NSWindowController, ContentRefittingWindowContr
 
     // MARK: - ContentRefittingWindowController
 
-    /// Frame captured while the gear's popover is open, so a slider drag
-    /// inside it cannot walk the window out from under the pointer.
-    private var frozenContentSize: NSSize?
+    /// Whether the gear's popover currently has the window frozen, so a slider
+    /// drag inside it cannot walk the window out from under the pointer.
+    private var isContentRefitSuppressed = false
+
+    /// The host's own limits, captured at freeze time. Restoring hardcoded
+    /// `.zero`/`.greatestFiniteMagnitude` instead would silently throw away any
+    /// minimum the host had set, the first time the gear was opened — and leave
+    /// the window draggable down to nothing.
+    private var suppressedContentMinSize: NSSize?
+    private var suppressedContentMaxSize: NSSize?
 
     public func suppressContentRefit() {
-        guard frozenContentSize == nil, let window else { return }
+        guard !isContentRefitSuppressed, let window else { return }
+        isContentRefitSuppressed = true
+        suppressedContentMinSize = window.contentMinSize
+        suppressedContentMaxSize = window.contentMaxSize
         let current = window.contentRect(forFrameRect: window.frame).size
-        frozenContentSize = current
         window.contentMinSize = current
         window.contentMaxSize = current
     }
 
     public func resumeContentRefit() {
-        guard frozenContentSize != nil, let window else { return }
-        frozenContentSize = nil
-        window.contentMinSize = .zero
-        window.contentMaxSize = NSSize(
-            width: CGFloat.greatestFiniteMagnitude, height: .greatestFiniteMagnitude)
+        guard isContentRefitSuppressed else { return }
+        isContentRefitSuppressed = false
+        if let window {
+            window.contentMinSize = suppressedContentMinSize ?? .zero
+            window.contentMaxSize = suppressedContentMaxSize
+                ?? NSSize(width: CGFloat.greatestFiniteMagnitude, height: .greatestFiniteMagnitude)
+        }
+        suppressedContentMinSize = nil
+        suppressedContentMaxSize = nil
+
+        // The refit the protocol asks for. This window does not size itself
+        // from its content — it keeps whatever size the reader dragged it to —
+        // so there is no frame to recompute; what there *is* is a layout pass
+        // owed to everything the sliders changed while the window was pinned,
+        // and running it here is what makes a text-size change land on the
+        // popover closing rather than at the next unrelated event.
+        window?.contentView?.layoutSubtreeIfNeeded()
+    }
+}
+
+/// The chat's scope, declared one level up so that everything pinned beside the
+/// chat resolves to it too.
+///
+/// A superview walk from the border never passes through the chat — they are
+/// siblings — so without this the border resolves to `ThemeScope.app` no matter
+/// what `host:` it was handed. Inert while a scope carries only a type scale (a
+/// hairline has no type), and wrong the moment one carries a colour, which is
+/// the entire reason scopes exist.
+@MainActor
+private final class ChatContainerView: NSView, ThemeScopeProviding {
+    let themeScope: ThemeScope
+
+    init(frame: NSRect, themeScope: ThemeScope) {
+        self.themeScope = themeScope
+        super.init(frame: frame)
+    }
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        fatalError("ChatContainerView is created in code, never from a nib")
     }
 }
 
@@ -241,7 +310,9 @@ private final class ChatContentViewController: NSViewController {
         // (a 232-point-wide window that could not be dragged wider). Pinned
         // inside a frame-driven container, its width is determined by the
         // container, and the container is sized by the window.
-        let container = NSView(frame: NSRect(origin: .zero, size: preferredContentSize))
+        let container = ChatContainerView(
+            frame: NSRect(origin: .zero, size: preferredContentSize),
+            themeScope: chatView.themeScope)
         chatView.translatesAutoresizingMaskIntoConstraints = false
         container.addSubview(chatView)
         // Above the chat rather than inside it: the border traces the

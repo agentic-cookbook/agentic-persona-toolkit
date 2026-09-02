@@ -61,7 +61,6 @@ struct ToolCallPillViewTests {
 
         let before = pill.titleColor
         manager.selectTheme(id: BuiltInThemes.dracula.id)
-        pumpRunLoop()
         let after = pill.titleColor
 
         #expect(before != nil)

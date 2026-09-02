@@ -42,6 +42,21 @@ public final class ThemeScope {
 
     public init() {}
 
+    /// Re-announces the scope without changing it, so views built *since* the
+    /// last change paint at the scale in force now.
+    ///
+    /// A themed view's first `applyTheme` happens inside its own initialiser,
+    /// which is necessarily before it has a superview to walk — so it resolves
+    /// to `.app`, and nothing corrects it until the next notification. For a
+    /// view that lives as long as its window that is invisible; for a transcript
+    /// that is rebuilt on every message it is the whole feature failing, because
+    /// each new bubble arrives at 100% while the composer beside it is at 150%.
+    /// Whoever inserted the views is the one who knows the tree is complete, so
+    /// this is theirs to call.
+    public func refresh() {
+        NotificationCenter.default.post(name: Self.didChangeNotification, object: self)
+    }
+
     /// The palette a view in this scope should paint with: the app's current
     /// palette, scaled by this region's own factor.
     public var palette: SemanticPalette {

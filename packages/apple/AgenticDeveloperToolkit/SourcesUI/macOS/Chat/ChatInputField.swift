@@ -95,6 +95,10 @@ public final class ChatInputField: NSTextField, Themeable {
     private var caretTimer: Timer?
     private var selectionObserver: (any NSObjectProtocol)?
 
+    /// The field editor's clip view, watched so the block caret follows the
+    /// text when it scrolls rather than only when it changes.
+    private var scrollObserver: (any NSObjectProtocol)?
+
     /// Web's `ost-caret-blink` is `1.06s steps(1)` with `50% { opacity: 0 }` —
     /// half the period lit, half dark, and no interpolation between them.
     static let caretBlinkHalfPeriod: TimeInterval = 0.53
@@ -128,6 +132,7 @@ public final class ChatInputField: NSTextField, Themeable {
     deinit {
         caretTimer?.invalidate()
         if let selectionObserver { NotificationCenter.default.removeObserver(selectionObserver) }
+        if let scrollObserver { NotificationCenter.default.removeObserver(scrollObserver) }
     }
 
     /// The cell's padding is drawn, not laid out, so auto layout has no idea
@@ -229,6 +234,12 @@ public final class ChatInputField: NSTextField, Themeable {
         let caretIndex = editor.map { Swift.min($0.selectedRange().location, text.length) } ?? text.length
         let attributes: [NSAttributedString.Key: Any] = [.font: font]
         let advance = text.substring(to: caretIndex).size(withAttributes: attributes).width
+        // How far the field editor has scrolled its text out to the left. Past
+        // a field's width AppKit scrolls the editor rather than shrinking the
+        // type, and the caret is a sublayer of the *field*, not of the editor,
+        // so an unadjusted advance walks it off the right edge and the field's
+        // own clipping erases it — exactly when a terminal chat needs it most.
+        let scrolled = (editor?.superview as? NSClipView)?.bounds.origin.x ?? 0
         // The same rect the cell lays its text out in — see
         // `PaddedTextFieldCell.titleRect(forBounds:)`.
         let title = bounds.insetBy(dx: PaddedTextFieldCell.inset.width, dy: PaddedTextFieldCell.inset.height)
@@ -239,8 +250,13 @@ public final class ChatInputField: NSTextField, Themeable {
         let cellWidth = Swift.max(("0" as NSString).size(withAttributes: attributes).width, 1)
         CATransaction.begin()
         CATransaction.setDisableActions(true)
+        // Clamped to the text rect: an *unfocused* field has no editor to
+        // scroll, so the cell truncates instead, and the block belongs at the
+        // edge it truncated at rather than somewhere outside the field.
+        let rightmost = Swift.max(title.minX, title.maxX - cellWidth)
+        let caretX = Swift.min(Swift.max(title.minX, title.minX + advance - scrolled), rightmost)
         caretLayer.frame = NSRect(
-            x: title.minX + advance,
+            x: caretX,
             y: title.midY - lineHeight / 2,
             width: cellWidth,
             height: lineHeight)
@@ -275,6 +291,18 @@ public final class ChatInputField: NSTextField, Themeable {
                     self?.positionCaret()
                 }
             }
+            // The scroll that keeps the insertion point visible happens *after*
+            // the change that caused it, so the two notifications above would
+            // each leave the block one keystroke behind once the text overflows.
+            // The clip view is the thing that actually moved; ask it.
+            if let clip = editor.superview as? NSClipView {
+                clip.postsBoundsChangedNotifications = true
+                scrollObserver = NotificationCenter.default.addObserver(
+                    forName: NSView.boundsDidChangeNotification, object: clip, queue: .main
+                ) { [weak self] _ in
+                    MainActor.assumeIsolated { self?.positionCaret() }
+                }
+            }
         }
         positionCaret()
     }
@@ -283,6 +311,8 @@ public final class ChatInputField: NSTextField, Themeable {
         super.textDidEndEditing(notification)
         if let selectionObserver { NotificationCenter.default.removeObserver(selectionObserver) }
         selectionObserver = nil
+        if let scrollObserver { NotificationCenter.default.removeObserver(scrollObserver) }
+        scrollObserver = nil
         positionCaret()
     }
 }

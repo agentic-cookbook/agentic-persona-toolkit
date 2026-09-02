@@ -42,7 +42,6 @@ struct ThinkingIndicatorViewTests {
 
         let before = try dotColor()
         manager.selectTheme(id: BuiltInThemes.dracula.id)
-        pumpRunLoop()
 
         #expect(before != nil)
         #expect(before != (try dotColor()))
@@ -112,7 +111,6 @@ struct ThinkingIndicatorViewTests {
 
         let before = renderedColor()
         manager.selectTheme(id: BuiltInThemes.dracula.id)
-        pumpRunLoop()
         let after = renderedColor()
 
         // Fails if the label stops being repainted on `ThemeManager`'s

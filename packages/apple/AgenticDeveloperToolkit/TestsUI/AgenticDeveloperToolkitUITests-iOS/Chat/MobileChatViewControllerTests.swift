@@ -121,7 +121,6 @@ struct MobileChatViewControllerTests {
 
         let before = controller.view.backgroundColor
         manager.selectTheme(id: BuiltInThemes.dracula.id)
-        pumpRunLoop()
         let after = controller.view.backgroundColor
 
         #expect(before != nil)

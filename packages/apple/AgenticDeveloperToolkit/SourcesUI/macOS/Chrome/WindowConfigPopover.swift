@@ -87,7 +87,11 @@ public final class WindowConfigPopover: NSObject {
     /// never appears.
     public func makeTitlebarAccessory(
         leading: [NSView] = [],
-        width: CGFloat = 120
+        // 240, which is what this was in the layer above before it moved down
+        // here. `install(leading:)` is the documented way for a host to put its
+        // own chrome next to the gear and passes no width, so halving the
+        // default silently halved the room every one of those hosts had.
+        width: CGFloat = 240
     ) -> NSTitlebarAccessoryViewController {
         let container = NSView(frame: NSRect(x: 0, y: 0, width: width, height: 28))
         container.autoresizingMask = [.minXMargin]

@@ -86,6 +86,19 @@ struct WindowConfigPopoverTests {
         #expect(controller.view.frame.width == 160)
     }
 
+    /// `install(leading:)` is the documented way for a host to put its own
+    /// chrome next to the gear and it passes no width, so the *default* is the
+    /// number every one of those hosts actually gets. Halving it cramps them
+    /// all, and no test that passes a width explicitly would notice.
+    @Test("the default accessory is wide enough for leading chrome beside the gear")
+    func accessoryDefaultWidthLeavesRoom() {
+        let popover = WindowConfigPopover(title: "Olylo Window") { [] }
+        let controller = popover.makeTitlebarAccessory(leading: [
+            NSButton(title: "Connect", target: nil, action: nil)
+        ])
+        #expect(controller.view.frame.width == 240)
+    }
+
     // MARK: The panel
 
     @Test("the panel captions itself and lays every control out at one width")

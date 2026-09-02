@@ -42,7 +42,6 @@ struct MobileThinkingIndicatorViewTests {
 
         let before = try dotColor()
         manager.selectTheme(id: BuiltInThemes.dracula.id)
-        pumpRunLoop()
 
         #expect(before != nil)
         #expect(before != (try dotColor()))
@@ -107,7 +106,6 @@ struct MobileThinkingIndicatorViewTests {
 
         let before = renderedColor()
         manager.selectTheme(id: BuiltInThemes.dracula.id)
-        pumpRunLoop()
         let after = renderedColor()
 
         #expect(before != nil)

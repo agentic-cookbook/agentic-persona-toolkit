@@ -94,8 +94,11 @@ public final class ChatWindowAppearanceController {
 
     /// Built on first open rather than at construction, so the controls read
     /// live values and a window pays nothing for the panel at launch.
-    private func makeControls() -> [NSView] {
-        [
+    ///
+    /// Internal rather than private so the tests can ask what the panel *would*
+    /// show without putting a window on screen to open it.
+    func makeControls() -> [NSView] {
+        var controls: [NSView] = [
             WindowConfigSlider(
                 title: "Text Size",
                 value: defaults.textScale,
@@ -127,15 +130,23 @@ public final class ChatWindowAppearanceController {
                 onChange: { [weak self] blinks in
                     self?.defaults.blinksCaret = blinks
                     self?.chatView?.blinksCaret = blinks
-                }),
-            WindowConfigToggle(
-                title: backdropToggleTitle,
-                isOn: defaults.showsBackdrop,
-                onChange: { [weak self] shows in
-                    self?.defaults.showsBackdrop = shows
-                    self?.chatView?.showsBackdrop = shows
                 })
         ]
+        // Only when there is something back there to switch off. A chat with
+        // no backdrop is the default (`InlineChatView.backdrop` is `nil`), and
+        // a switch that toggles a setting nothing reads is a switch that lies
+        // — which is also what the documentation has always promised.
+        if chatView?.backdrop != nil {
+            controls.append(
+                WindowConfigToggle(
+                    title: backdropToggleTitle,
+                    isOn: defaults.showsBackdrop,
+                    onChange: { [weak self] shows in
+                        self?.defaults.showsBackdrop = shows
+                        self?.chatView?.showsBackdrop = shows
+                    }))
+        }
+        return controls
     }
 
     /// Through the chat's own `ThemeScope`, not `ThemeManager.textScale`.

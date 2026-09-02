@@ -32,7 +32,6 @@ struct MobileMessageBubbleViewTests {
 
         let before = bubble.backgroundColor
         manager.selectTheme(id: BuiltInThemes.dracula.id)
-        pumpRunLoop()
         let after = bubble.backgroundColor
 
         #expect(before != nil)
