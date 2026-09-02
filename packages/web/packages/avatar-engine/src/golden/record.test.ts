@@ -102,7 +102,7 @@ describe("the checked-in goldens", () => {
     expect.fail(
       `${name}.jsonl is stale (${b.length} lines on disk, ${a.length} fresh). ` +
         `First difference at line ${i + 1}. ` +
-        `Re-record with: python3 tools/avatar/record_golden.py ${name}`,
+        `Re-record with: python3 tools/avatar/record_golden.py ${name}  (from the whatsnow-toolkit root)`,
     );
   });
 });
