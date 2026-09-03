@@ -8,13 +8,36 @@ import AgenticDeveloperToolkit
 @MainActor
 public final class AppKitAppearanceDriver: ThemeAppearanceDriver {
 
-    public init() {}
+    /// What an `.auto` theme resolves to.
+    ///
+    /// A theme pinned to `.light` or `.dark` wins outright: its colours *are*
+    /// that brightness, and forcing the opposite system appearance would put
+    /// light system chrome against a dark themed surface. Only an `.auto` theme
+    /// — one that makes no claim — asks this, which is how a host's own
+    /// "Appearance: Light / Dark / System" control still does something while
+    /// such a theme is active.
+    ///
+    /// Returning `nil` (the default) means "whatever the system says", which is
+    /// what `.auto` meant before any host had a control to ask.
+    public var autoAppearance: () -> NSAppearance?
+
+    public init(autoAppearance: @escaping () -> NSAppearance? = { nil }) {
+        self.autoAppearance = autoAppearance
+    }
 
     public func apply(_ theme: ColorTheme, palette: SemanticPalette) {
-        NSApplication.shared.appearance = theme.appearance.nsAppearance
+        NSApplication.shared.appearance = resolvedAppearance(for: theme)
         let background = NSColor(palette.windowBackground)
         for window in NSApplication.shared.windows where ThemeManager.shouldThemeBackground(of: window) {
             window.backgroundColor = background
+        }
+    }
+
+    /// The `NSAppearance` to run AppKit's unthemed chrome under.
+    private func resolvedAppearance(for theme: ColorTheme) -> NSAppearance? {
+        switch theme.appearance {
+        case .light, .dark: return theme.appearance.nsAppearance
+        case .auto:         return autoAppearance()
         }
     }
 }

@@ -86,6 +86,17 @@ public final class ThemeManager {
         appearanceDriver?.apply(currentTheme, palette: currentPalette)
     }
 
+    /// Re-drives app-wide chrome from the theme already active.
+    ///
+    /// For hosts whose driver reads something the manager does not own — an
+    /// "Appearance: Light / Dark / System" preference an `.auto` theme defers
+    /// to, say. Such a setting can change while the theme does not, and
+    /// nothing else would repaint. No notification is posted: the palette has
+    /// not moved, so no themed view has anything new to draw.
+    public func refreshApplicationAppearance() {
+        applyApplicationAppearance()
+    }
+
     /// Selects a theme by id (built-in or custom), persists the selection, and
     /// applies it. A no-op if `id` is already the active theme.
     public func selectTheme(id: String) {

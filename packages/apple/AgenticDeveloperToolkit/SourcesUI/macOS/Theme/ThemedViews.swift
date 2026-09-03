@@ -61,6 +61,60 @@ public final class ThemedLabel: NSTextField, Themeable {
     }
 }
 
+/// A label that emphasises the characters a filter matched.
+///
+/// The ranges are handed in rather than worked out here: what counts as a match
+/// belongs to whoever is doing the filtering, and a label that decided for
+/// itself would be a second answer to the same question (`dry`). The attributed
+/// string is rebuilt on every palette change, because the emphasis is a colour
+/// and a weight and both of those are the theme's to say.
+@MainActor
+public final class ThemedHighlightLabel: NSTextField, Themeable {
+    public var role: ThemeRole { didSet { applyTheme(resolvedThemeScope.palette) } }
+    public var textRole: TextRole { didSet { applyTheme(resolvedThemeScope.palette) } }
+    public var text: String { didSet { applyTheme(resolvedThemeScope.palette) } }
+    public var highlightedRanges: [NSRange] { didSet { applyTheme(resolvedThemeScope.palette) } }
+    private var observer: ThemePaletteObserver?
+
+    public init(
+        string: String = "",
+        highlighting ranges: [NSRange] = [],
+        role: ThemeRole = .primaryText,
+        textRole: TextRole = .body
+    ) {
+        self.role = role
+        self.textRole = textRole
+        self.text = string
+        self.highlightedRanges = ranges
+        super.init(frame: .zero)
+        self.isEditable = false
+        self.isBordered = false
+        self.isBezeled = false
+        self.drawsBackground = false
+        self.observer = ThemePaletteObserver(host: self) { [weak self] palette in self?.applyTheme(palette) }
+    }
+
+    @available(*, unavailable)
+    public required init?(coder: NSCoder) { fatalError() }
+
+    public func applyTheme(_ palette: SemanticPalette) {
+        let base = palette.font(textRole)
+        let string = NSMutableAttributedString(string: text, attributes: [
+            .font: base,
+            .foregroundColor: palette.nsColor(role)
+        ])
+        let bold = NSFontManager.shared.convert(base, toHaveTrait: .boldFontMask)
+        let whole = NSRange(location: 0, length: (text as NSString).length)
+        for range in highlightedRanges where NSIntersectionRange(range, whole) == range {
+            string.addAttributes([
+                .font: bold,
+                .foregroundColor: palette.nsColor(.accent)
+            ], range: range)
+        }
+        attributedStringValue = string
+    }
+}
+
 /// An editable text field themed from the palette: control-background fill,
 /// primary text, body font, and a placeholder in the placeholder-text role.
 @MainActor
@@ -82,6 +136,34 @@ public final class ThemedTextField: NSTextField, Themeable {
 
     public func applyTheme(_ palette: SemanticPalette) {
         backgroundColor = palette.controlBackgroundColor
+        textColor = palette.primaryTextColor
+        font = palette.font(.body)
+        if let placeholder = placeholderString {
+            placeholderAttributedString = NSAttributedString(string: placeholder, attributes: [
+                .foregroundColor: palette.placeholderTextColor,
+                .font: palette.font(.body)
+            ])
+        }
+    }
+}
+
+/// A search field whose text, placeholder and fill follow the palette.
+/// `NSSearchField` draws its own bezel and magnifier, so only the parts the
+/// theme actually owns are overridden (`native-controls`).
+@MainActor
+public final class ThemedSearchField: NSSearchField, Themeable {
+    private var observer: ThemePaletteObserver?
+
+    public init(placeholder: String = "") {
+        super.init(frame: .zero)
+        self.placeholderString = placeholder
+        self.observer = ThemePaletteObserver(host: self) { [weak self] palette in self?.applyTheme(palette) }
+    }
+
+    @available(*, unavailable)
+    public required init?(coder: NSCoder) { fatalError() }
+
+    public func applyTheme(_ palette: SemanticPalette) {
         textColor = palette.primaryTextColor
         font = palette.font(.body)
         if let placeholder = placeholderString {
@@ -297,6 +379,75 @@ public final class ThemedSeparatorView: NSView, Themeable {
     }
 }
 
+/// A split view whose divider comes from the palette.
+///
+/// `NSSplitView` draws its divider from a system color that no theme reaches,
+/// so a themed window ends up with a system-grey seam down the middle. This is
+/// the one hook AppKit gives for it. Split view *controllers* get it by
+/// subclassing `ThemedSplitViewController` rather than assigning this directly.
+@MainActor
+open class ThemedSplitView: NSSplitView, Themeable {
+    private var observer: ThemePaletteObserver?
+
+    public override init(frame frameRect: NSRect) {
+        super.init(frame: frameRect)
+        // `NSSplitView` is born stacked, but `NSSplitViewController` hands out a
+        // side-by-side one — so a controller that swapped in a themed split view
+        // and never said otherwise silently turned its sidebar into a header.
+        // Match what is being replaced: this subclass exists to recolour a
+        // divider, not to reorient a window.
+        self.isVertical = true
+        self.observer = ThemePaletteObserver(host: self) { [weak self] palette in self?.applyTheme(palette) }
+    }
+
+    @available(*, unavailable)
+    public required init?(coder: NSCoder) { fatalError() }
+
+    /// Visible to subclasses that paint more than the divider from the theme.
+    public private(set) var currentPalette: SemanticPalette = ThemePaletteObserver.currentPalette
+
+    open override var dividerColor: NSColor { currentPalette.nsColor(.divider) }
+
+    open func applyTheme(_ palette: SemanticPalette) {
+        currentPalette = palette
+        needsDisplay = true
+    }
+}
+
+/// An `NSSplitViewController` whose divider follows the theme.
+///
+/// The swap lives in `loadView()` because AppKit allows `splitView` to be
+/// assigned only *before* the view is loaded — doing it in `viewDidLoad` raises
+/// `NSInternalInconsistencyException` ("The -splitView can only be assigned
+/// before the view is loaded"), which AppKit swallows at the top of the run
+/// loop and which therefore aborts whatever was mid-way through building the
+/// controller. Subclassing keeps that one-shot constraint in one place.
+@MainActor
+open class ThemedSplitViewController: NSSplitViewController {
+
+    /// The split view to install. Overridable because the assignment is
+    /// one-shot and happens here — a subclass that wants a different
+    /// `ThemedSplitView` (a wider divider, a differently painted one) has
+    /// nowhere else to say so.
+    open func makeSplitView() -> ThemedSplitView { ThemedSplitView() }
+
+    open override func loadView() {
+        splitView = makeSplitView()
+        super.loadView()
+    }
+
+    /// A split view with a custom `dividerColor` gets view-backed dividers, and
+    /// AppKit asks a view-backed divider whether to hide itself while measuring
+    /// the split view inside `viewDidLoad` — before any subclass has added its
+    /// items. `NSSplitViewController`'s own implementation indexes
+    /// `splitViewItems` unguarded and throws on the empty array, so the answer
+    /// for an item that doesn't exist yet has to come from here.
+    open override func splitView(_ splitView: NSSplitView, shouldHideDividerAt dividerIndex: Int) -> Bool {
+        guard dividerIndex < splitViewItems.count else { return false }
+        return super.splitView(splitView, shouldHideDividerAt: dividerIndex)
+    }
+}
+
 /// A scroll view whose backdrop tracks the window-background role.
 @MainActor
 public final class ThemedScrollView: NSScrollView, Themeable {
@@ -327,6 +478,30 @@ public final class ThemedScrollView: NSScrollView, Themeable {
 /// palette has no say in; a themed list gets its banding, if any, from row views.
 @MainActor
 public final class ThemedTableView: NSTableView, Themeable {
+    public let role: ThemeRole
+    private var observer: ThemePaletteObserver?
+
+    public init(role: ThemeRole = .surface) {
+        self.role = role
+        super.init(frame: .zero)
+        self.usesAlternatingRowBackgroundColors = false
+        self.observer = ThemePaletteObserver(host: self) { [weak self] palette in self?.applyTheme(palette) }
+    }
+
+    @available(*, unavailable)
+    public required init?(coder: NSCoder) { fatalError() }
+
+    public func applyTheme(_ palette: SemanticPalette) {
+        backgroundColor = palette.nsColor(role)
+        gridColor = palette.nsColor(.divider)
+    }
+}
+
+/// The outline counterpart of `ThemedTableView`, for the same reason it exists:
+/// an untinted outline paints the system's table background through whatever
+/// the theme put behind it.
+@MainActor
+public final class ThemedOutlineView: NSOutlineView, Themeable {
     public let role: ThemeRole
     private var observer: ThemePaletteObserver?
 
