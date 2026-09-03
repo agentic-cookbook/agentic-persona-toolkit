@@ -128,6 +128,30 @@ final class BuildTests: XCTestCase {
             "MC")
     }
 
+    /// A PIN, not a repair: Swift's `fmt` has always rounded half AWAY FROM ZERO
+    /// (`Double.rounded()`), and it is the web's `Math.round` -- half toward
+    /// +Infinity -- that had to move to meet it. These are the exact values
+    /// `parse.test.ts` asserts, so the twin cannot drift back without one side
+    /// going red. Only negatives can disagree, and `back.out`'s overshoot past
+    /// t=1 is the route to one.
+    func testRoundsNegativeHalfStepsAwayFromZero() {
+        XCTAssertEqual(fmt(-1.5e-6), "-0.000002")
+        XCTAssertEqual(fmt(-5e-7), "-0.000001")
+        XCTAssertEqual(fmt(-187.0000005), "-187.000001")
+        XCTAssertEqual(fmt(1.5e-6), "0.000002")
+        XCTAssertEqual(fmt(5e-7), "0.000001")
+        XCTAssertEqual(fmt(187.0000005), "187.000001")
+        XCTAssertEqual(fmt(-0.0000004), "0")     // `-0` prints as "0"
+        for v in [1e-6, -1e-6, 1e21, -1e21, 5e-7, -5e-7] {
+            XCTAssertFalse(fmt(v).contains("e"), "\(v) emitted an exponent")
+        }
+    }
+
+    func testEmitsANegativeCoordinateTheSameWayTheWebDoes() {
+        XCTAssertEqual(emitPath(ParsedPath(kind: "ML", points: [-0.0000005, 0, 1, -1.5e-6])),
+                       "M-0.000001,0L1,-0.000002")
+    }
+
     func testMatchesTheWebsTextByteForByte() throws {
         // Not a formatting nicety: `.shape` channel values ARE these strings, and
         // Task 38 replays goldens recorded by the web. `String(13.0)` is "13.0"

@@ -5,6 +5,35 @@ import Foundation
 /// `ReflexesTests` can prove the two have not drifted apart.
 let DEFAULT_EASE = "power3.out"
 
+/// One PRNG draw from a `[lo, hi]` config pair, whatever arity the pair has.
+///
+/// Six sites in this file read a config array as a pair — `reachIdle`,
+/// `durationRange` twice, `rearm.gapMs`, `rearmMs`, `firstDelayMs` — and every
+/// one of them used to index `[0]` and `[1]` directly. Nothing between the JSON
+/// and here guarantees two elements: `Loader.swift` arity-checks no pair field
+/// and `schema.json` puts no `minItems`/`maxItems` on any of them, so
+/// `"rearmMs": [4000]` loads clean, passes every config test, and then traps
+/// with `Index out of range` minutes into a session, on whichever branch
+/// happens to be taken first — a crash arbitrarily far from the config that
+/// caused it. The TypeScript twin does not trap: it computes
+/// `range(4000, undefined)`, gets `NaN`, and schedules an event that can never
+/// come due, so the same config silently deletes the behaviour there instead.
+/// Two different wrong answers to one bad pair.
+///
+/// This is the second line of defence, not the first — the loader is where a
+/// bad pair should be named and refused, and this file cannot reach the loader.
+/// What it can do is make the two engines fail the SAME way: a pair short of an
+/// element degrades to the degenerate range built from what is actually there
+/// (`[4000]` reads as 4000...4000, `[]` as 0...0), and the draw still happens,
+/// so the PRNG stream stays in step across the two platforms and across the
+/// good and bad configs alike. Anything the pair does not say is missing
+/// behaviour, never a trap and never a `NaN`.
+func pairRange(_ prng: Prng, _ pair: [Double]) -> Double {
+    let lo = pair.first ?? 0
+    let hi = pair.count > 1 ? pair[1] : lo
+    return prng.range(lo, hi)
+}
+
 public struct ReflexDeps {
     public var ctx: AnimContext
     public var prng: Prng
@@ -71,6 +100,15 @@ public final class Reflexes {
 
     private var activeEffect: String?
     private var touched: Set<String> = []
+    /// The stir chain's generation, the same device `gen` is for the ambient
+    /// loops and for exactly the same reason: `stir` re-arms itself, so every
+    /// `startEffect` that did not first orphan the outstanding event left a
+    /// SECOND self-perpetuating chain running beside the first. A mood round
+    /// trip is all it takes, and the chains never merge — three round trips left
+    /// four of them, each drawing its own PRNG and stacking its own tweens on
+    /// the same channels. `activeEffect` cannot stand in for this: it is a
+    /// single mood name, so both chains read it and both find themselves live.
+    private var effectGen = 0
 
     private var pinpricksShown: Bool?
 
@@ -401,7 +439,7 @@ public final class Reflexes {
             } else {
                 let reach = curious ? g.reachCurious : g.reachIdle
                 let angle = prng.range(0, Double.pi * 2)
-                let r = prng.range(reach[0], reach[1])
+                let r = pairRange(prng, reach)
                 target = (cos(angle) * r, sin(angle) * r)
             }
             lookAt(when, target.x, target.y)
@@ -445,7 +483,7 @@ public final class Reflexes {
             return
         }
         fidgetRunning = true
-        let duration = prng.range(f.durationRange[0], f.durationRange[1])
+        let duration = pairRange(prng, f.durationRange)
         for (channel, amp, poseOwned) in fidgetTargets() {
             let base = live(channel)
             let to = base + prng.signed(amp)
@@ -462,7 +500,7 @@ public final class Reflexes {
                                             ease: f.settle.ease), now: t)
             }
         }
-        let gap = prng.range(f.rearm.gapMs[0], f.rearm.gapMs[1]) + prng.signed(f.rearm.jitterMs)
+        let gap = pairRange(prng, f.rearm.gapMs) + prng.signed(f.rearm.jitterMs)
         at(when + duration + gap / 1000) { me, t in me.fidget(t) }
     }
 
@@ -510,7 +548,7 @@ public final class Reflexes {
             return
         }
         let step = steps[i]
-        let duration = step.duration ?? step.durationRange.map { prng.range($0[0], $0[1]) } ?? 0
+        let duration = step.duration ?? step.durationRange.map { pairRange(prng, $0) } ?? 0
         // SORTED, and the PRNG is why: an `{"rnd": n}` channel draws one value
         // per channel in walk order, so this order IS part of the determinism
         // contract. JS walks the object in the JSON's key order; a Swift
@@ -523,33 +561,127 @@ public final class Reflexes {
             case .number(let value): to = value
             case .rnd(let r): to = prng.range(-r, r)
             }
-            touched.insert(channel)
-            ctx.tweens.add(TweenSpec(channel: channel, to: .number(to),
-                                     duration: duration, ease: step.ease), now: when)
+            // EXPANDED, exactly as `settleLoop` and `armLoop` expand theirs. The
+            // loader's `requireChannel` accepts a group name here — it is the
+            // same check a loop's channel goes through, and a loop's channel is
+            // routinely a group — so `"channel": "eyes.scale"` on an effect step
+            // validates cleanly. Writing the raw name instead put the tween on a
+            // channel nothing renders: the step was silently dead in both
+            // directions, and `stopEffect` then settled that phantom to rest
+            // while the two eyes it was supposed to move never learned of it.
+            //
+            // The draw happens ONCE, above, and every member of the group shares
+            // its value — the same shape as `armLoop`, which computes one
+            // amplitude and one duration and hands them to every expanded
+            // channel. Drawing per member instead would make the number of PRNG
+            // values consumed depend on how many members the rig's group happens
+            // to have, which is not something the determinism contract can say.
+            for concrete in ctx.config.expand(channel) {
+                touched.insert(concrete)
+                ctx.tweens.add(TweenSpec(channel: concrete, to: .number(to),
+                                         duration: duration, ease: step.ease), now: when)
+            }
         }
         // Sequential, not delayed: one tween per channel and newest wins, so two
         // steps touching the same channel must be separated by the scheduler.
         at(when + duration) { me, t in me.playSteps(steps, i + 1, t, done) }
     }
 
-    private func stir(_ when: Double) {
-        guard let active = activeEffect, let def = b.moodEffects[active] else { return }
-        let key = def.branch.map { prng.chance($0.probability) ? $0.then : $0.else } ?? "twitch"
-        let steps = key == "drift" ? def.drift : def.twitch
-        playSteps(steps ?? [], 0, when) { me, t in
-            guard let rearm = def.rearmMs else { return }
-            me.at(t + me.prng.range(rearm[0], rearm[1]) / 1000) { me2, t2 in me2.stir(t2) }
+    /// The step list a branch key names, or `nil` when this effect defines none
+    /// under that name.
+    ///
+    /// Total, and that is the whole point. The expression this replaces —
+    /// `key == "drift" ? def.drift : def.twitch` — answered two different
+    /// questions with one ternary and got both wrong. It mapped EVERY key that
+    /// was not `"drift"` onto `twitch`, so `"branch": { "then": "twich" }`
+    /// played the drift list's opposite rather than saying anything; and paired
+    /// with `?? []` at the call site it made an ABSENT list indistinguishable
+    /// from an authored empty one. `Loader.swift` validates only that a branch
+    /// key spells `"twitch"` or `"drift"`, never that the list it names exists,
+    /// so deleting olylo's `drift` block loads clean and then produces silence
+    /// on roughly 40% of stirs — half the authored behaviour gone, with nothing
+    /// anywhere saying so.
+    private func stepList(_ def: EffectDef, _ key: String) -> [EffectStep]? {
+        switch key {
+        case "twitch": return def.twitch
+        case "drift": return def.drift
+        default: return nil
         }
+    }
+
+    /// Checked on the way in AND again at the re-arm, like `armLoop`: a chain
+    /// can be orphaned at any point, including in the middle of the `playSteps`
+    /// walk it is already inside.
+    private func stir(_ when: Double, _ g: Int) {
+        guard g == effectGen, let active = activeEffect,
+              let def = b.moodEffects[active] else { return }
+        let key = def.branch.map { prng.chance($0.probability) ? $0.then : $0.else } ?? "twitch"
+        // A branch naming a list this effect does not define ENDS the chain, and
+        // the difference from `?? []` is the re-arm. `?? []` played nothing and
+        // then armed the next stir anyway, so the chain went on drawing a branch
+        // value and a re-arm gap forever for a behaviour that could never
+        // happen: an intermittent silence that also walks the shared PRNG
+        // stream out of step with every golden, which is the worst of the
+        // available failures because it is invisible in both directions.
+        // Stopping is visible — the effect goes quiet outright, at once, the
+        // first time the bad branch is drawn — and it consumes nothing further.
+        //
+        // An authored EMPTY list is a different thing and keeps its old
+        // behaviour: `stepList` hands back `[]`, `playSteps` completes
+        // immediately, and the chain re-arms. Absent and empty were the two
+        // cases `?? []` collapsed together.
+        guard let steps = stepList(def, key) else { return }
+        playSteps(steps, 0, when) { me, t in
+            guard g == me.effectGen, let rearm = def.rearmMs else { return }
+            me.at(t + pairRange(me.prng, rearm) / 1000) { me2, t2 in me2.stir(t2, g) }
+        }
+    }
+
+    /// Every channel the running effect moved, tweened back to the rig's rest.
+    ///
+    /// One function rather than a loop inside `stopEffect`, because `touched` is
+    /// a record of channels that are OFF REST, and every place that record is
+    /// dropped owes the same settle first. `startEffect` used to drop it with a
+    /// bare `touched.removeAll()`: a `stop()` that left a twitch standing on
+    /// `spark.x` at 0.7, followed by a `start()`, erased the only note of where
+    /// that channel had been taken, and nothing put it back for the life of the
+    /// session.
+    ///
+    /// Sorted for the same reason `playSteps` sorts, though nothing here depends
+    /// on it: no PRNG is drawn and every channel gets exactly one tween at the
+    /// same instant.
+    private func settleTouched(_ when: Double, _ settle: Settle) {
+        for channel in touched.sorted() {
+            ctx.tweens.add(TweenSpec(channel: channel, to: .number(rest(channel)),
+                                     duration: settle.duration,
+                                     ease: settle.ease), now: when)
+        }
+        touched.removeAll()
     }
 
     private func startEffect(_ mood: String, _ when: Double) {
         guard let def = b.moodEffects[mood] else { return }
+        // SETTLED, not merely forgotten. On the ordinary path `pollTick` has
+        // just run `stopEffect`, so `touched` is already empty and this writes
+        // nothing — which is why no golden moves. The path that is not ordinary
+        // is `stop()` then `start()`: `stop` used to leave `touched` populated
+        // and `activeEffect` nil, so `stopEffect` could never claim those
+        // channels again, and the `touched.removeAll()` that stood here was the
+        // moment the engine forgot a channel it had walked off rest. `stop` now
+        // puts them back itself, and this is the second door onto the same
+        // record — a `start` called twice without a `stop` between.
+        //
+        // The NEW effect's settle timing, because it is the only one still in
+        // reach: whichever effect took those channels off rest is gone, and the
+        // alternative is the raw write `stop` uses, which would pop mid-session.
+        settleTouched(when, def.settle)
         activeEffect = mood
-        touched.removeAll()
+        effectGen += 1
+        let g = effectGen
         if let once = def.once { playSteps(once, 0, when) { _, _ in } }
         if def.loop != nil { armLoop(effectLoop(def), when) }
         if let first = def.firstDelayMs {
-            at(when + prng.range(first[0], first[1]) / 1000) { me, t in me.stir(t) }
+            at(when + pairRange(prng, first) / 1000) { me, t in me.stir(t, g) }
         }
     }
 
@@ -557,19 +689,12 @@ public final class Reflexes {
         guard let active = activeEffect else { return }
         let def = b.moodEffects[active]
         activeEffect = nil
+        effectGen += 1   // orphan any pending stir event, mid-chain or re-arming
         guard let def else { return }
         // Through `stopLoop`, not by hand: an effect's loop is a chain like
         // any other, so its pending event needs orphaning too (see `gen`).
         if def.loop != nil { stopLoop(effectLoop(def), when) }
-        // Sorted for the same reason `playSteps` sorts, though nothing here
-        // depends on it: no PRNG is drawn and every channel gets exactly one
-        // tween at the same instant.
-        for channel in touched.sorted() {
-            ctx.tweens.add(TweenSpec(channel: channel, to: .number(rest(channel)),
-                                     duration: def.settle.duration,
-                                     ease: def.settle.ease), now: when)
-        }
-        touched.removeAll()
+        settleTouched(when, def.settle)
     }
 
     // MARK: - pinpricks
@@ -687,6 +812,12 @@ public final class Reflexes {
         // long ago, and the scheduler's catch-up loop runs to its 1000-iteration
         // guard instead of the poll: ~1000 spurious polls and a visible hitch.
         // Same anchor the arbiter's poll uses in Task 32.
+        //
+        // Cancelled first, because a second `start` without a `stop` between —
+        // a remount, a re-`play` of the whole engine — would otherwise overwrite
+        // `pollId` and leave the first repeater running with nothing holding its
+        // id. Two polls means every mood change is serviced twice, and the count
+        // climbs with each restart.
         if let pollId { ctx.scheduler.cancel(pollId) }
         pollId = ctx.scheduler.every(poll, first: when + poll) { [weak self] at in
             self?.pollTick(at)
@@ -711,5 +842,25 @@ public final class Reflexes {
         fidgetRunning = false
         breathRunning = false
         activeEffect = nil
+        effectGen += 1   // orphan any pending stir event, as `stopEffect` does
+        // Every channel the effect walked off rest, put back THIS instant.
+        //
+        // `stop` has no clock — it is teardown, not a moment on the timeline —
+        // so the restore is `cancel` then a raw write rather than a settle
+        // tween, exactly the way `TimelineHandle.cancel` hands a promoted shape
+        // back, and for the same reason: the tween that is still driving the
+        // channel would otherwise overwrite the value before anything saw it.
+        //
+        // Leaving `touched` populated here was the leak. `activeEffect` is nil
+        // from this line on, so `stopEffect` returns at its guard and can never
+        // reclaim these channels; the next `startEffect` cleared the record
+        // outright. A twitch caught mid-stroke therefore stranded `spark.x` at
+        // 0.7 for the life of the process, with nothing left that knew it was
+        // there.
+        for channel in touched.sorted() {
+            ctx.tweens.cancel(channel)
+            ctx.channels.set(channel, .number(rest(channel)))
+        }
+        touched.removeAll()
     }
 }

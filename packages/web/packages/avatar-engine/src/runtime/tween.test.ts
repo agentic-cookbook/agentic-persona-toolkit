@@ -110,6 +110,26 @@ describe("tweens", () => {
     expect(ch.get("mouth.shape")).toBe("M189,235L200,235L211,235");
   });
 
+  it("snaps a colour pair `parseHex` cannot read instead of throwing out of the frame loop", () => {
+    // `isHex` used to be `{3,6}`, which admits the 4- and 5-digit bodies
+    // `parseHex` throws `bad hex colour` on — so ONE bad palette entry threw
+    // inside `useAvatarEngine`'s rAF callback, which has no try/catch, and the
+    // avatar stopped for good. Swift's `isHex` has always required exactly 3 or
+    // 6, so the two platforms also disagreed about this same string.
+    //
+    // Two guards now: `isHex` rejects the pair, and if a future edit ever lets
+    // one through, `mixColor`'s throw is caught and the crossing snaps — the
+    // answer `lerpValue`'s last line already gives an uninterpolatable pair.
+    const ch = createChannels({ "body.ink": "#abcd" });
+    const tw = createTweens(ch);
+    tw.add({ channel: "body.ink", to: "#00ff41", duration: 1, ease: "none" }, 0);
+    expect(() => tw.tick(0.5)).not.toThrow();
+    expect(ch.get("body.ink")).toBe("#abcd");     // unknown string: holds, then snaps
+    tw.tick(1);
+    expect(ch.get("body.ink")).toBe("#00ff41");
+    expect(tw.active()).toBe(0);
+  });
+
   it("applies a zero-duration tween at add time, before any tick", () => {
     const ch = createChannels({ "mouth.family": "mouth" });
     const tw = createTweens(ch);

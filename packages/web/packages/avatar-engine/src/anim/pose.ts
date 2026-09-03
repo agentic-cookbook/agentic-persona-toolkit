@@ -74,7 +74,15 @@ export function applyPose(ctx: PoseContext, mood: string, now: number): PoseResu
     }
   }
 
-  for (const [channel, target] of Object.entries(pose.channels)) {
+  // `Object.keys(...).sort()`, never a bare `Object.entries(...)`: this walks in
+  // JSON insertion order, where Swift's `pose.channels.keys.sorted()` walks
+  // sorted (Task 28, rule 5). The two agree only until one pose writes both a
+  // group and one of its members — `eyes.y` and `eyeLeft.y` — at which point
+  // newest-wins resolves differently on each platform and the byte-identical
+  // golden contract is gone. 14 of olylo's 15 poses already have JSON order !=
+  // sorted order, so the divergence is one authored line away.
+  for (const channel of Object.keys(pose.channels).sort()) {
+    const target = pose.channels[channel]!;
     for (const concrete of config.expand(channel)) {
       const rides = carried.get(concrete);
       tweens.add({

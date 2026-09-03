@@ -61,6 +61,38 @@ describe("applyPose", () => {
     expect(c.channels.get("body.scaleY")).toBeCloseTo(1.1, 12);
   });
 
+  it("applies a pose's channels in SORTED order, as Swift does", () => {
+    // `Object.entries` walks JSON insertion order; `Poses.swift` walks
+    // `pose.channels.keys.sorted()`. The two agree until one pose writes both a
+    // GROUP and one of that group's members, at which point newest-wins picks a
+    // different winner on each platform and the byte-identical golden contract
+    // is gone. 14 of olylo's 15 poses already have insertion order != sorted
+    // order, so this is one authored line away rather than hypothetical.
+    //
+    // Authored member-first so the two orders genuinely disagree: insertion
+    // order ends on the GROUP (both eyes land on 1.5), sorted order ends on the
+    // MEMBER ("eye.scaleY" < "eyeLeft.scaleY", because "." precedes "L"), so
+    // the left eye keeps 0.5 and only the right takes the group's value.
+    const overlapping = {
+      ...config,
+      poses: {
+        ...config.poses,
+        poses: {
+          ...config.poses.poses,
+          parity: { duration: 1, ease: "none",
+                    channels: { "eyeLeft.scaleY": 0.5, "eye.scaleY": 1.5 } },
+        },
+      },
+    };
+    const channels = createChannels();
+    seedChannels(config, channels);
+    const c = { config: overlapping, channels, tweens: createTweens(channels) };
+    applyPose(c, "parity", 0);
+    c.tweens.tick(1);
+    expect(c.channels.get("eyeLeft.scaleY")).toBeCloseTo(0.5, 12);
+    expect(c.channels.get("eyeRight.scaleY")).toBeCloseTo(1.5, 12);
+  });
+
   it("settles on the pose's exact values after the full duration", () => {
     const c = ctx();
     applyPose(c, "sad", 0);

@@ -31,11 +31,18 @@ private struct Live {
 /// `#rrggbb` (or the three-digit short form) — the only string shape `Color.mix`
 /// accepts. Hand-scanned rather than regex-matched, for the same reason
 /// `parsePath` is: this runs once per tween per frame.
+///
+/// `isASCII &&`, not a bare `isHexDigit`: `Character.isHexDigit` follows
+/// Unicode's `Hex_Digit` property, so it is true for the fullwidth digit and
+/// letter blocks (U+FF10-FF19, U+FF21-FF26, U+FF41-FF46) that `Color.parseHex`
+/// throws on — `Color.isAsciiHexDigit` documents exactly this hazard, and a
+/// predicate looser than its own parser is what turned a bad colour into a
+/// trap. It also keeps this side identical to the web's `/^#[0-9a-fA-F]…/`.
 private func isHex(_ v: ChannelValue) -> Bool {
     guard let s = v.text, s.hasPrefix("#") else { return false }
     let body = s.dropFirst()
     guard body.count == 3 || body.count == 6 else { return false }
-    return body.allSatisfy { $0.isHexDigit }
+    return body.allSatisfy { $0.isASCII && $0.isHexDigit }
 }
 
 private func isPath(_ v: ChannelValue) -> Bool {
@@ -47,7 +54,14 @@ private func isPath(_ v: ChannelValue) -> Bool {
 private func lerpValue(_ from: ChannelValue, _ to: ChannelValue, _ t: Double) -> ChannelValue {
     if let a = from.number, let b = to.number { return .number(a + (b - a) * t) }
     if isHex(from), isHex(to) {
-        return .text(try! Color.mix(from.text!, to.text!, t))
+        // Two guards now agree that this cannot fail — `isHex` above and the
+        // loader's palette/`.ink` checks — and a `try!` on the per-frame path
+        // is a bet that they will still agree after the next edit, staked on
+        // the whole process. The colour crossing SNAPS instead, which is the
+        // answer this function's last line already gives an uninterpolatable
+        // pair, and is what the web does on the same input.
+        guard let mixed = try? Color.mix(from.text!, to.text!, t) else { return to }
+        return .text(mixed)
     }
     if isPath(from), isPath(to) {
         let a = try! parsePath(from.text!)

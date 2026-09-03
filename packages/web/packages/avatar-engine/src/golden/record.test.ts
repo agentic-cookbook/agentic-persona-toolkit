@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import character from "@character/character.json";
@@ -13,6 +13,10 @@ import { recordScenario } from "./record";
 
 const config = loadConfig({ character, rig, poses, timelines, behavior, sayings });
 const yawn = SCENARIOS.find((s) => s.name === "yawn")!;
+
+/** The recordings checked in beside the character JSON. Not importable: they
+ *  are read as files. See the `CHARACTER_DIR` note in vitest.config.ts. */
+const GOLDENS_DIR = join(process.env.CHARACTER_DIR!, "goldens");
 
 describe("recordScenario", () => {
   it("emits one line per frame, ending with a single newline", () => {
@@ -78,10 +82,17 @@ describe("recordScenario", () => {
 // goldens kept the old shape, stayed green, and the Swift port faithfully
 // reproducing the NEW behaviour looked like the thing that was broken (Ruling
 // 113). A recording that nothing re-checks is not a golden, it is a fossil.
-describe("the checked-in goldens", () => {
-  // Beside the character JSON, not importable: they are read as files. See the
-  // `CHARACTER_DIR` note in vitest.config.ts.
-  const dir = join(process.env.CHARACTER_DIR!, "goldens");
+//
+// `skipIf`, because the character this suite loads is not always the one the
+// goldens were recorded against. A checkout of THIS repo alone -- which is what
+// `web-tests.yml` does -- has no `characters/olylo` in any ancestor and falls
+// back to the copy bundled in `src/__fixtures__/olylo`, which deliberately does
+// not vendor 93MB of recorded frames. Skipping the comparison there leaves the
+// six recorder tests above running, which excluding the whole file did not.
+// Every run that can see the real character still compares, and that is every
+// run inside whatsnow-toolkit, CI's root workspace run included.
+describe.skipIf(!existsSync(GOLDENS_DIR))("the checked-in goldens", () => {
+  const dir = GOLDENS_DIR;
 
   it.each(SCENARIOS.map((s) => s.name))("%s.jsonl matches what src/ records today", (name) => {
     const scenario = SCENARIOS.find((s) => s.name === name)!;

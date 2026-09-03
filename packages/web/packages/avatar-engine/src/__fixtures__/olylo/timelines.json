@@ -1,0 +1,320 @@
+{
+  "schemaVersion": 1,
+  "timelines": {
+    "yawn": {
+      "duration": 2.1,
+      "steps": [
+        {
+          "at": 0,
+          "channel": "mouth.shape",
+          "family": "mouthO",
+          "duration": 0,
+          "ease": "none",
+          "promote": 4
+        },
+        {
+          "at": 0,
+          "channel": "body.scale",
+          "to": 1.06,
+          "duration": 0.85,
+          "ease": "power2.in"
+        },
+        {
+          "at": 0,
+          "channel": "face.rotation",
+          "to": -7,
+          "duration": 0.85,
+          "ease": "power2.in"
+        },
+        {
+          "at": 0,
+          "channel": "body.ink",
+          "to": "green",
+          "duration": 0.6,
+          "ease": "sine.out"
+        },
+        {
+          "at": 0,
+          "channel": "eye.scaleX",
+          "to": 1.0,
+          "duration": 0.85,
+          "ease": "power2.in"
+        },
+        {
+          "at": 0,
+          "channel": "eye.scaleY",
+          "to": 0.45,
+          "duration": 0.85,
+          "ease": "power2.in"
+        },
+        {
+          "at": 0,
+          "channel": "eye.y",
+          "to": -6,
+          "duration": 0.85,
+          "ease": "power2.in"
+        },
+        {
+          "at": 0,
+          "channel": "iris.scale",
+          "to": 0.85,
+          "duration": 0.85,
+          "ease": "power2.in"
+        },
+        {
+          "at": 0,
+          "channel": "antennaLeft.rotation",
+          "to": -10,
+          "duration": 0.85,
+          "ease": "power2.in"
+        },
+        {
+          "at": 0,
+          "channel": "antennaRight.rotation",
+          "to": 10,
+          "duration": 0.85,
+          "ease": "power2.in"
+        },
+        {
+          "at": 0,
+          "channel": "antennaLeft.y",
+          "to": -16,
+          "duration": 0.85,
+          "ease": "power2.in"
+        },
+        {
+          "at": 0,
+          "channel": "antennaRight.y",
+          "to": -16,
+          "duration": 0.85,
+          "ease": "power2.in"
+        },
+        {
+          "at": 0,
+          "channel": "browLeft.rotation",
+          "to": -6,
+          "duration": 0.85,
+          "ease": "power2.in"
+        },
+        {
+          "at": 0,
+          "channel": "browRight.rotation",
+          "to": 6,
+          "duration": 0.85,
+          "ease": "power2.in"
+        },
+        {
+          "at": 0,
+          "channel": "browLeft.y",
+          "to": -6,
+          "duration": 0.85,
+          "ease": "power2.in"
+        },
+        {
+          "at": 0,
+          "channel": "browRight.y",
+          "to": -6,
+          "duration": 0.85,
+          "ease": "power2.in"
+        },
+        {
+          "at": 0,
+          "channel": "mouth.shape",
+          "duration": 0.85,
+          "ease": "power2.in",
+          "to": "M200,225C204.9707,225 209,229.9247 209,236C209,242.0753 204.9707,247 200,247C195.0293,247 191,242.0753 191,236C191,229.9247 195.0293,225 200,225"
+        },
+        {
+          "at": 0,
+          "channel": "descender.shape",
+          "to": "M200,245 L200,264",
+          "duration": 0.85,
+          "ease": "power2.in"
+        },
+        {
+          "at": 0.85,
+          "channel": "eye.scaleX",
+          "to": 0.96,
+          "duration": 0.3,
+          "ease": "power2.in"
+        },
+        {
+          "at": 0.85,
+          "channel": "eye.scaleY",
+          "to": 0.08,
+          "duration": 0.3,
+          "ease": "power2.in"
+        },
+        {
+          "at": 0.85,
+          "channel": "eye.y",
+          "to": -9,
+          "duration": 0.3,
+          "ease": "power2.in"
+        },
+        {
+          "at": 0.85,
+          "channel": "iris.scale",
+          "to": 0.45,
+          "duration": 0.3,
+          "ease": "power2.in"
+        },
+        {
+          "at": 0.85,
+          "channel": "mouth.shape",
+          "duration": 0.4,
+          "ease": "power2.out",
+          "to": "M200,211C209.3891,211 217,221.2971 217,234C217,246.7029 209.3891,257 200,257C190.6109,257 183,246.7029 183,234C183,221.2971 190.6109,211 200,211"
+        },
+        {
+          "at": 0.85,
+          "channel": "body.scale",
+          "to": 1.12,
+          "duration": 0.4,
+          "ease": "power2.out"
+        },
+        {
+          "at": 0.85,
+          "channel": "face.rotation",
+          "to": -10,
+          "duration": 0.4,
+          "ease": "power2.out"
+        },
+        {
+          "at": 0.85,
+          "channel": "antennaLeft.y",
+          "to": -18,
+          "duration": 0.4,
+          "ease": "power2.out"
+        },
+        {
+          "at": 0.85,
+          "channel": "antennaRight.y",
+          "to": -18,
+          "duration": 0.4,
+          "ease": "power2.out"
+        },
+        {
+          "at": 1.4,
+          "channel": "mouth.shape",
+          "duration": 0.45,
+          "ease": "power2.out",
+          "to": "M200,233.6C207.1799,233.6 213,234.22678 213,235C213,235.77322 207.1799,236.4 200,236.4C192.8201,236.4 187,235.77322 187,235C187,234.22678 192.8201,233.6 200,233.6"
+        },
+        {
+          "at": 1.55,
+          "channel": "descender.shape",
+          "to": "M200,235 L200,265",
+          "duration": 0.5,
+          "ease": "power2.out"
+        },
+        {
+          "at": 1.45,
+          "channel": "eye.scaleX",
+          "to": 1,
+          "duration": 0.55,
+          "ease": "power2.out"
+        },
+        {
+          "at": 1.45,
+          "channel": "eye.scaleY",
+          "to": 1,
+          "duration": 0.55,
+          "ease": "power2.out"
+        },
+        {
+          "at": 1.45,
+          "channel": "eye.y",
+          "to": 0,
+          "duration": 0.55,
+          "ease": "power2.out"
+        },
+        {
+          "at": 1.45,
+          "channel": "iris.scale",
+          "to": 1,
+          "duration": 0.55,
+          "ease": "power2.out"
+        },
+        {
+          "at": 1.45,
+          "channel": "body.scale",
+          "to": 1,
+          "duration": 0.65,
+          "ease": "back.out(1.6)"
+        },
+        {
+          "at": 1.45,
+          "channel": "face.rotation",
+          "to": 0,
+          "duration": 0.55,
+          "ease": "power2.out"
+        },
+        {
+          "at": 1.45,
+          "channel": "antennaLeft.rotation",
+          "to": 0,
+          "duration": 0.55,
+          "ease": "power2.out"
+        },
+        {
+          "at": 1.45,
+          "channel": "antennaRight.rotation",
+          "to": 0,
+          "duration": 0.55,
+          "ease": "power2.out"
+        },
+        {
+          "at": 1.45,
+          "channel": "antennaLeft.y",
+          "to": 0,
+          "duration": 0.55,
+          "ease": "power2.out"
+        },
+        {
+          "at": 1.45,
+          "channel": "antennaRight.y",
+          "to": 0,
+          "duration": 0.55,
+          "ease": "power2.out"
+        },
+        {
+          "at": 1.45,
+          "channel": "browLeft.rotation",
+          "to": -7,
+          "duration": 0.55,
+          "ease": "power2.out"
+        },
+        {
+          "at": 1.45,
+          "channel": "browRight.rotation",
+          "to": 7,
+          "duration": 0.55,
+          "ease": "power2.out"
+        },
+        {
+          "at": 1.45,
+          "channel": "browLeft.y",
+          "to": 0,
+          "duration": 0.55,
+          "ease": "power2.out"
+        },
+        {
+          "at": 1.45,
+          "channel": "browRight.y",
+          "to": 0,
+          "duration": 0.55,
+          "ease": "power2.out"
+        },
+        {
+          "at": 1.85,
+          "channel": "mouth.shape",
+          "family": "mouth",
+          "duration": 0,
+          "ease": "none",
+          "to": "M187,235 L200,235 L213,235"
+        }
+      ]
+    }
+  }
+}

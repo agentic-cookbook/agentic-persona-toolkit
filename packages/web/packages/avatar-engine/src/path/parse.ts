@@ -71,9 +71,33 @@ export function parsePath(d: string): ParsedPath {
   return { kind: kind.join(""), points };
 }
 
-const fmt = (v: number): string => {
-  const r = Math.round(v * 1e6) / 1e6;
-  return Object.is(r, -0) ? "0" : String(r);
+/**
+ * Round to 1e-6 and print `-0` as `0`. Exported and imported by `./build`
+ * rather than copied there: this is the one function both platforms must agree
+ * on character-for-character (`ParsedPath.swift`'s `fmt` says so), and two
+ * copies of it is two places for that agreement to lapse.
+ *
+ * HALF-AWAY-FROM-ZERO, matching Swift's `Double.rounded()`. `Math.round` is
+ * half-toward-+Infinity, which agrees on every positive half-step and disagrees
+ * on every negative one — `Math.round(-1.5)` is -1 where `(-1.5).rounded()` is
+ * -2, so `fmt(-187.0000005)` emitted "-187" here and "-187.000001" there. Only
+ * negatives diverge, which is why nothing caught it: `morph`'s `back.out`
+ * easings EXTRAPOLATE past t=1, and that is the route to a negative coordinate.
+ */
+export const fmt = (v: number): string => {
+  const scaled = v * 1e6;
+  const r = (scaled < 0 ? -Math.round(-scaled) : Math.round(scaled)) / 1e6;
+  if (r === 0) return "0";                       // `-0` included
+  const s = String(r);
+  if (!s.includes("e")) return s;
+  // SVG path data has no exponent form, and Swift's `%.6f` never emits one.
+  // `String` reaches for one below 1e-6 — unreachable on this grid, whose
+  // smallest non-zero value IS 1e-6 — and at 1e21, which a runaway coordinate
+  // can reach and where `toFixed` gives up too. Every double that large is an
+  // integer, so `BigInt` prints it in full, which is what Swift's `%.6f` does.
+  return Math.abs(r) >= 1e21
+    ? BigInt(r).toString()
+    : r.toFixed(6).replace(/0+$/, "").replace(/\.$/, "");
 };
 
 export function emitPath(p: ParsedPath): string {

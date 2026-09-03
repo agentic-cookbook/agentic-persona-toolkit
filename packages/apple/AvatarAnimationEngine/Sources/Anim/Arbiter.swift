@@ -168,6 +168,27 @@ public final class Arbiter {
         alertUntil = now + ctx.config.behavior.ladder.alertAfterTypingMs / 1000
     }
 
+    /// Play a timeline by name, on the engine's ONE timeline slot.
+    ///
+    /// The slot is the same field a choreographed mood uses, and sharing it is
+    /// the point rather than a saving. A timeline is not a private animation: it
+    /// snaps engine-managed `.family` channels and rewrites the shapes beside
+    /// them, and only its own handle knows how to hand either back. Two of them
+    /// standing at once means the second reads channels the first has already
+    /// moved — `play("yawn")` twice half a second apart, or `play("yawn")`
+    /// followed by `setMood("yawning")`, both landed a second promote on an
+    /// already-promoted mouth.
+    ///
+    /// Cancelling first is therefore the whole fix, and putting the handle where
+    /// `evaluate` already looks is what extends it across the two doors: a mood
+    /// change cancels a hand-played timeline exactly as it cancels a
+    /// choreographed one, which is also the behaviour a caller wants — leaving
+    /// the mood a timeline was performing should not leave the timeline running.
+    public func play(_ name: String, now: Double) throws {
+        if let running = choreo { running.cancel(); choreo = nil }
+        choreo = try playTimeline(ctx, name, now: now)
+    }
+
     // MARK: - arbitration
 
     private func rungFor(_ now: Double) -> Int {

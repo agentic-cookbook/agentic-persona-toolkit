@@ -11,6 +11,23 @@ const fail = (msg: string): never => {
   throw new Error(`avatar config: ${msg}`);
 };
 
+/** `#rgb` or `#rrggbb` — exactly what `parseHex` accepts and `lerpValue`'s
+ *  `isHex` admits, and the same predicate Swift's loader applies. The loader is
+ *  the last place a bad colour is still attributable to a KEY: past here it is a
+ *  string on a per-frame path, where `mixColor`'s throw names only the string. */
+const isLoadableHex = (s: string): boolean => /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(s);
+
+/** The shape fields a variant may patch. The mirror of Swift's
+ *  `Shape.patchable`, and an ALLOWLIST rather than a lookup on the shape object:
+ *  `kind`, `bend` and `family` are all "defined" on a shape that has them, so a
+ *  dynamic read waves them through. `family` is excluded deliberately — changing
+ *  a family is a morph, never a variant — and `kind`/`bend` because `applyVariant`
+ *  merges the patch with an object spread, so a bad one is not quietly dropped by
+ *  a `switch`: it reaches `compose` and throws inside the rAF loop. */
+const PATCHABLE_SHAPE_FIELDS = new Set([
+  "points", "cx", "cy", "r", "band", "from", "to", "rx", "ry",
+]);
+
 /** The resting `shape` of a morphable node — the same string `resolvePath`
  *  (Task 12) will build for it on frame 0. Primitives have no shape channel. */
 function restShape(node: RigNode): string | undefined {
@@ -42,6 +59,28 @@ export function loadConfig(input: RawFiles): CharacterConfig {
     if (v !== SCHEMA_VERSION) {
       fail(`${name}.json has schemaVersion ${v}, expected ${SCHEMA_VERSION}`);
     }
+  }
+
+  // --- the values neither runtime survives ---------------------------------
+  // ONE block, not a guard scattered across the eight places these values are
+  // read. Everything checked here shares a shape: it is legal JSON, the loader
+  // used to wave it through, and the first thing downstream that touches it
+  // either writes `undefined`/`NaN` into a channel and kills the rAF loop (web)
+  // or TRAPS the process (Apple). Load is the last moment the offending KEY is
+  // still nameable — "bad hex colour: #abcd" arriving forty frames later names
+  // nothing an author can act on. `Loader.swift` runs the identical block, and
+  // `schema.json` states both constraints, so no single loader is the only
+  // defence.
+  for (const [name, hex] of Object.entries(character.palette)) {
+    if (!isLoadableHex(hex)) {
+      fail(`palette "${name}" is "${hex}", which is not a #rgb or #rrggbb colour`);
+    }
+  }
+  // An empty member list makes the group a legal CHANNEL — the member check
+  // below is vacuous over `[]`, so nothing rejects it — that expands to
+  // nothing. Every consumer then reaches for its first member.
+  for (const [name, members] of Object.entries(rig.groups)) {
+    if (members.length === 0) fail(`group "${name}" has no members`);
   }
 
   // An `.ink` channel holds an ink KEY (a shaped node names how it is painted) or
@@ -157,7 +196,18 @@ export function loadConfig(input: RawFiles): CharacterConfig {
         if ("bend" in node.shape && node.shape.bend !== undefined) {
           bendDriven.add(node.id);
         } else {
-          rest.set(`${node.id}.shape`, restShape(node)!);
+          // NOT `restShape(node)!`. A ring/disc/arc that also declares a family
+          // is a primitive — rebuilt every frame, never morphed — so `restShape`
+          // returns undefined for it, and the assertion wrote that `undefined`
+          // into `Channels` under a key `names()` lists, breaking the
+          // `ChannelValue` union every consumer assumes. It also reclassified
+          // the node as morphable, which refuses olylo's real `optical` variant.
+          // Swift's `restShape` throws on the same input; this is that throw.
+          const d = restShape(node);
+          if (d === undefined) {
+            fail(`node "${node.id}" has a family but is a ${node.shape.kind}`);
+          }
+          rest.set(`${node.id}.shape`, d!);
         }
       }
     }
@@ -290,16 +340,55 @@ export function loadConfig(input: RawFiles): CharacterConfig {
     }
   };
 
+  /**
+   * A pair field is two numbers and only two. Nothing between the JSON and the
+   * seven sites that index one enforces that — the `[number, number]` in
+   * `types.ts` is erased before `JSON.parse` ever runs — so `"rearmMs": [4000]`
+   * loads clean and reaches the runtime, where `pairRange` now reads it as the
+   * degenerate 4000..4000 rather than yielding `NaN`. That degrade is the
+   * SECOND line of defence, the one that makes the two engines agree about a
+   * config arriving from somewhere other than a loader; this is the first, and
+   * it names the field while the author is still looking at it.
+   *
+   * `schema.json` already says `minItems: 2, maxItems: 2` on every one of these
+   * (they all `$ref` `#/$defs/Point`) and it is not enough: nothing validates a
+   * config against that schema at load — it is a document, not a gate — so the
+   * check has to exist in code here, and in `Loader.swift`'s `requirePair`, to
+   * be a check at all.
+   */
+  const requirePair = (pair: readonly number[] | undefined, where: string): void => {
+    if (pair !== undefined && pair.length !== 2) {
+      fail(`${where} needs exactly two numbers, not ${pair.length}`);
+    }
+  };
+
   const requireValue = (channel: string, to: number | string, where: string): void => {
     if (channel.endsWith(".shape") && bendDriven.has(channel.slice(0, -".shape".length))) {
       fail(`${where} sets ${channel}, but that node is bend-driven — animate its .bend instead`);
+    }
+    // A `.shape` channel holds a path and an `.ink` channel holds a colour;
+    // both are text. A NUMBER written to one is not a value the channel can
+    // hold, and until this check nothing said so: `timeline.ts`'s promote step
+    // would meet a number where it demanded a string, refuse, and `continue` —
+    // the write silently dropped, arbitrarily far from the config that asked
+    // for it. This is the check the comment at that promote site assumes has
+    // already run. Every other suffix stays deliberately unexamined, exactly as
+    // the string branch below leaves it.
+    if (typeof to === "number" && (channel.endsWith(".shape") || channel.endsWith(".ink"))) {
+      fail(`${where} writes a number to ${channel}, which holds `
+        + `${channel.endsWith(".shape") ? "a path" : "a colour"}`);
     }
     if (typeof to !== "string") return;
     if (channel.endsWith(".shape")) {
       try { parsePath(to); } catch (e) { fail(`${where}: unsupported path — ${(e as Error).message}`); }
     } else if (channel.endsWith(".ink")) {
-      // `colourise` has already turned a palette name on a colour channel into
-      // a literal, so a "#" here is normalised, not unchecked.
+      // No shape check on the "#" branch, and the reason is worth stating:
+      // `colourise` runs immediately before every call to this function and
+      // rejects any `.ink` string that is neither an ink key nor a palette KEY
+      // — an authored `"#abcd"` included, because a literal is never a palette
+      // key. The only "#" that reaches here is therefore a palette VALUE, whose
+      // shape the block at the top of `loadConfig` has already checked. What is
+      // left is the ink-key case, which `colourise` passes through.
       if (!to.startsWith("#") && !(to in character.palette) && !(to in character.inks)) {
         fail(`${where} sets ${channel} to unknown colour "${to}"`);
       }
@@ -322,7 +411,12 @@ export function loadConfig(input: RawFiles): CharacterConfig {
     requireEase(pose.ease, where);
     for (const [channel, authored] of Object.entries(pose.channels)) {
       requireChannel(channel, where);
-      const first = expand(channel)[0]!;
+      // The block at the top rejects the only config that can make this empty;
+      // the guard stays because `[0]!` writes `undefined` through a signature
+      // that promises a string, and every check downstream then reads the wrong
+      // channel's rules. Swift throws the same `ConfigError` here.
+      const first = expand(channel)[0];
+      if (first === undefined) throw fail(`${where} targets empty group "${channel}"`);
       const to = canonicalise(first, colourise(first, authored, where), where);
       pose.channels[channel] = to;
       for (const c of expand(channel)) requireValue(c, to, where);
@@ -416,7 +510,9 @@ export function loadConfig(input: RawFiles): CharacterConfig {
         // The schema's `oneOf` has already ruled this out; the throw is what
         // narrows it for the compiler (see the `ink` guard above).
         if (step.to === undefined) throw fail(`${where} drives ${step.channel} with no value`);
-        const first = expand(step.channel)[0]!;
+        // As in the pose walk: an error, never an `undefined` channel name.
+        const first = expand(step.channel)[0];
+        if (first === undefined) throw fail(`${where} targets empty group "${step.channel}"`);
         step.to = canonicalise(first, colourise(first, step.to, where), where);
         for (const c of expand(step.channel)) requireValue(c, step.to, where);
       }
@@ -555,6 +651,8 @@ export function loadConfig(input: RawFiles): CharacterConfig {
   for (const part of [behavior.gaze.look, behavior.gaze.tilt, behavior.gaze.lean]) {
     requireEase(part.ease, "behavior.gaze");
   }
+  requirePair(behavior.gaze.reachCurious, "behavior.gaze.reachCurious");
+  requirePair(behavior.gaze.reachIdle, "behavior.gaze.reachIdle");
   requireChannel(behavior.idleFidget.breath.channel, "behavior.idleFidget.breath");
   requireEase(behavior.idleFidget.breath.ease, "behavior.idleFidget.breath");
   requireChannel(behavior.idleFidget.sway.channel, "behavior.idleFidget.sway");
@@ -563,6 +661,8 @@ export function loadConfig(input: RawFiles): CharacterConfig {
   }
   requireEase(behavior.idleFidget.ease, "behavior.idleFidget");
   requireEase(behavior.idleFidget.settle.ease, "behavior.idleFidget.settle");
+  requirePair(behavior.idleFidget.durationRange, "behavior.idleFidget.durationRange");
+  requirePair(behavior.idleFidget.rearm.gapMs, "behavior.idleFidget.rearm.gapMs");
   for (const id of behavior.pinpricks.nodes) {
     if (!nodes.has(id)) fail(`behavior.pinpricks names unknown node "${id}"`);
   }
@@ -574,20 +674,44 @@ export function loadConfig(input: RawFiles): CharacterConfig {
   for (const [mood, effect] of Object.entries(behavior.moodEffects)) {
     if (!(mood in poses.poses)) fail(`moodEffects names unknown mood "${mood}"`);
     if (!nodes.has(effect.target)) fail(`moodEffect "${effect.id}" names unknown node "${effect.target}"`);
+    requirePair(effect.firstDelayMs, `moodEffect "${effect.id}" firstDelayMs`);
+    requirePair(effect.rearmMs, `moodEffect "${effect.id}" rearmMs`);
     for (const steps of [effect.twitch, effect.drift, effect.once]) {
       for (const step of steps ?? []) {
         requireEase(step.ease, `moodEffect "${effect.id}"`);
-        for (const c of Object.keys(step.channels)) requireChannel(c, `moodEffect "${effect.id}"`);
+        requirePair(step.durationRange, `moodEffect "${effect.id}" step durationRange`);
+        for (const c of Object.keys(step.channels)) {
+          requireChannel(c, `moodEffect "${effect.id}"`);
+          // An effect step's value is always numeric — a literal or a
+          // `{"rnd": n}` draw — so every channel it names has to be one that
+          // holds a number. Pose channels and timeline steps have gone through
+          // `requireValue` all along; effect steps got `requireChannel` and
+          // nothing else, which is why an effect writing a number to
+          // `mouth.shape` loaded clean. Expanded first, because a group is a
+          // legitimate thing for a step to name and it is the MEMBERS written.
+          for (const member of expand(c)) requireValue(member, 0, `moodEffect "${effect.id}"`);
+        }
       }
     }
     if (effect.branch) {
       // "twitch" or "drift" — and NOT "once", however plausible a third step
-      // list looks here. `stir` reads `key === "drift" ? def.drift : def.twitch`,
-      // so anything else silently plays the twitch list; accepting a name the
-      // player cannot honour just moves the typo one step further from its error.
+      // list looks here: `stir` plays the list `branch.then`/`.else` names, and
+      // `once` is `startEffect`'s, played on a different clock.
+      //
+      // Naming one of the two is necessary and not sufficient. The list also
+      // has to EXIST: an effect that branches to "drift" without defining one
+      // used to load clean and then go silent on roughly the fraction of stirs
+      // the branch sent that way — while still drawing the branch value and the
+      // re-arm gap, so the chain lived forever and the shared PRNG stream
+      // walked out of step with every golden. `stir`'s `stepList` is total now
+      // and ends the chain instead, which is at least visible; this makes it
+      // unreachable from an authored config.
       for (const key of [effect.branch.then, effect.branch.else]) {
         if (!["twitch", "drift"].includes(key)) {
           fail(`moodEffect "${effect.id}" branches to "${key}", not "twitch" or "drift"`);
+        }
+        if ((key === "twitch" ? effect.twitch : effect.drift) === undefined) {
+          fail(`moodEffect "${effect.id}" branches to "${key}", which it does not define`);
         }
       }
     }
@@ -636,6 +760,7 @@ export function loadConfig(input: RawFiles): CharacterConfig {
   for (const mood of Object.values(behavior.ladder.moods)) {
     if (!(mood in poses.poses)) fail(`ladder names unknown mood "${mood}"`);
   }
+  requirePair(behavior.speech.bubble.distance, "behavior.speech.bubble.distance");
   requireEase(behavior.speech.bubble.in.ease, "behavior.speech.bubble.in");
   requireEase(behavior.speech.bubble.out.ease, "behavior.speech.bubble.out");
 
@@ -680,7 +805,14 @@ export function loadConfig(input: RawFiles): CharacterConfig {
         fail(`variant "${vName}" patches morphable node "${nodeId}"; its .shape channel would overwrite the patch`);
       }
       for (const [key, value] of Object.entries(fields)) {
-        const current = (shape as unknown as Record<string, unknown>)[key];
+        // The allowlist FIRST, then the shape's own declaration — the mirror of
+        // Swift's `patchable(_:)`, which returns nil for both. Reading the key
+        // straight off the shape made `kind`, `bend` and `family` all look
+        // "defined", so `{kind: 5}` and `{bend: 2}` loaded clean and threw in
+        // `compose` on the next frame.
+        const current = PATCHABLE_SHAPE_FIELDS.has(key)
+          ? (shape as unknown as Record<string, unknown>)[key]
+          : undefined;
         if (current === undefined) {
           fail(`variant "${vName}" node "${nodeId}" has no shape field "${key}"`);
         }

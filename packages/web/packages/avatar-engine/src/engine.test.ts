@@ -91,6 +91,57 @@ describe("engine", () => {
     expect(e.tick(2.5).find((i) => i.id === "mouth")!.d).toBe(CLOSED);
   });
 
+  it("cancels the running timeline before starting another, whichever door starts it", () => {
+    // `play` used to throw the handle away, so a second timeline landed on top
+    // of the first: its `at: 0` promote read a `mouth.shape` the first had
+    // already promoted and `promotePolyline` refused it —
+    // `can only promote an open polyline, not "MCCCC"` — thrown from inside
+    // `scheduler.tick`, i.e. out of `engine.tick`, which on the web is the frame
+    // that never schedules the next `requestAnimationFrame`. The avatar is dead
+    // until unmount, so "does not throw" is the whole assertion, and it is only
+    // worth anything because both of these DID.
+    for (const second of [
+      (e: ReturnType<typeof engine>) => e.play("yawn"),
+      (e: ReturnType<typeof engine>) => e.setMood("yawning"),
+    ]) {
+      const e = engine();
+      for (let t = 0; t <= 1; t += 1 / 60) e.tick(t);
+      e.play("yawn");
+      for (let t = 1 + 1 / 60; t <= 1.5; t += 1 / 60) e.tick(t);
+      second(e);
+      expect(() => { for (let t = 1.5; t <= 5; t += 1 / 60) e.tick(t); }).not.toThrow();
+      // Alive, and the mouth is back in a family the rig declares.
+      expect(e.tick(5).length).toBe(14);
+      expect(e.channels().get("mouth.family")).toBe("mouth");
+    }
+  });
+
+  it("refuses an unknown mood without committing it", () => {
+    // `setMood` is the one string reaching this engine that the loader never
+    // saw. The arbiter used to commit `current` first and let `applyPose` throw:
+    // the state then said the mood applied, so every later `evaluate`
+    // short-circuited on `next.mood !== current` and painted nothing at all —
+    // and the first one that did not short-circuit threw out of a `tick` the
+    // host's frame loop does not survive.
+    const e = engine();
+    for (let t = 0; t <= 1; t += 1 / 60) e.tick(t);
+    expect(() => e.setMood("exicted")).toThrow("unknown mood: exicted");
+    expect(e.state().mood).toBe("idle");
+
+    // Still painting, and still able to take a real mood afterwards.
+    const before = JSON.stringify(e.tick(1.5));
+    e.setMood("excited");
+    for (let t = 1.5; t <= 3; t += 1 / 60) e.tick(t);
+    expect(e.state().mood).toBe("excited");
+    expect(JSON.stringify(e.tick(3))).not.toBe(before);
+
+    // And a poke, whose window lapsing is what re-ran `evaluate` from inside
+    // `arbiter.tick` and threw there under the old order.
+    e.setMood(null);
+    e.poke();
+    expect(() => { for (let t = 3; t <= 12; t += 1 / 60) e.tick(t); }).not.toThrow();
+  });
+
   it("stamps a command with the frame that just passed, not a clock of its own", () => {
     // The regression guard for Ruling 48, and the shape of the bug it closed:
     // `play` issued two seconds in must still take the yawn its configured time

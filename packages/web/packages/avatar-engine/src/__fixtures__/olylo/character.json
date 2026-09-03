@@ -1,0 +1,56 @@
+{
+  "$schema": "../../packages/web/external/agenticdevelopertoolkit/packages/web/packages/avatar-engine/src/config/schema.json",
+  "schemaVersion": 1,
+  "id": "olylo",
+  "canvas": { "w": 400, "h": 400 },
+  "strokeStyle": { "width": 8, "linecap": "round", "linejoin": "round" },
+  "palette": {
+    "green": "#00ff41",
+    "orange": "#ff9500",
+    "yellow": "#ffd400",
+    "flash": "#fffce0",
+    "red": "#ff2d2d",
+    "blue": "#4f7cff",
+    "dimmer": "#5f7a64",
+    "hidden": "#4f6e57",
+    "iris": "#33ccff",
+    "eyeBg": "#06140d"
+  },
+  "inks": {
+    "body":     { "kind": "stroke", "color": "@body", "width": 8 },
+    "brow":     { "kind": "stroke", "color": "@body", "width": 5 },
+    "eyeRing":  { "kind": "fill",   "color": "@body" },
+    "eyeBg":    { "kind": "fill",   "color": "eyeBg" },
+    "iris":     { "kind": "fill",   "color": "iris" },
+    "pinprick": { "kind": "fill",   "color": "iris" }
+  },
+  "crops": {
+    "full":         ["brows", "antennae", "mouth", "descender", "eyes"],
+    "browsAndEyes": ["brows", "eyes"]
+  },
+  "variants": {
+    "optical": {
+      "inks": {
+        "body": { "width": 13 },
+        "brow": { "width": 9 }
+      },
+      "shapes": {
+        "eyeLeftRing":  { "band": 13 },
+        "eyeRightRing": { "band": 13 },
+        "eyeLeftBg":    { "r": 22 },
+        "eyeRightBg":   { "r": 22 },
+        "irisLeft":     { "r": 10 },
+        "irisRight":    { "r": 10 },
+        "antennaLeft":  { "points": [[180.5, 169], [177.5, 148], [172.5, 126], [176.5, 105]] },
+        "antennaRight": { "points": [[219.5, 169], [221.5, 148], [228.5, 126], [225.5, 105]] }
+      }
+    }
+  },
+  "files": {
+    "rig": "rig.json",
+    "poses": "poses.json",
+    "timelines": "timelines.json",
+    "behavior": "behavior.json",
+    "sayings": "sayings.json"
+  }
+}

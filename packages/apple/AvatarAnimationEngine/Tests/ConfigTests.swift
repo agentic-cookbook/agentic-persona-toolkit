@@ -213,6 +213,41 @@ final class ConfigTests: XCTestCase {
         }
     }
 
+    func testRejectsAPaletteEntryParseHexCannotRead() {
+        // The whole batch's failure shape in one line of JSON: legal JSON, waved
+        // through by the loader, and fatal at the first colour tween. `isHex` in
+        // `Tweens.swift` used to accept anything `Character.isHexDigit` liked,
+        // which includes the fullwidth digit block (U+FF10 here) that
+        // `Color.parseHex` throws on -- and the `try!` under it TRAPPED the
+        // process on the per-frame path. The web dies more politely and just as
+        // completely: `bad hex colour` thrown out of an rAF callback with no
+        // try/catch. Load is the last moment the offending KEY is nameable.
+        for bad in ["#abcd", "#abcde", "112233", "#gggggg", "#ab", "",
+                    "#\u{FF10}0ff41"] {
+            expectLoadFailure("palette \"warm\"") {
+                try fixture("character", set: "palette/warm", to: bad)
+            }
+        }
+    }
+
+    func testAcceptsBothLegalHexShapes() throws {
+        for ok in ["#abc", "#AABBCC"] {
+            _ = try CharacterConfig.load(fixture("character", set: "palette/warm", to: ok))
+        }
+    }
+
+    func testRejectsAGroupWithNoMembers() {
+        // An empty list is not an empty group: the member loop is vacuous over
+        // `[]`, so nothing rejects it, and `concrete.union(expandMap.keys)` then
+        // makes the name a legal CHANNEL that expands to nothing. Every consumer
+        // reaches for its first member -- `expand(name).first!`, which traps
+        // with "Unexpectedly found nil" out of the one function whose entire
+        // contract is to throw a `ConfigError`.
+        expectLoadFailure("group \"eyelids\" has no members") {
+            try fixture("rig", set: "groups/eyelids", to: [String]())
+        }
+    }
+
     func testRejectsARigWithNoGroupsKey() {
         // Same rule, same reason: required by `schema.json`, iterated unguarded
         // by `load.ts`. An empty rig writes `"groups": {}` on both platforms.
@@ -427,5 +462,96 @@ final class ConfigTests: XCTestCase {
                 "duration": 0, "ease": "sine.inOut",
             ])
         }
+    }
+    // MARK: - pair arity (finding 16, the load-time half)
+    //
+    // `schema.json` already says `minItems: 2, maxItems: 2` on all eight of
+    // these fields (`#/$defs/Point`), and says it to nobody: nothing validates a
+    // config against the schema at load. `requirePair` is what turns it into a
+    // rule. The runtime's `pairRange` still degrades a short pair to a
+    // degenerate range rather than trapping — that is the second line of
+    // defence, for a config that reaches the engine from anywhere but a loader.
+
+    func testRejectsAGazeReachThatIsNotExactlyTwoNumbers() {
+        expectLoadFailure("behavior.gaze.reachCurious needs exactly two numbers, not 1") {
+            try fixture("behavior", set: "gaze/reachCurious", to: [0.6])
+        }
+    }
+
+    func testRejectsAnIdleFidgetDurationRangeOfThreeNumbers() {
+        expectLoadFailure("behavior.idleFidget.durationRange needs exactly two numbers, not 3") {
+            try fixture("behavior", set: "idleFidget/durationRange", to: [0.5, 1.1, 2.0])
+        }
+    }
+
+    func testRejectsAOneElementRearmGapThePairThatUsedToTrapMinutesIn() {
+        // `"gapMs": [4000]` is the finding's own example. It loaded clean, and
+        // then this engine trapped on `pair[1]` — `Index out of range`, minutes
+        // into a session, arbitrarily far from the config that caused it —
+        // while the web engine produced a NaN deadline that could never come
+        // due. One bad config, two different wrong answers.
+        expectLoadFailure("behavior.idleFidget.rearm.gapMs needs exactly two numbers, not 1") {
+            try fixture("behavior", set: "idleFidget/rearm/gapMs", to: [4000])
+        }
+    }
+
+    func testRejectsASpeechBubbleDistanceThatIsNotAPair() {
+        expectLoadFailure("behavior.speech.bubble.distance needs exactly two numbers, not 0") {
+            try fixture("behavior", set: "speech/bubble/distance", to: [Double]())
+        }
+    }
+
+    func testRejectsAMoodEffectsRearmMsAndItsStepsDurationRangeAlike() {
+        expectLoadFailure("rearmMs needs exactly two numbers, not 1") {
+            try fixture("behavior", set: "moodEffects/eager/rearmMs", to: [1200])
+        }
+        expectLoadFailure("step durationRange needs exactly two numbers, not 3") {
+            try fixture("behavior", set: "moodEffects/eager/drift/0/durationRange", to: [1, 2, 3])
+        }
+    }
+
+    // MARK: - channel type (finding 17, the loader half)
+
+    func testRejectsAnEffectStepWritingANumberToAChannelThatHoldsAPath() {
+        // The finding's second half: `requireChannel` said the channel exists
+        // and nothing said it can hold what the step writes. An effect step's
+        // value is always numeric, so a `.shape` channel is a type error — one
+        // that used to surface only as `Timelines.swift`'s promote quietly
+        // refusing, mid-session, with the write dropped.
+        expectLoadFailure("writes a number to line.shape, which holds a path") {
+            try fixture("behavior", set: "moodEffects/calm/once/0/channels",
+                        to: ["line.shape": 1])
+        }
+    }
+
+    func testRejectsAnEffectStepWritingANumberToAChannelThatHoldsAColour() {
+        expectLoadFailure("writes a number to body.ink, which holds a colour") {
+            try fixture("behavior", set: "moodEffects/calm/once/0/channels",
+                        to: ["body.ink": 0.5])
+        }
+    }
+
+    // MARK: - branch target exists (finding 36, the loader half)
+
+    func testRejectsAnEffectThatBranchesToAListItDoesNotDefine() {
+        // Spelling the key right was the whole of the old check. An effect that
+        // branches to "drift" and defines none used to load clean, then go
+        // silent on the share of stirs the branch sent that way — while still
+        // drawing the branch value and the re-arm gap, so the chain lived
+        // forever and the shared PRNG stream walked out of step with every
+        // golden. `stir`'s `stepList` guard ends the chain visibly now; this
+        // makes the state unreachable from an authored config at all.
+        expectLoadFailure("branches to \"drift\", which it does not define") {
+            try fixture("behavior", set: "moodEffects/eager/drift", to: nil)
+        }
+    }
+
+    func testStillAcceptsAnEffectWhoseBranchListIsAuthoredEmpty() throws {
+        // Absent and empty are different statements — "no such list" against
+        // "nothing to play this round" — and the runtime's old `?? []` was
+        // collapsing them. The runtime keeps the distinction now; so must the
+        // loader, or the distinction is only half real.
+        _ = try CharacterConfig.load(
+            try fixture("behavior", set: "moodEffects/eager/drift", to: [Any]()))
     }
 }

@@ -29,15 +29,27 @@ interface Live {
   easeName: string;
 }
 
+/** `{3}|{6}`, never `{3,6}`: a 4- or 5-digit body is not a colour `parseHex`
+ *  accepts, so the looser form let `mixColor` throw out of the rAF loop — and it
+ *  disagreed with Swift's `isHex`, which has always required exactly 3 or 6. */
 const isHex = (v: ChannelValue): v is string =>
-  typeof v === "string" && /^#[0-9a-fA-F]{3,6}$/.test(v);
+  typeof v === "string" && /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(v);
 const isPath = (v: ChannelValue): v is string =>
   typeof v === "string" && /^[Mm]/.test(v);
 
 /** Interpolate whatever kind of value this is; unknown strings snap at t >= 1. */
 function lerpValue(from: ChannelValue, to: ChannelValue, t: number): ChannelValue {
   if (typeof from === "number" && typeof to === "number") return from + (to - from) * t;
-  if (isHex(from) && isHex(to)) return mixColor(from, to, t);
+  if (isHex(from) && isHex(to)) {
+    // Two guards now agree this cannot fail — `isHex` above and the loader's
+    // palette/`.ink` checks — and an uncaught throw on the per-frame path is a
+    // bet that they will still agree after the next edit, staked on the whole
+    // frame loop: `useAvatarEngine`'s rAF has no try/catch, so one bad colour
+    // stops the avatar for good. The crossing SNAPS instead, which is the answer
+    // this function's last line already gives an uninterpolatable pair, and is
+    // what Swift now does on the same input.
+    try { return mixColor(from, to, t); } catch { return to; }
+  }
   if (isPath(from) && isPath(to)) {
     const a = parsePath(from);
     const b = parsePath(to);

@@ -31,6 +31,18 @@ final class ColorTests: XCTestCase {
         XCTAssertLessThan(abs(Color.srgbToOklab(try Color.parseHex("#000000")).r), 1e-9)
     }
 
+    /// `clamp01` was a min/max pair, and every comparison against NaN is false,
+    /// so NaN passed straight through to `Int(Double.nan.rounded())` -- which
+    /// TRAPS, on the per-frame render path, for a value that should at worst
+    /// render as a wrong colour. NaN reaches a colour channel from any
+    /// divide-by-zero upstream in an interpolation. The web's twin does not
+    /// crash but lies, printing "#NaNNaNNaN"; clamping to 0 makes both say
+    /// black for the same input.
+    func testRendersANaNChannelAsBlackRatherThanCrashing() {
+        XCTAssertEqual(Color.toHex((Double.nan, Double.nan, Double.nan)), "#000000")
+        XCTAssertEqual(Color.toHex((Double.nan, 1, 0)), "#00ff00")
+    }
+
     func testMixesEndpointsExactly() throws {
         XCTAssertEqual(try Color.mix("#00ff41", "#ff2d2d", 0), "#00ff41")
         XCTAssertEqual(try Color.mix("#00ff41", "#ff2d2d", 1), "#ff2d2d")

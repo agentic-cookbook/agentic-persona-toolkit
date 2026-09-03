@@ -48,4 +48,36 @@ describe("createPrng", () => {
     const items = ["a", "b", "c"];
     for (let i = 0; i < 5000; i += 1) expect(items).toContain(p.pick(items));
   });
+
+  /**
+   * `pick` cannot be total — `T` has no empty case — so it used to hand the
+   * caller `items[...]` (`undefined`) with a non-null assertion waving it
+   * through as a `T`: a saying that renders as the string "undefined", or a
+   * lookup that fails frames later naming nothing. The contract is now stated
+   * (`loadConfig` rejects every empty list-typed field that reaches it) and
+   * `pickOrUndefined` is the total form for a caller holding no such
+   * guarantee. The Swift twin is `Prng.pickOrNil`; its `pick` states the same
+   * contract with a `preconditionFailure`, which XCTest cannot catch, so the
+   * throwing half of this is tested on the web side alone.
+   */
+  it("pick names the broken contract instead of returning undefined as a T", () => {
+    const p = createPrng(3);
+    expect(() => p.pick([])).toThrow(/Prng\.pick on an empty array/);
+  });
+
+  it("pickOrUndefined answers undefined for an empty array and draws nothing", () => {
+    const p = createPrng(3);
+    expect(p.pickOrUndefined([])).toBeUndefined();
+    expect(p.pickOrUndefined<string>([])).toBeUndefined();
+    // No draw was consumed, so the stream is where it started: the same first
+    // value a fresh generator gives.
+    expect(p.next()).toBe(createPrng(3).next());
+  });
+
+  it("pickOrUndefined consumes the same stream as pick", () => {
+    const items = ["a", "b", "c", "d", "e"];
+    const a = createPrng(7);
+    const b = createPrng(7);
+    for (let i = 0; i < 200; i += 1) expect(a.pick(items)).toBe(b.pickOrUndefined(items));
+  });
 });

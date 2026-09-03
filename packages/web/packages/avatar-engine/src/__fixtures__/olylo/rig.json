@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 1,
+  "groups": {
+    "eye.scaleX": ["eyeLeft.scaleX", "eyeRight.scaleX"],
+    "eye.scaleY": ["eyeLeft.scaleY", "eyeRight.scaleY"],
+    "eye.y":      ["eyeLeft.y", "eyeRight.y"],
+    "iris.scale": ["irisLeft.scale", "irisRight.scale"]
+  },
+  "root": {
+    "id": "idle", "layer": true,
+    "transform": { "pivot": [200, 200] },
+    "children": [{
+      "id": "tilt", "layer": true,
+      "transform": { "pivot": [200, 200] },
+      "children": [{
+        "id": "lean", "layer": true,
+        "children": [{
+          "id": "body", "layer": true, "ink": "green",
+          "transform": { "pivot": [200, 200] },
+          "children": [{
+            "id": "face", "layer": true,
+            "transform": { "pivot": [200, 204.334] },
+            "children": [
+              { "id": "browLeft", "feature": "brows", "ink": "brow", "alpha": 0.8,
+                "transform": { "pivot": [152, 200] },
+                "shape": { "kind": "arc", "cx": 152, "cy": 200, "r": 45, "from": 233.1301, "to": 306.8699 } },
+              { "id": "browRight", "feature": "brows", "ink": "brow", "alpha": 0.8,
+                "transform": { "pivot": [248, 200] },
+                "shape": { "kind": "arc", "cx": 248, "cy": 200, "r": 45, "from": 233.1301, "to": 306.8699 } },
+
+              { "id": "antennaLeft", "feature": "antennae", "ink": "body",
+                "transform": { "pivot": [183, 169] },
+                "shape": { "kind": "bezier", "family": "antenna",
+                           "points": [[183, 169], [180, 148], [175, 126], [179, 105]],
+                           "bend": { "axis": "x", "weights": [0, 0.3, 0.8, 1], "inwardDamp": 0.72, "inwardSign": 1 } } },
+              { "id": "antennaRight", "feature": "antennae", "ink": "body",
+                "transform": { "pivot": [217, 169] },
+                "shape": { "kind": "bezier", "family": "antenna",
+                           "points": [[217, 169], [219, 148], [226, 126], [223, 105]],
+                           "bend": { "axis": "x", "weights": [0, 0.3, 0.8, 1], "inwardDamp": 0.72, "inwardSign": -1 } } },
+
+              { "id": "mouth", "feature": "mouth", "ink": "body",
+                "transform": { "pivot": [200, 235] },
+                "shape": { "kind": "polyline", "family": "mouth",
+                           "points": [[187, 233], [200, 246], [213, 233]] } },
+
+              { "id": "descender", "feature": "descender", "ink": "body",
+                "transform": { "pivot": [200, 235] },
+                "shape": { "kind": "polyline", "family": "tail",
+                           "points": [[200, 246], [200, 271]] } },
+
+              { "id": "eyeLeft", "feature": "eyes",
+                "transform": { "pivot": [152, 200] },
+                "children": [
+                  { "id": "eyeLeftBg",   "ink": "eyeBg",   "shape": { "kind": "disc", "cx": 152, "cy": 200, "r": 27 } },
+                  { "id": "eyeLeftRing", "ink": "eyeRing", "shape": { "kind": "ring", "cx": 152, "cy": 200, "r": 35, "band": 8 } },
+                  { "id": "irisLeft",    "ink": "iris",
+                    "transform": { "pivot": [152, 200] },
+                    "shape": { "kind": "disc", "cx": 152, "cy": 200, "r": 9 } }
+                ] },
+              { "id": "eyeRight", "feature": "eyes",
+                "transform": { "pivot": [248, 200] },
+                "children": [
+                  { "id": "eyeRightBg",   "ink": "eyeBg",   "shape": { "kind": "disc", "cx": 248, "cy": 200, "r": 27 } },
+                  { "id": "eyeRightRing", "ink": "eyeRing", "shape": { "kind": "ring", "cx": 248, "cy": 200, "r": 35, "band": 8 } },
+                  { "id": "irisRight",    "ink": "iris",
+                    "transform": { "pivot": [248, 200] },
+                    "shape": { "kind": "disc", "cx": 248, "cy": 200, "r": 9 } }
+                ] }
+            ]
+          },
+
+          { "id": "pinprickLeft",  "feature": "eyes", "ink": "pinprick", "alpha": 0,
+            "shape": { "kind": "disc", "cx": 152, "cy": 200, "r": 2.6 } },
+          { "id": "pinprickRight", "feature": "eyes", "ink": "pinprick", "alpha": 0,
+            "shape": { "kind": "disc", "cx": 248, "cy": 200, "r": 2.6 } }]
+        }]
+      }]
+    }]
+  }
+}

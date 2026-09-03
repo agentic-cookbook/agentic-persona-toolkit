@@ -29,6 +29,7 @@ export interface Arbiter {
   notice(now: number): void;
   poke(now: number): void;
   say(text: string, now: number): void;
+  play(name: string, now: number): void;
   tick(now: number): void;
 }
 
@@ -147,6 +148,23 @@ export function createArbiter(deps: ArbiterDeps): Arbiter {
     },
 
     setMood(mood, now) {
+      // The only unvalidated string that reaches this arbiter — every other
+      // mood it can resolve to (the three rungs, every poke expression, the
+      // waking mood) was checked against `poses.json` by the loader. Refusing
+      // it HERE, before a single field is committed, is what keeps `evaluate`
+      // honest: `evaluate` runs from inside `scheduler.tick` as well as from
+      // this call, and a throw from there escapes `engine.tick` and takes the
+      // host's frame loop with it. Committing `appMood` first and letting
+      // `applyPose` throw is worse still — the state says the mood applied, so
+      // every later `evaluate` short-circuits on `next.mood !== current` and
+      // paints nothing at all, until the first one that does not short-circuit
+      // throws out of a tick nobody called.
+      //
+      // Byte-identical message to `applyPose`'s, so the two doors fail the same
+      // way, and identical to Swift's `Arbiter.setMood`.
+      if (mood !== null && config.poses.poses[mood] === undefined) {
+        throw new Error(`unknown mood: ${mood}`);
+      }
       appMood = mood;
       evaluate(now);
     },
@@ -176,6 +194,29 @@ export function createArbiter(deps: ArbiterDeps): Arbiter {
     say(text, now) {
       speech = { text, until: now + speechLife };
       alertUntil = now + ladder.alertAfterTypingMs / 1000;
+    },
+
+    /**
+     * Play a timeline by name, on the engine's ONE timeline slot.
+     *
+     * The slot is the same field a choreographed mood uses, and sharing it is
+     * the point rather than a saving. A timeline is not a private animation: it
+     * snaps engine-managed `.family` channels and rewrites the shapes beside
+     * them, and only its own handle knows how to hand either back. Two of them
+     * standing at once means the second reads channels the first has already
+     * moved — `play("yawn")` twice half a second apart, or `play("yawn")`
+     * followed by `setMood("yawning")`, both landed a second promote on an
+     * already-promoted mouth and threw out of `engine.tick`.
+     *
+     * Cancelling first is therefore the whole fix, and putting the handle where
+     * `evaluate` already looks is what extends it across the two doors: a mood
+     * change cancels a hand-played timeline exactly as it cancels a
+     * choreographed one, which is also the behaviour a caller wants — leaving
+     * the mood a timeline was performing should not leave the timeline running.
+     */
+    play(name, now) {
+      if (choreo !== null) { choreo.cancel(); choreo = null; }
+      choreo = playTimeline({ config, channels, tweens, scheduler }, name, now);
     },
 
     tick(now) {

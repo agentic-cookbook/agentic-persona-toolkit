@@ -221,6 +221,32 @@ final class TweenTests: XCTestCase {
         XCTAssertEqual(ch.get("mouth.shape"), .text(open))
     }
 
+    func testSnapsAColourPairParseHexCannotReadInsteadOfTrapping() {
+        // `isHex` gated a `try!`, and the two disagreed about what a hex digit
+        // is: `Character.isHexDigit` follows Unicode's `Hex_Digit` property, so
+        // the FULLWIDTH DIGIT ZERO below is a hex digit to the gate and a throw
+        // to `Color.parseHex`. The result was a trap on the per-frame tween
+        // path. The gate is now ASCII-only, and the mix is fallible either way:
+        // an unmixable pair snaps to `to`, exactly as a shape-family crossing
+        // does, so the frame keeps rendering.
+        // Both shapes the two platforms' gates used to disagree about: the
+        // fullwidth zero (Swift's, which trapped) and a 4-digit body (the web's,
+        // whose `{3,6}` regex admitted it and threw). Neither is mixable, so
+        // both take the uninterpolatable path -- hold `from`, snap at t=1 --
+        // which is the answer `lerpValue`'s last line already gives, and the
+        // one `tween.ts` now gives for the same two inputs.
+        for bad in ["#\u{FF10}0ff41", "#abcd"] {
+            let ch = Channels(["body.ink": .text(bad)])
+            let tw = Tweens(channels: ch)
+            tw.add(TweenSpec(channel: "body.ink", to: .text("#ff2d2d"),
+                             duration: 1, ease: "none"), now: 0)
+            tw.tick(0.5)
+            XCTAssertEqual(ch.get("body.ink"), .text(bad))
+            tw.tick(1)
+            XCTAssertEqual(ch.get("body.ink"), .text("#ff2d2d"))
+        }
+    }
+
     func testSettlesTheTweenItReplacesAtTheInstantOfTheHandoff() {
         // Rule 5. The outgoing tween writes what it shows AT the handoff instant,
         // so the incoming tween's `from` is that value and not whatever the last

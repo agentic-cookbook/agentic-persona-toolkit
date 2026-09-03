@@ -1,0 +1,234 @@
+{
+  "schemaVersion": 1,
+  "order": ["idle", "thinking", "excited", "surprised", "startled", "mad", "laughing",
+            "inquisitive", "sad", "bored", "silly", "smug", "yawning", "asleep"],
+  "poses": {
+    "idle": {
+      "duration": 0.45, "ease": "power3.out",
+      "channels": {
+        "eye.scaleX": 1, "eye.scaleY": 1, "eye.y": 0,
+        "eyeLeft.x": 0, "eyeRight.x": 0,
+        "iris.scale": 1,
+        "body.scale": 1, "body.rotation": 0, "body.ink": "green",
+        "antennaLeft.rotation": 0,  "antennaLeft.y": 0,  "antennaLeft.x": 0,
+        "antennaRight.rotation": 0, "antennaRight.y": 0, "antennaRight.x": 0,
+        "browLeft.rotation": -7, "browLeft.y": 0,
+        "browRight.rotation": 7, "browRight.y": 0,
+        "mouth.shape": "M187,233 L200,246 L213,233",
+        "descender.shape": "M200,246 L200,271"
+      },
+      "loops": { "bob": 0, "wiggle": 0 }
+    },
+    "thinking": {
+      "duration": 0.4, "ease": "power2.out",
+      "channels": {
+        "eye.scaleX": 1, "eye.scaleY": 0.5, "eye.y": 0,
+        "eyeLeft.x": 0, "eyeRight.x": 0,
+        "iris.scale": 0.6,
+        "body.scale": 1, "body.rotation": 0, "body.ink": "green",
+        "antennaLeft.rotation": -10, "antennaLeft.y": -3, "antennaLeft.x": 0,
+        "antennaRight.rotation": 6,  "antennaRight.y": -1, "antennaRight.x": 0,
+        "browLeft.rotation": -12, "browLeft.y": -5,
+        "browRight.rotation": 5,  "browRight.y": 2,
+        "mouth.shape": "M193,233 L200,235 L207,233",
+        "descender.shape": "M200,235 L200,265"
+      },
+      "loops": { "bob": 0, "wiggle": 0 }
+    },
+    "excited": {
+      "duration": 0.28, "ease": "back.out(1.7)",
+      "channels": {
+        "eye.scaleX": 1.12, "eye.scaleY": 1.12, "eye.y": 0,
+        "eyeLeft.x": 0, "eyeRight.x": 0,
+        "iris.scale": 1.4,
+        "body.scale": 1.1, "body.rotation": 0, "body.ink": "orange",
+        "antennaLeft.rotation": -3, "antennaLeft.y": -4, "antennaLeft.x": 0,
+        "antennaRight.rotation": 3, "antennaRight.y": -4, "antennaRight.x": 0,
+        "browLeft.rotation": -17, "browLeft.y": -5,
+        "browRight.rotation": 17, "browRight.y": -5,
+        "mouth.shape": "M188,229 L200,235 L212,229",
+        "descender.shape": "M200,235 L200,265"
+      },
+      "loops": { "bob": 2, "wiggle": 4 }
+    },
+    "surprised": {
+      "duration": 0.16, "ease": "back.out(2.4)",
+      "channels": {
+        "eye.scaleX": 1.28, "eye.scaleY": 1.3, "eye.y": 0,
+        "eyeLeft.x": -9, "eyeRight.x": 9,
+        "iris.scale": 1.6,
+        "body.scale": 1.16, "body.rotation": 0, "body.ink": "yellow",
+        "antennaLeft.rotation": -4, "antennaLeft.y": -7, "antennaLeft.x": -9,
+        "antennaRight.rotation": 4, "antennaRight.y": -7, "antennaRight.x": 9,
+        "browLeft.rotation": -12, "browLeft.y": -17,
+        "browRight.rotation": 12, "browRight.y": -17,
+        "mouth.shape": "M195,230 L200,235 L205,230",
+        "descender.shape": "M200,235 L200,265"
+      },
+      "loops": { "bob": 0, "wiggle": 0 }
+    },
+    "startled": {
+      "duration": 0.12, "ease": "back.out(3)",
+      "channels": {
+        "eye.scaleX": 1.35, "eye.scaleY": 1.4, "eye.y": 0,
+        "eyeLeft.x": -8, "eyeRight.x": 8,
+        "iris.scale": 1.7,
+        "body.scale": 1.2, "body.rotation": 0, "body.ink": "flash",
+        "antennaLeft.rotation": -2, "antennaLeft.y": -16, "antennaLeft.x": -8,
+        "antennaRight.rotation": 2, "antennaRight.y": -16, "antennaRight.x": 8,
+        "browLeft.rotation": -14, "browLeft.y": -20,
+        "browRight.rotation": 14, "browRight.y": -20,
+        "mouth.shape": "M195,230 L200,235 L205,230",
+        "descender.shape": "M200,235 L200,265"
+      },
+      "loops": { "bob": 0, "wiggle": 7 }
+    },
+    "mad": {
+      "duration": 0.18, "ease": "power3.out",
+      "channels": {
+        "eye.scaleX": 1.04, "eye.scaleY": 0.7, "eye.y": 0,
+        "eyeLeft.x": 0, "eyeRight.x": 0,
+        "iris.scale": 0.7,
+        "body.scale": 1.06, "body.rotation": 0, "body.ink": "red",
+        "antennaLeft.rotation": 14,  "antennaLeft.y": -2,  "antennaLeft.x": 0,
+        "antennaRight.rotation": -14, "antennaRight.y": -2, "antennaRight.x": 0,
+        "browLeft.rotation": 16,  "browLeft.y": 4,
+        "browRight.rotation": -16, "browRight.y": 4,
+        "mouth.shape": "M189,235 L200,235 L211,235",
+        "descender.shape": "M200,235 L200,265"
+      },
+      "loops": { "bob": 0, "wiggle": 0 }
+    },
+    "laughing": {
+      "duration": 0.3, "ease": "back.out(1.6)",
+      "channels": {
+        "eye.scaleX": 1, "eye.scaleY": 0.14, "eye.y": 0,
+        "eyeLeft.x": 0, "eyeRight.x": 0,
+        "iris.scale": 1.3,
+        "body.scale": 1.1, "body.rotation": 0, "body.ink": "orange",
+        "antennaLeft.rotation": -3, "antennaLeft.y": 0, "antennaLeft.x": 0,
+        "antennaRight.rotation": 3, "antennaRight.y": 0, "antennaRight.x": 0,
+        "browLeft.rotation": -15, "browLeft.y": -4,
+        "browRight.rotation": 15, "browRight.y": -4,
+        "mouth.shape": "M186,226 L200,235 L214,226",
+        "descender.shape": "M200,235 L200,265"
+      },
+      "loops": { "bob": 3, "wiggle": 4 }
+    },
+    "inquisitive": {
+      "duration": 0.42, "ease": "power2.out",
+      "channels": {
+        "eyeLeft.scaleX": 1, "eyeLeft.scaleY": 0.55,
+        "eyeRight.scaleX": 1.04, "eyeRight.scaleY": 1.06,
+        "eye.y": 0, "eyeLeft.x": 0, "eyeRight.x": 0,
+        "iris.scale": 1.1,
+        "body.scale": 1.02, "body.rotation": 6, "body.ink": "green",
+        "antennaLeft.rotation": -6, "antennaLeft.y": -2, "antennaLeft.x": 0,
+        "antennaRight.rotation": 10, "antennaRight.y": -3, "antennaRight.x": 0,
+        "browLeft.rotation": -6, "browLeft.y": 4,
+        "browRight.rotation": 14, "browRight.y": -16,
+        "mouth.shape": "M193,233 L200,235 L207,233",
+        "descender.shape": "M200,235 L200,265"
+      },
+      "loops": { "bob": 0, "wiggle": 0 }
+    },
+    "sad": {
+      "duration": 0.7, "ease": "sine.out",
+      "channels": {
+        "eye.scaleX": 1, "eye.scaleY": 0.62, "eye.y": 0,
+        "eyeLeft.x": 6, "eyeRight.x": -6,
+        "iris.scale": 0.8,
+        "body.scale": 0.94, "body.rotation": 0, "body.ink": "blue",
+        "antennaLeft.rotation": 8,  "antennaLeft.y": 3,  "antennaLeft.x": 6,
+        "antennaRight.rotation": -8, "antennaRight.y": 3, "antennaRight.x": -6,
+        "browLeft.rotation": -8, "browLeft.y": -3,
+        "browRight.rotation": 8, "browRight.y": -3,
+        "mouth.shape": "M188,241 L200,235 L212,241",
+        "descender.shape": "M200,235 L200,265"
+      },
+      "loops": { "bob": 0, "wiggle": 0 }
+    },
+    "bored": {
+      "duration": 0.6, "ease": "power2.out",
+      "channels": {
+        "eye.scaleX": 0.97, "eye.scaleY": 0.4, "eye.y": 0,
+        "eyeLeft.x": 5, "eyeRight.x": -5,
+        "iris.scale": 0.7,
+        "body.scale": 0.9, "body.rotation": 0, "body.ink": "dimmer",
+        "antennaLeft.rotation": 6,  "antennaLeft.y": 2,  "antennaLeft.x": 5,
+        "antennaRight.rotation": -6, "antennaRight.y": 2, "antennaRight.x": -5,
+        "browLeft.rotation": -10, "browLeft.y": 6,
+        "browRight.rotation": 10, "browRight.y": 6,
+        "mouth.shape": "M188,241 L200,235 L212,241",
+        "descender.shape": "M200,235 L200,265"
+      },
+      "loops": { "bob": 0, "wiggle": 0 }
+    },
+    "silly": {
+      "duration": 0.4, "ease": "back.out(1.6)",
+      "spin": { "channel": "body.rotation", "turns": 1, "duration": 0.9, "ease": "power3.inOut", "carries": ["body.scale"] },
+      "channels": {
+        "eye.scaleX": 1.1, "eye.scaleY": 1.1, "eye.y": 0,
+        "eyeLeft.x": -6, "eyeRight.x": 6,
+        "iris.scale": 1.35,
+        "body.scale": 1.15, "body.rotation": 180, "body.ink": "orange",
+        "antennaLeft.rotation": -8, "antennaLeft.y": -3, "antennaLeft.x": -6,
+        "antennaRight.rotation": 8, "antennaRight.y": -3, "antennaRight.x": 6,
+        "browLeft.rotation": -16, "browLeft.y": -5,
+        "browRight.rotation": 16, "browRight.y": -5,
+        "mouth.shape": "M186,226 L200,235 L214,226",
+        "descender.shape": "M200,235 L200,265"
+      },
+      "loops": { "bob": 2, "wiggle": 5 }
+    },
+    "smug": {
+      "duration": 0.34, "ease": "back.out(1.5)",
+      "channels": {
+        "eyeLeft.scaleX": 1, "eyeLeft.scaleY": 0.62,
+        "eyeRight.scaleX": 1, "eyeRight.scaleY": 0.8,
+        "eye.y": 0, "eyeLeft.x": 0, "eyeRight.x": 0,
+        "iris.scale": 0.95,
+        "body.scale": 1.04, "body.rotation": 4, "body.ink": "orange",
+        "antennaLeft.rotation": -10, "antennaLeft.y": -3, "antennaLeft.x": 0,
+        "antennaRight.rotation": 3,  "antennaRight.y": 0,  "antennaRight.x": 0,
+        "browLeft.rotation": -4, "browLeft.y": 3,
+        "browRight.rotation": 11, "browRight.y": -11,
+        "mouth.shape": "M188,236 L200,235 L212,230",
+        "descender.shape": "M200,235 L200,265"
+      },
+      "loops": { "bob": 0, "wiggle": 2 }
+    },
+    "yawning": {
+      "duration": 0.6, "ease": "sine.out",
+      "channels": {
+        "eye.scaleX": 0.97, "eye.scaleY": 0.3, "eye.y": -8,
+        "eyeLeft.x": 0, "eyeRight.x": 0,
+        "iris.scale": 0.7,
+        "body.scale": 1.06, "body.rotation": 0, "body.ink": "green",
+        "antennaLeft.rotation": -10, "antennaLeft.y": -16, "antennaLeft.x": 0,
+        "antennaRight.rotation": 10, "antennaRight.y": -16, "antennaRight.x": 0,
+        "browLeft.rotation": -6, "browLeft.y": -4,
+        "browRight.rotation": 6, "browRight.y": -4,
+        "mouth.shape": "M195,230 L200,235 L205,230",
+        "descender.shape": "M200,235 L200,265"
+      },
+      "loops": { "bob": 0, "wiggle": 0 }
+    },
+    "asleep": {
+      "duration": 0.75, "ease": "sine.out",
+      "channels": {
+        "eye.scaleX": 0.95, "eye.scaleY": 0.07, "eye.y": 0,
+        "eyeLeft.x": 0, "eyeRight.x": 0,
+        "iris.scale": 0.6,
+        "body.scale": 0.88, "body.rotation": 0, "body.ink": "hidden",
+        "antennaLeft.rotation": 10,  "antennaLeft.y": 3,  "antennaLeft.x": 0,
+        "antennaRight.rotation": -10, "antennaRight.y": 3, "antennaRight.x": 0,
+        "browLeft.rotation": -12, "browLeft.y": 9,
+        "browRight.rotation": 12, "browRight.y": 9,
+        "mouth.shape": "M189,235 L200,235 L211,235",
+        "descender.shape": "M200,235 L200,265"
+      },
+      "loops": { "bob": 0, "wiggle": 0 }
+    }
+  }
+}

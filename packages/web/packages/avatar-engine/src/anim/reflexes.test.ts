@@ -8,11 +8,11 @@ import sayings from "@character/sayings.json";
 import { loadConfig } from "../config/load";
 import { createPrng } from "../math/prng";
 import { createChannels } from "../runtime/channels";
-import { createScheduler } from "../runtime/scheduler";
+import { createScheduler, type Scheduler } from "../runtime/scheduler";
 import { createTweens } from "../runtime/tween";
 import { seedChannels } from "../scene/rig";
 import { amplitude, gateOpen } from "./params";
-import { createReflexes } from "./reflexes";
+import { createReflexes, pairRange } from "./reflexes";
 
 const config = loadConfig({ character, rig, poses, timelines, behavior, sayings });
 const B = config.behavior;
@@ -54,14 +54,21 @@ interface Harness {
   mutters: number[];
 }
 
-const make = (seed = 7) => {
+/** The suite's harness, over the shipped config unless a variant is handed in.
+ *
+ *  `cfg` exists for the findings whose failure mode no shipped config reaches:
+ *  a step naming a group, a branch naming a list that was deleted, a reflex
+ *  pointed at a channel whose rest is a colour. Each is a one-line edit to the
+ *  behaviour file rather than a second character, so what the test drives is
+ *  still olylo — see `variant` below. */
+const make = (seed = 7, cfg: typeof config = config) => {
   const h: Harness = { mood: ACTIVE, reduced: false, mutters: [] };
   const channels = createChannels();
-  seedChannels(config, channels);
+  seedChannels(cfg, channels);
   const scheduler = createScheduler();
   const tweens = createTweens(channels);
   const reflexes = createReflexes({
-    config, channels, tweens, scheduler,
+    config: cfg, channels, tweens, scheduler,
     prng: createPrng(seed),
     mood: () => h.mood,
     reducedMotion: () => h.reduced,
@@ -430,6 +437,58 @@ describe("reflexes", () => {
     expect(c.channels.get("body.x")).toBeCloseTo(config.rest.get("body.x") as number, 5);
   });
 
+  it("arms exactly one stir chain across a mood round trip", () => {
+    // The stir chain re-arms itself through `at`, which hands back no id, so
+    // `stopEffect` cannot cancel the pending event -- and `stir`'s only gate was
+    // `activeEffect !== null`, which an ORPHAN passes whenever any effect is
+    // active by the time it lands. Leaving and re-entering `asleep` inside the
+    // 4-7s `firstDelayMs` window therefore left chain 1 pending while
+    // `startEffect` armed chain 2, and when the orphan landed it adopted the
+    // effect it found and perpetuated itself: N round trips, N+1 chains, all
+    // writing `body.rotation` at fractional offsets and each cancelling the last
+    // by the newest-wins tween rule -- with the extra PRNG draws diverging the
+    // stream from every golden on the way.
+    //
+    // Counted through the tween funnel rather than by watching the channel: two
+    // chains fighting over one channel can leave it looking almost like one, and
+    // it is the DRAWS as much as the motion that are the bug. `body.rotation` is
+    // written by both of `asleepStir`'s shapes and by nothing else in this file,
+    // so one add is one step of one stir.
+    const stirs = (roundTrips: number): number => {
+      const c = make();
+      let adds = 0;
+      const add = c.tweens.add.bind(c.tweens);
+      c.tweens.add = (spec, now) => {
+        if (spec.channel === "body.rotation") adds += 1;
+        add(spec, now);
+      };
+      c.h.mood = B.eyesShutMood;
+      c.reflexes.start(0);
+      // Every toggle lands inside the pending `firstDelayMs` window, so each one
+      // strands a chain that has not fired yet.
+      for (let i = 0; i < roundTrips; i += 1) {
+        run(c, i * 2, i * 2 + 1);
+        c.h.mood = ACTIVE;
+        run(c, i * 2 + 1, i * 2 + 1.5);
+        c.h.mood = B.eyesShutMood;
+      }
+      run(c, roundTrips * 2, 120);
+      return adds;
+    };
+
+    // One chain cannot beat its own cadence: a stir writes this channel at most
+    // twice (the twitch's two steps) and cannot start again until `rearmMs`, at
+    // least 4s, has passed -- so 120s admits at most 2 * (120 / 4 + 1) adds.
+    const rearmMin = B.moodEffects[B.eyesShutMood]!.rearmMs![0]! / 1000;
+    const CEILING = 2 * (120 / rearmMin + 1);
+    const one = stirs(0);
+    expect(one).toBeGreaterThan(0);
+    expect(one).toBeLessThanOrEqual(CEILING);
+    // Three round trips used to leave four chains, and this counted 103 adds
+    // against a ceiling of 62.
+    expect(stirs(3)).toBeLessThanOrEqual(CEILING);
+  });
+
   it("mutters only while asleep, on the mutterMs cadence", () => {
     const period = B.speech.mutterMs / 1000;
     const c = make();
@@ -568,5 +627,290 @@ describe("reflexes", () => {
     const frozen = c.channels.names().map((n) => c.channels.get(n));
     run(c, 9, 20);
     expect(c.channels.names().map((n) => c.channels.get(n))).toStrictEqual(frozen);
+  });
+});
+
+/* ── the runtime's unchecked assumptions about what the loader let through ──
+ *
+ *  Four of the five findings below share one root cause: the runtime trusts the
+ *  loader, and the loader does not check what the runtime assumes. A pair field
+ *  with one element, a group name where a concrete channel was meant, a branch
+ *  naming a step list nobody defined — each loads clean and then deletes
+ *  behaviour silently, or (in Swift) aborts the process. The fixes are the
+ *  runtime's second line of defence, so the two engines at least fail the same
+ *  way; the loader's own checks are the first, and belong in `load.ts`.
+ */
+
+/** The one behaviour file the shipped character loads, minus one line.
+ *
+ *  A mutated copy of olylo rather than a second fixture: what makes these
+ *  findings worth a test is that the SHIPPED config is one edit away from each
+ *  of them, and a synthetic character would prove only that the synthetic
+ *  character behaves. `structuredClone` per call, because `loadConfig`
+ *  normalises what it is handed. */
+type MutStep = {
+  channels: Record<string, number | { rnd: number }>;
+  duration?: number;
+  durationRange?: number[];
+  ease: string;
+};
+type MutBehavior = {
+  moodEffects: Record<string, {
+    branch?: { probability: number; then: string; else: string };
+    twitch?: MutStep[];
+    drift?: MutStep[];
+    once?: MutStep[];
+    settle: { duration: number; ease: string };
+  }>;
+  idleFidget: { sway: { channel: string; amplitude: number } };
+};
+const RAW = { character, rig, poses, timelines, behavior, sayings };
+const variant = (edit: (b: MutBehavior) => void): typeof config => {
+  const files = structuredClone(RAW);
+  edit(files.behavior as unknown as MutBehavior);
+  return loadConfig(files);
+};
+
+/** A loaded config whose branching effect has NO `drift` list — built by
+ *  mutating the config after `loadConfig` returned it, which is now the only
+ *  way to build one. `variant` cannot: the loader refuses an effect that
+ *  branches to a list it does not define (`load.test.ts` owns that half). That
+ *  is the division of labour, not a workaround — the loader makes the state
+ *  unreachable from an authored config, and `stir`'s `stepList` guard is the
+ *  second line of defence for a config that reaches the engine from anywhere
+ *  else. Spread rather than `structuredClone`d because a `CharacterConfig`
+ *  carries Maps and functions that a clone would not survive. */
+const withoutDrift = (): typeof config => {
+  const effect = { ...config.behavior.moodEffects[STIR_MOOD]! };
+  delete (effect as { drift?: unknown }).drift;
+  return {
+    ...config,
+    behavior: {
+      ...config.behavior,
+      moodEffects: { ...config.behavior.moodEffects, [STIR_MOOD]: effect },
+    },
+  };
+};
+
+/** Every channel some reflex already drives, so a test can pick one that is
+ *  free. Derived rather than listed: a new reflex on a channel these tests had
+ *  assumed was theirs would otherwise turn into an intermittent failure with no
+ *  obvious cause. */
+const RESERVED = new Set<string>([
+  ...config.expand(B.blink.channel),
+  ...B.gaze.look.channels.flatMap((c) => config.expand(c)),
+  ...config.expand(B.gaze.tilt.channel),
+  ...B.gaze.lean.channels.flatMap((c) => config.expand(c)),
+  ...B.loops.flatMap((l) => config.expand(l.channel)),
+  ...config.expand(B.idleFidget.sway.channel),
+  ...config.expand(B.idleFidget.breath.channel),
+  ...B.idleFidget.brow.nodes.flatMap((n) => [`${n}.rotation`, `${n}.y`]),
+  ...B.pinpricks.nodes.map((n) => `${n}.alpha`),
+  ...Object.values(B.moodEffects).flatMap((e) => [
+    ...(e.loop === undefined ? [] : config.expand(e.loop.channel)),
+    ...[e.once, e.twitch, e.drift].flatMap((steps) =>
+      (steps ?? []).flatMap((s) => Object.keys(s.channels).flatMap((c) => config.expand(c)))),
+  ]),
+]);
+
+/** A rig group no reflex drives, and the concrete channels it stands for. */
+const FREE_GROUP = Object.keys(rig.groups).sort().find((g) =>
+  config.expand(g).length > 1
+  && config.expand(g).every((c) => typeof config.rest.get(c) === "number" && !RESERVED.has(c)))!;
+const FREE_MEMBERS = config.expand(FREE_GROUP);
+
+/** The mood whose effect plays a `once` list, and the channels that list moves
+ *  off rest — the record `touched` is supposed to keep. */
+const ONCE_MOOD = Object.keys(B.moodEffects).sort()
+  .find((m) => B.moodEffects[m]!.once !== undefined)!;
+const ONCE_CHANNELS = (B.moodEffects[ONCE_MOOD]!.once ?? [])
+  .flatMap((s) => Object.keys(s.channels))
+  .flatMap((c) => config.expand(c));
+
+/** The mood whose effect BRANCHES — the stir chain, the only shape of effect a
+ *  missing step list can silence. */
+const STIR_MOOD = Object.keys(B.moodEffects).sort()
+  .find((m) => B.moodEffects[m]!.branch !== undefined)!;
+/** A channel the stir's twitch writes and nothing else in this file does, so
+ *  one `tweens.add` on it is one step of one stir. */
+const STIR_CHANNEL = Object.keys(B.moodEffects[STIR_MOOD]!.twitch![0]!.channels).sort()[0]!;
+
+/** A channel whose REST is a colour, not a number. */
+const INK_CHANNEL = [...config.rest.keys()].sort()
+  .find((c) => typeof config.rest.get(c) === "string" && !RESERVED.has(c))!;
+
+describe("reflexes over configs the loader lets through", () => {
+  it("reads a pair short of an element as a degenerate range, not NaN", () => {
+    // Finding 16. Seven sites index `[0]` and `[1]` on pair fields nothing
+    // arity-checks: `load.ts` has no `.length ===` on any of them and
+    // `schema.json` no `minItems`. `"rearmMs": [4000]` therefore loads clean and
+    // then computes `range(4000, undefined)` — NaN — scheduled as a deadline
+    // that can never come due, while the Swift twin traps outright.
+    const p = createPrng(3);
+    expect(pairRange(p, [0.5, 0.5])).toBeCloseTo(0.5, 12);
+    expect(pairRange(p, [0.5])).toBeCloseTo(0.5, 12);
+    expect(pairRange(p, [])).toBe(0);
+
+    // And exactly ONE draw however short the pair is. The draw count is the
+    // part that has to hold: it is what keeps the shared stream in step between
+    // the two engines, and between a good config and a bad one.
+    const short = createPrng(11);
+    pairRange(short, [4000]);
+    pairRange(short, []);
+    const full = createPrng(11);
+    pairRange(full, [4000, 4000]);
+    pairRange(full, [0, 0]);
+    expect(short.range(0, 1)).toBe(full.range(0, 1));
+  });
+
+  it("expands a group named by an effect step, like every other channel write", () => {
+    // Finding 35. `requireChannel` accepts a group name — it is the same check
+    // a loop's channel passes, and a loop's channel is routinely a group — so
+    // the step validates, then the tween lands on a name nothing renders.
+    const cfg = variant((b) => {
+      b.moodEffects[ONCE_MOOD]!.once = [
+        { channels: { [FREE_GROUP]: 3 }, duration: 0.2, ease: "power2.out" },
+      ];
+    });
+    const c = make(7, cfg);
+    c.h.mood = ONCE_MOOD;
+    c.reflexes.start(0);
+    run(c, 0, 0.4);
+    for (const member of FREE_MEMBERS) expect(c.channels.get(member)).toBeCloseTo(3, 6);
+    // And nothing at all on the group name itself.
+    expect(c.channels.get(FREE_GROUP)).toBeUndefined();
+  });
+
+  it("ends the stir chain when a branch names a list the effect never defines", () => {
+    // Finding 36. `load.ts` checks that a branch key spells "twitch" or "drift"
+    // and never that the list it names exists, so deleting olylo's `drift` block
+    // loads clean. `?? []` then played nothing and re-armed anyway: a chain
+    // drawing a branch value and a re-arm gap forever for a behaviour that can
+    // never happen — silent, and out of step with every golden's PRNG stream.
+    const adds = (cfg: typeof config, marks: readonly number[]): number[] => {
+      const c = make(7, cfg);
+      let n = 0;
+      const add = c.tweens.add.bind(c.tweens);
+      c.tweens.add = (spec, now) => {
+        if (spec.channel === STIR_CHANNEL) n += 1;
+        add(spec, now);
+      };
+      c.h.mood = STIR_MOOD;
+      c.reflexes.start(0);
+      const out: number[] = [];
+      let from = 0;
+      for (const mark of marks) { run(c, from, mark); out.push(n); from = mark; }
+      return out;
+    };
+
+    const [early, late] = adds(withoutDrift(), [120, 400]);
+    // It ran at all — the chain has to have stirred before it can be shown to
+    // have stopped.
+    expect(early!).toBeGreaterThan(0);
+    // And then stopped, the first time the missing branch came up. Before the
+    // fix this counted 60 against 20: the chain outlived every stir it could
+    // actually play.
+    expect(late).toBe(early);
+
+    // An authored EMPTY list is a different statement and keeps its behaviour:
+    // nothing to play this time round, re-arm and try again. Absent and empty
+    // were the two cases `?? []` collapsed into one.
+    const [earlyEmpty, lateEmpty] = adds(
+      variant((b) => { b.moodEffects[STIR_MOOD]!.drift = []; }), [120, 400]);
+    expect(lateEmpty!).toBeGreaterThan(earlyEmpty!);
+  });
+
+  it("puts every channel the effect moved back to rest when the engine stops", () => {
+    // Finding 37, the `stop()` half. `touched` is the record of which channels
+    // are off rest; `stop` dropped it without settling, and `activeEffect` is
+    // null from that moment, so `stopEffect` could never reclaim them either.
+    const c = make(7);
+    c.h.mood = ONCE_MOOD;
+    c.reflexes.start(0);
+    run(c, 0, 0.4); // mid-flight: the once step runs longer than this
+    const moved = ONCE_CHANNELS.filter((ch) =>
+      Math.abs((c.channels.get(ch) as number) - (config.rest.get(ch) as number)) > 1e-6);
+    expect(moved.length).toBeGreaterThan(0);
+
+    c.reflexes.stop();
+    // Instantly, not over a settle: `stop` is teardown and has no clock. Same
+    // shape as `TimelineHandle.cancel` handing a promoted shape back.
+    for (const ch of ONCE_CHANNELS) {
+      expect(c.channels.get(ch)).toBeCloseTo(config.rest.get(ch) as number, 10);
+    }
+  });
+
+  it("settles the channels a previous effect stranded when the next one starts", () => {
+    // Finding 37, the `startEffect` half. Reached by a second `start` with no
+    // `stop` between — a remount, or a host that starts on re-render. The bare
+    // `touched.clear()` that stood there was the moment the engine forgot a
+    // channel it had walked off rest.
+    const c = make(7);
+    c.h.mood = ONCE_MOOD;
+    c.reflexes.start(0);
+    run(c, 0, 1.5); // the once step has completed; its channels sit where it left them
+    expect(ONCE_CHANNELS.some((ch) =>
+      Math.abs((c.channels.get(ch) as number) - (config.rest.get(ch) as number)) > 1e-6)).toBe(true);
+
+    // A different effect, so nothing re-touches those channels by accident.
+    c.h.mood = STIR_MOOD;
+    c.reflexes.start(1.5);
+    run(c, 1.5, 3.5);
+    for (const ch of ONCE_CHANNELS) {
+      expect(c.channels.get(ch)).toBeCloseTo(config.rest.get(ch) as number, 6);
+    }
+  });
+
+  it("cancels the previous poll chain when start is called twice", () => {
+    // Finding 38. `start` overwrote `pollId` without cancelling, so a second
+    // call left two 400 ms chains running forever — double the poll rate and
+    // double the draws, diverging from every golden. `arbiter.ts` and Swift's
+    // `Reflexes.start` both guard this; the web reflexes were the odd one out.
+    const inner = createScheduler();
+    const live = new Set<number>();
+    // `every` is the poll and only the poll: every other chain in this file
+    // re-arms itself through `once`.
+    const scheduler: Scheduler = {
+      every: (interval, runAt, opts) => {
+        const id = inner.every(interval, runAt, opts);
+        live.add(id);
+        return id;
+      },
+      once: (at, runAt) => inner.once(at, runAt),
+      cancel: (id) => { live.delete(id); inner.cancel(id); },
+      tick: (now) => inner.tick(now),
+    };
+    const channels = createChannels();
+    seedChannels(config, channels);
+    const tweens = createTweens(channels);
+    const reflexes = createReflexes({
+      config, channels, tweens, scheduler,
+      prng: createPrng(7),
+      mood: () => ACTIVE,
+      reducedMotion: () => false,
+      mutter: () => {},
+    });
+    reflexes.start(0);
+    reflexes.start(0.5);
+    expect(live.size).toBe(1);
+    reflexes.stop();
+    expect(live.size).toBe(0);
+  });
+
+  it("reads a rest that is not a number as zero, the way Swift does", () => {
+    // Finding 39. `rest` and `now0` CAST where Swift checks (`?.number ?? 0`),
+    // so a reflex pointed at an `.ink` channel — which `requireChannel` accepts,
+    // its rest being a colour — computed `"#3a3a3a" + 1.4` and wrote the string
+    // "#3a3a3a1.4" to a channel as a number. Swift, given the identical config,
+    // jitters around 0. Two engines, one config, two different answers.
+    const cfg = variant((b) => { b.idleFidget.sway.channel = INK_CHANNEL; });
+    const c = make(7, cfg);
+    c.h.mood = ACTIVE; // the fidget's own gate; it is the mood it jitters under
+    c.reflexes.start(0);
+    run(c, 0, 1.5);
+    const v = c.channels.get(INK_CHANNEL);
+    expect(typeof v).toBe("number");
+    expect(Number.isFinite(v)).toBe(true);
+    expect(Math.abs(v as number)).toBeLessThanOrEqual(B.idleFidget.sway.amplitude + 1e-9);
   });
 });

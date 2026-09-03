@@ -5,7 +5,6 @@ import { createPrng } from "./math/prng";
 import { buildScene, compose, seedChannels, type DisplayList } from "./scene/rig";
 import { createArbiter, type ArbiterState } from "./anim/arbiter";
 import { createReflexes } from "./anim/reflexes";
-import { playTimeline } from "./anim/timeline";
 import { defaultEnvironment, type Environment } from "./env";
 import type { CharacterConfig } from "./config/types";
 
@@ -115,9 +114,10 @@ export function createEngine(options: EngineOptions): Engine {
     look: (x, y) => reflexes.look(x, y, clock),
     poke: () => arbiter.poke(clock),
     say: (text) => arbiter.say(text, clock),
-    play: (name) => {
-      playTimeline({ config, channels, tweens, scheduler }, name, clock);
-    },
+    // Through the arbiter, which owns the engine's one timeline slot — see
+    // `Arbiter.play`. Calling `playTimeline` here instead threw the handle away,
+    // and a timeline nobody holds is a timeline nobody can cancel.
+    play: (name) => arbiter.play(name, clock),
 
     randomSaying: pickSaying,
 

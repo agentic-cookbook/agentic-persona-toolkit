@@ -9,7 +9,13 @@
  */
 export type Rgb = readonly [number, number, number];
 
-const clamp01 = (v: number): number => (v < 0 ? 0 : v > 1 ? 1 : v);
+/** NaN-safe, and that is the whole point of the first clause: a min/max pair
+ *  passes NaN straight through (every comparison against NaN is false), and
+ *  `toHex` then prints "#NaNNaNNaN" — a string no consumer can render and
+ *  nothing downstream rejects. Swift's twin does not merely lie: `Int(nan)`
+ *  TRAPS the process on the per-frame render path. Clamping to 0 makes both
+ *  platforms answer "#000000" for the same input. */
+const clamp01 = (v: number): number => (Number.isNaN(v) ? 0 : v < 0 ? 0 : v > 1 ? 1 : v);
 
 export function parseHex(hex: string): Rgb {
   const h = hex.trim().replace("#", "");

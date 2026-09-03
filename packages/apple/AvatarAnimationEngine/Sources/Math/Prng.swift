@@ -55,8 +55,31 @@ public final class Prng {
         lo + float() * (hi - lo)
     }
 
+    /// Nil for an empty array, and one draw otherwise — so the stream a caller
+    /// consumes is identical to `pick`'s.
+    ///
+    /// The total form exists because `pick` cannot be total: `T` has no empty
+    /// case, so an empty array leaves it nothing to return and it dies with
+    /// `Index out of range`, which names neither the array nor the caller.
+    public func pickOrNil<T>(_ items: [T]) -> T? {
+        items.isEmpty ? nil : items[Int(float() * Double(items.count))]
+    }
+
+    /// One of `items`, which must not be empty.
+    ///
+    /// Emptiness is a CONFIG fault, and `CharacterConfig.load` is where it is
+    /// caught and named — it rejects an empty saying list, an empty group, and
+    /// an active mood with no sayings, which is every list that reaches here.
+    /// Reaching this line means that contract was broken, so it says so rather
+    /// than trapping anonymously one frame later; a caller with no such
+    /// guarantee wants `pickOrNil`.
     public func pick<T>(_ items: [T]) -> T {
-        items[Int(float() * Double(items.count))]
+        guard let picked = pickOrNil(items) else {
+            preconditionFailure(
+                "Prng.pick on an empty array — the config that supplied it should have been "
+                + "rejected by CharacterConfig.load; use pickOrNil where no such guarantee holds")
+        }
+        return picked
     }
 
     public func chance(_ p: Double) -> Bool { float() < p }

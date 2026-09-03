@@ -20,7 +20,18 @@ public enum Color {
         }
     }
 
-    private static func clamp01(_ v: Double) -> Double { v < 0 ? 0 : (v > 1 ? 1 : v) }
+    /// NaN-safe, and that is the whole point of the first clause: a min/max
+    /// pair passes NaN straight through (every comparison against NaN is
+    /// false), and `toHex` then evaluates `Int(Double.nan.rounded())`, which
+    /// TRAPS — on the per-frame render path, for a value that should at worst
+    /// render as a wrong colour. NaN reaches a colour channel from any
+    /// divide-by-zero upstream in an interpolation. Clamping it to 0 is also
+    /// what makes this side agree with the web again: `Math.round(NaN)` there
+    /// is NaN and `toHex` prints "#NaNNaNNaN", so both platforms now say
+    /// "#000000" for the same input rather than one crashing and one lying.
+    private static func clamp01(_ v: Double) -> Double {
+        v.isNaN ? 0 : (v < 0 ? 0 : (v > 1 ? 1 : v))
+    }
 
     /// The web's guard is `/[^0-9a-fA-F]/.test(full)` — ASCII-only. Swift's
     /// `Character.isHexDigit` follows Unicode's `Hex_Digit` property, which is

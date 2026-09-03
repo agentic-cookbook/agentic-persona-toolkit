@@ -171,6 +171,16 @@ final class PoseTests: XCTestCase {
     }
 }
 
+/// A context on `Fixture.promoting()` — the only config in this suite carrying a
+/// `promote` step, which is what the three cancel/promote tests below are about.
+private func bowCtx() throws -> AnimContext {
+    let config = try Fixture.promoting()
+    let channels = Channels()
+    config.seed(into: channels)
+    return AnimContext(config: config, channels: channels,
+                       tweens: Tweens(channels: channels), scheduler: Scheduler())
+}
+
 final class TimelineTests: XCTestCase {
     func testReportsTheFlipsSpan() throws {
         let c = try ctx()
@@ -281,6 +291,65 @@ final class TimelineTests: XCTestCase {
         // timeline happens to touch `line.shape` next assuming a family that
         // isn't there.
         XCTAssertEqual(c.channels.get("line.family"), .text("line"))
+    }
+
+    func testRestoresThePromotedShapeAlongsideTheFamilyAndOnlyWhileSnapped() throws {
+        // Restoring the family alone left `line.shape` holding the two-cubic path
+        // the promote wrote while `line.family` said "line" — a pair nothing else
+        // in the engine produces — and the next promote out of that node read the
+        // cubic, where `try!` trapped the process.
+        let c = try bowCtx()
+        let rest = try XCTUnwrap(c.channels.get("line.shape")?.text)
+        // What a promote consumes, and what a cancel has to give back.
+        XCTAssertEqual(try parsePath(rest).kind, "MLL")
+        let h = try playTimeline(c, "bow", now: 0)
+        drive(c, from: 0, to: 0.1)
+        XCTAssertEqual(c.channels.get("line.family"), .text("bowLine"))
+        XCTAssertEqual(try parsePath(XCTUnwrap(c.channels.get("line.shape")?.text)).kind, "MCC")
+        h.cancel()
+        XCTAssertEqual(c.channels.get("line.family"), .text("line"))
+        XCTAssertEqual(c.channels.get("line.shape"), .text(rest))
+        // And it survives the frames after the cancel: the promote's own morph is
+        // still live at 0.1 (it runs to 0.2), so a restore that did not take the
+        // channel off that tween would be overwritten on the next `tweens.tick`.
+        drive(c, from: 0.1, to: 0.5)
+        XCTAssertEqual(c.channels.get("line.shape"), .text(rest))
+    }
+
+    func testLeavesACompletedTimelineAloneWhenCancelArrivesAfterItsClosingSnap() throws {
+        // The arbiter cancels every choreo handle on the next mood change,
+        // whether the timeline ran to completion or not. `bow` hands
+        // `line.family` back itself at `at: 0.3`; a cancel after that must touch
+        // nothing, or it drags the shape back to the one the timeline spent its
+        // whole run animating away from — and re-records every golden that plays
+        // a timeline.
+        let c = try bowCtx()
+        let h = try playTimeline(c, "bow", now: 0)
+        drive(c, from: 0, to: 0.5)
+        let settled = c.channels.get("line.shape")
+        XCTAssertEqual(settled, .text("M40,68L50,68L60,68"))
+        h.cancel()
+        XCTAssertEqual(c.channels.get("line.family"), .text("line"))
+        XCTAssertEqual(c.channels.get("line.shape"), settled)
+    }
+
+    func testLeavesTheChannelUntouchedWhenAPromoteCannotBePerformed() throws {
+        // Reachable only from a state nobody authored — the loader checks every
+        // promote statically — so the answer is the one `Tweens.swift` gives an
+        // unauthored family crossing: do nothing, rather than trap the process
+        // (or, on the web, throw out of `engine.tick`).
+        let c = try bowCtx()
+        _ = try playTimeline(c, "bow", now: 0)
+        drive(c, from: 0, to: 0.1)
+        let promoted = c.channels.get("line.shape")
+        XCTAssertEqual(try parsePath(XCTUnwrap(promoted?.text)).kind, "MCC")
+        // A second play with the first still standing: its promote reads the
+        // cubic. `scheduler.tick` alone, without the tween pass, so what is
+        // asserted is what the promote step itself wrote — nothing.
+        _ = try playTimeline(c, "bow", now: 0.1)
+        c.scheduler.tick(0.1)
+        XCTAssertEqual(c.channels.get("line.family"), .text("bowLine"))
+        XCTAssertEqual(c.channels.get("line.shape"), promoted)
     }
 
     func testHoldsEachPhaseAtTheInstantItWasAuthoredFor() throws {

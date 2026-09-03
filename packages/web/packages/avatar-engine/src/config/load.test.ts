@@ -21,7 +21,26 @@ type BadBehavior = {
   ladder: { moods: Record<string, string> };
   choreography: Record<string, string>;
   waking: { from: string; to: string; play: string; ms: number };
+  gaze: { reachCurious: number[]; reachIdle: number[] };
+  idleFidget: { durationRange: number[]; rearm: { gapMs: number[] } };
+  speech: { bubble: { distance: number[] } };
+  moodEffects: Record<string, {
+    branch?: { probability: number; then: string; else: string };
+    twitch?: { channels: Record<string, unknown>; durationRange?: number[] }[];
+    drift?: unknown[];
+    once?: { channels: Record<string, unknown>; durationRange?: number[] }[];
+    firstDelayMs?: number[];
+    rearmMs?: number[];
+  }>;
 };
+
+/** The id of an effect that branches, and one that plays a `once` list — read
+ *  off the shipped behaviour rather than written down, so a rename of either
+ *  fails here loudly instead of turning these into tests of nothing. */
+const BRANCHING = Object.keys((behavior as unknown as BadBehavior).moodEffects)
+  .sort().find((m) => (behavior as unknown as BadBehavior).moodEffects[m]!.branch !== undefined)!;
+const WITH_ONCE = Object.keys((behavior as unknown as BadBehavior).moodEffects)
+  .sort().find((m) => ((behavior as unknown as BadBehavior).moodEffects[m]!.once ?? []).length > 0)!;
 type BadTimelines = {
   timelines: Record<string, {
     duration: number;
@@ -184,6 +203,57 @@ describe("loadConfig", () => {
     expect(() => loadConfig(ok)).not.toThrow();
   });
 
+  it("rejects a palette entry `parseHex` cannot read", () => {
+    // The whole batch's failure shape in one line of JSON: legal JSON, waved
+    // through by the loader, and fatal at the first colour tween. `#abcd` is a
+    // 4-digit body — accepted by the old `isHex`, thrown on by `parseHex` — so
+    // it threw `bad hex colour: #abcd` from inside `useAvatarEngine`'s rAF
+    // callback, which has no try/catch, and the avatar stopped for good. Swift
+    // fared worse: a fullwidth digit is `Character.isHexDigit` there, and the
+    // `try!` beneath it TRAPPED the process. Load is the last moment the
+    // offending KEY is nameable.
+    for (const bad of ["#abcd", "#abcde", "abcdef", "#gggggg", "#ab", ""]) {
+      const c = clone();
+      (c.character as { palette: Record<string, string> }).palette.green = bad;
+      expect(() => loadConfig(c), bad).toThrow(/palette "green"/);
+    }
+    // The two legal shapes stay legal.
+    for (const ok of ["#abc", "#AABBCC"]) {
+      const c = clone();
+      (c.character as { palette: Record<string, string> }).palette.green = ok;
+      expect(() => loadConfig(c), ok).not.toThrow();
+    }
+  });
+
+  it("rejects a group with no members", () => {
+    // An empty list is not an empty group: the member loop is vacuous over
+    // `[]`, so nothing rejects it, and `concrete.union(expandMap.keys)` then
+    // makes the name a legal CHANNEL that expands to nothing. Every consumer
+    // reaches for its first member — `expand(name)[0]!` here, `.first!` on
+    // Swift, which traps out of the one function whose contract is to throw.
+    const bad = clone();
+    (bad.rig as unknown as BadRig).groups.eyelids = [];
+    expect(() => loadConfig(bad)).toThrow(/group "eyelids" has no members/);
+  });
+
+  it("rejects a primitive that also declares a family", () => {
+    // A ring/disc/arc is REBUILT every frame and never morphed, so `restShape`
+    // returns undefined for it — and the `!` on that call wrote `undefined`
+    // into `Channels` under a key `names()` lists, breaking the `ChannelValue`
+    // union every consumer assumes. It also reclassified the node as morphable,
+    // which refuses olylo's real `optical` variant. Swift threw on this input
+    // all along.
+    const bad = clone();
+    type Walkable = { id: string; shape?: { family?: string }; children?: Walkable[] };
+    const stack: Walkable[] = [(bad.rig as unknown as { root: Walkable }).root];
+    while (stack.length > 0) {
+      const n = stack.pop()!;
+      if (n.id === "eyeLeftRing") { n.shape!.family = "eye"; break; }
+      for (const c of n.children ?? []) stack.push(c);
+    }
+    expect(() => loadConfig(bad)).toThrow(/"eyeLeftRing" has a family but is a ring/);
+  });
+
   it("rejects a tweened family change in a timeline", () => {
     const bad = clone();
     // The yawn carries two family steps: the promote at 0 and the closing snap
@@ -267,6 +337,25 @@ describe("loadConfig", () => {
     expect(() => loadConfig(bad)).toThrow(/no shape field "band"/);
   });
 
+  it("rejects a variant patching a shape field that is not resizable", () => {
+    // The key was validated by READING it off the shape object, so `kind`,
+    // `bend` and `family` all looked "defined" and passed — where Swift checks
+    // an allowlist and throws. The patch is applied by object spread, not by a
+    // `switch`, so it was not quietly dropped: `{kind: 5}` reached `compose`
+    // as `unknown shape kind: 5` and `{bend: 2}` as a TypeError reading
+    // `(2).weights[0]`, both inside the rAF loop, every frame.
+    for (const [nodeId, patch] of [
+      ["eyeLeftRing", { kind: 5 }],
+      ["antennaLeft", { bend: 2 }],
+      ["eyeLeftRing", { family: 3 }],
+    ] as [string, Record<string, unknown>][]) {
+      const bad = clone();
+      (bad.character as BadVariants).variants.optical!.shapes![nodeId] = patch;
+      expect(() => loadConfig(bad), `${nodeId} ${JSON.stringify(patch)}`)
+        .toThrow(/has no shape field/);
+    }
+  });
+
   it("rejects a variant patching a morphable node", () => {
     // `mouth` is a polyline with a `family` and no bend, so its geometry lives
     // on `mouth.shape` and is re-seeded from the unpatched rig every build. A
@@ -338,5 +427,100 @@ describe("loadConfig", () => {
     const bad = clone();
     (bad.behavior as BadBehavior).waking.play = "yawn";
     expect(() => loadConfig(bad)).toThrow(/waking.play names unknown mood "yawn"/);
+  });
+  // --- pair arity (finding 16, the load-time half) -------------------------
+  //
+  // `schema.json` already says `minItems: 2, maxItems: 2` on all eight of these
+  // (`#/$defs/Point`), and says it to nobody: no validator runs the schema at
+  // load. `requirePair` is what makes it a rule. The runtime's `pairRange`
+  // still degrades a short pair rather than trapping — that is the second line
+  // of defence, for a config reaching the engine from somewhere other than here.
+
+  it("rejects a gaze reach that is not exactly two numbers", () => {
+    const bad = clone();
+    (bad.behavior as BadBehavior).gaze.reachCurious = [0.4];
+    expect(() => loadConfig(bad))
+      .toThrow(/behavior\.gaze\.reachCurious needs exactly two numbers, not 1/);
+  });
+
+  it("rejects an idle-fidget duration range of three numbers", () => {
+    const bad = clone();
+    (bad.behavior as BadBehavior).idleFidget.durationRange = [200, 400, 600];
+    expect(() => loadConfig(bad))
+      .toThrow(/behavior\.idleFidget\.durationRange needs exactly two numbers, not 3/);
+  });
+
+  it("rejects a one-element rearm gap, the pair that used to trap minutes in", () => {
+    // `"gapMs": [4000]` is the finding's own example: it loaded clean, then the
+    // Swift engine trapped on `pair[1]` and the web engine produced a NaN
+    // deadline that could never come due — one bad config, two wrong answers,
+    // both arbitrarily far from the line that caused them.
+    const bad = clone();
+    (bad.behavior as BadBehavior).idleFidget.rearm.gapMs = [4000];
+    expect(() => loadConfig(bad))
+      .toThrow(/behavior\.idleFidget\.rearm\.gapMs needs exactly two numbers, not 1/);
+  });
+
+  it("rejects a speech bubble distance that is not a pair", () => {
+    const bad = clone();
+    (bad.behavior as BadBehavior).speech.bubble.distance = [];
+    expect(() => loadConfig(bad))
+      .toThrow(/behavior\.speech\.bubble\.distance needs exactly two numbers, not 0/);
+  });
+
+  it("rejects a mood effect's rearmMs and its step's durationRange alike", () => {
+    const bad = clone();
+    (bad.behavior as BadBehavior).moodEffects[BRANCHING]!.rearmMs = [1000];
+    expect(() => loadConfig(bad)).toThrow(/rearmMs needs exactly two numbers, not 1/);
+
+    const bad2 = clone();
+    (bad2.behavior as BadBehavior).moodEffects[WITH_ONCE]!.once![0]!.durationRange = [1, 2, 3];
+    expect(() => loadConfig(bad2))
+      .toThrow(/step durationRange needs exactly two numbers, not 3/);
+  });
+
+  // --- channel type (finding 17, the loader half) --------------------------
+
+  it("rejects an effect step writing a number to a channel that holds a path", () => {
+    // The finding's second half: `requireChannel` said the channel exists and
+    // nothing said it can hold what the step writes. An effect step's value is
+    // always numeric, so a `.shape` channel is a type error — one that used to
+    // surface only as a promote silently refusing, mid-session.
+    const bad = clone();
+    const shape = Object.keys(
+      (bad.poses as unknown as BadPoses).poses[
+        Object.keys((bad.poses as unknown as BadPoses).poses)[0]!]!.channels)
+      .find((c) => c.endsWith(".shape"))!;
+    (bad.behavior as BadBehavior).moodEffects[WITH_ONCE]!.once![0]!.channels[shape] = 1;
+    expect(() => loadConfig(bad))
+      .toThrow(new RegExp(`writes a number to ${shape.replace(".", "\\.")}, which holds a path`));
+  });
+
+  it("rejects an effect step writing a number to a channel that holds a colour", () => {
+    const bad = clone();
+    (bad.behavior as BadBehavior).moodEffects[WITH_ONCE]!.once![0]!.channels["body.ink"] = 0.5;
+    expect(() => loadConfig(bad)).toThrow(/writes a number to body\.ink, which holds a colour/);
+  });
+
+  // --- branch target exists (finding 36, the loader half) ------------------
+
+  it("rejects an effect that branches to a list it does not define", () => {
+    // Spelling the key right was the whole of the old check. An effect that
+    // branches to "drift" and defines none used to load clean, then go silent
+    // on the share of stirs the branch sent that way — while still drawing the
+    // branch value and the re-arm gap, so the chain lived forever and the PRNG
+    // stream walked out of step with every golden.
+    const bad = clone();
+    delete (bad.behavior as BadBehavior).moodEffects[BRANCHING]!.drift;
+    expect(() => loadConfig(bad)).toThrow(/branches to "drift", which it does not define/);
+  });
+
+  it("still accepts an effect whose branch list is authored empty", () => {
+    // Absent and empty are different statements — "no such list" against
+    // "nothing to play this time" — and `?? []` was collapsing them. The
+    // runtime keeps the distinction; so must the loader.
+    const ok = clone();
+    (ok.behavior as BadBehavior).moodEffects[BRANCHING]!.drift = [];
+    expect(() => loadConfig(ok)).not.toThrow();
   });
 });

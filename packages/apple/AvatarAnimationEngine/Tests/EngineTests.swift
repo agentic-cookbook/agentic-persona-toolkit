@@ -144,6 +144,32 @@ final class EngineTests: XCTestCase {
         XCTAssertEqual(try item(try e.tick(span + 0.2), "line").d, rest)
     }
 
+    func testCancelsTheRunningTimelineBeforeStartingAnotherWhicheverDoorStartsIt() throws {
+        // `play` used to throw the handle away, so a second timeline landed on
+        // top of the first: its `at: 0` promote read a `line.shape` the first had
+        // already promoted, and `promotePolyline`'s refusal reached a `try!`
+        // inside a scheduler callback — which is to say it took the host process
+        // down, not just the frame. "It reaches the end alive" is therefore the
+        // whole assertion, and it is only worth anything because both of these
+        // doors did not.
+        //
+        // On `Fixture.promoting()`, whose `bow` timeline is the only one in this
+        // suite that promotes; `bowing` is the mood choreographed to it, so the
+        // second door is the arbiter's rather than `play`'s.
+        for viaMood in [false, true] {
+            let e = try Engine(EngineOptions(config: try Fixture.promoting(), seed: 1))
+            for t in frames(fps: 60, seconds: 0.1) { _ = try e.tick(t) }
+            try e.play("bow")
+            for f in 6...12 { _ = try e.tick(Double(f) / 60) }
+            if viaMood { try e.setMood("bowing") } else { try e.play("bow") }
+            var last: DisplayList = []
+            for f in 12...120 { last = try e.tick(Double(f) / 60) }
+            XCTAssertFalse(last.isEmpty)
+            // Alive, and the line is back in the family the rig declares.
+            XCTAssertEqual(e.channels.get("line.family"), .text("line"))
+        }
+    }
+
     func testAnUnknownTimelineThrows() throws {
         let e = try engine()
         _ = try e.tick(0)

@@ -7,7 +7,17 @@ public struct TimelineHandle {
     private let ids: [Int]
     private let scheduler: Scheduler
     private let channels: Channels
+    private let tweens: Tweens
     private let config: CharacterConfig
+    /// What each concrete `.shape` channel held immediately BEFORE a promote
+    /// step rewrote it, keyed by the node whose family that step snapped.
+    ///
+    /// A reference type, and it has to be: the recording happens inside the
+    /// scheduler closures, which run long after this struct was handed back,
+    /// and a struct's copy would leave every one of them writing into a value
+    /// `cancel` never sees. The TypeScript twin closes over a `Map` for the
+    /// same reason (`timeline.ts`).
+    private let promoted: PromotedShapes
     /// Every node a step of this timeline snaps into a different shape family,
     /// gathered at construction time regardless of whether that step has fired
     /// yet. `cancel` needs this list because a family channel is engine-managed
@@ -15,15 +25,18 @@ public struct TimelineHandle {
     private let snapped: [String]
 
     init(name: String, startedAt: Double, endsAt: Double, ids: [Int], scheduler: Scheduler,
-         channels: Channels, config: CharacterConfig, snapped: [String]) {
+         channels: Channels, tweens: Tweens, config: CharacterConfig, snapped: [String],
+         promoted: PromotedShapes) {
         self.name = name
         self.startedAt = startedAt
         self.endsAt = endsAt
         self.ids = ids
         self.scheduler = scheduler
         self.channels = channels
+        self.tweens = tweens
         self.config = config
         self.snapped = snapped
+        self.promoted = promoted
     }
 
     /// Drop every pending one-shot, then hand each family this timeline snapped
@@ -40,6 +53,16 @@ public struct TimelineHandle {
     /// mean the same thing as "never played" for every node this timeline
     /// touched, matching the TypeScript exactly (`timeline.ts`'s `cancel`).
     ///
+    /// Restoring the family alone is only half a restore, and the other half is
+    /// what this used to get wrong. A promote does not merely rename the family
+    /// a shape belongs to — it REWRITES the shape, from the polyline the rig
+    /// declares into the all-cubic path of the family the timeline is crossing
+    /// into. Hand the family back without handing the shape back and the node
+    /// holds an `MCCCC` path while its family channel says `mouth`, a pair no
+    /// pose, no rig and no other timeline ever produces. The next promote out of
+    /// that node then reads the cubic it left behind and `promotePolyline`
+    /// refuses it — in Swift a trap, on the web a throw out of `engine.tick`.
+    ///
     /// `onDone` can never fire after a cancel — its completion is a scheduled
     /// one-shot like any other step, so it is dropped with them.
     public func cancel() {
@@ -51,11 +74,59 @@ public struct TimelineHandle {
         // array (see `playTimeline`) — sorting here is what keeps the write
         // order deterministic regardless of how that set later changes shape.
         for node in snapped.sorted() {
-            if let declared = config.families[node] {
-                channels.set("\(node).family", .text(declared))
+            guard let declared = config.families[node] else { continue }
+            // The family channel is the flag. While it still names a family this
+            // timeline snapped it into, the crossing is standing and this handle
+            // owes both halves of the restore. Once the timeline's own closing
+            // snap has put it back — the yawn does that at `at: 1.85`, a quarter
+            // second before it ends — the crossing is already undone and a
+            // cancel arriving afterwards must touch nothing: the arbiter cancels
+            // every choreo handle on the next mood change whether it ran to
+            // completion or not, and a restore there would drag the shape back
+            // to the one the timeline deliberately animated away from.
+            if channels.get("\(node).family") == .text(declared) { continue }
+            channels.set("\(node).family", .text(declared))
+            guard let held = promoted.byNode[node] else { continue }
+            for concrete in held.keys.sorted() {
+                // `tweens.cancel` first, then a raw write. The tween the promote
+                // step added — or whichever later step of this timeline
+                // superseded it — is still live, and `tweens.tick` runs after
+                // `scheduler.tick` on this very frame, so a write with the tween
+                // left standing is overwritten before anything sees it.
+                // `freezeLoop` in `Reflexes.swift` takes a channel off an
+                // animation the same way and for the same reason.
+                tweens.cancel(concrete)
+                channels.set(concrete, .text(held[concrete]!))
             }
         }
     }
+}
+
+/// The pre-promote content of every `.shape` channel a running timeline has
+/// rewritten, so `TimelineHandle.cancel` can hand it back. See the field on the
+/// handle for why this is a class and not a dictionary.
+final class PromotedShapes {
+    private(set) var byNode: [String: [String: String]] = [:]
+
+    /// Records only the FIRST promote of a run on a given channel: that is the
+    /// one that took the channel out of its declared family, so it is the one to
+    /// undo. Later steps of the same timeline write over a shape that is already
+    /// across the crossing.
+    func record(node: String, channel: String, held: String) {
+        if byNode[node]?[channel] == nil { byNode[node, default: [:]][channel] = held }
+    }
+}
+
+/// The promoted form of `held`, or `nil` if it has none.
+///
+/// Split out so that the ONE place a promote can fail on live channel content is
+/// named, rather than a pair of `try?`s buried in the middle of a loop — and so
+/// it reads as the deliberate refusal it is next to the `try!` it replaces. The
+/// TypeScript twin has the same function under the same name (`timeline.ts`).
+private func tryPromote(_ held: String, _ segments: Int) -> String? {
+    guard let parsed = try? parsePath(held),
+          let promoted = try? promotePolyline(parsed, segments: segments) else { return nil }
+    return emitPath(promoted)
 }
 
 /// Re-express an open polyline as an all-cubic path of `segments` segments,
@@ -64,8 +135,9 @@ public struct TimelineHandle {
 /// and 2/3 points of its chord, so the rewrite is exact and has no free
 /// choices. `segments` must be a whole multiple of the polyline's own line
 /// count — Task 29's promotion check already guarantees that for every
-/// authored `promote` step, which is what lets `playTimeline` call this with
-/// `try!` below.
+/// authored `promote` step. `playTimeline` still goes through `tryPromote`
+/// rather than `try!`, because what a promote step actually reads at fire time
+/// is live channel content, which no static check covers.
 func promotePolyline(_ p: ParsedPath, segments: Int) throws -> ParsedPath {
     guard p.kind.hasPrefix("M"), p.kind.count > 1,
           p.kind.dropFirst().allSatisfy({ $0 == "L" }) else {
@@ -139,6 +211,7 @@ public func playTimeline(_ ctx: AnimContext, _ name: String, now: Double,
     // reading an unordered collection's raw order.
     var snapped: [String] = []
     var snappedSeen: Set<String> = []
+    let promoted = PromotedShapes()
 
     // Authored order, front to back. Scheduler ids are monotonic and `tick`
     // iterates them sorted, so insertion order IS firing order among events that
@@ -167,11 +240,23 @@ public func playTimeline(_ ctx: AnimContext, _ name: String, now: Double,
                 // families out of THAT shape rather than a guess at it.
                 var to = s.to
                 if let segments = s.promote {
-                    guard case .text(let held)? = channels.get(concrete) else {
-                        preconditionFailure(
-                            "timeline \(name) promotes \(concrete), which holds no path")
-                    }
-                    to = .text(emitPath(try! promotePolyline(try! parsePath(held), segments: segments)))
+                    // A promote that cannot be performed leaves the channel
+                    // EXACTLY where it is — no tween, no write, nothing thrown
+                    // and nothing trapped. The same answer, and for the same
+                    // reason, as the family crossing `Tweens.swift` snaps rather
+                    // than morphs: every promote an author can write is checked
+                    // statically by the loader, so a refusal reaching here is one
+                    // nobody authored — a channel already sitting in the promoted
+                    // family because a previous play of this timeline is still
+                    // standing. Trapping would be a worse answer than doing
+                    // nothing, and it is the only other one available: this
+                    // closure is the scheduler's `(Double) -> Void`, which cannot
+                    // throw, so `try!` here took the host process down for a
+                    // state the engine can simply decline to act on.
+                    guard case .text(let held)? = channels.get(concrete) else { continue }
+                    guard let target = tryPromote(held, segments) else { continue }
+                    promoted.record(node: nodeOf(s.channel), channel: concrete, held: held)
+                    to = .text(target)
                 }
                 tweens.add(TweenSpec(channel: concrete,
                                      to: to!,
@@ -188,5 +273,6 @@ public func playTimeline(_ ctx: AnimContext, _ name: String, now: Double,
 
     return TimelineHandle(name: name, startedAt: now, endsAt: endsAt,
                           ids: ids, scheduler: ctx.scheduler,
-                          channels: channels, config: config, snapped: snapped)
+                          channels: channels, tweens: tweens, config: config,
+                          snapped: snapped, promoted: promoted)
 }

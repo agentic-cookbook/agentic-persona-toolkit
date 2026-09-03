@@ -5,18 +5,28 @@
     "rootDir": "./src",
     "lib": ["ES2022", "DOM"],
     "baseUrl": ".",
-    // TWO candidates, because this repo is checked out twice in the olylo
-    // superproject at two different depths — once nested under
+    // THREE candidates, tried in order; TypeScript takes the first that
+    // resolves. The first two are the two depths this repo is checked out at in
+    // the olylo superproject — once nested under
     // whatsnow-toolkit/packages/web/external/ for the web app, once as a sibling
-    // at the superproject root for the Apple one. TypeScript tries each in
-    // order and takes the first that resolves, so one entry serves both; a
-    // single fixed run of ".." typechecks in exactly one of them. `vitest.config.ts`
-    // solves the same problem by searching upward, which is what a config that
-    // can run code should do — this one cannot, so it lists the depths.
+    // at the superproject root for the Apple one — so one entry serves both,
+    // where a single fixed run of ".." typechecks in exactly one of them.
+    // `vitest.config.ts` solves the same problem by searching upward, which is
+    // what a config that can run code should do — this one cannot, so it lists
+    // the depths.
+    //
+    // The third is the fixture bundled beside the source, and it is LAST so it
+    // can only ever be the fallback: wherever a real character is reachable, it
+    // wins. Without it, a checkout of this repo alone — which is what
+    // `web-tests.yml` does, since whatsnow-toolkit is a parent of this repo and
+    // never a submodule of it — fails `pnpm lint` with TS2307 on all six
+    // imports, even though the suite itself runs green there via the upward
+    // search. See `character-dir.ts` for why the fallback exists at all.
     "paths": {
       "@character/*": [
         "../../../../../../../../characters/olylo/*",
-        "../../../../../../external/whatsnow-toolkit/characters/olylo/*"
+        "../../../../../../external/whatsnow-toolkit/characters/olylo/*",
+        "src/__fixtures__/olylo/*"
       ]
     }
   },

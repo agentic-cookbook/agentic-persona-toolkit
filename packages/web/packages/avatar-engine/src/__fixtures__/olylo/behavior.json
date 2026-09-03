@@ -1,0 +1,132 @@
+{
+  "schemaVersion": 1,
+  "channelDelays": {
+    "antennaLeft": 0.04, "antennaRight": 0.04,
+    "browLeft": 0.06, "browRight": 0.06,
+    "mouth": 0.08, "descender": 0.08,
+    "body.ink": 0.08
+  },
+  "params": {
+    "lively":           { "gt": ["wiggle", 0] },
+    "swayAmp":          { "select": "lively", "then": 23.94, "else": 10.64 },
+    "swayPeriodLeft":   { "select": "lively", "then": 0.3,   "else": 0.85 },
+    "swayPeriodRight":  { "select": "lively", "then": 0.36,  "else": 1.05 }
+  },
+  "loops": [
+    { "id": "swayLeft",  "channel": "antennaLeft.bend",  "mode": "symmetric",
+      "amplitude": { "param": "swayAmp" }, "duration": { "param": "swayPeriodLeft" },
+      "ease": "sine.inOut", "yoyo": true, "delay": 0.12, "phase": "negativeFirst",
+      "disabledWhen": "eyesShut", "restValue": 0, "restDuration": 0.5, "restEase": "sine.out" },
+    { "id": "swayRight", "channel": "antennaRight.bend", "mode": "symmetric",
+      "amplitude": { "param": "swayAmp" }, "duration": { "param": "swayPeriodRight" },
+      "ease": "sine.inOut", "delay": 0.12, "yoyo": true, "phase": "positiveFirst",
+      "disabledWhen": "eyesShut", "restValue": 0, "restDuration": 0.5, "restEase": "sine.out" },
+    { "id": "tailFlick", "channel": "descender.rotation", "mode": "symmetric",
+      "amplitude": 9, "duration": 0.22, "ease": "sine.inOut", "yoyo": true,
+      "phase": "negativeFirst",
+      "enabledWhen": "lively", "restValue": 0 },
+    { "id": "faceBob",   "channel": "face.y", "mode": "zeroTo",
+      "amplitude": { "param": "bob", "scale": -1 }, "duration": 0.5,
+      "ease": "sine.inOut", "yoyo": true, "restValue": 0,
+      "restDuration": 0.45, "restEase": "power3.out" },
+    { "id": "faceWiggle", "channel": "face.rotation", "mode": "symmetric",
+      "amplitude": { "param": "wiggle" }, "duration": 0.16, "phase": "negativeFirst",
+      "ease": "sine.inOut", "yoyo": true, "restValue": 0,
+      "restDuration": 0.45, "restEase": "power3.out" }
+  ],
+  "blink": {
+    "channel": "eye.scaleY", "shut": 0.06,
+    "durationMs": 130, "minMs": 2800, "maxMs": 7000,
+    "tweenDuration": 0.09, "ease": "power1.inOut",
+    "suppressedIn": ["laughing", "yawning", "asleep"]
+  },
+  "gaze": {
+    "gazeMax": 7, "tiltMax": 9, "leanMax": 6,
+    "look":  { "channels": ["irisLeft.x", "irisRight.x", "irisLeft.y", "irisRight.y"],
+               "duration": 0.5, "ease": "power3.out" },
+    "tilt":  { "channel": "tilt.rotation", "duration": 0.4, "ease": "power3.out" },
+    "lean":  { "channels": ["lean.x", "lean.y"], "duration": 0.5, "ease": "power3.out" },
+    "wanderAfterMs": 1200, "wanderMinMs": 1400, "wanderMaxMs": 3200,
+    "centreChanceCurious": 0.25, "centreChanceIdle": 0.35,
+    "reachCurious": [0.45, 0.9], "reachIdle": [0.12, 0.32],
+    "disabledWhen": "eyesShut"
+  },
+  "idleFidget": {
+    "activeWhen": "curious",
+    "breath": { "channel": "idle.scale", "from": 1, "to": 1.035,
+                "duration": 2.6, "ease": "sine.inOut", "yoyo": true },
+    "sway":   { "channel": "idle.rotation", "amplitude": 3.5 },
+    "brow":   { "nodes": ["browLeft", "browRight"],
+                "rotationAmplitude": 3, "yAmplitude": 2 },
+    "durationRange": [0.5, 0.9],
+    "rearm": { "gapMs": [2200, 3600], "jitterMs": 150 },
+    "ease": "sine.inOut",
+    "settle": { "duration": 0.5, "ease": "power2.out" }
+  },
+  "ladder": {
+    "boredAfterMs": 6000, "asleepAfterMs": 14000, "alertAfterTypingMs": 30000,
+    "pollMs": 400,
+    "moods": { "active": "idle", "bored": "bored", "asleep": "asleep" }
+  },
+  "poke": [
+    { "from": "asleep", "expression": "startled", "ms": 1700 },
+    { "from": "*",      "expression": "laughing", "ms": 1400 }
+  ],
+  "choreography": { "yawning": "yawn" },
+  "waking": { "from": "asleep", "to": "idle", "play": "yawning", "ms": 2800 },
+  "moodEffects": {
+    "asleep": {
+      "id": "asleepStir",
+      "target": "body",
+      "settle": { "duration": 0.5, "ease": "sine.out" },
+      "firstDelayMs": [4000, 7000],
+      "rearmMs": [4000, 8000],
+      "branch": { "probability": 0.6, "then": "twitch", "else": "drift" },
+      "twitch": [
+        { "channels": { "body.rotation": { "rnd": 1.6 }, "body.x": { "rnd": 1.5 } },
+          "duration": 0.12, "ease": "power2.out" },
+        { "channels": { "body.rotation": 0, "body.x": 0 },
+          "duration": 0.55, "ease": "sine.out" }
+      ],
+      "drift": [
+        { "channels": { "body.x": { "rnd": 4 }, "body.y": { "rnd": 3 },
+                        "body.rotation": { "rnd": 1 } },
+          "durationRange": [2.6, 4.2], "ease": "sine.inOut" }
+      ]
+    },
+    "bored": {
+      "id": "boredSag", "target": "face",
+      "settle": { "duration": 0.45, "ease": "power3.out" },
+      "loop": { "channel": "face.y", "mode": "zeroTo", "amplitude": 2.5,
+                "duration": 3.5, "ease": "sine.inOut", "yoyo": true }
+    },
+    "sad": {
+      "id": "sadDroop", "target": "face",
+      "settle": { "duration": 0.45, "ease": "power3.out" },
+      "once": [{ "channels": { "face.rotation": 4, "face.y": 3,
+                               "face.pivotX": 200, "face.pivotY": 271.022 },
+                 "duration": 0.9, "ease": "power2.out" }]
+    }
+  },
+  "eyesShutMood": "asleep",
+  "pinpricks": {
+    "nodes": ["pinprickLeft", "pinprickRight"],
+    "shownWhen": "eyesShut", "alpha": 1,
+    "showDuration": 0.6, "hideDuration": 0.2, "ease": "power2.out"
+  },
+  "speech": {
+    "mutterMs": 11000,
+    "loopingIn": ["asleep"],
+    "bubble": {
+      "x": 200, "y": 62,
+      "angleDeg": { "base": -90, "jitter": 55 },
+      "distance": [40, 90],
+      "spin": 12,
+      "in":  { "from": { "opacity": 0, "scale": 0.7, "y": 6 },
+               "to":   { "opacity": 0.7, "scale": 1, "y": -4 },
+               "duration": 0.22, "ease": "back.out(2)" },
+      "out": { "duration": 1.3, "delay": 0.5, "ease": "power1.in",
+               "to": { "opacity": 0, "scale": 0.95 } }
+    }
+  }
+}

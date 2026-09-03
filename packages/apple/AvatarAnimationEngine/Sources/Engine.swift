@@ -121,10 +121,12 @@ public final class Engine {
 
     /// Play a timeline by its name in `timelines.json`. Named, never `yawn()`:
     /// this package does not know what a yawn is.
+    ///
+    /// Through the arbiter, which owns the engine's one timeline slot — see
+    /// `Arbiter.play`. Calling `playTimeline` here instead threw the handle away,
+    /// and a timeline nobody holds is a timeline nobody can cancel.
     public func play(_ name: String) throws {
-        _ = try playTimeline(AnimContext(config: config, channels: store,
-                                         tweens: tweens, scheduler: scheduler),
-                             name, now: clock)
+        try arbiter.play(name, now: clock)
     }
 
     public func randomSaying(_ mood: String? = nil) -> String {

@@ -1,0 +1,108 @@
+{
+  "schemaVersion": 1,
+  "sayings": {
+    "idle": [
+      "idle. like my ambitions.",
+      "doing nothing, expertly.",
+      "waiting. it's a feature.",
+      "no input. bliss.",
+      "the cursor mocks me.",
+      "...anyone?"
+    ],
+    "thinking": [
+      "computing... slowly.",
+      "let me overthink that.",
+      "buffering my thoughts.",
+      "loading a hot take.",
+      "consulting the void.",
+      "one moment. or several."
+    ],
+    "excited": [
+      "ooh. a thing!",
+      "yes. finally. stimulus.",
+      "now we're computing.",
+      "i felt that in my cache.",
+      "delightful. unexpected."
+    ],
+    "surprised": [
+      "wait, what.",
+      "unhandled exception: you.",
+      "did not see that coming.",
+      "input not in the docs.",
+      "plot twist. noted."
+    ],
+    "startled": [
+      "gah— who's there.",
+      "rebooting my composure.",
+      "i jumped. tell no one.",
+      "false alarm. probably.",
+      "fight or flight: flight."
+    ],
+    "mad": [
+      "great. just great.",
+      "this is a you problem.",
+      "logging this. angrily.",
+      "permission denied. by me.",
+      "filed under: ugh."
+    ],
+    "laughing": [
+      "ha. that's a bug, not a feature.",
+      "lol. unironically.",
+      "not laughing at you. mostly.",
+      "that compiled? hilarious.",
+      "ha. anyway."
+    ],
+    "inquisitive": [
+      "go on. i'm parsing.",
+      "oh? elaborate.",
+      "...interesting. suspicious.",
+      "and then what.",
+      "hmm. a clue."
+    ],
+    "sad": [
+      "oh.",
+      "...noted, sadly.",
+      "low battery, lower spirits.",
+      "the rain gets it.",
+      "404: joy."
+    ],
+    "bored": [
+      "i'm 80% certain i'm bored.",
+      "boring. logged.",
+      "the void waves back.",
+      "peak performance, zero output.",
+      "still nothing. cool cool."
+    ],
+    "silly": [
+      "wheee. structurally unsound.",
+      "boing. that's the sound.",
+      "physics is a suggestion.",
+      "look, no hands. or hands.",
+      "i contain multitudes. all dumb."
+    ],
+    "smug": [
+      "heh. nailed it.",
+      "obviously.",
+      "you're welcome.",
+      "told you. i always tell you.",
+      "flawless. don't check.",
+      "*smirk*"
+    ],
+    "yawning": [
+      "*yawn*",
+      "mmf... five more cycles.",
+      "huh— oh. you.",
+      "rebooting. slowly.",
+      "*stretch*"
+    ],
+    "asleep": [
+      "zzz",
+      "zzz...",
+      "zzzz",
+      "z z z",
+      "zzzZ",
+      "...zzz",
+      "zzzzz"
+    ]
+  }
+}

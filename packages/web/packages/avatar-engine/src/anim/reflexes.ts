@@ -24,6 +24,35 @@ export interface Reflexes {
 
 const clamp1 = (v: number): number => (v < -1 ? -1 : v > 1 ? 1 : v);
 
+/** One PRNG draw from a `[lo, hi]` config pair, whatever arity the pair has.
+ *
+ *  Six sites in this file read a config array as a pair — `reachIdle`,
+ *  `durationRange` twice, `rearm.gapMs`, `rearmMs`, `firstDelayMs` — and every
+ *  one of them used to index `[0]` and `[1]` directly. The TYPE says
+ *  `[number, number]`; nothing between the JSON and here enforces it, because
+ *  `load.ts` arity-checks no pair field and `schema.json` puts no
+ *  `minItems`/`maxItems` on any of them. So `"rearmMs": [4000]` loads clean,
+ *  passes every config test, and then computes `range(4000, undefined)` — `NaN`
+ *  — which is scheduled as a deadline that can never come due: the behaviour is
+ *  silently deleted, at a distance, on whichever branch happens to be taken
+ *  first. The Swift twin does not degrade, it TRAPS: `Index out of range`,
+ *  minutes into a session, arbitrarily far from the config that caused it. Two
+ *  different wrong answers to one bad pair.
+ *
+ *  This is the second line of defence, not the first — the loader is where a
+ *  bad pair should be named and refused, and this file cannot reach the loader.
+ *  What it can do is make the two engines fail the SAME way: a pair short of an
+ *  element degrades to the degenerate range built from what is actually there
+ *  (`[4000]` reads as 4000..4000, `[]` as 0..0), and the draw still happens, so
+ *  the PRNG stream stays in step across the two platforms and across the good
+ *  and bad configs alike. Anything the pair does not say is missing behaviour,
+ *  never `NaN` and never a trap. */
+export function pairRange(prng: Prng, pair: readonly number[]): number {
+  const lo = pair.length > 0 ? pair[0]! : 0;
+  const hi = pair.length > 1 ? pair[1]! : lo;
+  return prng.range(lo, hi);
+}
+
 export function createReflexes(deps: ReflexDeps): Reflexes {
   const { config, channels, tweens, scheduler, prng } = deps;
   const { mood, reducedMotion, mutter } = deps;
@@ -31,8 +60,35 @@ export function createReflexes(deps: ReflexDeps): Reflexes {
   const poll = b.ladder.pollMs / 1000;
 
   const scope = (): ParamScope => ({ mood: mood() });
-  const rest = (channel: string): number => (config.rest.get(channel) as number) ?? 0;
-  const now0 = (channel: string): number => (channels.get(channel) as number) ?? rest(channel);
+  /** The rig's resting value for a channel, as a NUMBER.
+   *
+   *  A check, not a cast, and the difference is arithmetic. `ChannelValue` is
+   *  `number | string`, and a `.ink` or `.shape` channel's rest is a string:
+   *  `"#3a3a3a"`, `"M40,70L50,74L60,70"`. `as number` told the compiler
+   *  otherwise and let that string straight into `fidget`'s
+   *  `base + prng.signed(amp)`, where `+` is concatenation — `"#3a3a3a1.4"`,
+   *  written to a channel as if it were a number, and from there into a tween
+   *  that interpolates toward it. Swift reaches these lines through
+   *  `?.number ?? 0`, which yields 0 for exactly the same config, so the cast
+   *  was also a silent divergence between the twins. Zero is the answer both
+   *  now give: a reflex aimed at a non-numeric channel does nothing, rather
+   *  than doing something no one can name. */
+  const rest = (channel: string): number => {
+    const v = config.rest.get(channel);
+    return typeof v === "number" ? v : 0;
+  };
+  /** The channel's live value, or its rest if nothing has written it yet.
+   *
+   *  Checked for the same reason `rest` is, and it has to be checked HERE too:
+   *  `seedChannels` seeds every channel from `config.rest`, so a string rest is
+   *  also a string sitting live on the channel, and a guard on `rest` alone
+   *  would be walked straight past by the `channels.get` branch. Swift's
+   *  `ctx.channels.get(channel)?.number ?? rest(channel)` falls through to the
+   *  rest for a non-numeric value; this is that fall-through. */
+  const now0 = (channel: string): number => {
+    const v = channels.get(channel);
+    return typeof v === "number" ? v : rest(channel);
+  };
 
   // Every one-shot this file schedules is tracked so `stop` can cancel it. A
   // fired entry removes itself, so the set is bounded by what is actually pending.
@@ -338,7 +394,7 @@ export function createReflexes(deps: ReflexDeps): Reflexes {
       } else {
         const reach = curious ? g.reachCurious : g.reachIdle;
         const angle = prng.range(0, Math.PI * 2);
-        const r = prng.range(reach[0], reach[1]);
+        const r = pairRange(prng, reach);
         target = [Math.cos(angle) * r, Math.sin(angle) * r];
       }
       lookAt(when, target[0], target[1]);
@@ -379,7 +435,7 @@ export function createReflexes(deps: ReflexDeps): Reflexes {
       return; // every fidget settles itself, so there is nothing to unwind
     }
     fidgetRunning = true;
-    const dur = prng.range(f.durationRange[0], f.durationRange[1]);
+    const dur = pairRange(prng, f.durationRange);
     for (const [ch, amp, poseOwned] of fidgetTargets()) {
       const base = now0(ch);
       tweens.add({ channel: ch, to: base + prng.signed(amp), duration: dur, ease: f.ease }, when);
@@ -394,7 +450,7 @@ export function createReflexes(deps: ReflexDeps): Reflexes {
         }, t);
       });
     }
-    const gap = prng.range(f.rearm.gapMs[0], f.rearm.gapMs[1]) + prng.signed(f.rearm.jitterMs);
+    const gap = pairRange(prng, f.rearm.gapMs) + prng.signed(f.rearm.jitterMs);
     at(when + dur + gap / 1000, fidget);
   }
 
@@ -432,6 +488,29 @@ export function createReflexes(deps: ReflexDeps): Reflexes {
 
   let activeEffect: string | null = null;
   const touched = new Set<string>();
+  /** Which arming of the stir chain is the current one.
+   *
+   *  The same problem `gen` solves for an ambient loop, and the same answer.
+   *  A stir chain re-arms itself through `at`, which hands back no id, so
+   *  `stopEffect` cannot cancel the pending event — and `stir`'s only gate was
+   *  `activeEffect !== null`, which an orphan passes whenever ANY effect is
+   *  active by the time it lands, not just the one that armed it. Every mood
+   *  change through an effect-bearing mood, and every reduced-motion toggle
+   *  (`pollTick` runs `stopEffect` then `startEffect`), left the old chain
+   *  pending and armed a new one: N transitions, N+1 chains, all of them
+   *  writing the same `body.x`/`body.rotation` at fractional offsets and each
+   *  cancelling the last by the newest-wins tween rule. The extra PRNG draws
+   *  alone diverge the stream from every golden.
+   *
+   *  `asleep` reaches it on the shipped config with nothing but time:
+   *  `firstDelayMs` is [4000, 7000] and `rearmMs` [4000, 8000], so
+   *  `setMood("asleep")`, `setMood("idle")`, `setMood("asleep")` inside four
+   *  seconds is enough.
+   *
+   *  A single counter rather than one per effect id: there is exactly one stir
+   *  chain, because there is exactly one `activeEffect`. Every start mints a
+   *  generation; every stop invalidates whatever is outstanding. */
+  let effectGen = 0;
 
   function playSteps(
     steps: readonly EffectStep[], i: number, when: number, done: (t: number) => void,
@@ -442,9 +521,7 @@ export function createReflexes(deps: ReflexDeps): Reflexes {
       return;
     }
     const dur = step.duration
-      ?? (step.durationRange === undefined
-        ? 0
-        : prng.range(step.durationRange[0], step.durationRange[1]));
+      ?? (step.durationRange === undefined ? 0 : pairRange(prng, step.durationRange));
     // SORTED, and it is the PRNG that makes it matter: a `{"rnd": n}` channel
     // draws one value per channel, in walk order, so the order of this loop is
     // part of the determinism contract. JS would walk it in the JSON's own key
@@ -454,37 +531,135 @@ export function createReflexes(deps: ReflexDeps): Reflexes {
     for (const ch of Object.keys(step.channels).sort()) {
       const value = step.channels[ch]!;
       const to = typeof value === "number" ? value : prng.range(-value.rnd, value.rnd);
-      touched.add(ch);
-      tweens.add({ channel: ch, to, duration: dur, ease: step.ease }, when);
+      // EXPANDED, exactly as `settleLoop` and `armLoop` expand theirs. The
+      // loader's `requireChannel` accepts a group name here — it is the same
+      // check a loop's channel goes through, and a loop's channel is routinely
+      // a group — so `"channel": "eye.y"` on an effect step validates cleanly.
+      // Writing the raw name instead put the tween on a channel nothing
+      // renders: the step was silently dead in both directions, and
+      // `stopEffect` then settled that phantom to rest while the two eyes it
+      // was supposed to move never learned of it.
+      //
+      // The draw happens ONCE, above, and every member of the group shares its
+      // value — the same shape as `armLoop`, which computes one amplitude and
+      // one duration and hands them to every expanded channel. Drawing per
+      // member instead would make the number of PRNG values consumed depend on
+      // how many members the rig's group happens to have, which is not
+      // something the determinism contract can say.
+      for (const concrete of config.expand(ch)) {
+        touched.add(concrete);
+        tweens.add({ channel: concrete, to, duration: dur, ease: step.ease }, when);
+      }
     }
     // Sequential, not delayed: one tween per channel and newest wins, so two
     // steps touching the same channel must be separated by the scheduler.
     at(when + dur, (t) => playSteps(steps, i + 1, t, done));
   }
 
-  function stir(when: number): void {
-    if (activeEffect === null) return;
+  /** The step list a branch key names, or `undefined` when this effect defines
+   *  none under that name.
+   *
+   *  Total, and that is the whole point. The expression this replaces —
+   *  `key === "drift" ? def.drift : def.twitch` — answered two different
+   *  questions with one ternary and got both wrong. It mapped EVERY key that
+   *  was not `"drift"` onto `twitch`, so `"branch": { "then": "twich" }` played
+   *  the drift list's opposite rather than saying anything; and paired with
+   *  `?? []` at the call site it made an ABSENT list indistinguishable from an
+   *  authored empty one. `load.ts` validates only that a branch key spells
+   *  `"twitch"` or `"drift"`, never that the list it names exists, so deleting
+   *  olylo's `drift` block loads clean and then produces silence on roughly 40%
+   *  of stirs — half the authored behaviour gone, with nothing anywhere saying
+   *  so. */
+  const stepList = (def: EffectDef, key: string): readonly EffectStep[] | undefined => {
+    if (key === "twitch") return def.twitch;
+    if (key === "drift") return def.drift;
+    return undefined;
+  };
+
+  /** `g` is the arming this call belongs to; an orphan from an earlier one
+   *  returns without drawing, scheduling or writing anything. */
+  function stir(when: number, g: number): void {
+    if (g !== effectGen || activeEffect === null) return;
     const def = b.moodEffects[activeEffect];
     if (def === undefined) return;
     const key = def.branch === undefined
       ? "twitch"
       : (prng.chance(def.branch.probability) ? def.branch.then : def.branch.else);
-    const steps = key === "drift" ? def.drift : def.twitch;
-    playSteps(steps ?? [], 0, when, (t) => {
+    // A branch naming a list this effect does not define ENDS the chain, and
+    // the difference from `?? []` is the re-arm. `?? []` played nothing and then
+    // armed the next stir anyway, so the chain went on drawing a branch value
+    // and a re-arm gap forever for a behaviour that could never happen: an
+    // intermittent silence that also walks the shared PRNG stream out of step
+    // with every golden, which is the worst of the available failures because it
+    // is invisible in both directions. Stopping is visible — the effect goes
+    // quiet outright, at once, the first time the bad branch is drawn — and it
+    // consumes nothing further.
+    //
+    // An authored EMPTY list is a different thing and keeps its old behaviour:
+    // `stepList` hands back `[]`, `playSteps` completes immediately, and the
+    // chain re-arms. Absent and empty were the two cases `?? []` collapsed
+    // together.
+    const steps = stepList(def, key);
+    if (steps === undefined) return;
+    playSteps(steps, 0, when, (t) => {
+      // Checked again here, not only at the top: `playSteps` walks the steps
+      // through the scheduler, so seconds can pass between the two and the
+      // effect can be stopped in between.
+      if (g !== effectGen) return;
       const r = def.rearmMs;
-      if (r !== undefined) at(t + prng.range(r[0], r[1]) / 1000, stir);
+      if (r !== undefined) at(t + pairRange(prng, r) / 1000, (t2) => stir(t2, g));
     });
   }
+
+  /** Every channel the running effect moved, tweened back to the rig's rest.
+   *
+   *  One function rather than a loop inside `stopEffect`, because `touched` is a
+   *  record of channels that are OFF REST, and every place that record is
+   *  dropped owes the same settle first. `startEffect` used to drop it with a
+   *  bare `touched.clear()`: a `stop()` that left a twitch standing on
+   *  `spark.x` at 0.7, followed by a `start()`, erased the only note of where
+   *  that channel had been taken, and nothing put it back for the life of the
+   *  session.
+   *
+   *  Sorted too, though nothing here depends on it: no PRNG is drawn, and every
+   *  channel gets exactly one tween at the same instant, so the order is
+   *  unobservable. It is sorted so that the Swift port — where an unsorted walk
+   *  IS a bug waiting for the day someone adds a draw — can be a transcription
+   *  rather than a judgement call. */
+  const settleTouched = (when: number, settle: { duration: number; ease: string }): void => {
+    for (const ch of [...touched].sort()) {
+      tweens.add({
+        channel: ch, to: rest(ch),
+        duration: settle.duration, ease: settle.ease,
+      }, when);
+    }
+    touched.clear();
+  };
 
   const startEffect = (m: string, when: number): void => {
     const def = b.moodEffects[m];
     if (def === undefined) return;
+    // SETTLED, not merely forgotten. On the ordinary path `pollTick` has just
+    // run `stopEffect`, so `touched` is already empty and this writes nothing —
+    // which is why no golden moves. The path that is not ordinary is `stop()`
+    // then `start()`: `stop` used to leave `touched` populated and
+    // `activeEffect` null, so `stopEffect` could never claim those channels
+    // again, and the `touched.clear()` that stood here was the moment the engine
+    // forgot a channel it had walked off rest. `stop` now puts them back itself,
+    // and this is the second door onto the same record — a `start` called twice
+    // without a `stop` between.
+    //
+    // The NEW effect's settle timing, because it is the only one still in reach:
+    // whichever effect took those channels off rest is gone, and the alternative
+    // is the raw write `stop` uses, which would pop mid-session.
+    settleTouched(when, def.settle);
     activeEffect = m;
-    touched.clear();
+    effectGen += 1;
+    const g = effectGen;
     if (def.once !== undefined) playSteps(def.once, 0, when, () => {});
     if (def.loop !== undefined) armLoop(effectLoop(def), when);
     if (def.firstDelayMs !== undefined) {
-      at(when + prng.range(def.firstDelayMs[0], def.firstDelayMs[1]) / 1000, stir);
+      at(when + pairRange(prng, def.firstDelayMs) / 1000, (t) => stir(t, g));
     }
   };
 
@@ -492,22 +667,12 @@ export function createReflexes(deps: ReflexDeps): Reflexes {
     if (activeEffect === null) return;
     const def = b.moodEffects[activeEffect];
     activeEffect = null;
+    effectGen += 1; // orphan any pending stir event, mid-chain or re-arming
     if (def === undefined) return;
     // Through `stopLoop`, not by hand: an effect's loop is a chain like any
     // other, so its pending event needs orphaning too (see `gen`).
     if (def.loop !== undefined) stopLoop(effectLoop(def), when);
-    // Sorted too, though nothing here depends on it: no PRNG is drawn, and every
-    // channel gets exactly one tween at the same instant, so the order is
-    // unobservable. It is sorted so that the Swift port — where an unsorted walk
-    // IS a bug waiting for the day someone adds a draw — can be a transcription
-    // rather than a judgement call.
-    for (const ch of [...touched].sort()) {
-      tweens.add({
-        channel: ch, to: rest(ch),
-        duration: def.settle.duration, ease: def.settle.ease,
-      }, when);
-    }
-    touched.clear();
+    settleTouched(when, def.settle);
   };
 
   /* ── pinpricks ───────────────────────────────────────────────────── */
@@ -626,6 +791,13 @@ export function createReflexes(deps: ReflexDeps): Reflexes {
       // changed at — so an unanchored deadline is one that went by long ago, and
       // the scheduler's catch-up loop runs to its 1000-iteration guard instead
       // of the poll: ~1000 spurious polls and a visible hitch.
+      //
+      // Cancelled first, because a second `start` without a `stop` between — a
+      // remount, a re-`play` of the whole engine — would otherwise overwrite
+      // `pollId` and leave the first repeater running with nothing holding its
+      // id. Two polls means every mood change is serviced twice, and the count
+      // climbs with each restart.
+      if (pollId !== null) scheduler.cancel(pollId);
       pollId = scheduler.every(poll, pollTick, { first: when + poll });
     },
 
@@ -644,6 +816,25 @@ export function createReflexes(deps: ReflexDeps): Reflexes {
       fidgetRunning = false;
       breathRunning = false;
       activeEffect = null;
+      effectGen += 1; // orphan any pending stir event, as `stopEffect` does
+      // Every channel the effect walked off rest, put back THIS instant.
+      //
+      // `stop` has no clock — it is teardown, not a moment on the timeline — so
+      // the restore is `cancel` then a raw write rather than a settle tween,
+      // exactly the way `TimelineHandle.cancel` hands a promoted shape back, and
+      // for the same reason: the tween still driving the channel would otherwise
+      // overwrite the value before anything saw it.
+      //
+      // Leaving `touched` populated here was the leak. `activeEffect` is null
+      // from this line on, so `stopEffect` returns at its guard and can never
+      // reclaim these channels; the next `startEffect` cleared the record
+      // outright. A twitch caught mid-stroke therefore stranded `spark.x` at 0.7
+      // for the life of the process, with nothing left that knew it was there.
+      for (const ch of [...touched].sort()) {
+        tweens.cancel(ch);
+        channels.set(ch, rest(ch));
+      }
+      touched.clear();
     },
   };
 }

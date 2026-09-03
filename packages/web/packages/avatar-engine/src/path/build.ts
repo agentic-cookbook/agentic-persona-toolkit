@@ -7,13 +7,16 @@
  * every ring it has, and making the band the datum means the invariant lives in
  * the data rather than in a comment.
  */
+import { fmt } from "./parse";
+
 const K = 0.5523; // cubic approximation of a quarter circle
 const DEG = Math.PI / 180;
 
-const fmt = (v: number): string => {
-  const r = Math.round(v * 1e6) / 1e6;
-  return Object.is(r, -0) ? "0" : String(r);
-};
+// `fmt` is IMPORTED, not copied. Every ring, disc and arc is rebuilt through it
+// each frame, and a second copy of the one function documented to agree with
+// Swift character-for-character is a second place for that to lapse — which is
+// what it had already done. Swift has always had one `fmt`; `Build.swift` calls
+// the same one `emitPath` does.
 const pt = (x: number, y: number): string => `${fmt(x)},${fmt(y)}`;
 
 export function cubicO(cx: number, cy: number, rx: number, ry: number): string {

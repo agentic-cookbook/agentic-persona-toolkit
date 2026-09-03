@@ -4,6 +4,40 @@ import XCTest
 /// The four things a reflex test drives by hand. A separate object, not the
 /// harness itself: the harness owns `Reflexes`, `Reflexes` owns the closures,
 /// and closures that read the harness would close the loop into a retain cycle.
+/// A box the counting `respond` closure below can write into. A class, so the
+/// closure `Tweens` holds and the test that reads it share one integer.
+private final class Counter { var n = 0 }
+
+/// The dot fixture, loaded — with one edit to its behaviour file when a test
+/// needs a config the checked-in files cannot express.
+///
+/// The edit is applied to the raw JSON rather than to the decoded
+/// `BehaviorFile`, because what these tests are about is what the LOADER lets
+/// through: a step naming a group, a branch naming a list nobody defined. Going
+/// through `CharacterConfig.load` is the point — a decoded struct edited in
+/// place would skip the very check whose absence is the finding.
+private func dotConfig(_ edit: ((inout [String: Any]) -> Void)? = nil) throws -> CharacterConfig {
+    var d = try Fixture.all()
+    if let edit {
+        var behavior = try JSONSerialization.jsonObject(with: d["behavior"]!) as! [String: Any]
+        edit(&behavior)
+        d["behavior"] = try JSONSerialization.data(withJSONObject: behavior)
+    }
+    return try CharacterConfig.load(RawFiles(
+        character: d["character"]!, rig: d["rig"]!, poses: d["poses"]!,
+        timelines: d["timelines"]!, behavior: d["behavior"]!, sayings: d["sayings"]!))
+}
+
+/// One mood effect of the raw behaviour file, edited in place.
+private func editEffect(_ behavior: inout [String: Any], _ mood: String,
+                        _ edit: (inout [String: Any]) -> Void) {
+    var effects = behavior["moodEffects"] as! [String: Any]
+    var effect = effects[mood] as! [String: Any]
+    edit(&effect)
+    effects[mood] = effect
+    behavior["moodEffects"] = effects
+}
+
 private final class Knobs {
     var mood: String
     var reduced = false
@@ -19,16 +53,32 @@ private struct Harness {
     let knobs: Knobs
     let reflexes: Reflexes
 
-    init(seed: UInt32 = 7) throws {
-        let d = try Fixture.all()
-        let config = try CharacterConfig.load(RawFiles(
-            character: d["character"]!, rig: d["rig"]!, poses: d["poses"]!,
-            timelines: d["timelines"]!, behavior: d["behavior"]!, sayings: d["sayings"]!))
+    /// `counting`, when given, is incremented once per `Tweens.add` on either
+    /// spark channel. `respond` is the hook because it is called exactly once
+    /// per `add`, inside `add` — the single funnel every animated value passes
+    /// through — which makes it the Swift equivalent of the web suite's wrapper
+    /// around `tweens.add`.
+    init(seed: UInt32 = 7, counting: Counter? = nil,
+         on counted: Set<String> = ["spark.x", "spark.y"]) throws {
+        try self.init(config: dotConfig(), seed: seed, counting: counting, on: counted)
+    }
+
+    /// The same harness over a config the test built itself — the shape every
+    /// finding below needs, because none of them is reachable from the fixture
+    /// as checked in. The fixture files are pinned (the goldens and the
+    /// schema-parity suite read them), so a variant is assembled in memory the
+    /// way `Fixture.promoting` assembles its timeline.
+    init(config: CharacterConfig, seed: UInt32 = 7, counting: Counter? = nil,
+         on counted: Set<String> = ["spark.x", "spark.y"]) {
         self.config = config
         channels = Channels()
         config.seed(into: channels)
         scheduler = Scheduler()
-        tweens = Tweens(channels: channels, respond: config.respond)
+        let respond = config.respond
+        tweens = Tweens(channels: channels, respond: { channel, value in
+            if let counting, counted.contains(channel) { counting.n += 1 }
+            return respond(channel, value)
+        })
         let k = Knobs(mood: config.behavior.ladder.moods["active"]!)
         knobs = k
         reflexes = Reflexes(ReflexDeps(
@@ -540,6 +590,47 @@ final class ReflexesTests: XCTestCase {
         XCTAssertEqual(h.number("spark.y"), h.rest("spark.y"), accuracy: 1e-5)
     }
 
+    func testArmsExactlyOneStirChainAcrossAMoodRoundTrip() throws {
+        // `stir` re-arms itself, so `startEffect` had to orphan whatever was
+        // already pending before arming again — and it did not. Every round trip
+        // out of the effect's mood and back left the old chain running beside the
+        // new one, each drawing its own PRNG and stacking its own tweens on the
+        // same two channels. `activeEffect` cannot stand in for the generation
+        // token `armLoop` uses: it is a single mood name, so every chain reads it
+        // and every chain finds itself live.
+        func stirs(_ roundTrips: Int) throws -> Int {
+            let counting = Counter()
+            let h = try Harness(counting: counting)
+            h.knobs.mood = h.lively
+            h.reflexes.start(0)
+            for i in 0..<roundTrips {
+                h.knobs.mood = h.lively
+                h.run(from: Double(i) * 2, to: Double(i) * 2 + 1)
+                h.knobs.mood = h.calm
+                h.run(from: Double(i) * 2 + 1, to: Double(i) * 2 + 2)
+            }
+            h.knobs.mood = h.lively
+            h.run(from: Double(roundTrips) * 2, to: 120)
+            return counting.n
+        }
+
+        let h = try Harness()
+        let rearm = try XCTUnwrap(h.behavior.moodEffects[h.lively]?.rearmMs?[0]) / 1000
+        // ONE chain cannot stir more often than its own shortest re-arm allows,
+        // and each round trip's `stopEffect` settles the two channels it touched.
+        // Derived from the config rather than pinned, so the bound tracks the
+        // fixture; what it is measuring is the NUMBER of chains, and a second
+        // chain doubles the rate whatever the numbers happen to be.
+        func ceiling(_ roundTrips: Int) -> Int { Int(120 / rearm) + 1 + 2 * roundTrips }
+
+        let one = try stirs(0)
+        XCTAssertGreaterThan(one, 0, "the spark never stirred")
+        XCTAssertLessThanOrEqual(one, ceiling(0))
+        // Three round trips used to leave FOUR chains running at once; the count
+        // is what says so.
+        XCTAssertLessThanOrEqual(try stirs(3), ceiling(3))
+    }
+
     func testPlaysAOnceListOnEntryAndRunsTheEffectsOwnLoopUntilTheMoodTurns() throws {
         let h = try Harness()
         h.knobs.mood = h.calm
@@ -753,5 +844,257 @@ final class ReflexesTests: XCTestCase {
         let frozen = h.channels.names().map { h.channels.get($0) }
         h.run(from: 9, to: 20)
         XCTAssertEqual(h.channels.names().map { h.channels.get($0) }, frozen)
+    }
+}
+
+// MARK: - the runtime's unchecked assumptions about what the loader let through
+
+/// Every channel some reflex already drives, derived rather than listed: a new
+/// reflex on a channel these tests had assumed was free would otherwise become
+/// an intermittent failure with no obvious cause.
+private func reservedChannels(_ c: CharacterConfig) -> Set<String> {
+    let b = c.behavior
+    var out = Set<String>()
+    out.formUnion(c.expand(b.blink.channel))
+    for ch in b.gaze.look.allChannels + b.gaze.tilt.allChannels + b.gaze.lean.allChannels {
+        out.formUnion(c.expand(ch))
+    }
+    for loop in b.loops { out.formUnion(c.expand(loop.channel)) }
+    out.formUnion(c.expand(b.idleFidget.sway.channel))
+    out.formUnion(c.expand(b.idleFidget.breath.channel))
+    for node in b.idleFidget.brow.nodes {
+        out.insert("\(node).rotation")
+        out.insert("\(node).y")
+    }
+    for node in b.pinpricks.nodes { out.insert("\(node).alpha") }
+    for mood in b.moodEffects.keys.sorted() {
+        let effect = b.moodEffects[mood]!
+        if let loop = effect.loop { out.formUnion(c.expand(loop.channel)) }
+        for steps in [effect.once, effect.twitch, effect.drift] {
+            for step in steps ?? [] {
+                for ch in step.channels.keys.sorted() { out.formUnion(c.expand(ch)) }
+            }
+        }
+    }
+    return out
+}
+
+/// A rig group standing for more than one numeric channel that no reflex drives.
+private func freeGroup(_ c: CharacterConfig) -> String {
+    let reserved = reservedChannels(c)
+    return c.channels.sorted().first { name in
+        let members = c.expand(name)
+        return members.count > 1
+            && members.allSatisfy { c.rest[$0]?.number != nil && !reserved.contains($0) }
+    }!
+}
+
+/// A channel whose REST is a colour rather than a number.
+private func inkChannel(_ c: CharacterConfig) -> String {
+    let reserved = reservedChannels(c)
+    return c.rest.keys.sorted().first {
+        $0.hasSuffix(".ink") && c.rest[$0]?.number == nil && !reserved.contains($0)
+    }!
+}
+
+/// The mood whose effect plays a `once` list, and the channels that list moves
+/// off rest — the record `touched` is supposed to keep.
+private func onceMood(_ c: CharacterConfig) -> String {
+    c.behavior.moodEffects.keys.sorted().first { c.behavior.moodEffects[$0]!.once != nil }!
+}
+
+private func onceChannels(_ c: CharacterConfig, _ mood: String) -> [String] {
+    (c.behavior.moodEffects[mood]!.once ?? [])
+        .flatMap { $0.channels.keys.sorted() }
+        .flatMap { c.expand($0) }
+}
+
+/// The mood whose effect BRANCHES — the stir chain, the only shape of effect a
+/// missing step list can silence.
+private func stirMood(_ c: CharacterConfig) -> String {
+    c.behavior.moodEffects.keys.sorted().first { c.behavior.moodEffects[$0]!.branch != nil }!
+}
+
+/// A channel the stir's twitch writes and nothing else does, so one `add` on it
+/// is one step of one stir.
+private func stirChannel(_ c: CharacterConfig) -> String {
+    c.behavior.moodEffects[stirMood(c)]!.twitch!.first!.channels.keys.sorted().first!
+}
+
+/// Four of the five findings here share one root cause: the runtime trusts the
+/// loader, and the loader does not check what the runtime assumes. A pair field
+/// with one element, a group name where a concrete channel was meant, a branch
+/// naming a step list nobody defined — each loads clean and then deletes
+/// behaviour silently, or aborts the process. What these tests pin is the
+/// runtime's second line of defence, which is what makes the two engines fail
+/// the same way; the loader's own checks are the first line and belong there.
+final class ReflexesLooseConfigTests: XCTestCase {
+
+    func testAPairShortOfAnElementReadsAsADegenerateRange() {
+        // Finding 16. Seven sites index `[0]` and `[1]` on pair fields nothing
+        // arity-checks — `Loader.swift` has one `.count ==` in 917 lines and it
+        // is not on any of these, and `schema.json` sets no `minItems`. So
+        // `"rearmMs": [4000]` loads clean, passes every config test, and then
+        // TRAPS with `Index out of range` minutes into a session, arbitrarily
+        // far from the config that caused it. The web twin degrades to `NaN`
+        // instead: two different wrong answers to one bad pair.
+        let p = Prng(seed: 3)
+        XCTAssertEqual(pairRange(p, [0.5, 0.5]), 0.5, accuracy: 1e-12)
+        XCTAssertEqual(pairRange(p, [0.5]), 0.5, accuracy: 1e-12)
+        XCTAssertEqual(pairRange(p, []), 0)
+
+        // And exactly ONE draw however short the pair is. The draw count is the
+        // part that has to hold: it is what keeps the shared stream in step
+        // between the two engines, and between a good config and a bad one.
+        let short = Prng(seed: 11)
+        _ = pairRange(short, [4000])
+        _ = pairRange(short, [])
+        let full = Prng(seed: 11)
+        _ = pairRange(full, [4000, 4000])
+        _ = pairRange(full, [0, 0])
+        XCTAssertEqual(short.range(0, 1), full.range(0, 1))
+    }
+
+    func testExpandsAGroupNamedByAnEffectStep() throws {
+        // Finding 35. `requireChannel` accepts a group name — it is the same
+        // check a loop's channel passes, and a loop's channel is routinely a
+        // group — so the step validates, and then the tween lands on a name
+        // nothing renders. The effect is silently dead in both directions.
+        let group = freeGroup(try dotConfig())
+        let mood = onceMood(try dotConfig())
+        let config = try dotConfig { behavior in
+            editEffect(&behavior, mood) { effect in
+                effect["once"] = [["channels": [group: 1.4],
+                                   "duration": 0.2, "ease": "power2.out"]]
+            }
+        }
+        let h = Harness(config: config)
+        h.knobs.mood = mood
+        h.reflexes.start(0)
+        h.run(from: 0, to: 0.4)
+        for member in config.expand(group) {
+            XCTAssertEqual(h.number(member), 1.4, accuracy: 1e-6)
+        }
+        // And nothing at all on the group name itself.
+        XCTAssertNil(h.channels.get(group))
+    }
+
+    func testEndsTheStirChainWhenABranchNamesAnUndefinedList() throws {
+        // Finding 36. The loader checks that a branch key spells "twitch" or
+        // "drift" and never that the list it names exists, so deleting the
+        // `drift` block loads clean. `?? []` then played nothing and re-armed
+        // anyway: a chain drawing a branch value and a re-arm gap forever for a
+        // behaviour that can never happen — silent, and out of step with every
+        // golden's PRNG stream.
+        let base = try dotConfig()
+        let mood = stirMood(base)
+        let channel = stirChannel(base)
+
+        func adds(_ config: CharacterConfig, marks: [Double]) -> [Int] {
+            let counter = Counter()
+            let h = Harness(config: config, counting: counter, on: [channel])
+            h.knobs.mood = mood
+            h.reflexes.start(0)
+            var out: [Int] = []
+            var from = 0.0
+            for mark in marks {
+                h.run(from: from, to: mark)
+                out.append(counter.n)
+                from = mark
+            }
+            return out
+        }
+
+        // Built by editing the LOADED config rather than the JSON behind it:
+        // the loader now refuses an effect that branches to a list it does not
+        // define (`ConfigTests` owns that half), so this config can no longer
+        // be loaded into existence. That is the division of labour, not a
+        // workaround — the loader makes the state unreachable from an authored
+        // config, and this pins what the runtime does if one arrives anyway.
+        var stripped = base.behavior.moodEffects[mood]!
+        stripped.drift = nil
+        let missing = base.replacingMoodEffect(mood, with: stripped)
+        let m = adds(missing, marks: [30, 120])
+        // It ran at all — the chain has to have stirred before it can be shown
+        // to have stopped.
+        XCTAssertGreaterThan(m[0], 0)
+        // And then stopped, the first time the missing branch came up.
+        XCTAssertEqual(m[1], m[0])
+
+        // An authored EMPTY list is a different statement and keeps its
+        // behaviour: nothing to play this time round, re-arm and try again.
+        // Absent and empty were the two cases `?? []` collapsed into one.
+        let empty = try dotConfig { behavior in
+            editEffect(&behavior, mood) { $0["drift"] = [] }
+        }
+        let e = adds(empty, marks: [30, 120])
+        XCTAssertGreaterThan(e[1], e[0])
+    }
+
+    func testStopPutsEveryChannelTheEffectMovedBackToRest() throws {
+        // Finding 37, the `stop()` half. `touched` is the record of which
+        // channels are off rest; `stop` dropped it without settling, and
+        // `activeEffect` is nil from that moment on, so `stopEffect` could never
+        // reclaim them either. The channel stayed where the twitch left it for
+        // the life of the process.
+        let config = try dotConfig()
+        let mood = onceMood(config)
+        let channels = onceChannels(config, mood)
+        let h = Harness(config: config)
+        h.knobs.mood = mood
+        h.reflexes.start(0)
+        h.run(from: 0, to: 0.15) // mid-flight: the once step runs longer than this
+        XCTAssertTrue(channels.contains { abs(h.number($0) - h.rest($0)) > 1e-6 })
+
+        h.reflexes.stop()
+        // Instantly, not over a settle: `stop` is teardown and has no clock.
+        // Same shape as `TimelineHandle.cancel` handing a promoted shape back.
+        for ch in channels { XCTAssertEqual(h.number(ch), h.rest(ch), accuracy: 1e-10) }
+    }
+
+    func testAStartAfterAStartSettlesWhatTheLastEffectStranded() throws {
+        // Finding 37, the `startEffect` half. Reached by a second `start` with
+        // no `stop` between — a remount, or a host that starts on re-render. The
+        // bare `touched.removeAll()` that stood there was the moment the engine
+        // forgot a channel it had walked off rest.
+        let config = try dotConfig()
+        let once = onceMood(config)
+        let channels = onceChannels(config, once)
+        let h = Harness(config: config)
+        h.knobs.mood = once
+        h.reflexes.start(0)
+        h.run(from: 0, to: 0.6) // the once step has completed and stays where it landed
+        XCTAssertTrue(channels.contains { abs(h.number($0) - h.rest($0)) > 1e-6 })
+
+        // A different effect, so nothing re-touches those channels by accident.
+        h.knobs.mood = stirMood(config)
+        h.reflexes.start(0.6)
+        h.run(from: 0.6, to: 2.0)
+        for ch in channels { XCTAssertEqual(h.number(ch), h.rest(ch), accuracy: 1e-6) }
+    }
+
+    func testARestThatIsNotANumberReadsAsZero() throws {
+        // Finding 39 is a web-side bug — `rest()` and `now0()` CAST there where
+        // this file checks — so what this pins is the answer the web half was
+        // changed to match: a reflex pointed at an `.ink` channel, whose rest is
+        // a colour, jitters around 0. TypeScript computed `"#3a3a3a" + 1.4` and
+        // wrote the string "#3a3a3a1.4" to a channel as a number. One config,
+        // two engines, and they now agree.
+        let ink = inkChannel(try dotConfig())
+        let config = try dotConfig { behavior in
+            var fidget = behavior["idleFidget"] as! [String: Any]
+            var sway = fidget["sway"] as! [String: Any]
+            sway["channel"] = ink
+            fidget["sway"] = sway
+            behavior["idleFidget"] = fidget
+        }
+        let h = Harness(config: config)
+        h.knobs.mood = h.lively
+        h.reflexes.start(0)
+        h.run(from: 0, to: 1.5)
+        guard case .number(let v)? = h.channels.get(ink) else {
+            return XCTFail("\(ink) holds \(String(describing: h.channels.get(ink))), not a number")
+        }
+        XCTAssertLessThanOrEqual(abs(v), config.behavior.idleFidget.sway.amplitude + 1e-9)
     }
 }

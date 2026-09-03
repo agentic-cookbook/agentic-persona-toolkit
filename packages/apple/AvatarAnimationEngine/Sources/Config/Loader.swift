@@ -6,6 +6,20 @@ public struct ConfigError: Error, Equatable, CustomStringConvertible {
     public var description: String { "avatar config: \(message)" }
 }
 
+/// `#rgb` or `#rrggbb`, ASCII only — exactly the shape `Color.parseHex` accepts
+/// and `Tweens`' `isHex` admits, and deliberately narrower than
+/// `Character.isHexDigit`, which follows Unicode's `Hex_Digit` property and is
+/// also true for the fullwidth digit and letter blocks (see
+/// `Color.isAsciiHexDigit`). The loader is the last place a bad colour is still
+/// attributable to a KEY: past here it is a string on a per-frame path, where a
+/// throw from `Color.mix` names only the string.
+func isLoadableHex(_ s: String) -> Bool {
+    guard s.hasPrefix("#") else { return false }
+    let body = s.dropFirst()
+    guard body.count == 3 || body.count == 6 else { return false }
+    return body.allSatisfy { $0.isASCII && $0.isHexDigit }
+}
+
 /// The six files, unparsed.
 public struct RawFiles: Sendable {
     public var character: Data
@@ -84,6 +98,28 @@ public struct CharacterConfig {
         return sign == bend.inwardSign ? .number(v * bend.inwardDamp) : value
     }
 
+    /// A copy of this config with one mood effect replaced.
+    ///
+    /// Internal, not public, and nothing in the engine calls it: it exists so
+    /// a `@testable` test can build a config the LOADER refuses. The loader's
+    /// branch-target check rejects an effect that branches to a step list it
+    /// does not define, which is precisely what makes `stir`'s own guard
+    /// unreachable from an authored config — and that guard still has to
+    /// hold, because it is the second line of defence for a config reaching
+    /// the engine from anywhere else. So the test builds its config AFTER the
+    /// load rather than through it. The web twin does the same by spreading
+    /// the loaded object; a struct of `let`s with private members has no
+    /// spread, hence this.
+    func replacingMoodEffect(_ mood: String, with effect: EffectDef) -> CharacterConfig {
+        var behavior = self.behavior
+        behavior.moodEffects[mood] = effect
+        return CharacterConfig(
+            character: character, rig: rig, poses: poses, timelines: timelines,
+            behavior: behavior, sayings: sayings,
+            channels: channels, families: families, rest: rest, nodes: nodes,
+            bendDriven: bendDriven, expandMap: expandMap, responses: responses)
+    }
+
     public static func load(_ files: RawFiles) throws -> CharacterConfig {
         func decode<T: Decodable>(_ type: T.Type, _ data: Data, _ name: String) throws -> T {
             do {
@@ -112,6 +148,30 @@ public struct CharacterConfig {
                     "\(name) declares schemaVersion \(declared), but this engine reads "
                     + "schemaVersion \(Schema.version)")
             }
+        }
+
+        // 1b. the values neither runtime survives ----------------------------
+        // ONE block, not a guard scattered across the eight places these values
+        // are read. Everything checked here shares a shape: it is legal JSON,
+        // the loader used to wave it through, and the first thing downstream
+        // that touches it either TRAPS the process (Apple) or writes
+        // `undefined`/`NaN` into a channel and kills the frame loop (web). Load
+        // is the last moment the offending KEY is still nameable — "bad hex
+        // colour: #abcd" arriving forty frames later names nothing an author
+        // can act on. `load.ts` runs the identical block, and `schema.json`
+        // states both constraints, so no single loader is the only defence.
+        for name in character.palette.keys.sorted() {
+            let hex = character.palette[name]!
+            guard isLoadableHex(hex) else {
+                throw ConfigError(
+                    "palette \"\(name)\" is \"\(hex)\", which is not a #rgb or #rrggbb colour")
+            }
+        }
+        // An empty member list makes the group a legal CHANNEL — the member
+        // loop below is vacuous over `[]`, so nothing rejects it — that expands
+        // to nothing. Every consumer then reaches for its first member.
+        for name in rig.groups.keys.sorted() where rig.groups[name]!.isEmpty {
+            throw ConfigError("group \"\(name)\" has no members")
         }
 
         // 2. walk the rig ---------------------------------------------------
@@ -323,6 +383,26 @@ public struct CharacterConfig {
             }
         }
 
+        /// A pair field is two numbers and only two. Nothing between the JSON
+        /// and the seven sites that index one enforces that: `"rearmMs": [4000]`
+        /// decodes clean and reaches the runtime, where `pairRange` now reads it
+        /// as the degenerate 4000..4000 rather than trapping. That degrade is
+        /// the SECOND line of defence — it is what makes the two engines agree
+        /// about a config that arrives from somewhere other than a loader — and
+        /// this is the first: an author who writes one number, or three, is told
+        /// so at load, with the field named, instead of watching a behaviour
+        /// quietly go missing.
+        ///
+        /// `schema.json` already says `minItems: 2, maxItems: 2` on every one of
+        /// these fields (they all `$ref` `#/$defs/Point`). It is not enough:
+        /// nothing validates a config against that schema at load — it is a
+        /// document, not a gate — so the check has to exist in code here, and in
+        /// the web loader's `requirePair`, to be a check at all.
+        func requirePair(_ pair: [Double]?, _ context: String) throws {
+            guard let pair, pair.count != 2 else { return }
+            throw ConfigError("\(context) needs exactly two numbers, not \(pair.count)")
+        }
+
         func requireEase(_ name: String, _ context: String) throws {
             guard (try? Ease.resolve(name)) != nil else {
                 throw ConfigError("\(context) uses unknown ease \"\(name)\"")
@@ -383,6 +463,20 @@ public struct CharacterConfig {
                     "\(context) sets \(channel), but that node is bend-driven — animate its "
                     + ".bend instead")
             }
+            // A `.shape` channel holds a path and an `.ink` channel holds a
+            // colour; both are text. A NUMBER written to one is not a value the
+            // channel can hold, and until this check nothing said so: the
+            // promote step in `Timelines.swift` would meet a `.number` where it
+            // demanded `.text`, refuse, and `continue` — the write silently
+            // dropped, arbitrarily far from the config that asked for it. This
+            // is the check that comment at the promote site assumes has already
+            // run. Every other suffix is deliberately unexamined, exactly as the
+            // text branch below is.
+            if case .number = to, channel.hasSuffix(".shape") || channel.hasSuffix(".ink") {
+                throw ConfigError(
+                    "\(context) writes a number to \(channel), which holds "
+                    + (channel.hasSuffix(".shape") ? "a path" : "a colour"))
+            }
             guard case .text(let s) = to else { return }
             if channel.hasSuffix(".shape") {
                 do {
@@ -391,6 +485,16 @@ public struct CharacterConfig {
                     throw ConfigError("\(context): unsupported path — \(error)")
                 }
             } else if channel.hasSuffix(".ink") {
+                // The "#" escape is load-bearing and is NOT a hole: `colourise`
+                // runs immediately before every call to this function and has
+                // already replaced a palette NAME with its value, so the only
+                // "#" that reaches here is a palette value whose shape the
+                // block at the top of `load` has checked. An authored literal
+                // never gets this far -- a literal is not a palette key, so
+                // `colourise` rejects it by name. Hence no second shape check
+                // here: there is no input it could reject that is still
+                // reachable, and the web's `requireValue` is written the same
+                // way for the same reason.
                 guard s.hasPrefix("#") || character.palette[s] != nil
                         || character.inks[s] != nil else {
                     throw ConfigError("\(context) sets \(channel) to unknown colour \"\(s)\"")
@@ -424,7 +528,13 @@ public struct CharacterConfig {
             try requireEase(pose.ease, context)
             for name in pose.channels.keys.sorted() {
                 try requireChannel(name, context)
-                let first = expand(name).first!
+                // Section 1b rejects the only config that can make this empty;
+                // the guard stays because this function's contract is to THROW
+                // a `ConfigError`, and a `.first!` here aborts the process
+                // instead — the one failure mode a loader must never have.
+                guard let first = expand(name).first else {
+                    throw ConfigError("\(context) targets empty group \"\(name)\"")
+                }
                 var to = try colourise(first, pose.channels[name]!, context)
                 to = try canonicalise(first, to, context)
                 pose.channels[name] = to
@@ -541,7 +651,11 @@ public struct CharacterConfig {
                     guard let to = step.to else {
                         throw ConfigError("\(context) drives \(step.channel) with no value")
                     }
-                    let first = expand(step.channel).first!
+                    // As in the pose walk: a `ConfigError`, never a trap.
+                    guard let first = expand(step.channel).first else {
+                        throw ConfigError(
+                            "\(context) targets empty group \"\(step.channel)\"")
+                    }
                     var value = try colourise(first, to, context)
                     value = try canonicalise(first, value, context)
                     timeline.steps[index].to = value
@@ -728,6 +842,8 @@ public struct CharacterConfig {
         for move in [behavior.gaze.look, behavior.gaze.tilt, behavior.gaze.lean] {
             try requireEase(move.ease, "behavior.gaze")
         }
+        try requirePair(behavior.gaze.reachCurious, "behavior.gaze.reachCurious")
+        try requirePair(behavior.gaze.reachIdle, "behavior.gaze.reachIdle")
 
         try requireChannel(behavior.idleFidget.breath.channel, "behavior.idleFidget.breath")
         try requireEase(behavior.idleFidget.breath.ease, "behavior.idleFidget.breath")
@@ -737,6 +853,8 @@ public struct CharacterConfig {
         }
         try requireEase(behavior.idleFidget.ease, "behavior.idleFidget")
         try requireEase(behavior.idleFidget.settle.ease, "behavior.idleFidget.settle")
+        try requirePair(behavior.idleFidget.durationRange, "behavior.idleFidget.durationRange")
+        try requirePair(behavior.idleFidget.rearm.gapMs, "behavior.idleFidget.rearm.gapMs")
 
         for id in behavior.pinpricks.nodes {
             try requireNode(id, "behavior.pinpricks")
@@ -751,20 +869,51 @@ public struct CharacterConfig {
             let context = "moodEffect \"\(effect.id)\""
             try requireMood(mood, "moodEffects")
             try requireNode(effect.target, context)
+            try requirePair(effect.firstDelayMs, "\(context) firstDelayMs")
+            try requirePair(effect.rearmMs, "\(context) rearmMs")
             for steps in [effect.twitch, effect.drift, effect.once] {
                 for step in steps ?? [] {
                     try requireEase(step.ease, context)
+                    try requirePair(step.durationRange, "\(context) step durationRange")
                     for channel in step.channels.keys.sorted() {
                         try requireChannel(channel, context)
+                        // An effect step's value is always numeric — a literal
+                        // or a `{"rnd": n}` draw — so every channel it names has
+                        // to be one that holds a number. Pose channels and
+                        // timeline steps have gone through `requireValue` all
+                        // along; effect steps got `requireChannel` and nothing
+                        // else, which is why an effect writing a number to
+                        // `mouth.shape` loaded clean. Expanded first, because a
+                        // group is a legitimate thing for a step to name and it
+                        // is the MEMBERS that get written.
+                        for member in expand(channel) {
+                            try requireValue(member, .number(0), context)
+                        }
                     }
                 }
             }
             // "twitch" or "drift" — and NOT "once", however plausible a third
-            // step list looks here. `stir` plays `key == "drift" ? drift :
-            // twitch`, so anything else silently plays the twitch list.
+            // step list looks here: `stir` plays the list `branch.then`/`.else`
+            // names, and `once` is `startEffect`'s, played on a different clock.
+            //
+            // Naming one of the two is necessary and not sufficient. The list
+            // also has to EXIST: an effect that branches to "drift" without
+            // defining one used to load clean and then go silent on roughly the
+            // fraction of stirs the branch sends that way — while still drawing
+            // the branch value and the re-arm gap, so the chain lived forever
+            // and the shared PRNG stream walked out of step with every golden.
+            // `stir`'s `stepList` is total now and ends the chain instead, which
+            // is visible; this makes it unreachable from an authored config.
             if let branch = effect.branch {
-                for key in [branch.then, branch.else] where !["twitch", "drift"].contains(key) {
-                    throw ConfigError("\(context) branches to \"\(key)\", not \"twitch\" or \"drift\"")
+                for key in [branch.then, branch.else] {
+                    guard ["twitch", "drift"].contains(key) else {
+                        throw ConfigError(
+                            "\(context) branches to \"\(key)\", not \"twitch\" or \"drift\"")
+                    }
+                    guard (key == "twitch" ? effect.twitch : effect.drift) != nil else {
+                        throw ConfigError(
+                            "\(context) branches to \"\(key)\", which it does not define")
+                    }
                 }
             }
             try requireEase(effect.settle.ease, "\(context) settle")
@@ -818,6 +967,7 @@ public struct CharacterConfig {
             try requireMood(behavior.ladder.moods[mood]!, "ladder")
         }
 
+        try requirePair(behavior.speech.bubble.distance, "behavior.speech.bubble.distance")
         try requireEase(behavior.speech.bubble.in.ease, "behavior.speech.bubble.in")
         try requireEase(behavior.speech.bubble.out.ease, "behavior.speech.bubble.out")
 

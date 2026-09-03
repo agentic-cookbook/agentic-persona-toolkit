@@ -36,6 +36,14 @@ describe("build", () => {
     expect(Math.abs(p.points[2]! - (200 + 13 * 0.5523))).toBeLessThan(1e-9);
   });
 
+  it("rounds through the same `fmt` the emitter does", () => {
+    // `build.ts` carried a verbatim COPY of `fmt`, so the negative half-step
+    // divergence lived in two places at once -- and this one runs on every
+    // ring, disc and arc every frame. It imports the emitter's `fmt` now, and
+    // this asserts the shared rounding rather than the copy's.
+    expect(polyline([[-1.5e-6, -5e-7], [0, 0]])).toBe("M-0.000002,-0.000001L0,0");
+  });
+
   it("builds polylines and beziers", () => {
     expect(parsePath(polyline([[187, 233], [200, 246], [213, 233]])).kind).toBe("MLL");
     expect(parsePath(bezier([[183, 169], [180, 148], [175, 126], [179, 105]])).kind).toBe("MC");

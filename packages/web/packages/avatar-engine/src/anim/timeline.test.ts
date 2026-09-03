@@ -134,6 +134,62 @@ describe("playTimeline", () => {
     expect(done).toBe(0);
   });
 
+  it("restores the promoted SHAPE alongside the family, and only while snapped", () => {
+    // Restoring the family alone left `mouth.shape` holding the "MCCCC" path the
+    // promote wrote while `mouth.family` said "mouth" — a pair nothing else in
+    // the engine produces — and the next promote out of that node read the cubic
+    // and threw `can only promote an open polyline, not "MCCCC"`.
+    const c = ctx();
+    const rest = c.channels.get("mouth.shape") as string;
+    // The rig's declared mouth is an open polyline; that is what a promote
+    // consumes, and what a cancel has to give back.
+    expect(rest.replace(/[^A-Za-z]/g, "")).toBe("MLL");
+    const h = playTimeline(c, "yawn", 0);
+    step(c, 0, 0.5);
+    expect(c.channels.get("mouth.family")).toBe("mouthO");
+    h.cancel();
+    expect(c.channels.get("mouth.family")).toBe("mouth");
+    expect(c.channels.get("mouth.shape")).toBe(rest);
+    // And it survives the frames after the cancel: the promote's own tween is
+    // still live at 0.5 (the inhale runs to 0.85), so a restore that did not
+    // take the channel off that tween would be overwritten on the very next
+    // `tweens.tick`.
+    step(c, 0.5, 1.5);
+    expect(c.channels.get("mouth.shape")).toBe(rest);
+  });
+
+  it("leaves a completed timeline alone when cancel arrives after its closing snap", () => {
+    // The arbiter cancels every choreo handle on the next mood change, whether
+    // the timeline ran to completion or not. The yawn hands `mouth.family` back
+    // itself at `at: 1.85`; a cancel after that must touch nothing, or it drags
+    // the mouth back to the shape the timeline spent two seconds animating away
+    // from — and re-records every golden that plays one.
+    const c = ctx();
+    const h = playTimeline(c, "yawn", 0);
+    step(c, 0, 2.1);
+    const settled = c.channels.get("mouth.shape");
+    h.cancel();
+    expect(c.channels.get("mouth.family")).toBe("mouth");
+    expect(c.channels.get("mouth.shape")).toBe(settled);
+  });
+
+  it("leaves the channel untouched when a promote cannot be performed", () => {
+    // Reachable only from a state nobody authored — the loader checks every
+    // promote statically — so the answer is the one `tween.ts` gives an
+    // unauthored family crossing: do nothing, rather than throw out of
+    // `engine.tick` (or, in Swift, trap the process).
+    const c = ctx();
+    playTimeline(c, "yawn", 0);
+    step(c, 0, 0.5);
+    const promotedShape = c.channels.get("mouth.shape") as string;
+    expect(promotedShape.replace(/[^A-Za-z]/g, "")).toBe("MCCCC");
+    // A second play with the first still standing: its promote reads the cubic.
+    expect(() => { playTimeline(c, "yawn", 0.5); step(c, 0.5, 0.5); }).not.toThrow();
+    expect(c.channels.get("mouth.family")).toBe("mouthO");
+    // Untouched by the refused promote — the frame it fires on writes nothing.
+    expect(c.channels.get("mouth.shape")).toBe(promotedShape);
+  });
+
   it("holds each phase at the instant it was authored for", () => {
     // t = 1.775 is 0.325s into the `back.out(1.6)` settle authored at 1.45 — deep
     // enough into the overshoot to be a number no other schedule produces. If the

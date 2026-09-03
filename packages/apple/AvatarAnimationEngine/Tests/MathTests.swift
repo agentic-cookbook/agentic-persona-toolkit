@@ -161,4 +161,25 @@ final class PrngTests: XCTestCase {
         let items = ["a", "b", "c"]
         for _ in 0..<5000 { XCTAssertTrue(items.contains(p.pick(items))) }
     }
+
+    /// `pick` cannot be total -- `T` has no empty case -- so it died with
+    /// "Index out of range", naming neither the array nor the caller. The
+    /// contract is now stated (`CharacterConfig.load` rejects every empty
+    /// list-typed field that reaches it) and `pickOrNil` is the total form for a
+    /// caller holding no such guarantee.
+    func testPickOrNilAnswersNilForAnEmptyArrayAndDrawsNothing() {
+        let p = Prng(seed: 3)
+        XCTAssertNil(p.pickOrNil([Int]()))
+        XCTAssertNil(p.pickOrNil([String]()))
+        // No draw was consumed, so the stream is where it started: the same
+        // first value a fresh generator gives.
+        XCTAssertEqual(p.next(), Prng(seed: 3).next())
+    }
+
+    func testPickOrNilConsumesTheSameStreamAsPick() {
+        let items = ["a", "b", "c", "d", "e"]
+        let a = Prng(seed: 7)
+        let b = Prng(seed: 7)
+        for _ in 0..<200 { XCTAssertEqual(a.pick(items), b.pickOrNil(items)) }
+    }
 }

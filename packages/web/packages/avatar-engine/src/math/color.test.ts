@@ -35,6 +35,18 @@ describe("color", () => {
     near(srgbToOklab(parseHex("#000000"))[0], 0, 1e-9);
   });
 
+  it("renders a NaN channel as black rather than as the string \"NaN\"", () => {
+    // `clamp01` is a comparison pair, and every comparison against NaN is
+    // false, so NaN used to pass straight through: `Math.round(NaN).toString(16)`
+    // is "NaN" and `toHex` emitted "#NaNNaNNaN" — not a colour, not an error,
+    // and nothing downstream rejects it. Swift's twin does worse than lie:
+    // `Int(Double.nan.rounded())` TRAPS, on the per-frame render path. NaN
+    // reaches a colour channel from any divide-by-zero upstream in an
+    // interpolation, so both platforms now answer black for it.
+    expect(toHex([NaN, NaN, NaN])).toBe("#000000");
+    expect(toHex([NaN, 1, 0])).toBe("#00ff00");
+  });
+
   it("mixes endpoints exactly", () => {
     expect(mixColor("#00ff41", "#ff2d2d", 0)).toBe("#00ff41");
     expect(mixColor("#00ff41", "#ff2d2d", 1)).toBe("#ff2d2d");
