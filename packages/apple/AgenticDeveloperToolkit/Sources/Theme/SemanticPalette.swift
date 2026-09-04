@@ -390,3 +390,27 @@ extension SemanticPalette {
         return SemanticPalette(theme: scaledTheme)
     }
 }
+
+/// The project window's two resolved colors.
+///
+/// Both are a theme override falling back to a role, and both are read from
+/// more than one place — the pane view and the split view's gutter both paint
+/// the backdrop, the pane view and the theme editor both need the outline — so
+/// the fallback lives here rather than being spelled out at each site (`dry`).
+extension SemanticPalette {
+
+    /// The plane a project window's panes sit on: what shows through the frame
+    /// spacing around them and the gutters between them. One step off
+    /// `windowBackground`, which is what a pane itself paints, so the panes
+    /// read as objects on a surface instead of one field cut by seams.
+    public var projectPaneBackdrop: RGBAColor {
+        theme.project?.paneBackdrop ?? elevatedSurface
+    }
+
+    /// The border around the pane the user is working in. The outline role, not
+    /// a surface tone: this is a two-point line, and a line drawn in the tone of
+    /// an adjacent plane is a line nobody can see.
+    public var projectPaneOutline: RGBAColor {
+        theme.project?.paneOutline ?? outline
+    }
+}
