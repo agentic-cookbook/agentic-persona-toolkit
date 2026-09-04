@@ -231,8 +231,18 @@ export function EditableList<T>({
   // the set the bar's buttons act on can be larger than the set on screen, and a bulk Delete that
   // reaches rows off the end of a filter is precisely the accident this whole model exists to
   // prevent. Said out loud rather than fixed by resetting, because resetting is the other bug.
+  //
+  // Counted from `selectedRows`, NOT from `selectedIds`. An id whose row has left the list
+  // entirely — deleted, or dropped by a refetch — is pruned from `selectedIds` by a passive
+  // effect, which by definition runs AFTER the render that first saw the row go. For that render
+  // the id is still in the set and matches no visible row, so it counts here as "selected but not
+  // shown": the bar reports rows the operator cannot find and the verbs cannot reach, in the exact
+  // moment — a delete they just confirmed — when a phantom count reads as the delete having
+  // failed. `selectedRows` is the intersection with `allRows` and is right on the first render.
   const visibleIds = new Set(list.rows.map(list.getRowId));
-  const hiddenSelected = [...list.selectedIds].filter((id) => !visibleIds.has(id)).length;
+  const hiddenSelected = list.selectedRows.filter(
+    (row) => !visibleIds.has(list.getRowId(row)),
+  ).length;
 
   // The one row the details pane is about. `selectedRows` is drawn from `allRows`, so a row the
   // filter is hiding still has a pane — which is right: the operator ticked it, the bar's verbs
@@ -306,7 +316,7 @@ export function EditableList<T>({
             BUTTON because saying so is not enough on its own: a selection that outlives a filter
             change has to be undoable in one press, and the table's own select-all header spans
             only the visible rows, so it cannot reach the ones the filter is hiding. */}
-        {selectable && list.selectedIds.size > 0 && (
+        {selectable && list.selectedRows.length > 0 && (
           <Button
             variant="ghost"
             size="sm"
@@ -314,7 +324,7 @@ export function EditableList<T>({
             onClick={list.clearSelection}
             aria-live="polite"
           >
-            {list.selectedIds.size} selected
+            {list.selectedRows.length} selected
             {hiddenSelected > 0 && (
               <span className="text-apt-gold">{` (${hiddenSelected} not shown)`}</span>
             )}
