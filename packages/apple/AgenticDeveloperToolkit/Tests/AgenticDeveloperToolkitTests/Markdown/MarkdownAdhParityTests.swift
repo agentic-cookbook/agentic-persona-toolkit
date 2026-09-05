@@ -271,4 +271,86 @@ struct MarkdownAdhParityTests {
         // the asymmetry the two properties document.
         #expect(MarkdownText.deriveExcerpt(document.content) == "past the window")
     }
+
+    @Test("windows the body but not the frontmatter, as adh's list handler does")
+    func excerptWindowKeepsWholeDocumentFrontmatter() {
+        // adh calls `deriveExcerpt(left(content, 2000), row.frontmatter)`, and
+        // `row.frontmatter` was parsed from the WHOLE document on write. So a
+        // `---` block that runs past the window still names the title, and the
+        // excerpt therefore spends no body line skipping one.
+        let padding = String(repeating: "p", count: 2500)
+        let document = MarkdownDocument.new(
+            id: "0198c0de-0000-7000-8000-000000000003",
+            content: "---\ntitle: T\npad: " + padding + "\n---\nbody line\n",
+            ownerKind: .customer,
+            ownerID: "local")
+        #expect(document.title == "T")
+        // The window ends mid-`pad:`, so the truncated body has no closing
+        // `---` and adh's frontmatter regex does not match it: every line of
+        // the opened block becomes a preview line, starting at the first.
+        let lines = document.excerpt.components(separatedBy: "\n")
+        #expect(lines.count == 3)
+        #expect(lines[0] == "---")
+        #expect(lines[1] == "title: T")
+        #expect(lines[2] == "pad: " + String(repeating: "p", count: 155))
+    }
+
+    // MARK: - the units adh cuts in
+
+    @Test("caps the title at 500 UTF-16 code units, not 500 grapheme clusters")
+    func titleCapCountsUTF16CodeUnits() {
+        // JavaScript's `.slice(0, 500)` counts code units, so 600 astral emoji
+        // (two units each) cap at 250 of them — not 500.
+        let title = MarkdownText.deriveTitle(String(repeating: "\u{1F600}", count: 600))
+        #expect(title.utf16.count == 500)
+        #expect(title.count == 250)
+    }
+
+    @Test("drops a surrogate pair the 500th code unit would split")
+    func titleCapSplittingASurrogatePairDropsIt() {
+        // adh's cut lands between the two halves of the emoji and yields an
+        // unpaired surrogate; a Swift `String` cannot hold one, so we stop at
+        // the last whole scalar — 499 code units — rather than invent a
+        // character. This is the single documented divergence in the port.
+        let content = String(repeating: "a", count: 499) + "\u{1F600}" + " and more\n"
+        let title = MarkdownText.deriveTitle(content)
+        #expect(title.utf16.count == 499)
+        #expect(title == String(repeating: "a", count: 499))
+    }
+
+    @Test("caps an excerpt line at 160 UTF-16 code units, splitting a cluster if adh does")
+    func excerptLineCapCountsUTF16CodeUnits() {
+        // "e" + U+0301 is one Character but two code units. adh keeps 80 of
+        // them; `prefix(160)` would have kept 160 and produced a 320-unit line.
+        let accented = String(repeating: "e\u{0301}", count: 200)
+        let wide = MarkdownText.deriveExcerpt("t\n" + accented)
+        #expect(wide.utf16.count == 160)
+        #expect(wide.count == 80)
+
+        // And the cut lands mid-cluster when adh's does: the 160th code unit is
+        // the base "e", the combining mark is the 161st and is dropped.
+        let split = MarkdownText.deriveExcerpt(
+            "t\n" + String(repeating: "x", count: 159) + "e\u{0301}z")
+        #expect(split.utf16.count == 160)
+        #expect(split == String(repeating: "x", count: 159) + "e")
+    }
+
+    @Test("windows the excerpt source in scalars, the unit Postgres' left() counts")
+    func excerptWindowCountsUnicodeScalars() {
+        // The window is `left(content, 2000)` in SQL, not a `.slice`, and
+        // Postgres counts characters — one Unicode scalar each in a UTF-8
+        // database. "e" + U+0301 is two of them, so 2500 of those sequences
+        // window down to 1000, where `prefix(2000)` would have kept 2000.
+        let accented = String(repeating: "e\u{0301}", count: 2500)
+        let source = MarkdownText.excerptSource(accented)
+        #expect(source.unicodeScalars.count == 2000)
+        #expect(source.count == 1000)
+
+        // An astral emoji is one scalar and one Character, so the window keeps
+        // 2000 of them — two thousand characters, four thousand code units.
+        let emoji = MarkdownText.excerptSource(String(repeating: "\u{1F600}", count: 2500))
+        #expect(emoji.unicodeScalars.count == 2000)
+        #expect(emoji.utf16.count == 4000)
+    }
 }
+

@@ -102,8 +102,15 @@ public struct MarkdownDocument: Identifiable, Equatable, Sendable {
     /// A document whose first 2 KB is all frontmatter or one code fence simply
     /// has no excerpt — on the server, and so here. The asymmetry with `title`
     /// above is adh's, not an oversight.
+    ///
+    /// Only the *body* is windowed. adh's handler is
+    /// `deriveExcerpt(excerptSource, row.frontmatter)`: the frontmatter comes
+    /// from the `frontmatter` column, which was parsed from the whole document
+    /// on write, so a `---` block that runs past the 2 KB mark still names the
+    /// title and still costs the excerpt no body line. Hence the whole
+    /// `content` as the second argument.
     public var excerpt: String {
-        MarkdownText.deriveExcerpt(String(content.prefix(MarkdownText.excerptSourceCharacters)))
+        MarkdownText.deriveExcerpt(MarkdownText.excerptSource(content), frontmatterFrom: content)
     }
     public var contentHash: String { MarkdownText.contentHash(content) }
     public var sizeBytes: Int { MarkdownText.byteLength(content) }
