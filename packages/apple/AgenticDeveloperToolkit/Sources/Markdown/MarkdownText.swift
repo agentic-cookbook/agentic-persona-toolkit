@@ -12,16 +12,69 @@ import CryptoKit
 public enum MarkdownText {
 
     public static let excerptLines = 4
+    /// Per-line cap, counted the way adh's `line.slice(0, 160)` counts: in
+    /// UTF-16 code units. See `truncated(_:toUTF16CodeUnits:)`.
     public static let excerptLineCharacters = 160
     /// How much of a document adh's LIST endpoint looks at when it cuts an
     /// excerpt (`EXCERPT_SOURCE_CHARS`). The title is derived from the *whole*
     /// content on write; only the excerpt is windowed, so a document whose
     /// first 2 KB is all frontmatter or one code fence simply has no excerpt.
     /// `deriveExcerpt` itself takes the whole string — adh's does too — so the
-    /// window is applied by the caller that stands in for adh's list row.
+    /// window is applied by `excerptSource(_:)`, standing in for adh's list row.
     public static let excerptSourceCharacters = 2000
+    /// The width of adh's `title` column, and the cap `deriveTitle` applies —
+    /// counted in UTF-16 code units, because adh's cap is `.slice(0, 500)`.
     public static let titleCharacterLimit = 500
     public static let untitled = "Untitled"
+
+    // MARK: - adh's units
+
+    // adh cuts strings in two different units, and this file must cut in the
+    // same two or the derived columns disagree with the ones the server writes
+    // back on every save.
+    //
+    // * `deriveTitle` and `deriveExcerpt` cap with JavaScript's `String.slice`,
+    //   which indexes **UTF-16 code units** (`lib/markdown.ts`).
+    // * The excerpt window is Postgres' `left(content, 2000)`
+    //   (`routes/markdownDocuments.ts`), which counts **characters** — and a
+    //   character in a UTF-8 database is one Unicode scalar.
+    //
+    // Swift's `prefix` counts neither: it counts `Character`s, i.e. extended
+    // grapheme clusters. One emoji, one combining accent or one flag anywhere
+    // before the cap moves our cut off the server's, and the title column then
+    // flips on every sync round trip — which is the whole failure this port
+    // exists to avoid. So neither cap below goes through `prefix`.
+
+    /// The longest prefix of `text` that is at most `limit` UTF-16 code units —
+    /// JavaScript's `text.slice(0, limit)`.
+    ///
+    /// One deliberate divergence, in the one case Swift cannot follow: when the
+    /// cut lands *inside* a surrogate pair, JavaScript yields a string ending in
+    /// an unpaired surrogate. A Swift `String` cannot hold one, so the split
+    /// pair is dropped and the result is `limit - 1` code units. (adh cannot
+    /// really keep it either — the unpaired surrogate is replaced on its way
+    /// into the UTF-8 column.) Cuts that split a *grapheme cluster* but not a
+    /// scalar — a combining accent, a ZWJ sequence — are made exactly where
+    /// JavaScript makes them, because those halves are representable.
+    static func truncated(_ text: String, toUTF16CodeUnits limit: Int) -> String {
+        guard text.utf16.count > limit else { return text }
+        var kept = String.UnicodeScalarView()
+        var used = 0
+        for scalar in text.unicodeScalars {
+            let width = UTF16.width(scalar)
+            guard used + width <= limit else { break }
+            kept.append(scalar)
+            used += width
+        }
+        return String(kept)
+    }
+
+    /// The longest prefix of `text` that is at most `limit` Unicode scalars —
+    /// Postgres' `left(text, limit)` over a UTF-8 database.
+    static func truncated(_ text: String, toUnicodeScalars limit: Int) -> String {
+        guard text.unicodeScalars.count > limit else { return text }
+        return String(String.UnicodeScalarView(text.unicodeScalars.prefix(limit)))
+    }
 
     // MARK: - adh's regexes
 
@@ -118,8 +171,17 @@ public enum MarkdownText {
     /// each answering "which line was the title?" for itself — that is what
     /// keeps the two from disagreeing, and it is what tells the excerpt
     /// whether there is a body line to skip.
-    static func resolvedTitle(_ content: String) -> (title: String, cameFromBody: Bool) {
-        if let named = frontmatterTitle(content) { return (named, false) }
+    ///
+    /// `frontmatterSource` exists for the windowed excerpt: adh's list handler
+    /// calls `deriveExcerpt(excerptSource, row.frontmatter)`, where the body is
+    /// the first 2 KB but the frontmatter is the *whole* document's, parsed on
+    /// write. Pass `nil` — the whole-document case — and the two are the same
+    /// string, exactly as they are on adh's write path.
+    static func resolvedTitle(
+        _ content: String,
+        frontmatterSource: String? = nil
+    ) -> (title: String, cameFromBody: Bool) {
+        if let named = frontmatterTitle(frontmatterSource ?? content) { return (named, false) }
         for line in lines(of: titleSearchBody(content)) {
             let stripped = stripLineSyntax(line)
             guard !stripped.isEmpty else { continue }
@@ -148,7 +210,7 @@ public enum MarkdownText {
     /// title on every write and sees the whole document. Only the excerpt is
     /// windowed — see `excerptSourceCharacters`.
     public static func deriveTitle(_ content: String) -> String {
-        String(resolvedTitle(content).title.prefix(titleCharacterLimit))
+        truncated(resolvedTitle(content).title, toUTF16CodeUnits: titleCharacterLimit)
     }
 
     /// The next `excerptLines` stripped non-empty body lines, each capped at
@@ -160,18 +222,35 @@ public enum MarkdownText {
     ///
     /// Takes the whole content, as adh's does. The list projection's 2000-
     /// character window is applied by the caller (`MarkdownDocument.excerpt`),
-    /// which is where adh applies it.
-    public static func deriveExcerpt(_ content: String) -> String {
+    /// which is where adh applies it — and such a caller passes the *whole*
+    /// document as `frontmatterFrom`, because adh's list handler pairs the
+    /// windowed body with the frontmatter parsed from the whole document
+    /// (`deriveExcerpt(excerptSource, row.frontmatter)`). Deriving the
+    /// frontmatter from the window instead would make a document whose
+    /// `---` block spans the 2 KB boundary look untitled, and the excerpt
+    /// would then eat its own first body line.
+    public static func deriveExcerpt(
+        _ content: String,
+        frontmatterFrom frontmatterSource: String? = nil
+    ) -> String {
         var collected: [String] = []
-        var linesToSkip = resolvedTitle(content).cameFromBody ? 1 : 0
+        var linesToSkip = resolvedTitle(content, frontmatterSource: frontmatterSource)
+            .cameFromBody ? 1 : 0
         for line in lines(of: titleSearchBody(content)) {
             let stripped = stripLineSyntax(line)
             guard !stripped.isEmpty else { continue }
             guard linesToSkip == 0 else { linesToSkip -= 1; continue }
-            collected.append(String(stripped.prefix(excerptLineCharacters)))
+            collected.append(truncated(stripped, toUTF16CodeUnits: excerptLineCharacters))
             if collected.count == excerptLines { break }
         }
         return collected.joined(separator: "\n")
+    }
+
+    /// The slice of a document adh's list endpoint cuts an excerpt from:
+    /// `left(content, 2000)`. Scalars, not `Character`s and not code units —
+    /// see the note on `truncated(_:toUnicodeScalars:)`.
+    public static func excerptSource(_ content: String) -> String {
+        truncated(content, toUnicodeScalars: excerptSourceCharacters)
     }
 
     public static func contentHash(_ content: String) -> String {
