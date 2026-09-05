@@ -116,4 +116,43 @@ struct ADHClientWiringTests {
         #expect(ADHClient(transport: .direct(transport: MockClientTransport())).transportKind == .direct)
         #expect(ADHClient(transport: .daemon(transport: MockClientTransport())).transportKind == .daemon)
     }
+
+    @Test("session init installs SessionRefreshMiddleware and stores the transport")
+    func sessionInitWiresRefresh() async throws {
+        let store = InMemorySessionStore(Session(credentials: Credentials(token: "jwt-1", kind: .jwt), refreshToken: "r-1"))
+        let calls = Box<[HTTPRequest]>([])
+        let mock = MockClientTransport { request in
+            calls.set(calls.get + [request])
+            if request.path == "/auth/refresh" {
+                var response = HTTPResponse(status: .ok)
+                response.headerFields[.contentType] = "application/json"
+                return (response, HTTPBody(Data(#"{"token":"jwt-2","refreshToken":"r-2"}"#.utf8)))
+            }
+            if request.headerFields[.authorization] == "Bearer jwt-1" {
+                return (HTTPResponse(status: .unauthorized), nil)
+            }
+            return MockClientTransport.healthOK()
+        }
+        let adh = ADHClient(transport: .direct(transport: mock), session: store)
+
+        _ = try await adh.api.getHealth()
+
+        #expect(adh.transport.kind == .direct)
+        #expect(calls.get.map { $0.path ?? "" } == ["/health", "/auth/refresh", "/health"])
+        #expect(store.currentSession()?.credentials.token == "jwt-2")
+    }
+
+    @Test("session expiry callback fires when refresh is rejected")
+    func sessionExpiryCallback() async throws {
+        let store = InMemorySessionStore(Session(credentials: Credentials(token: "jwt-1", kind: .jwt), refreshToken: "r-1"))
+        let expired = Box(false)
+        let mock = MockClientTransport { _ in (HTTPResponse(status: .unauthorized), nil) }
+        let adh = ADHClient(transport: .direct(transport: mock), session: store, onSessionExpired: { expired.set(true) })
+
+        let output = try await adh.api.getHealth()
+
+        #expect(throws: (any Error).self) { try output.ok }
+        #expect(expired.get == true)
+        #expect(store.currentSession() == nil)
+    }
 }
