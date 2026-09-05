@@ -13,9 +13,9 @@ import Foundation
 @Suite("Session sign-in wrappers")
 struct SessionWrappersTests {
 
-    private static let authJSON = #"{"refreshToken":"r-1","token":"jwt-1","user":{"avatarUrl":"","capabilities":[],"email":"a@b.c","id":"u1","name":"A","publicProfileEnabled":false}}"#
+    private static let authJSON = #"{"refreshToken":"r-1","token":"jwt-1","user":{"avatarUrl":"","capabilities":[],"email":"a@b.c","id":"u1","name":"A","profileVisibility":"private","publicProfileEnabled":false,"slug":null}}"#
     private static let mfaJSON = #"{"mfaRequired":true,"token":"mfa-tok","methods":["totp","sms"]}"#
-    private static let userJSON = #"{"avatarUrl":"","capabilities":["x"],"email":"a@b.c","id":"u1","name":"A","publicProfileEnabled":false}"#
+    private static let userJSON = #"{"avatarUrl":"","capabilities":["x"],"email":"a@b.c","id":"u1","name":"A","profileVisibility":"private","publicProfileEnabled":false,"slug":null}"#
 
     private func makeClient(
         store: InMemorySessionStore = InMemorySessionStore(),
