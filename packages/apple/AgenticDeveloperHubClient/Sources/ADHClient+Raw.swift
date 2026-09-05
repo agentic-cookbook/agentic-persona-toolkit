@@ -39,13 +39,37 @@ extension JSONDecoder {
     }()
 }
 
-/// Escape hatch for backend routes the OpenAPI document does not describe
-/// (see the design spec's endpoint inventory). Runs the exact middleware
-/// chain the typed `api` uses, so bearer injection and refresh-and-retry
-/// apply identically.
+/// The one buffering cap for a whole-body read on the request path. Both the
+/// request body `SessionRefreshMiddleware` buffers (so a retry can resend it)
+/// and the response body `rawJSON` collects are governed by this single
+/// contract: 16 MiB covers every JSON body the hub sends; uploads go through
+/// storage presigned URLs, not this client.
+enum ADHBodyLimit {
+    static let maxBuffered = 16 * 1024 * 1024
+}
+
+/// Escape hatch for backend routes the OpenAPI document does not describe, or
+/// describes stalely enough that the generated operation cannot express
+/// the real request (see the design spec's endpoint inventory). Runs the exact
+/// middleware chain the typed `api` uses, so bearer injection and
+/// refresh-and-retry apply identically.
 extension ADHClient {
 
-    static let rawBodyLimit = 16 * 1024 * 1024
+    /// The `operationID` `rawJSON` reports to the middleware chain for a raw
+    /// request. Middleware that keys off operation IDs (notably
+    /// ``SessionRefreshMiddleware/exemptOperationIDs``) must derive its
+    /// entries from this, never restate the format, so the two can never
+    /// disagree about what a raw request is called.
+    static func rawOperationID(method: HTTPRequest.Method, path: String) -> String {
+        "raw \(method.rawValue) \(path)"
+    }
+
+    /// `POST /auth/revoke` — the one raw route the session layer itself sends
+    /// (from ``signOut()``). Named here so `signOut` and the refresh
+    /// middleware's exemption always describe the same request.
+    static let revokeMethod: HTTPRequest.Method = .post
+    static let revokePath = "/auth/revoke"
+    static let revokeRawOperationID = rawOperationID(method: revokeMethod, path: revokePath)
 
     public func rawJSON(
         method: HTTPRequest.Method,
@@ -75,7 +99,7 @@ extension ADHClient {
             request.headerFields[.contentType] = "application/json"
         }
 
-        let operationID = "raw \(method.rawValue) \(path)"
+        let operationID = Self.rawOperationID(method: method, path: path)
         let transport = self.transport
         var next: @Sendable (HTTPRequest, HTTPBody?, URL) async throws -> (HTTPResponse, HTTPBody?) = { request, body, baseURL in
             try await transport.transport.send(request, body: body, baseURL: baseURL, operationID: operationID)
@@ -89,7 +113,7 @@ extension ADHClient {
 
         let (response, responseBody) = try await next(request, body.map { HTTPBody($0) }, transport.serverURL)
         let data: Data = if let responseBody {
-            try await Data(collecting: responseBody, upTo: Self.rawBodyLimit)
+            try await Data(collecting: responseBody, upTo: ADHBodyLimit.maxBuffered)
         } else {
             Data()
         }

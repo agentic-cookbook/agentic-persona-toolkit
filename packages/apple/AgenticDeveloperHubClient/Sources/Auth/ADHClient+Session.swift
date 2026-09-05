@@ -221,11 +221,24 @@ extension ADHClient {
 
     /// Revokes the refresh token (best effort — a dead backend must not keep
     /// the user signed in locally) and clears the store.
+    ///
+    /// The revoke goes through ``rawJSON(method:path:query:body:)`` rather
+    /// than the generated `postAuthRevoke`: the backend accepts (and the hub
+    /// requires) a `{"refreshToken": …}` body, but the committed
+    /// `openapi.json` still describes `POST /auth/revoke` as a bodiless
+    /// `204`, so the generated operation cannot express the real request.
+    /// The backend is the authority here; the document is stale. This is the
+    /// one raw call the session layer makes, and it is exempt from
+    /// refresh-and-retry (``SessionRefreshMiddleware/exemptOperationIDs``
+    /// derives that exemption from ``ADHClient/revokeRawOperationID``):
+    /// signing out with an already-expired access token 401s, and rotating
+    /// the refresh token mid-revoke would leave the body carrying a consumed
+    /// token the server can no longer match — a silent failure to revoke.
     public func signOut() async {
         guard let session else { return }
         if let refreshToken = session.currentSession()?.refreshToken,
            let body = try? JSONEncoder().encode(["refreshToken": refreshToken]) {
-            _ = try? await rawJSON(method: .post, path: "/auth/revoke", body: body)
+            _ = try? await rawJSON(method: Self.revokeMethod, path: Self.revokePath, body: body)
         }
         session.clear()
     }

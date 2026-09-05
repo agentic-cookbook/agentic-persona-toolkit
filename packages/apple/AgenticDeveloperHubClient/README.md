@@ -80,8 +80,14 @@ instead of the bearer-only `AuthenticationMiddleware`:
 - Sign-in flows: `signIn(email:password:) -> SignInOutcome`, `completeMfa`,
   `sendMfaSms`, `passkeyOptions`/`completePasskey`, `mfaPasskeyOptions`/`completeMfaPasskey`, `exchangeOAuthCode`,
   `signOut()` (revokes, then clears), `currentUser()`.
-- `rawJSON(method:path:query:body:)` sends an undocumented route through the
-  same middleware chain; use it only for routes missing from `openapi.json`.
+- `rawJSON(method:path:query:body:)` sends a route through the same middleware
+  chain without a generated operation; use it only for routes missing from
+  `openapi.json`, or whose committed schema is stale enough that the generated
+  operation cannot express the real request. Today there is exactly one such
+  case: `POST /auth/revoke`, which the backend accepts with a
+  `{"refreshToken": …}` body while the committed document still describes it
+  as bodiless — so `signOut()` sends it raw (and the refresh middleware exempts
+  it from refresh-and-retry).
 
 ## Regenerating the client
 

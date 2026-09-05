@@ -13,3 +13,16 @@ public struct Session: Sendable, Equatable, Codable {
         self.refreshToken = refreshToken
     }
 }
+
+/// Redacted by default, for the same reason as ``Credentials``: neither the
+/// access token nor the (single-use, long-lived) refresh token may ever reach
+/// a log. Whether a refresh token is present is the part that matters when
+/// diagnosing a session, so that much is reported.
+extension Session: CustomStringConvertible, CustomDebugStringConvertible {
+
+    public var description: String {
+        "Session(kind: \(credentials.kind.rawValue), token: <redacted>, refreshToken: \(refreshToken == nil ? "none" : "<redacted>"))"
+    }
+
+    public var debugDescription: String { description }
+}

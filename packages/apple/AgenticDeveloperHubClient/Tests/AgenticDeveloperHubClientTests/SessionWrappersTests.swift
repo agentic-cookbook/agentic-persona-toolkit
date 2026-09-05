@@ -158,6 +158,30 @@ struct SessionWrappersTests {
         await adh.signOut()
 
         #expect(mock.lastRequest?.path == "/auth/revoke")
+        // The committed `openapi.json` describes `POST /auth/revoke` as
+        // bodiless, but the backend requires the refresh token in the body —
+        // which is the whole reason `signOut` sends it through `rawJSON`. A
+        // revoke without this body is a silent no-op server-side, so assert
+        // the body, not just the path.
+        #expect(mock.lastBody == Data(#"{"refreshToken":"r-1"}"#.utf8))
+        #expect(store.currentSession() == nil)
+    }
+
+    /// The access token is usually already expired by the time the user signs
+    /// out, so revoke is the request most likely to 401. Refreshing there
+    /// would rotate the (single-use) refresh token and then replay revoke with
+    /// the consumed one in the body — the server cannot match it, so the
+    /// rotated token survives on the server while the local store is cleared.
+    @Test("a 401 on revoke does not trigger a refresh")
+    func signOutDoesNotRefreshOn401() async throws {
+        let store = InMemorySessionStore(Session(credentials: Credentials(token: "jwt-expired", kind: .jwt), refreshToken: "r-signout"))
+        let (adh, mock) = makeClient(store: store) { _ in (.unauthorized, #"{"error":{"message":"token expired"}}"#) }
+
+        await adh.signOut()
+
+        #expect(mock.recordedPaths == ["/auth/revoke"])
+        #expect(mock.recorded.first?.operationID == ADHClient.revokeRawOperationID)
+        #expect(mock.recorded.first?.body == Data(#"{"refreshToken":"r-signout"}"#.utf8))
         #expect(store.currentSession() == nil)
     }
 

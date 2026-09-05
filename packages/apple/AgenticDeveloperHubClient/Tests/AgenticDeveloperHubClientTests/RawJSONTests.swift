@@ -37,14 +37,17 @@ struct RawJSONTests {
 
     @Test("a 401 is refreshed and retried like any typed operation")
     func refreshesOn401() async throws {
-        let store = InMemorySessionStore(Session(credentials: Credentials(token: "jwt-1", kind: .jwt), refreshToken: "r-1"))
+        // A unique access token per test: refreshes serialize through the
+        // process-wide `RefreshCoordinator.shared`, which identifies a refresh
+        // wave by the expired access token (real tokens never collide).
+        let store = InMemorySessionStore(Session(credentials: Credentials(token: "jwt-raw", kind: .jwt), refreshToken: "r-raw"))
         let mock = MockClientTransport { request in
             if request.path == "/auth/refresh" {
                 var response = HTTPResponse(status: .ok)
                 response.headerFields[.contentType] = "application/json"
                 return (response, HTTPBody(Data(#"{"token":"jwt-2","refreshToken":"r-2"}"#.utf8)))
             }
-            if request.headerFields[.authorization] == "Bearer jwt-1" {
+            if request.headerFields[.authorization] == "Bearer jwt-raw" {
                 return (HTTPResponse(status: .unauthorized), nil)
             }
             return (HTTPResponse(status: .ok), HTTPBody(Data("{}".utf8)))
