@@ -1,5 +1,9 @@
 import Testing
+#if os(macOS)
 import AppKit
+#else
+import UIKit
+#endif
 import Foundation
 import AgenticDeveloperToolkit
 @testable import AgenticDeveloperToolkitUI
@@ -12,7 +16,7 @@ struct MarkdownDocumentRendererTests {
 
     private func render(_ text: String) -> NSAttributedString {
         MarkdownDocumentRenderer()
-            .render(text, palette: palette, textColor: palette.nsColor(.primaryText))
+            .render(text, palette: palette, textColor: palette.platformColor(.primaryText))
     }
 
     @Test("frontmatter is a header, not content, so it is not rendered")
@@ -29,8 +33,8 @@ struct MarkdownDocumentRendererTests {
     func alertIsLabelled() {
         let rendered = render("> [!WARNING]\n> mind the gap")
         #expect(rendered.string == "WARNING\nmind the gap")
-        #expect(rendered.attributes(at: 0, effectiveRange: nil)[.foregroundColor] as? NSColor
-                == palette.nsColor(.warning))
+        #expect(rendered.attributes(at: 0, effectiveRange: nil)[.foregroundColor] as? PlatformColor
+                == palette.platformColor(.warning))
     }
 
     @Test("every alert kind maps to a distinct role")
@@ -99,15 +103,16 @@ struct MarkdownDocumentRendererTests {
 
         let realAlertRange = (rendered.string as NSString).range(of: "NOTE\nReal alert.")
         #expect(realAlertRange.location != NSNotFound)
-        #expect(rendered.attributes(at: realAlertRange.location, effectiveRange: nil)[.foregroundColor] as? NSColor
-                == palette.nsColor(.info))
+        let realAlertColor = rendered.attributes(at: realAlertRange.location,
+                                               effectiveRange: nil)[.foregroundColor]
+        #expect(realAlertColor as? PlatformColor == palette.platformColor(.info))
     }
 
     @Test("a CRLF-authored document renders identically to its LF twin")
     func crlfDocumentMatchesLFTwin() {
-        let lf = "> [!WARNING]\n> mind the gap\n\n- [ ] todo\n- [x] done"
+        let lineFeed = "> [!WARNING]\n> mind the gap\n\n- [ ] todo\n- [x] done"
         let crlf = "> [!WARNING]\r\n> mind the gap\r\n\r\n- [ ] todo\r\n- [x] done"
-        #expect(render(crlf).string == render(lf).string)
+        #expect(render(crlf).string == render(lineFeed).string)
     }
 
     @Test("a quote line already ending in a backslash hard break is not corrupted")
@@ -126,10 +131,10 @@ struct MarkdownDocumentRendererTests {
 
     /// The colour of the run at the first occurrence of `text`, or `nil` when
     /// the text is not there at all.
-    private func color(at text: String, in rendered: NSAttributedString) -> NSColor? {
+    private func color(at text: String, in rendered: NSAttributedString) -> PlatformColor? {
         let found = (rendered.string as NSString).range(of: text)
         guard found.location != NSNotFound else { return nil }
-        return rendered.attributes(at: found.location, effectiveRange: nil)[.foregroundColor] as? NSColor
+        return rendered.attributes(at: found.location, effectiveRange: nil)[.foregroundColor] as? PlatformColor
     }
 
     @Test("a bare [!NOTE] inside a fence does not suppress the real alert after it")
@@ -139,8 +144,8 @@ struct MarkdownDocumentRendererTests {
         let rendered = render("```\n[!NOTE]\n```\n\n> [!NOTE]\n> Real.")
         #expect(rendered.string.contains("[!NOTE]"))        // the fenced one, literal
         #expect(rendered.string.contains("NOTE\nReal."))    // the real one, relabelled
-        #expect(color(at: "NOTE\nReal.", in: rendered) == palette.nsColor(.info))
-        #expect(color(at: "[!NOTE]", in: rendered) != palette.nsColor(.info))
+        #expect(color(at: "NOTE\nReal.", in: rendered) == palette.platformColor(.info))
+        #expect(color(at: "[!NOTE]", in: rendered) != palette.platformColor(.info))
     }
 
     @Test("the same document with the fence after the alert behaves identically")
@@ -150,8 +155,8 @@ struct MarkdownDocumentRendererTests {
         let rendered = render("> [!NOTE]\n> Real.\n\n```\n[!NOTE]\n```")
         #expect(rendered.string.contains("NOTE\nReal."))
         #expect(rendered.string.contains("[!NOTE]"))
-        #expect(color(at: "NOTE\nReal.", in: rendered) == palette.nsColor(.info))
-        #expect(color(at: "[!NOTE]", in: rendered) != palette.nsColor(.info))
+        #expect(color(at: "NOTE\nReal.", in: rendered) == palette.platformColor(.info))
+        #expect(color(at: "[!NOTE]", in: rendered) != palette.platformColor(.info))
     }
 
     @Test("two real alerts with a fenced block between them are both relabelled")
@@ -159,8 +164,8 @@ struct MarkdownDocumentRendererTests {
         let rendered = render("> [!NOTE]\n> First.\n\n```\ncode\n```\n\n> [!WARNING]\n> Second.")
         #expect(rendered.string.contains("NOTE\nFirst."))
         #expect(rendered.string.contains("WARNING\nSecond."))
-        #expect(color(at: "NOTE\nFirst.", in: rendered) == palette.nsColor(.info))
-        #expect(color(at: "WARNING\nSecond.", in: rendered) == palette.nsColor(.warning))
+        #expect(color(at: "NOTE\nFirst.", in: rendered) == palette.platformColor(.info))
+        #expect(color(at: "WARNING\nSecond.", in: rendered) == palette.platformColor(.warning))
     }
 
     @Test("five preceding alerts do not push a fenced tag out of its exclusion")
@@ -171,8 +176,8 @@ struct MarkdownDocumentRendererTests {
         let alerts = (1...5).map { "> [!NOTE]\n> Body \($0)." }.joined(separator: "\n\n")
         let rendered = render(alerts + "\n\n```\n[!WARNING]\n```")
         #expect(rendered.string.contains("[!WARNING]"))
-        #expect(color(at: "[!WARNING]", in: rendered) != palette.nsColor(.warning))
-        #expect(color(at: "NOTE\nBody 5.", in: rendered) == palette.nsColor(.info))
+        #expect(color(at: "[!WARNING]", in: rendered) != palette.platformColor(.warning))
+        #expect(color(at: "NOTE\nBody 5.", in: rendered) == palette.platformColor(.info))
     }
 
     @Test("a table cell that reads [!NOTE] is not an alert and recolours nothing")
@@ -185,10 +190,14 @@ struct MarkdownDocumentRendererTests {
         """
         let rendered = render(document)
         #expect(rendered.string.contains("[!NOTE]"))
-        #expect(color(at: "[!NOTE]", in: rendered) != palette.nsColor(.info))
+        #expect(color(at: "[!NOTE]", in: rendered) != palette.platformColor(.info))
         // The old run started at the cell and ran to the first literal "\n\n",
         // which a table never contains — so it painted every following row.
-        #expect(color(at: "a tip", in: rendered) != palette.nsColor(.info))
+        // The `contains` is load-bearing for the same reason as in
+        // `adjacentQuoteIsNotColored`: a missing subject makes `color(at:in:)`
+        // `nil`, and `nil != aColor` passes.
+        #expect(rendered.string.contains("a tip"))
+        #expect(color(at: "a tip", in: rendered) != palette.platformColor(.info))
     }
 
     @Test("an alert whose quote spans several blocks colours all of them")
@@ -196,22 +205,27 @@ struct MarkdownDocumentRendererTests {
         let rendered = render("> [!NOTE]\n> - one\n> - two")
         #expect(rendered.string.contains("one"))
         #expect(rendered.string.contains("two"))
-        #expect(color(at: "NOTE", in: rendered) == palette.nsColor(.info))
-        #expect(color(at: "one", in: rendered) == palette.nsColor(.info))
-        #expect(color(at: "two", in: rendered) == palette.nsColor(.info))
+        #expect(color(at: "NOTE", in: rendered) == palette.platformColor(.info))
+        #expect(color(at: "one", in: rendered) == palette.platformColor(.info))
+        #expect(color(at: "two", in: rendered) == palette.platformColor(.info))
     }
 
     @Test("the colour of one alert quote does not leak into the next quote")
     func adjacentQuoteIsNotColored() {
         let rendered = render("> [!NOTE]\n> First.\n\n> Plain quote.")
-        #expect(color(at: "NOTE", in: rendered) == palette.nsColor(.info))
-        #expect(color(at: "Plain quote.", in: rendered) != palette.nsColor(.info))
+        #expect(color(at: "NOTE", in: rendered) == palette.platformColor(.info))
+        // `color(at:in:)` is `nil` when the text is absent, and `nil != aColor`
+        // is `true` — so without this line the assertion below would keep
+        // reporting success in the one case that most obviously breaks the
+        // guarantee it names: the plain quote vanishing from the output.
+        #expect(rendered.string.contains("Plain quote."))
+        #expect(color(at: "Plain quote.", in: rendered) != palette.platformColor(.info))
     }
 
     @Test("a tag on the second line of a quote is body text, not an alert")
     func tagOnLaterQuoteLineIsNotAnAlert() {
         let rendered = render("> Heads up.\n> [!NOTE]")
         #expect(rendered.string.contains("[!NOTE]"))
-        #expect(color(at: "[!NOTE]", in: rendered) != palette.nsColor(.info))
+        #expect(color(at: "[!NOTE]", in: rendered) != palette.platformColor(.info))
     }
 }
