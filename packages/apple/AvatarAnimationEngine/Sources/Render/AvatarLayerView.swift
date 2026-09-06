@@ -101,6 +101,9 @@ public final class AvatarLayerView: AvatarHostView {
     // actor instead, which is exactly where `link` was created and used.
     isolated deinit {
         link?.invalidate()
+        // The run loop holds the timer, and the timer's block holds this view
+        // weakly — so without this the beat outlives the view it was watching.
+        watchdog?.invalidate()
         if let occlusionObserver { NotificationCenter.default.removeObserver(occlusionObserver) }
     }
 
@@ -117,6 +120,34 @@ public final class AvatarLayerView: AvatarHostView {
     var isTicking: Bool { link != nil }
     private var occlusionObserver: NSObjectProtocol?
 
+    /// When the last frame arrived, on `CACurrentMediaTime`'s clock — or when
+    /// the current link was armed, so a link that has not had time to deliver
+    /// yet is not mistaken for one that never will. `nil` while nothing is
+    /// armed. Internal: the tests back-date it to stall the loop on purpose.
+    private(set) var lastFrameAt: CFTimeInterval?
+
+    /// How many display links this view has built. A host never needs it; it is
+    /// what lets a test tell "the same link kept running" from "a dead one was
+    /// replaced", which is the whole of the watchdog's contract.
+    private(set) var linkGeneration = 0
+
+    private var watchdog: Timer?
+
+    /// How long the view waits for a frame before deciding the link is dead
+    /// rather than merely idle.
+    ///
+    /// Two seconds is hundreds of missed frames at any refresh rate, so it is
+    /// never a hitch, a slow frame or a run loop busy with something else; and
+    /// it is short enough that a reader who looks up after a display wake sees
+    /// the character moving rather than stuck.
+    static let frameStallAfter: CFTimeInterval = 2
+
+    /// How often the view checks. Also the beat that re-runs
+    /// `reconcileTicking`, which is what makes visibility level-triggered
+    /// rather than resting on the single edge `didChangeOcclusionState`
+    /// delivers — a missed edge is otherwise permanent.
+    private static let watchdogInterval: TimeInterval = 1
+
     /// The colour painted under the mark. `nil` leaves the host layer clear.
     public var plateColor: CGColor? {
         didSet { host.backgroundColor = plateColor }
@@ -125,10 +156,12 @@ public final class AvatarLayerView: AvatarHostView {
     public func start() {
         isStarted = true
         reconcileTicking()
+        startWatchdog()
     }
 
     public func stop() {
         isStarted = false
+        stopWatchdog()
         reconcileTicking()
     }
 
@@ -144,10 +177,67 @@ public final class AvatarLayerView: AvatarHostView {
                                          selector: #selector(DisplayLinkProxy.step(_:)))
             l.add(to: .main, forMode: .common)
             link = l
+            linkGeneration += 1
+            lastFrameAt = CACurrentMediaTime()
         } else if !shouldTick, let l = link {
             l.invalidate()
             link = nil
+            lastFrameAt = nil
         }
+    }
+
+    /// One beat of the watchdog: is this view still being drawn?
+    ///
+    /// A display link is an object, not a promise. `NSView`'s is bound to the
+    /// display the view is on, and AppKit's own contract for it is that "if the
+    /// view is hidden, or not on any display, the callback will not be invoked"
+    /// — a delivery gate the view can neither see nor query. So a display that
+    /// goes away and comes back (an external monitor powering down overnight)
+    /// takes the callbacks with it, and nothing throws, nothing is notified,
+    /// and the link is still there. A liveness test of `link == nil` reports a
+    /// healthy loop forever.
+    ///
+    /// Both halves of the check are therefore level-triggered, deliberately.
+    /// `reconcileTicking` re-reads the window's live occlusion state, so a
+    /// `didChangeOcclusionState` edge that never arrived stops being permanent;
+    /// and liveness is then measured in FRAMES rather than in objects, so a
+    /// link that exists but has gone quiet is torn down and rebuilt.
+    ///
+    /// Internal so the tests can drive a beat without waiting on the run loop.
+    func checkFrames(_ now: CFTimeInterval) {
+        reconcileTicking()
+        guard let l = link, let last = lastFrameAt,
+              now - last > Self.frameStallAfter else { return }
+        // Frames are owed and are not arriving: the link is dead, not idle.
+        // Rebuilding costs one object and one run-loop source, so if the fault
+        // is something this cannot fix the next beat simply tries again.
+        l.invalidate()
+        link = nil
+        lastFrameAt = nil
+        reconcileTicking()
+    }
+
+    /// The beat itself. A `Timer` rather than anything the display drives,
+    /// because what has failed IS the display's own callback: the run loop kept
+    /// pumping through the whole freeze — its other timers went on firing — so
+    /// a timer is the one signal source proven to survive it.
+    private func startWatchdog() {
+        guard watchdog == nil else { return }
+        let t = Timer(timeInterval: Self.watchdogInterval, repeats: true) { [weak self] _ in
+            MainActor.assumeIsolated { self?.checkFrames(CACurrentMediaTime()) }
+        }
+        // Half the interval: the check is a coarse "has a second gone by with
+        // no frames", so letting the system coalesce it costs nothing.
+        t.tolerance = Self.watchdogInterval / 2
+        // `.common`, like the link itself, so a menu tracking or resize loop
+        // does not suspend the one thing watching for a stall.
+        RunLoop.main.add(t, forMode: .common)
+        watchdog = t
+    }
+
+    private func stopWatchdog() {
+        watchdog?.invalidate()
+        watchdog = nil
     }
 
     private func observeOcclusion() {
@@ -164,6 +254,9 @@ public final class AvatarLayerView: AvatarHostView {
     }
 
     fileprivate func step(_ link: CADisplayLink) {
+        // Proof of life for `checkFrames`, taken before the work rather than
+        // after it: a frame that throws still happened.
+        lastFrameAt = CACurrentMediaTime()
         do {
             // The original samples the cursor once per frame too -- its
             // `pointermove` handler throttles itself to one `requestAnimationFrame`

@@ -421,6 +421,80 @@ final class RenderTests: XCTestCase {
         window.orderOut(nil)
     }
 
+    // MARK: - lifecycle: the loop can stop without saying so
+
+    /// A visible, started view whose window is on a real display, so the link
+    /// is genuinely armed. Skipped on a host with no display session, like the
+    /// other lifecycle tests.
+    private func tickingView(_ window: NSWindow) throws -> AvatarLayerView {
+        try XCTSkipUnless(showAndWaitForVisible(window),
+                          "this host has no display session; the window is never visible")
+        let view = AvatarLayerView(engine: try makeEngine())
+        window.contentView?.addSubview(view)
+        view.start()
+        XCTAssertTrue(view.isTicking)
+        return view
+    }
+
+    private func testWindow() -> NSWindow {
+        NSWindow(contentRect: NSRect(x: 0, y: 0, width: 200, height: 200),
+                 styleMask: [.titled], backing: .buffered, defer: false)
+    }
+
+    /// The frame loop can stop without the view being told. `NSView`'s display
+    /// link is bound to the display the view is on, and AppKit's own contract
+    /// is that "if the view is hidden, or not on any display, the callback will
+    /// not be invoked" — a delivery gate the view can neither see nor query.
+    /// A display that goes away and comes back — an external monitor powering
+    /// down overnight — takes the callbacks with it. Nothing throws and nothing
+    /// is notified; the link object is still there, so a liveness test of
+    /// `link == nil` reports a healthy loop forever and the character stays
+    /// frozen mid-pose until the app is relaunched.
+    func testTheWatchdogRebuildsALinkThatHasStoppedDeliveringFrames() throws {
+        let window = testWindow()
+        let view = try tickingView(window)
+        let armed = view.linkGeneration
+        let last = try XCTUnwrap(view.lastFrameAt)
+
+        view.checkFrames(last + AvatarLayerView.frameStallAfter + 1)
+
+        XCTAssertTrue(view.isTicking, "a dead link is replaced, not abandoned")
+        XCTAssertEqual(view.linkGeneration, armed + 1)
+        XCTAssertNotNil(view.lastFrameAt, "the replacement starts its own clock")
+        window.orderOut(nil)
+    }
+
+    /// The other half of the contract: a stall shorter than the threshold is a
+    /// hitch, and tearing the link down for one would make the watchdog the
+    /// thing that stutters the animation.
+    func testTheWatchdogLeavesALinkThatIsStillDeliveringFramesAlone() throws {
+        let window = testWindow()
+        let view = try tickingView(window)
+        let armed = view.linkGeneration
+        let last = try XCTUnwrap(view.lastFrameAt)
+
+        view.checkFrames(last + AvatarLayerView.frameStallAfter - 0.1)
+
+        XCTAssertEqual(view.linkGeneration, armed, "a live loop is not restarted")
+        XCTAssertTrue(view.isTicking)
+        window.orderOut(nil)
+    }
+
+    /// The watchdog repairs the host's intent, it does not override it: a view
+    /// the host stopped has no frames to miss.
+    func testTheWatchdogDoesNotReviveAStoppedView() throws {
+        let window = testWindow()
+        let view = try tickingView(window)
+        view.stop()
+        let armed = view.linkGeneration
+
+        view.checkFrames(CACurrentMediaTime() + 3600)
+
+        XCTAssertFalse(view.isTicking)
+        XCTAssertEqual(view.linkGeneration, armed)
+        window.orderOut(nil)
+    }
+
     func testThePlateColourIsPaintedOnTheHostLayer() throws {
         let view = AvatarLayerView(engine: try makeEngine())
         XCTAssertNil(view.plateColor)
