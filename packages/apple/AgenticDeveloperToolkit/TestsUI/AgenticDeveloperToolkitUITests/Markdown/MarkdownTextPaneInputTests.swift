@@ -1,6 +1,7 @@
 import Testing
 import AppKit
 import Foundation
+import AgenticDeveloperToolkit
 @testable import AgenticDeveloperToolkitUI
 
 /// The one genuinely platform-specific pane test: driving the real `NSTextView`
@@ -23,5 +24,20 @@ struct MarkdownTextPaneInputTests {
         textView?.insertText("typed", replacementRange: NSRange(location: 0, length: 0))
 
         #expect(received == "typed")
+    }
+
+    @Test("focusing the editor puts the caret in a text view, not a container")
+    func focusEditorReachesTheTextView() {
+        let controller = MarkdownEditorController(palette: SemanticPalette(theme: BuiltInThemes.solarizedDark))
+        let window = NSWindow(
+            contentRect: NSRect(x: 0, y: 0, width: 400, height: 300),
+            styleMask: [.titled], backing: .buffered, defer: false)
+        window.contentViewController = controller
+        window.makeKeyAndOrderFront(nil)
+        window.contentView?.layoutSubtreeIfNeeded()
+
+        controller.focusEditor()
+
+        #expect(window.firstResponder is NSTextView)
     }
 }

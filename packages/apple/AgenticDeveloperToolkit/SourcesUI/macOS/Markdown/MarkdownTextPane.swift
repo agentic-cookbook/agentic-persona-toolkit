@@ -58,6 +58,16 @@ public final class MarkdownTextPane: NSView {
         set { textView.isEditable = newValue }
     }
 
+    /// Moves the keyboard focus into the text view itself.
+    ///
+    /// The text view is private, and a caller that makes *the pane* first
+    /// responder gets a container that does not accept keystrokes — so a
+    /// window that wants a ready caret has to ask for it by name.
+    @discardableResult
+    public func focus() -> Bool {
+        window?.makeFirstResponder(textView) ?? false
+    }
+
     /// The pane's plain-text contents.
     ///
     /// Setting this does **not** fire `onTextChange` — `NSTextViewDelegate.textDidChange`
