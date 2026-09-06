@@ -18,6 +18,11 @@ public final class MarkdownTextPane: NSView {
         textView.isSelectable = true
         textView.isRichText = false
         textView.allowsUndo = true
+        // The find bar is `NSTextView`'s own, and it stays off unless asked
+        // for: `usesFindBar` defaults to false, which makes
+        // `performTextFinderAction(.showFindInterface)` a silent no-op.
+        textView.usesFindBar = true
+        textView.isIncrementalSearchingEnabled = true
         textView.isAutomaticQuoteSubstitutionEnabled = false
         textView.isAutomaticDashSubstitutionEnabled = false
         textView.isAutomaticSpellingCorrectionEnabled = false

@@ -26,6 +26,18 @@ struct MarkdownTextPaneInputTests {
         #expect(received == "typed")
     }
 
+    @Test("the pane's text view has the native find bar enabled")
+    func textViewEnablesTheFindBar() {
+        let pane = MarkdownTextPane(editable: true)
+
+        let textView = pane.subviews
+            .compactMap { $0 as? NSScrollView }
+            .first?.documentView as? NSTextView
+
+        #expect(textView?.usesFindBar == true)
+        #expect(textView?.isIncrementalSearchingEnabled == true)
+    }
+
     @Test("focusing the editor puts the caret in a text view, not a container")
     func focusEditorReachesTheTextView() {
         let controller = MarkdownEditorController(palette: SemanticPalette(theme: BuiltInThemes.solarizedDark))
