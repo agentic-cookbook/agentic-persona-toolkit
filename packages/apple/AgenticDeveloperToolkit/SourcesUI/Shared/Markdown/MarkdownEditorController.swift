@@ -67,6 +67,11 @@ public final class MarkdownEditorController: PlatformViewController {
         set { toolbar.showsImportButton = newValue }
     }
 
+    /// Forwarded to the editor pane, which is internal. See
+    /// `MarkdownTextPane.focus()`.
+    @discardableResult
+    public func focusEditor() -> Bool { editorPane.focus() }
+
     public private(set) var availableModes: [MarkdownEditorMode] = MarkdownEditorMode.allCases
 
     /// The last mode chosen deliberately — via this setter or the toolbar's
