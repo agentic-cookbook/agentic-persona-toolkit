@@ -107,9 +107,21 @@ struct MarkdownEditorControllerTests {
 
     @Test("a narrow editor falls back to one pane at a time")
     func narrowEditorTabs() {
+        // The wide layout has to happen FIRST, or nothing narrows: loading the
+        // view runs a layout pass at zero width, so the editor is already in
+        // the two-mode set before the test body starts, and resizing to 500
+        // then hits `applyLayoutForCurrentSize`'s "nothing changed" guard. The
+        // assertions held, but they held before the resize — the transition
+        // this test is named for was never exercised.
         let editor = loadedEditor("# Hi")
+        editor.view.frame = CGRect(x: 0, y: 0, width: 900, height: 600)
+        layoutNow(editor.view)
+        #expect(editor.availableModes.contains(.split))
+        #expect(editor.mode == .split)
+
         editor.view.frame = CGRect(x: 0, y: 0, width: 500, height: 600)
         layoutNow(editor.view)
+        #expect(editor.availableModes == [.edit, .preview])
         #expect(editor.mode == .edit)
         #expect(editor.viewer.view.superview == nil)
     }
