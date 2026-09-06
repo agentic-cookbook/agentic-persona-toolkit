@@ -26,6 +26,27 @@ public final class Scheduler {
     private var entries: [Int: Entry] = [:]
     private var nextId = 1
 
+    /// How late a one-shot may be and still be handed its own deadline.
+    ///
+    /// A repeater's catch-up is bounded by the guard in `tick`; a chain of
+    /// one-shots — every reflex that re-arms itself: the fidget, the blink, the
+    /// gaze wander, a mood effect's stir — has no such bound, because the chain
+    /// lives in the handler and the scheduler cannot see it. Each link is armed
+    /// relative to the time its handler was HANDED, so a deadline hours in the
+    /// past re-arms into a deadline hours in the past, and the chain replays its
+    /// whole backlog at one link per frame with the tween sampler running in
+    /// between. That is not the same thing as having run in real time: a fidget
+    /// anchors its jitter on the channel's live value, so a replayed chain walks
+    /// the channel one amplitude per frame, for as many frames as there were
+    /// missed re-arms.
+    ///
+    /// So a grossly overdue one-shot is handed `now` less this, which is enough
+    /// lateness to be a dropped frame and not enough to be a stopped loop: the
+    /// chain re-arms into the future and the backlog is one link, not thousands.
+    /// A one-shot inside the window keeps its exact deadline, which is what
+    /// keeps the ordinary frame-rate independence intact.
+    private static let staleAfter = 1.0
+
     public init() {}
 
     @discardableResult
@@ -60,7 +81,7 @@ public final class Scheduler {
             if entry.interval <= 0 {
                 if now >= entry.nextAt {
                     entries.removeValue(forKey: id)
-                    entry.run(entry.nextAt)
+                    entry.run(max(entry.nextAt, now - Self.staleAfter))
                 }
                 continue
             }

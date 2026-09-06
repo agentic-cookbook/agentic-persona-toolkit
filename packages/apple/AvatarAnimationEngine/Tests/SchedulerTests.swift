@@ -49,6 +49,46 @@ final class SchedulerTests: XCTestCase {
         s.cancel(id)                  // cancelling a spent one-shot is a no-op, not a trap
     }
 
+    func testHandsASlightlyLateOneShotItsOwnDeadline() {
+        let s = Scheduler()
+        var fired: Double?
+        s.once(at: 0.5) { fired = $0 }
+        s.tick(1)                     // half a second late: a dropped frame
+        XCTAssertEqual(fired, 0.5)    // still its own deadline, not `now`
+    }
+
+    /// A repeater's catch-up is bounded by the guard in `tick`. A chain of
+    /// one-shots — every reflex that re-arms itself — has no such bound: each
+    /// link is armed relative to the time its handler was handed, so a deadline
+    /// an hour in the past re-arms an hour in the past, and the chain replays
+    /// its whole backlog at one link per frame. The frame loop stops for real
+    /// reasons (display sleep, occlusion, backgrounding), and a chain that
+    /// anchors on a live channel walks that channel once per replayed link.
+    func testResumesAOneShotChainAfterAStoppedLoopInsteadOfReplayingItsBacklog() {
+        let s = Scheduler()
+        var fires: [Double] = []
+        func arm(_ at: Double) {
+            s.once(at: at) { t in
+                fires.append(t)
+                arm(t + 5)
+            }
+        }
+        arm(5)
+        s.tick(5)
+        XCTAssertEqual(fires, [5])
+
+        s.tick(3600)                  // an hour with no frames at all
+        XCTAssertEqual(fires.count, 2, "the backlog is one link, not 719")
+        // Late enough to be a stopped loop, so the link is pulled up to `now`
+        // rather than left at its dead deadline...
+        XCTAssertGreaterThanOrEqual(fires[1], 3599)
+        XCTAssertLessThanOrEqual(fires[1], 3600)
+        // ...which is what puts the next link in the FUTURE. Without that, the
+        // next frame fires again, and the frame after that, for 719 frames.
+        s.tick(3600 + 1.0 / 60)
+        XCTAssertEqual(fires.count, 2)
+    }
+
     func testCancelsARepeater() {
         let s = Scheduler()
         var n = 0

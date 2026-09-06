@@ -541,6 +541,32 @@ final class ReflexesTests: XCTestCase {
                        "nothing may write a skipped brow again later")
     }
 
+
+    /// The frame loop can stop while the host's clock keeps running: the display
+    /// sleeps, the window is occluded, the app is backgrounded. The scheduler is
+    /// built to catch up rather than drop events, and one catch-up step of the
+    /// fidget's self-re-arming chain is a whole fidget — a jitter anchored on
+    /// `live(channel)` and a settle back to that anchor. The chain advances one
+    /// link per FRAME, though, with the tween sampler running in between, so the
+    /// settle is overwritten by the next jitter before it can restore anything
+    /// and each anchor is the previous jitter. That turns the sway into a random
+    /// walk of one amplitude per frame, for as many frames as there were missed
+    /// re-arms: hundreds of degrees after a night's display sleep, on a channel
+    /// whose entire range is `amplitude`.
+    func testAStoppedFrameLoopDoesNotWalkTheSwayOffItsAmplitude() throws {
+        let h = try Harness()
+        h.knobs.mood = h.lively
+        h.reflexes.start(0)
+        h.run(from: 0, to: 30)
+
+        let sway = h.behavior.idleFidget.sway.channel
+        // An hour with no frames at all, and then the loop resumes. Two minutes
+        // is far longer than the backlog needs to drain at 60 Hz.
+        let peak = h.swing(sway, from: 3600, to: 3720)
+        XCTAssertLessThanOrEqual(
+            peak, abs(h.rest(sway)) + h.behavior.idleFidget.sway.amplitude + 1e-6)
+    }
+
     // MARK: - pinpricks
 
     func testFadesThePinpricksInWhenTheEyesShutAndBackOutWhenTheyOpen() throws {
