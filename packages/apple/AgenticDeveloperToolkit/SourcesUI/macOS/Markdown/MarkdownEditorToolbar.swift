@@ -24,6 +24,19 @@ public final class MarkdownEditorToolbar: NSView {
         didSet { syncSelection() }
     }
 
+    /// Whether the `?` button is in the strip. A host that surfaces markdown
+    /// help somewhere of its own — a window toolbar, a slide-out pane — turns
+    /// this off rather than showing the same help twice.
+    public var showsHelpButton: Bool = true {
+        didSet { helpButton.isHidden = !showsHelpButton }
+    }
+
+    /// Whether the `Open…` button is in the strip. A host with its own import
+    /// command (a File-menu item, say) turns this off.
+    public var showsImportButton: Bool = true {
+        didSet { importButton.isHidden = !showsImportButton }
+    }
+
     public init() {
         super.init(frame: .zero)
 

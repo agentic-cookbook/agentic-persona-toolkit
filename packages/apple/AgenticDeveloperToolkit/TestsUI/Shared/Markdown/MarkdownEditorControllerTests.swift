@@ -202,4 +202,21 @@ struct MarkdownEditorControllerTests {
                     "reference row missing or mangled in the rendered sheet: \(syntax)")
         }
     }
+
+    @Test("the help and import buttons are shown by default")
+    func helpAndImportButtonsAreShownByDefault() {
+        let editor = MarkdownEditorController(palette: palette)
+        #expect(editor.showsHelpButton)
+        #expect(editor.showsImportButton)
+    }
+
+    @Test("hiding the help and import buttons survives view loading")
+    func hidingTheHelpAndImportButtonsSurvivesViewLoading() {
+        let editor = MarkdownEditorController(palette: palette)
+        editor.showsHelpButton = false
+        editor.showsImportButton = false
+        editor.loadViewIfNeeded()
+        #expect(!editor.showsHelpButton)
+        #expect(!editor.showsImportButton)
+    }
 }

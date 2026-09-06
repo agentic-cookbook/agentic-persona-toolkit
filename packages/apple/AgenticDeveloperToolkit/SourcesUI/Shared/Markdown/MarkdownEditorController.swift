@@ -53,6 +53,20 @@ public final class MarkdownEditorController: PlatformViewController {
         didSet { applyLayoutForCurrentSize() }
     }
 
+    /// Forwarded to the toolbar, which is internal. See
+    /// `MarkdownEditorToolbar.showsHelpButton`.
+    public var showsHelpButton: Bool {
+        get { toolbar.showsHelpButton }
+        set { toolbar.showsHelpButton = newValue }
+    }
+
+    /// Forwarded to the toolbar, which is internal. See
+    /// `MarkdownEditorToolbar.showsImportButton`.
+    public var showsImportButton: Bool {
+        get { toolbar.showsImportButton }
+        set { toolbar.showsImportButton = newValue }
+    }
+
     public private(set) var availableModes: [MarkdownEditorMode] = MarkdownEditorMode.allCases
 
     /// The last mode chosen deliberately — via this setter or the toolbar's
