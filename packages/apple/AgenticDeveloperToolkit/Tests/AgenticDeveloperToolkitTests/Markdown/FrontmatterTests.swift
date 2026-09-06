@@ -120,6 +120,47 @@ struct FrontmatterTests {
         #expect(Frontmatter.setting("pinned", to: nil, in: "---\npinned: true\n---\nbody\n") == "body\n")
     }
 
+    // MARK: - Duplicate keys
+
+    @Test("overwriting a duplicated key leaves exactly one line, and it is the new one")
+    func settingNormalisesADuplicatedKey() {
+        // Writer and readers used to disagree: `setting` rewrote the FIRST
+        // occurrence while `parse`/`stringValue` take the LAST, so the write
+        // was a silent no-op. Normalising to one line settles it.
+        let content = "---\ntitle: Hi\npinned: true\nweird: keep\npinned: true\n---\nbody\n"
+        let updated = Frontmatter.setting("pinned", to: .bool(false), in: content)
+        #expect(updated == "---\ntitle: Hi\npinned: false\nweird: keep\n---\nbody\n")
+        #expect(Frontmatter.value("pinned", in: updated) == "false")
+    }
+
+    @Test("removing a duplicated key removes every one of its lines")
+    func settingNilRemovesEveryDuplicate() {
+        // The reported failure verbatim: unpin a note whose block carries the
+        // key twice, and the surviving line answered `true` to the read-back.
+        let content = "---\npinned: true\npinned: true\n---\nbody\n"
+        #expect(Frontmatter.setting("pinned", to: nil, in: content) == "body\n")
+    }
+
+    @Test("setting a duplicated key that is the only key still collapses to one line")
+    func settingCollapsesADuplicatedSoleKey() {
+        let content = "---\npinned: true\npinned: true\n---\nbody\n"
+        #expect(Frontmatter.setting("pinned", to: .bool(false), in: content)
+                == "---\npinned: false\n---\nbody\n")
+    }
+
+    @Test("a document whose block duplicates a key is normalised by one round trip")
+    func duplicateKeyIsNormalisedByAWrite() {
+        var doc = MarkdownDocument.new(
+            id: "0198c0de-0000-7000-8000-000000000004",
+            content: "---\npinned: true\npinned: true\n---\n# Hi\n",
+            ownerKind: .customer,
+            ownerID: "local")
+        #expect(doc.isPinned)
+        doc.setPinned(false)
+        #expect(doc.isPinned == false)
+        #expect(doc.content == "# Hi\n")
+    }
+
     @Test("removing an absent key changes nothing at all")
     func removingAbsentKeyIsIdentity() {
         let content = "---\ntitle: Hi\n---\nbody\n"
@@ -129,8 +170,76 @@ struct FrontmatterTests {
 
     @Test("jsonText is stable, sorted, and nil when there is no block")
     func jsonTextIsSorted() {
-        #expect(Frontmatter.jsonText(for: "---\nb: 2\na: 1\n---\nbody") == #"{"a":"1","b":"2"}"#)
+        // Typed, not stringified: `1` and `2` are YAML numbers, so they are
+        // JSON numbers. `jsonTextTypesItsValues` pins the whole type table.
+        #expect(Frontmatter.jsonText(for: "---\nb: 2\na: 1\n---\nbody") == #"{"a":1,"b":2}"#)
         #expect(Frontmatter.jsonText(for: "body") == nil)
+    }
+
+    @Test("jsonText emits each value as the JSON type YAML gives it")
+    func jsonTextTypesItsValues() {
+        // Every one of these was `"…"` before: the column then disagreed with
+        // the server's own recomputation of it on the very same write.
+        #expect(Frontmatter.jsonText(for: "---\npinned: true\n---\nb") == #"{"pinned":true}"#)
+        #expect(Frontmatter.jsonText(for: "---\npinned: False\n---\nb") == #"{"pinned":false}"#)
+        #expect(Frontmatter.jsonText(for: "---\norder: 3\n---\nb") == #"{"order":3}"#)
+        #expect(Frontmatter.jsonText(for: "---\norder: -7\n---\nb") == #"{"order":-7}"#)
+        #expect(Frontmatter.jsonText(for: "---\nratio: 1.5\n---\nb") == #"{"ratio":1.5}"#)
+        #expect(Frontmatter.jsonText(for: "---\nbig: 1e3\n---\nb") == #"{"big":1000}"#)
+        #expect(Frontmatter.jsonText(for: "---\nmask: 0x1f\n---\nb") == #"{"mask":31}"#)
+        #expect(Frontmatter.jsonText(for: "---\nmode: 0o755\n---\nb") == #"{"mode":493}"#)
+        #expect(Frontmatter.jsonText(for: "---\ngone: null\n---\nb") == #"{"gone":null}"#)
+        #expect(Frontmatter.jsonText(for: "---\ngone: ~\n---\nb") == #"{"gone":null}"#)
+        #expect(Frontmatter.jsonText(for: "---\ntitle: Hi\n---\nb") == #"{"title":"Hi"}"#)
+    }
+
+    @Test("a quoted scalar stays a JSON string however its characters read")
+    func jsonTextKeepsQuotedScalarsAsStrings() {
+        // The whole reason the typing runs off the RAW scalar: `"42"` is a
+        // string and `42` is a number, and only the quotes tell them apart.
+        #expect(Frontmatter.jsonText(for: "---\nk: \"42\"\n---\nb") == #"{"k":"42"}"#)
+        #expect(Frontmatter.jsonText(for: "---\nk: \"true\"\n---\nb") == #"{"k":"true"}"#)
+        #expect(Frontmatter.jsonText(for: "---\nk: 'null'\n---\nb") == #"{"k":"null"}"#)
+        // ...and the escapes are decoded on the way out, as `value` decodes them.
+        #expect(Frontmatter.jsonText(for: "---\nk: \"a\\tb\"\n---\nb") == #"{"k":"a\tb"}"#)
+    }
+
+    @Test("a flow sequence becomes a JSON array of its typed items")
+    func jsonTextTypesFlowSequences() {
+        #expect(Frontmatter.jsonText(for: "---\nallowed: [a, b]\n---\nb") == #"{"allowed":["a","b"]}"#)
+        #expect(Frontmatter.jsonText(for: "---\nk: [1, true, null]\n---\nb") == #"{"k":[1,true,null]}"#)
+        #expect(Frontmatter.jsonText(for: "---\nk: []\n---\nb") == #"{"k":[]}"#)
+        // A quoted item may hold the separator without splitting the list.
+        #expect(Frontmatter.jsonText(for: "---\nk: [\"x, y\", z]\n---\nb") == #"{"k":["x, y","z"]}"#)
+    }
+
+    @Test("what jsonText will not type, it hands back as text rather than guessing")
+    func jsonTextFallsBackToTextForWhatItCannotType() {
+        // Each of these is a real divergence from adh's parser, and each is
+        // pinned in `MarkdownAdhParityTests` as such. Here the point is only
+        // that they fail soft — a wrong type is worse than an honest string.
+        #expect(Frontmatter.jsonText(for: "---\nk: {a: 1}\n---\nb") == #"{"k":"{a: 1}"}"#)
+        #expect(Frontmatter.jsonText(for: "---\nk: [a, [b]]\n---\nb") == #"{"k":"[a, [b]]"}"#)
+        #expect(Frontmatter.jsonText(for: "---\nk: >-\n---\nb") == #"{"k":">-"}"#)
+    }
+
+    @Test("a key with no value at all is JSON null, not an empty string")
+    func jsonTextTreatsAnEmptyValueAsNull() {
+        #expect(Frontmatter.jsonText(for: "---\nk:\n---\nb") == #"{"k":null}"#)
+        // ...while the text readers still hand back the empty string they see.
+        #expect(Frontmatter.value("k", in: "---\nk:\n---\nb") == "")
+    }
+
+    @Test("an infinity or NaN becomes null, because JSON has neither")
+    func jsonTextNullsNonFiniteNumbers() {
+        #expect(Frontmatter.jsonText(for: "---\nk: .inf\n---\nb") == #"{"k":null}"#)
+        #expect(Frontmatter.jsonText(for: "---\nk: -.inf\n---\nb") == #"{"k":null}"#)
+        #expect(Frontmatter.jsonText(for: "---\nk: .nan\n---\nb") == #"{"k":null}"#)
+    }
+
+    @Test("jsonText takes the last of a duplicated key, as every other reader does")
+    func jsonTextTakesTheLastDuplicate() {
+        #expect(Frontmatter.jsonText(for: "---\nk: 1\nk: 2\n---\nb") == #"{"k":2}"#)
     }
 
     @Test("a value needing quotes survives a write/read round trip")
