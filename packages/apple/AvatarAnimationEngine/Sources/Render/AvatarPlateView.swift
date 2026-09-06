@@ -36,6 +36,23 @@ public final class AvatarPlateView: PlatformView {
     /// collapsed by the time this is called.
     public var onError: ((Error) -> Void)?
 
+    /// Room for the motion that leaves the canvas box — see
+    /// `AvatarLayerView.overscan`, which this forwards to.
+    ///
+    /// The layer view defaults this to 1 (canvas fills the binding dimension)
+    /// because a host that sized its view to the canvas is asking for the
+    /// canvas. A plate is the opposite case by construction: its height is
+    /// whatever the host had to spare, never the canvas's, so a pose that
+    /// leaves the box — bitbag's `silly` is a 180° turn about a pivot below
+    /// centre — is sheared off at the plate edge. Fitting the canvas into two
+    /// thirds leaves half a canvas of margin, which is what that turn needs to
+    /// stay whole. It is the value AvatarPreview proved out.
+    public var overscan: CGFloat = AvatarPlateView.defaultOverscan {
+        didSet { avatar?.overscan = overscan }
+    }
+
+    public static let defaultOverscan: CGFloat = 0.66
+
     /// The colour under the character. Held rather than forwarded on the spot so
     /// a host can set it before an engine exists and after one dies.
     public var plateColor: CGColor? {
@@ -51,9 +68,11 @@ public final class AvatarPlateView: PlatformView {
     public init(engine: Engine?,
                 content: PlatformView?,
                 plateHeight: CGFloat = AvatarPlateView.defaultPlateHeight,
-                plateColor: CGColor? = nil) {
+                plateColor: CGColor? = nil,
+                overscan: CGFloat = AvatarPlateView.defaultOverscan) {
         self.content = content
         self.plateColor = plateColor
+        self.overscan = overscan
         super.init(frame: .zero)
 
         var constraints: [NSLayoutConstraint] = []
@@ -62,6 +81,7 @@ public final class AvatarPlateView: PlatformView {
             avatar = view
             view.translatesAutoresizingMaskIntoConstraints = false
             view.plateColor = plateColor
+            view.overscan = overscan
             addSubview(view)
             constraints += [
                 view.topAnchor.constraint(equalTo: topAnchor),
