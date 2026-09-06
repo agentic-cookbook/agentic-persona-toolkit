@@ -1,5 +1,9 @@
 import Testing
+#if os(macOS)
 import AppKit
+#else
+import UIKit
+#endif
 import Foundation
 import AgenticDeveloperToolkit
 @testable import AgenticDeveloperToolkitUI
@@ -18,6 +22,20 @@ private struct AbstainingHighlighter: CodeHighlighter {
     func highlight(_ code: String, language: String?, palette: SemanticPalette) -> NSAttributedString? { nil }
 }
 
+/// AppKit and UIKit spell the same symbolic trait differently (`.bold` vs
+/// `.traitBold`) and neither declares the other's. That one name is the only
+/// thing about this suite that is platform-specific, so it is the only thing
+/// behind an `#if` — the renderer itself compiles into both UI frameworks, so
+/// its tests live in `TestsUI/Shared` and compile into both test bundles.
+func isBold(_ font: PlatformFont?) -> Bool {
+    guard let font else { return false }
+    #if os(macOS)
+    return font.fontDescriptor.symbolicTraits.contains(.bold)
+    #else
+    return font.fontDescriptor.symbolicTraits.contains(.traitBold)
+    #endif
+}
+
 @MainActor
 @Suite("MarkdownRenderer")
 struct MarkdownRendererTests {
@@ -29,7 +47,7 @@ struct MarkdownRendererTests {
         highlighter: (any CodeHighlighter)? = nil
     ) -> NSAttributedString {
         MarkdownRenderer(highlighter: highlighter)
-            .render(text, palette: palette, textColor: palette.nsColor(.personaText))
+            .render(text, palette: palette, textColor: palette.platformColor(.personaText))
     }
 
     @Test("plain text renders verbatim in the body font and the given color")
@@ -37,8 +55,8 @@ struct MarkdownRendererTests {
         let rendered = render("hello world")
         #expect(rendered.string == "hello world")
         let attributes = rendered.attributes(at: 0, effectiveRange: nil)
-        #expect(attributes[.font] as? NSFont == palette.font(.body))
-        #expect(attributes[.foregroundColor] as? NSColor == palette.nsColor(.personaText))
+        #expect(attributes[.font] as? PlatformFont == palette.platformFont(.body))
+        #expect(attributes[.foregroundColor] as? PlatformColor == palette.platformColor(.personaText))
     }
 
     @Test("an inline code span drops its backticks and takes the code font")
@@ -47,7 +65,8 @@ struct MarkdownRendererTests {
         #expect(rendered.string == "call reload() now")
         let location = (rendered.string as NSString).range(of: "reload()").location
         #expect(location != NSNotFound)
-        #expect(rendered.attributes(at: location, effectiveRange: nil)[.font] as? NSFont == palette.font(.code))
+        #expect(rendered.attributes(at: location, effectiveRange: nil)[.font] as? PlatformFont
+                == palette.platformFont(.code))
     }
 
     @Test("a fenced block drops its fences and renders as themed monospaced text")
@@ -57,8 +76,8 @@ struct MarkdownRendererTests {
         #expect(rendered.string.contains("let x = 1"))
         let location = (rendered.string as NSString).range(of: "let x = 1").location
         let attributes = rendered.attributes(at: location, effectiveRange: nil)
-        #expect(attributes[.font] as? NSFont == palette.font(.code))
-        #expect(attributes[.foregroundColor] as? NSColor == palette.nsColor(.personaText))
+        #expect(attributes[.font] as? PlatformFont == palette.platformFont(.code))
+        #expect(attributes[.foregroundColor] as? PlatformColor == palette.platformColor(.personaText))
     }
 
     @Test("an injected highlighter is given the block's code and language hint, and its output is used")
@@ -72,7 +91,8 @@ struct MarkdownRendererTests {
         let rendered = render("```swift\nlet x = 1\n```", highlighter: AbstainingHighlighter())
         #expect(rendered.string.contains("let x = 1"))
         let location = (rendered.string as NSString).range(of: "let x").location
-        #expect(rendered.attributes(at: location, effectiveRange: nil)[.font] as? NSFont == palette.font(.code))
+        #expect(rendered.attributes(at: location, effectiveRange: nil)[.font] as? PlatformFont
+                == palette.platformFont(.code))
     }
 
     @Test("inline code inside a paragraph does not reach the highlighter — only fenced blocks do")
@@ -86,8 +106,8 @@ struct MarkdownRendererTests {
         let rendered = render("a **loud** word")
         #expect(rendered.string == "a loud word")
         let location = (rendered.string as NSString).range(of: "loud").location
-        let font = rendered.attributes(at: location, effectiveRange: nil)[.font] as? NSFont
-        #expect(font?.fontDescriptor.symbolicTraits.contains(.bold) == true)
+        let font = rendered.attributes(at: location, effectiveRange: nil)[.font] as? PlatformFont
+        #expect(isBold(font))
     }
 
     @Test("two paragraphs stay two paragraphs")
@@ -99,15 +119,15 @@ struct MarkdownRendererTests {
     func headingIsStyled() {
         let rendered = render("# Title\n\nbody")
         #expect(rendered.string == "Title\n\nbody")
-        let font = rendered.attributes(at: 0, effectiveRange: nil)[.font] as? NSFont
-        #expect(font == palette.font(.title).applying(bold: true, italic: false))
+        let font = rendered.attributes(at: 0, effectiveRange: nil)[.font] as? PlatformFont
+        #expect(font == palette.platformFont(.title).applying(bold: true, italic: false))
     }
 
     @Test("heading levels step down through the type scale")
     func headingLevelsDiffer() {
-        let one = render("# A").attributes(at: 0, effectiveRange: nil)[.font] as? NSFont
-        let two = render("## A").attributes(at: 0, effectiveRange: nil)[.font] as? NSFont
-        let four = render("#### A").attributes(at: 0, effectiveRange: nil)[.font] as? NSFont
+        let one = render("# A").attributes(at: 0, effectiveRange: nil)[.font] as? PlatformFont
+        let two = render("## A").attributes(at: 0, effectiveRange: nil)[.font] as? PlatformFont
+        let four = render("#### A").attributes(at: 0, effectiveRange: nil)[.font] as? PlatformFont
         #expect(one != two)
         #expect(two != four)
     }
@@ -131,12 +151,29 @@ struct MarkdownRendererTests {
         #expect((inner?.headIndent ?? 0) > (outer?.headIndent ?? 0))
     }
 
+    @Test("a bullet nested inside a numbered list keeps its bullet")
+    func nestedBulletInsideOrderedListKeepsItsBullet() {
+        // `nestedListIndentsFurther` above nests unordered in unordered, which
+        // is exactly why this shipped: the list kind was one flag that ANY
+        // ancestor `.orderedList` could set, and components arrive
+        // innermost-first — so the outer numbered list overwrote the inner
+        // bullet's kind and the sub-point rendered as "1." too.
+        #expect(render("1. one\n   - bullet").string == "1.\tone\n•\tbullet")
+    }
+
+    @Test("a numbered list nested inside a bulleted one keeps its numbering")
+    func nestedOrderedListInsideBulletedListKeepsItsNumbers() {
+        // The inverse used to pass by luck rather than by rule; it is pinned
+        // here so the fix cannot be "unordered always wins" either.
+        #expect(render("- one\n  1. first\n  2. second").string == "•\tone\n1.\tfirst\n2.\tsecond")
+    }
+
     @Test("a blockquote is indented and set in the secondary text color")
     func blockQuoteIsIndentedAndDimmed() {
         let rendered = render("> quoted")
         #expect(rendered.string == "quoted")
         let attributes = rendered.attributes(at: 0, effectiveRange: nil)
-        #expect(attributes[.foregroundColor] as? NSColor == palette.nsColor(.secondaryText))
+        #expect(attributes[.foregroundColor] as? PlatformColor == palette.platformColor(.secondaryText))
         #expect(((attributes[.paragraphStyle] as? NSParagraphStyle)?.headIndent ?? 0) > 0)
     }
 
@@ -154,11 +191,11 @@ struct MarkdownRendererTests {
     @Test("a table's header row is bold and its body rows are not")
     func tableHeaderIsBold() {
         let rendered = render("| a | b |\n| --- | --- |\n| 1 | 2 |")
-        let header = rendered.attributes(at: 0, effectiveRange: nil)[.font] as? NSFont
+        let header = rendered.attributes(at: 0, effectiveRange: nil)[.font] as? PlatformFont
         let bodyLocation = (rendered.string as NSString).range(of: "1").location
-        let body = rendered.attributes(at: bodyLocation, effectiveRange: nil)[.font] as? NSFont
-        #expect(header?.fontDescriptor.symbolicTraits.contains(.bold) == true)
-        #expect(body?.fontDescriptor.symbolicTraits.contains(.bold) == false)
+        let body = rendered.attributes(at: bodyLocation, effectiveRange: nil)[.font] as? PlatformFont
+        #expect(isBold(header))
+        #expect(!isBold(body))
     }
 
     @Test("two adjacent tables stay two tables, not one run-on row")
@@ -185,16 +222,16 @@ struct MarkdownRendererTests {
         // than inventing a seventh heading level the palette has no font for.
         let rendered = render("####### Deep")
         #expect(rendered.string == "####### Deep")
-        let font = rendered.attributes(at: 0, effectiveRange: nil)[.font] as? NSFont
-        #expect(font == palette.font(.body))
+        let font = rendered.attributes(at: 0, effectiveRange: nil)[.font] as? PlatformFont
+        #expect(font == palette.platformFont(.body))
     }
 
     @Test("a table with a header and no body rows renders just its header")
     func emptyTableRendersItsHeader() {
         let rendered = render("| a | b |\n| --- | --- |")
         #expect(rendered.string == "a\tb")
-        let font = rendered.attributes(at: 0, effectiveRange: nil)[.font] as? NSFont
-        #expect(font?.fontDescriptor.symbolicTraits.contains(.bold) == true)
+        let font = rendered.attributes(at: 0, effectiveRange: nil)[.font] as? PlatformFont
+        #expect(isBold(font))
     }
 
     @Test("list items still render their inline emphasis")
@@ -202,7 +239,7 @@ struct MarkdownRendererTests {
         let rendered = render("- a **loud** item")
         #expect(rendered.string == "•\ta loud item")
         let location = (rendered.string as NSString).range(of: "loud").location
-        let font = rendered.attributes(at: location, effectiveRange: nil)[.font] as? NSFont
-        #expect(font?.fontDescriptor.symbolicTraits.contains(.bold) == true)
+        let font = rendered.attributes(at: location, effectiveRange: nil)[.font] as? PlatformFont
+        #expect(isBold(font))
     }
 }

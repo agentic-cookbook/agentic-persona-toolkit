@@ -186,10 +186,16 @@ public struct MarkdownRenderer: Sendable {
             switch component.kind {
             case .header(let level):
                 shape.headerLevel = level
+            // Only the INNERMOST list decides the marker, and components
+            // arrive innermost-first — so `listDepth == 0` is how the
+            // innermost one identifies itself. Letting every ancestor write
+            // the flag made a bullet nested inside a numbered list render
+            // with its parent's numeral.
             case .orderedList:
+                if shape.listDepth == 0 { shape.isOrderedList = true }
                 shape.listDepth += 1
-                shape.isOrderedList = true
             case .unorderedList:
+                if shape.listDepth == 0 { shape.isOrderedList = false }
                 shape.listDepth += 1
             case .listItem(let ordinal):
                 if shape.ordinal == nil { shape.ordinal = ordinal }
