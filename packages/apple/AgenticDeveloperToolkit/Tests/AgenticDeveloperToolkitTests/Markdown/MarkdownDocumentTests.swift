@@ -50,8 +50,17 @@ struct MarkdownDocumentTests {
     @Test("frontmatter is exposed as a parsed map and as canonical JSON")
     func exposesFrontmatter() {
         let doc = document("---\nb: 2\na: 1\n---\nbody\n")
+        // Two projections of one block, on purpose: `frontmatter` is the local
+        // text map every reader here wants, and `frontmatterJSON` is the
+        // column, which adh computes with a real YAML parser and types.
         #expect(doc.frontmatter == ["a": "1", "b": "2"])
-        #expect(doc.frontmatterJSON == #"{"a":"1","b":"2"}"#)
+        #expect(doc.frontmatterJSON == #"{"a":1,"b":2}"#)
+    }
+
+    @Test("the frontmatter column carries YAML's types, so it survives a sync round trip")
+    func frontmatterJSONIsTyped() {
+        let doc = document("---\npinned: true\norder: 3\ntitle: Hi\n---\nbody\n")
+        #expect(doc.frontmatterJSON == #"{"order":3,"pinned":true,"title":"Hi"}"#)
     }
 
     @Test("a document with no frontmatter has no frontmatter JSON")

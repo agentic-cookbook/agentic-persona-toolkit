@@ -137,6 +137,14 @@ public enum Frontmatter {
     /// Passing `nil` removes the key; removing the last key removes the whole
     /// block, so a document never carries an empty fence.
     ///
+    /// **A duplicated key is normalised, not preserved:** the first occurrence
+    /// is rewritten and every later one is deleted, so exactly one line carries
+    /// the key when this returns. The readers here all take the *last*
+    /// occurrence (`parse` assigns into a dictionary; `stringValue` says so
+    /// outright), so a writer that touched only the first would leave a
+    /// surviving duplicate answering for it — `setPinned(false)` returning a
+    /// still-pinned document. One line is the only state both agree on.
+    ///
     /// **The rewritten block is re-emitted with LF line endings even when the
     /// document was authored with CRLF**, and the body after the closing fence
     /// keeps whatever endings it had. That is deliberate: the block is rebuilt
@@ -160,16 +168,23 @@ public enum Frontmatter {
         // Same CRLF-grapheme-cluster hazard as `parse` above — split on
         // newline characters, not the `"\n"` scalar.
         var lines = block.split(omittingEmptySubsequences: false, whereSeparator: { $0.isNewline }).map(String.init)
-        let index = lines.firstIndex { scalarPair(in: $0)?.key == key }
+        // EVERY line carrying the key, not just the first. A block can hold
+        // the same key twice — two writers appending, or a hand edit — and the
+        // readers all take the LAST one, so rewriting only the first left
+        // `setting` silently a no-op. Normalising the block on each write
+        // dissolves the ambiguity instead of picking a side.
+        let indices = lines.indices.filter { scalarPair(in: lines[$0])?.key == key }
 
-        switch (index, value) {
-        case let (index?, value?):
-            lines[index] = "\(key): \(serialize(value))"
-        case let (index?, nil):
-            lines.remove(at: index)
-        case let (nil, value?):
+        if let first = indices.first {
+            if let value {
+                lines[first] = "\(key): \(serialize(value))"
+                for duplicate in indices.dropFirst().reversed() { lines.remove(at: duplicate) }
+            } else {
+                for duplicate in indices.reversed() { lines.remove(at: duplicate) }
+            }
+        } else if let value {
             lines.append("\(key): \(serialize(value))")
-        case (nil, nil):
+        } else {
             return content
         }
 
@@ -180,14 +195,103 @@ public enum Frontmatter {
 
     /// The parsed block as canonical JSON — sorted keys, no whitespace — ready
     /// for the `frontmatter` column. `nil` when the document has no block.
+    ///
+    /// **Values are YAML-typed, not stringified.** `pinned: true` becomes
+    /// `{"pinned":true}` and `order: 3` becomes `{"order":3}`, because adh runs
+    /// a real YAML parser and stores exactly that. A stringified projection
+    /// would guarantee the flip this port exists to prevent: the client writes
+    /// `{"pinned":"true"}`, the server recomputes the column on the same write
+    /// and stores `{"pinned":true}`, and the row then looks dirty on every sync
+    /// round trip forever.
+    ///
+    /// `parse` deliberately keeps returning `[String: String]` — the local
+    /// readers want the text — so the typing happens here, from the *raw*
+    /// scalars, through the same `YAMLScalar` predicates the writer quotes by.
+    ///
+    /// The residual divergences from adh's parser are recorded as tests in
+    /// `MarkdownAdhParityTests`, not as prose: a block sequence, a flow
+    /// mapping, a block scalar and an anchor/alias are all things a real parser
+    /// understands and this one hands back as text.
     public static func jsonText(for content: String) -> String? {
         guard let block = split(content).block else { return nil }
-        let values = parse(block)
-        guard let data = try? JSONSerialization.data(
-            withJSONObject: values,
-            options: [.sortedKeys, .withoutEscapingSlashes]
-        ) else { return nil }
+        var values: [String: Any] = [:]
+        for line in block.split(omittingEmptySubsequences: false, whereSeparator: { $0.isNewline }) {
+            guard let pair = rawScalarPair(in: String(line)) else { continue }
+            values[pair.key] = jsonValue(for: pair.value)
+        }
+        guard JSONSerialization.isValidJSONObject(values),
+              let data = try? JSONSerialization.data(
+                withJSONObject: values,
+                options: [.sortedKeys, .withoutEscapingSlashes]
+              ) else { return nil }
         return String(decoding: data, as: UTF8.self)
+    }
+
+    /// One raw scalar as the JSON value a YAML parser would have produced.
+    ///
+    /// Order matters: `YAMLScalar.isString` is asked first because a *quoted*
+    /// scalar is a string whatever its characters spell — `"42"` is not 42.
+    private static func jsonValue(for raw: String) -> Any {
+        // `key:` with nothing after it is YAML's null, not the empty string.
+        if raw.isEmpty { return NSNull() }
+        if YAMLScalar.isString(raw) { return unquote(raw) }
+        if YAMLScalar.isNull(raw) { return NSNull() }
+        if let flag = YAMLScalar.booleanValue(raw) { return flag }
+        if let number = YAMLScalar.numberValue(raw) {
+            // JSON has no infinity or NaN, and `JSON.stringify` — which is what
+            // put adh's column there — writes `null` for both.
+            return number.doubleValue.isFinite ? number : NSNull()
+        }
+        if let items = flowSequenceItems(raw) { return items.map { jsonValue(for: $0) } }
+        // A block-scalar header, a flow mapping, an alias: nothing this reader
+        // can type without becoming the YAML parser it declines to be. The text
+        // is what it has, so the text is what it emits.
+        return unquote(raw)
+    }
+
+    /// Splits a YAML flow sequence — `[a, b]`, `[1, "x, y"]` — into its item
+    /// texts, or `nil` when `raw` is not one this reader will type.
+    ///
+    /// Worth doing rather than stringifying because a flow sequence is the one
+    /// non-scalar adh's frontmatter routinely holds, and `{"allowed":"[a, b]"}`
+    /// against the server's `{"allowed":["a","b"]}` is the same round-trip flip
+    /// as the scalar case. Anything harder than a flat list of scalars —
+    /// nesting, a flow mapping, an unclosed quote — returns `nil` and falls
+    /// back to the text, because a wrong type is worse than an honest string.
+    private static func flowSequenceItems(_ raw: String) -> [String]? {
+        guard raw.count >= 2, raw.hasPrefix("["), raw.hasSuffix("]") else { return nil }
+        let inner = String(raw.dropFirst().dropLast()).trimmingCharacters(in: .whitespaces)
+        guard !inner.isEmpty else { return [] }
+
+        var items: [String] = []
+        var current = ""
+        var quote: Character?
+        var isEscaped = false
+        for character in inner {
+            if let open = quote {
+                current.append(character)
+                if isEscaped {
+                    isEscaped = false
+                } else if open == "\"", character == "\\" {
+                    isEscaped = true
+                } else if character == open {
+                    quote = nil
+                }
+            } else if character == "\"" || character == "'" {
+                quote = character
+                current.append(character)
+            } else if character == "," {
+                items.append(current.trimmingCharacters(in: .whitespaces))
+                current = ""
+            } else if character == "[" || character == "{" {
+                return nil   // nested collection
+            } else {
+                current.append(character)
+            }
+        }
+        guard quote == nil else { return nil }   // unterminated quote
+        items.append(current.trimmingCharacters(in: .whitespaces))
+        return items.contains(where: \.isEmpty) ? nil : items
     }
 
     // MARK: - Lines
@@ -345,14 +449,47 @@ enum YAMLScalar {
         "|", ">", "'", "\"", "%", "@", "`"
     ]
 
-    private static func isNull(_ raw: String) -> Bool {
+    static func isNull(_ raw: String) -> Bool {
         raw == "~" || raw.lowercased() == "null"
     }
 
     /// YAML 1.2's core schema: `true`/`false` in any case a reader accepts.
     private static func isBoolean(_ raw: String) -> Bool {
+        booleanValue(raw) != nil
+    }
+
+    /// The boolean this bare scalar denotes, or `nil` when it is not one.
+    /// Same rule as `isBoolean`, spelled once, so the predicate that decides
+    /// whether to quote and the projection that decides what JSON to write can
+    /// never answer differently.
+    static func booleanValue(_ raw: String) -> Bool? {
+        switch raw.lowercased() {
+        case "true": return true
+        case "false": return false
+        default: return nil
+        }
+    }
+
+    /// The number this bare scalar denotes, or `nil` when it is not one.
+    ///
+    /// `NSNumber` rather than `Double`, because `JSONSerialization` writes an
+    /// integer-typed one as `3` and a double-typed one as `3.0` — and adh's
+    /// column holds `3`. `.inf`/`.nan` come back as the non-finite doubles
+    /// they name; the caller decides what JSON can do with those.
+    static func numberValue(_ raw: String) -> NSNumber? {
+        guard isNumber(raw) else { return nil }
+        if raw.hasPrefix("0o"), let value = Int(raw.dropFirst(2), radix: 8) { return NSNumber(value: value) }
+        if raw.hasPrefix("0x"), let value = Int(raw.dropFirst(2), radix: 16) { return NSNumber(value: value) }
+        if let value = Int(raw) { return NSNumber(value: value) }
         let lowered = raw.lowercased()
-        return lowered == "true" || lowered == "false"
+        if lowered.hasSuffix(".inf") {
+            return NSNumber(value: lowered.hasPrefix("-") ? -Double.infinity : Double.infinity)
+        }
+        if lowered.hasSuffix(".nan") { return NSNumber(value: Double.nan) }
+        // An integer too large for `Int` also lands here, as a double — the
+        // same widening `JSON.stringify` would have applied.
+        guard let value = Double(raw) else { return nil }
+        return NSNumber(value: value)
     }
 
     /// YAML 1.1's extra booleans. Readers disagree about these, so the writer

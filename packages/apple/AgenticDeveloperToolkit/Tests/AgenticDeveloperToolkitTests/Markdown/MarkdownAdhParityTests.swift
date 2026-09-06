@@ -71,6 +71,58 @@ struct MarkdownAdhParityTests {
         #expect(Frontmatter.parse(Frontmatter.split("---\n- a\n- b\n---\n").block ?? "").isEmpty)
     }
 
+    // MARK: - the frontmatter column
+
+    @Test("the frontmatter column is typed JSON, the shape adh's parser produces")
+    func frontmatterColumnIsTyped() {
+        // adh parses the block with a YAML parser and stores the result as
+        // JSONB, so `pinned: true` is the JSON boolean `true`. This client
+        // recomputes the same column on the same write; if it stringified,
+        // every write would be followed by the server rewriting the column,
+        // and the row would read dirty on every round trip forever.
+        let content = "---\npinned: true\norder: 3\ntitle: Notes\nempty:\ngone: null\n---\nbody\n"
+        #expect(Frontmatter.jsonText(for: content)
+                == #"{"empty":null,"gone":null,"order":3,"pinned":true,"title":"Notes"}"#)
+    }
+
+    @Test("a flow sequence reaches the column as a JSON array, as adh's parser gives it")
+    func frontmatterColumnTypesFlowSequences() {
+        // The companion to `handlesColonsAndQuotes` below: `parse` still hands
+        // the flow sequence back as written, because the local text readers
+        // want the text — but the COLUMN is typed, and here it agrees with
+        // adh's `['a', 'b']`.
+        let content = "---\ntitle: \"Ratios: 1:2 and 3:4\"\nallowed: [a, b]\n---\nbody\n"
+        #expect(Frontmatter.jsonText(for: content)
+                == #"{"allowed":["a","b"],"title":"Ratios: 1:2 and 3:4"}"#)
+    }
+
+    @Test("DIVERGENCE: a block sequence is flattened away, where adh's parser keeps it")
+    func frontmatterColumnFlattensBlockSequences() {
+        // A list written in block form puts its items on indented lines, and
+        // this reader does not descend into them — adh's parser gives
+        // `{"allowed":["a","b"]}` and this gives the key a null. Closing it
+        // means becoming a YAML parser, which a foundation-tier package that
+        // builds for five platforms does not get to do. Written down here so
+        // it cannot be discovered by surprise.
+        let content = "---\nallowed:\n  - a\n  - b\n---\nbody\n"
+        #expect(Frontmatter.jsonText(for: content) == #"{"allowed":null}"#)
+    }
+
+    @Test("DIVERGENCE: a flow mapping, a block scalar and an alias reach the column as text")
+    func frontmatterColumnKeepsUntypeableScalarsAsText() {
+        // Same root cause as the block sequence, same choice: hand back the
+        // text rather than guess at a type. adh's parser would give an object,
+        // the folded string, and a parse failure that nulls the WHOLE block.
+        #expect(Frontmatter.jsonText(for: "---\nk: {a: 1}\n---\nb\n") == #"{"k":"{a: 1}"}"#)
+        #expect(Frontmatter.jsonText(for: "---\nk: >-\n  folded\n---\nb\n") == #"{"k":">-"}"#)
+        #expect(Frontmatter.jsonText(for: "---\nname: *undef\n---\n") == #"{"name":"*undef"}"#)
+    }
+
+    @Test("a document with no block has no column value at all")
+    func frontmatterColumnIsNullWithoutABlock() {
+        #expect(Frontmatter.jsonText(for: "# Just a heading\n") == nil)
+    }
+
     // MARK: - deriveTitle
 
     @Test("prefers frontmatter title, then name")
@@ -353,4 +405,3 @@ struct MarkdownAdhParityTests {
         #expect(emoji.utf16.count == 4000)
     }
 }
-
